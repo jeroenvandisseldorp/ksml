@@ -57,7 +57,7 @@ public class TableDefinition extends BaseStreamDefinition {
         var streamValue = new StreamDataType(notationLibrary, valueType, false);
 
         if (queryable) {
-            var store = new StoreDefinition(name, null, null);
+            var store = new StoreDefinition(name, null, null, null);
             storeRegistry.registerStore(StoreType.KEYVALUE_STORE, store, streamKey, streamValue);
             var mat = StoreUtil.createKeyValueStore(store, streamKey, streamValue);
             return new KTableWrapper(builder.table(topic, mat), streamKey, streamValue);

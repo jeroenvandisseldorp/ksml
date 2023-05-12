@@ -28,6 +28,8 @@ import io.axual.ksml.definition.BaseStreamDefinition;
 import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.stream.StreamWrapper;
 
+import static io.axual.ksml.util.DataUtil.asDataType;
+
 public class ToOperation extends BaseOperation {
     private final BaseStreamDefinition target;
 
@@ -47,8 +49,8 @@ public class ToOperation extends BaseOperation {
         var k = input.keyType().userType().dataType();
         var v = input.valueType().userType().dataType();
         // Perform a dataType check to see if the key/value data types received matches the stream definition's types
-        checkType("Target topic keyType", target.keyType.dataType(), superOf(k));
-        checkType("Target topic valueType", target.valueType.dataType(), superOf(v));
+        checkType("Target topic keyType", asDataType(target.keyType.dataType()), superOf(k));
+        checkType("Target topic valueType", asDataType(target.valueType.dataType()), superOf(v));
 
         var keySerde = target.keyType.dataType() != DataType.UNKNOWN
                 ? streamDataTypeOf(target.keyType, true).getSerde()

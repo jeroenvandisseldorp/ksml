@@ -22,5 +22,5 @@ package io.axual.ksml.definition;
 
 import java.time.Duration;
 
-public record StoreDefinition(String name, Duration retention, Boolean caching) {
+public record StoreDefinition(String name, Duration retention, Boolean caching, Boolean logging) {
 }

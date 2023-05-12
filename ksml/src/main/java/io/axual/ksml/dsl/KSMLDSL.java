@@ -43,6 +43,7 @@ public class KSMLDSL {
     public static final String STORE_NAME_ATTRIBUTE = "name";
     public static final String STORE_RETENTION_ATTRIBUTE = "retention";
     public static final String STORE_CACHING_ATTRIBUTE = "caching";
+    public static final String STORE_LOGGING_ATTRIBUTE = "logging";
     public static final String NAME_ATTRIBUTE = "name";
     public static final String TOPIC_ATTRIBUTE = "topic";
     public static final String KEYTYPE_ATTRIBUTE = "keyType";

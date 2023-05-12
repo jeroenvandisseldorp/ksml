@@ -43,7 +43,8 @@ public abstract class StoreOperationParser<T extends StoreOperation> extends Ope
                 new StoreDefinition(
                         storeDefinition != null && storeDefinition.name() != null ? storeDefinition.name() : name,
                         storeDefinition != null && storeDefinition.retention() != null ? storeDefinition.retention() : null,
-                        storeDefinition == null || storeDefinition.caching() == null || storeDefinition.caching()
+                        storeDefinition == null || storeDefinition.caching() == null || storeDefinition.caching(),
+                        storeDefinition == null || storeDefinition.logging() == null || storeDefinition.logging()
                 ),
                 context::registerGrouped,
                 context::registerStore);

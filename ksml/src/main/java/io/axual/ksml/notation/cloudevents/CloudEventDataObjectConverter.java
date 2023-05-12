@@ -1,10 +1,10 @@
-package io.axual.ksml.data.object;
+package io.axual.ksml.notation.cloudevents;
 
 /*-
  * ========================LICENSE_START=================================
  * KSML
  * %%
- * Copyright (C) 2021 Axual B.V.
+ * Copyright (C) 2021 - 2023 Axual B.V.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,27 +20,16 @@ package io.axual.ksml.data.object;
  * =========================LICENSE_END==================================
  */
 
-import io.axual.ksml.data.type.SimpleType;
+import io.axual.ksml.data.object.DataObject;
+import io.axual.ksml.data.type.UserType;
+import io.axual.ksml.notation.NotationConverter;
 
-public class DataString extends DataPrimitive<String> {
-    public static final SimpleType DATATYPE = new SimpleType(String.class);
-    public static final String DEFAULT = "";
+public class CloudEventDataObjectConverter implements NotationConverter {
+//    private static final CloudEventDataObjectMapper DATA_OBJECT_MAPPER = new CloudEventDataObjectMapper();
 
-    public DataString() {
-        this(DEFAULT);
-    }
-
-    public DataString(String value) {
-        super(DATATYPE, value);
-    }
-
-    public static DataString from(String value) {
-        if (value == null) return null;
-        return new DataString(value);
-    }
-
-    public static DataString from(Object value) {
-        if (value == null) return null;
-        return new DataString(value.toString());
+    @Override
+    public DataObject convert(DataObject value, UserType targetType) {
+        // Return null if there is no conversion possible
+        return null;
     }
 }

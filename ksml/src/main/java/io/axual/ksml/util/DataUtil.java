@@ -20,21 +20,17 @@ package io.axual.ksml.util;
  * =========================LICENSE_END==================================
  */
 
-import org.apache.kafka.streams.kstream.Windowed;
-
 import io.axual.ksml.data.object.DataLong;
 import io.axual.ksml.data.object.DataObject;
 import io.axual.ksml.data.object.DataString;
 import io.axual.ksml.data.object.DataStruct;
+import io.axual.ksml.data.type.DataType;
+import io.axual.ksml.data.type.StructType;
 import io.axual.ksml.data.type.WindowedType;
 import io.axual.ksml.notation.binary.NativeDataObjectMapper;
+import org.apache.kafka.streams.kstream.Windowed;
 
-import static io.axual.ksml.dsl.WindowedSchema.WINDOWED_SCHEMA_END_FIELD;
-import static io.axual.ksml.dsl.WindowedSchema.WINDOWED_SCHEMA_END_TIME_FIELD;
-import static io.axual.ksml.dsl.WindowedSchema.WINDOWED_SCHEMA_KEY_FIELD;
-import static io.axual.ksml.dsl.WindowedSchema.WINDOWED_SCHEMA_START_FIELD;
-import static io.axual.ksml.dsl.WindowedSchema.WINDOWED_SCHEMA_START_TIME_FIELD;
-import static io.axual.ksml.dsl.WindowedSchema.generateWindowedSchema;
+import static io.axual.ksml.dsl.WindowedSchema.*;
 
 public class DataUtil {
     private static final NativeDataObjectMapper nativeDataObjectMapper = new NativeDataObjectMapper();
@@ -66,5 +62,15 @@ public class DataUtil {
             return result;
         }
         return nativeDataObjectMapper.toDataObject(object);
+    }
+
+    // The method below does the same as above, but only for the data type, not for the data itself.
+    public static DataType asDataType(DataType type) {
+        // Convert WindowedTypes to Structs with WindowedSchema
+        if (type instanceof WindowedType windowedType) {
+            var schema = generateWindowedSchema(windowedType);
+            return new StructType(schema);
+        }
+        return type;
     }
 }

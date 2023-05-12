@@ -20,6 +20,8 @@ package io.axual.ksml.store;
  * =========================LICENSE_END==================================
  */
 
+import io.axual.ksml.definition.StoreDefinition;
+import io.axual.ksml.generator.StreamDataType;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.kstream.Materialized;
@@ -29,9 +31,7 @@ import org.apache.kafka.streams.state.SessionStore;
 import org.apache.kafka.streams.state.WindowStore;
 
 import java.time.Duration;
-
-import io.axual.ksml.definition.StoreDefinition;
-import io.axual.ksml.generator.StreamDataType;
+import java.util.HashMap;
 
 public class StoreUtil {
     private StoreUtil() {
@@ -39,25 +39,26 @@ public class StoreUtil {
 
     public static <V> Materialized<Object, V, KeyValueStore<Bytes, byte[]>> createKeyValueStore(StoreDefinition storeDefinition, StreamDataType keyType, StreamDataType valueType) {
         Materialized<Object, V, KeyValueStore<Bytes, byte[]>> mat = Materialized.as(storeDefinition.name());
-        return configureStore(mat, storeDefinition.retention(), keyType, valueType, storeDefinition.caching());
+        return configureStore(mat, storeDefinition.retention(), keyType, valueType, storeDefinition.caching(), storeDefinition.logging());
     }
 
     public static <V> Materialized<Object, V, SessionStore<Bytes, byte[]>> createSessionStore(StoreDefinition storeDefinition, StreamDataType keyType, StreamDataType valueType) {
         Materialized<Object, V, SessionStore<Bytes, byte[]>> mat = Materialized.as(storeDefinition.name());
-        return configureStore(mat, storeDefinition.retention(), keyType, valueType, storeDefinition.caching());
+        return configureStore(mat, storeDefinition.retention(), keyType, valueType, storeDefinition.caching(), storeDefinition.logging());
     }
 
     public static <V> Materialized<Object, V, WindowStore<Bytes, byte[]>> createWindowStore(StoreDefinition storeDefinition, StreamDataType keyType, StreamDataType valueType) {
         Materialized<Object, V, WindowStore<Bytes, byte[]>> mat = Materialized.as(storeDefinition.name());
-        return configureStore(mat, storeDefinition.retention(), keyType, valueType, storeDefinition.caching());
+        return configureStore(mat, storeDefinition.retention(), keyType, valueType, storeDefinition.caching(), storeDefinition.logging());
     }
 
-    private static <V, S extends StateStore> Materialized<Object, V, S> configureStore(Materialized<Object, V, S> mat, Duration retention, StreamDataType keyType, StreamDataType valueType, Boolean cachingEnabled) {
+    private static <V, S extends StateStore> Materialized<Object, V, S> configureStore(Materialized<Object, V, S> mat, Duration retention, StreamDataType keyType, StreamDataType valueType, Boolean cachingEnabled, Boolean loggingEnabled) {
         mat = mat.withKeySerde(keyType.getSerde());
         mat = mat.withValueSerde((Serde<V>) valueType.getSerde());
         if (retention != null) {
             mat = mat.withRetention(retention);
         }
-        return cachingEnabled != null && cachingEnabled ? mat.withCachingEnabled() : mat.withCachingDisabled();
+        mat = cachingEnabled != null && cachingEnabled ? mat.withCachingEnabled() : mat.withCachingDisabled();
+        return loggingEnabled != null && loggingEnabled ? mat.withLoggingEnabled(new HashMap<>()) : mat.withLoggingDisabled();
     }
 }

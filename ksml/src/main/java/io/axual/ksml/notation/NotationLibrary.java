@@ -23,6 +23,8 @@ package io.axual.ksml.notation;
 import io.axual.ksml.execution.FatalError;
 import io.axual.ksml.notation.avro.AvroNotation;
 import io.axual.ksml.notation.binary.BinaryNotation;
+import io.axual.ksml.notation.cloudevents.CloudEventDataObjectConverter;
+import io.axual.ksml.notation.cloudevents.CloudEventNotation;
 import io.axual.ksml.notation.csv.CsvDataObjectConverter;
 import io.axual.ksml.notation.csv.CsvNotation;
 import io.axual.ksml.notation.json.JsonDataObjectConverter;
@@ -44,6 +46,7 @@ public class NotationLibrary {
     public NotationLibrary(Map<String, Object> configs) {
         register(AvroNotation.NOTATION_NAME, new AvroNotation(configs), null);
         register(BinaryNotation.NOTATION_NAME, new BinaryNotation(), null);
+        register(CloudEventNotation.NOTATION_NAME, new CloudEventNotation(configs, this), new CloudEventDataObjectConverter());
         register(CsvNotation.NOTATION_NAME, new CsvNotation(), new CsvDataObjectConverter());
         register(JsonNotation.NOTATION_NAME, new JsonNotation(), new JsonDataObjectConverter());
         register(SOAPNotation.NOTATION_NAME, new SOAPNotation(), new SOAPDataObjectConverter());

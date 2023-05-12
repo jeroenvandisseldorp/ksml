@@ -46,7 +46,8 @@ public class StoreOperation extends BaseOperation {
         store = new StoreDefinition(
                 config.store.name() == null ? name : config.store.name(),
                 config.store.retention(),
-                config.store.caching()
+                config.store.caching(),
+                config.store.logging()
         );
         this.groupedRegistry = config.groupedRegistry;
         this.storeRegistry = config.storeRegistry;

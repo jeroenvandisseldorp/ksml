@@ -25,9 +25,7 @@ import io.axual.ksml.definition.StoreDefinition;
 import io.axual.ksml.parser.BaseParser;
 import io.axual.ksml.parser.YamlNode;
 
-import static io.axual.ksml.dsl.KSMLDSL.STORE_CACHING_ATTRIBUTE;
-import static io.axual.ksml.dsl.KSMLDSL.STORE_NAME_ATTRIBUTE;
-import static io.axual.ksml.dsl.KSMLDSL.STORE_RETENTION_ATTRIBUTE;
+import static io.axual.ksml.dsl.KSMLDSL.*;
 
 public class StoreDefinitionParser extends BaseParser<StoreDefinition> {
     @Override
@@ -36,6 +34,7 @@ public class StoreDefinitionParser extends BaseParser<StoreDefinition> {
         return new StoreDefinition(
                 parseString(node, STORE_NAME_ATTRIBUTE),
                 parseDuration(node, STORE_RETENTION_ATTRIBUTE),
-                parseBoolean(node, STORE_CACHING_ATTRIBUTE));
+                parseBoolean(node, STORE_CACHING_ATTRIBUTE),
+                parseBoolean(node, STORE_LOGGING_ATTRIBUTE));
     }
 }

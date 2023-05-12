@@ -32,6 +32,10 @@ public class StructSchema extends NamedSchema {
     private final List<DataField> fields = new ArrayList<>();
     private final Map<String, DataField> fieldsByName = new HashMap<>();
 
+    public StructSchema() {
+        this(null, null, null, null);
+    }
+
     public StructSchema(StructSchema other) {
         this(other.namespace(), other.name(), other.doc(), other.fields);
     }

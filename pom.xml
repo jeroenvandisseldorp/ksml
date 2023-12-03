@@ -52,7 +52,6 @@
         <module>ksml-query</module>
         <module>ksml-kafka-clients</module>
         <module>ksml-runner</module>
-        <module>ksml-data-generator</module>
         <module>ksml-reporting</module>
         <module>graalpy-module-collection</module>
     </modules>
@@ -63,7 +62,7 @@
         <apache.commons.text.version>1.11.0</apache.commons.text.version>
         <apache.kafka.version>3.6.0</apache.kafka.version>
         <confluent.version>7.5.2</confluent.version>
-        <graalvm.version>23.1.0</graalvm.version>
+        <graalvm.version>23.1.1</graalvm.version>
         <graalvm.polyglot.version>23.1.1</graalvm.polyglot.version>
         <graalvm.python.version>23.1.1</graalvm.python.version>
         <guava.version>32.0.1-jre</guava.version>
@@ -127,11 +126,6 @@
             <!-- project dependencies -->
             <dependency>
                 <groupId>io.axual.ksml</groupId>
-                <artifactId>ksml-data-generator</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.axual.ksml</groupId>
                 <artifactId>ksml</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -154,25 +148,22 @@
             <dependency>
                 <groupId>org.graalvm.polyglot</groupId>
                 <artifactId>polyglot</artifactId>
-                <version>${graalvm.polyglot.version}</version>
+                <version>${graalvm.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.graalvm.python</groupId>
                 <artifactId>python-language</artifactId>
-                <version>${graalvm.python.version}</version>
-                <scope>runtime</scope>
+                <version>${graalvm.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.graalvm.python</groupId>
                 <artifactId>python-resources</artifactId>
-                <version>${graalvm.python.version}</version>
-                <scope>runtime</scope>
+                <version>${graalvm.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.graalvm.truffle</groupId>
                 <artifactId>truffle-runtime</artifactId>
-                <version>${graalvm.python.version}</version>
-                <scope>runtime</scope>
+                <version>${graalvm.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.graalvm.truffle</groupId>

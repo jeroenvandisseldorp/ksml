@@ -21,33 +21,25 @@ package io.axual.ksml.operation.parser;
  */
 
 
-import io.axual.ksml.definition.StreamDefinition;
 import io.axual.ksml.definition.parser.StreamDefinitionParser;
 import io.axual.ksml.dsl.KSMLDSL;
-import io.axual.ksml.execution.FatalError;
-import io.axual.ksml.generator.TopologyResources;
 import io.axual.ksml.operation.MergeOperation;
 import io.axual.ksml.operation.OperationConfig;
-import io.axual.ksml.parser.StructParser;
+import io.axual.ksml.parser.MultiSchemaParser;
 
 public class MergeOperationParser extends OperationParser<MergeOperation> {
-    public MergeOperationParser(TopologyResources resources) {
-        super("merge", resources);
+    public MergeOperationParser(String namespace) {
+        super(namespace, "merge");
     }
 
     @Override
-    protected StructParser<MergeOperation> parser() {
+    protected MultiSchemaParser<MergeOperation> parser() {
         return structParser(
                 MergeOperation.class,
                 "A merge operation to join two Streams",
                 operationTypeField(KSMLDSL.Operations.MERGE),
                 nameField(),
                 topicField(KSMLDSL.Operations.Merge.STREAM, true, "The stream to merge with", new StreamDefinitionParser(true)),
-                (type, name, stream) -> {
-                    if (stream instanceof StreamDefinition streamDef) {
-                        return new MergeOperation(new OperationConfig(namespace(), name, null), streamDef);
-                    }
-                    throw FatalError.topologyError("Merge stream not correct, should be a defined Stream");
-                });
+                (type, name, stream) -> new MergeOperation(new OperationConfig(namespace(), name, null), stream));
     }
 }

@@ -36,6 +36,7 @@ import io.axual.ksml.data.schema.UnionSchema;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -53,6 +54,7 @@ public class JsonSchemaMapper implements DataSchemaMapper<String> {
     private static final String DEFINITIONS_NAME = "definitions";
     private static final String REF_NAME = "$ref";
     private static final String ANY_OF_NAME = "anyOf";
+    private static final String ONE_OF_NAME = "oneOf";
     private static final String ENUM_NAME = "enum";
 
     @Override
@@ -178,7 +180,14 @@ public class JsonSchemaMapper implements DataSchemaMapper<String> {
     private void convertType(DataSchema schema, boolean constant, DataValue defaultValue, DataStruct target, DataStruct definitions) {
         if (schema.type() == DataSchema.Type.NULL) target.put(TYPE_NAME, new DataString("null"));
         if (schema.type() == DataSchema.Type.BOOLEAN) target.put(TYPE_NAME, new DataString("boolean"));
-        if (schema.type() == DataSchema.Type.LONG) target.put(TYPE_NAME, new DataString("number"));
+        if (schema.type() == DataSchema.Type.BYTE
+                || schema.type() == DataSchema.Type.SHORT
+                || schema.type() == DataSchema.Type.INTEGER
+                || schema.type() == DataSchema.Type.LONG
+                || schema.type() == DataSchema.Type.FLOAT
+                || schema.type() == DataSchema.Type.DOUBLE) {
+            target.put(TYPE_NAME, new DataString("number"));
+        }
         if (schema.type() == DataSchema.Type.STRING) {
             if (constant && defaultValue != null && defaultValue.value() != null) {
                 DataList enumList = new DataList();
@@ -213,14 +222,23 @@ public class JsonSchemaMapper implements DataSchemaMapper<String> {
         }
 
         if (schema instanceof UnionSchema unionSchema) {
+            // Since multiple number types can give the same JSON type export, we create a set of types first,
+            // eliminating duplicates. The LinkedHashSet preserves insertion order, so the list of anyOf types is
+            // ordered similarly to its original.
+            final var possibleTypes = new LinkedHashSet<DataStruct>();
             // Convert to an array of possible types
-            final var possibleTypes = new DataList();
             for (var possibleSchema : unionSchema.possibleSchemas()) {
                 final var typeStruct = new DataStruct();
                 convertType(possibleSchema, false, null, typeStruct, definitions);
-                possibleTypes.add(typeStruct);
+                if (typeStruct.size() > 0) {
+                    possibleTypes.add(typeStruct);
+                }
             }
-            target.put(ANY_OF_NAME, possibleTypes);
+
+            // Copy the list of results into the schema as anyOf type
+            final var types = new DataList();
+            possibleTypes.forEach(types::add);
+            target.put(ANY_OF_NAME, types);
         }
     }
 }

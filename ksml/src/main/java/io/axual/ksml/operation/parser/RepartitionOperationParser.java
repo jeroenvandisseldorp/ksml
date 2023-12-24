@@ -25,15 +25,15 @@ import io.axual.ksml.definition.parser.StreamPartitionerDefinitionParser;
 import io.axual.ksml.dsl.KSMLDSL;
 import io.axual.ksml.generator.TopologyResources;
 import io.axual.ksml.operation.RepartitionOperation;
-import io.axual.ksml.parser.StructParser;
+import io.axual.ksml.parser.MultiSchemaParser;
 
 public class RepartitionOperationParser extends OperationParser<RepartitionOperation> {
-    public RepartitionOperationParser(TopologyResources resources) {
-        super("repartition", resources);
+    public RepartitionOperationParser(String namespace) {
+        super(namespace, "repartition");
     }
 
     @Override
-    public StructParser<RepartitionOperation> parser() {
+    public MultiSchemaParser<RepartitionOperation> parser() {
         return structParser(
                 RepartitionOperation.class,
                 "Operation to (re)partition a stream",

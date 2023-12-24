@@ -23,11 +23,11 @@ package io.axual.ksml.definition.parser;
 
 import io.axual.ksml.definition.AggregatorDefinition;
 import io.axual.ksml.dsl.KSMLDSL;
-import io.axual.ksml.parser.StructParser;
+import io.axual.ksml.parser.MultiSchemaParser;
 
 public class AggregatorDefinitionParser extends FunctionDefinitionParser<AggregatorDefinition> {
     @Override
-    public StructParser<AggregatorDefinition> parser() {
+    public MultiSchemaParser<AggregatorDefinition> parser() {
         return parserWithoutStores(AggregatorDefinition.class, KSMLDSL.Functions.TYPE_AGGREGATOR, "aggregator", AggregatorDefinition::new);
     }
 }

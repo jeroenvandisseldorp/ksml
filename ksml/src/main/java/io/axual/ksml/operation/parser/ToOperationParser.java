@@ -20,66 +20,71 @@ package io.axual.ksml.operation.parser;
  * =========================LICENSE_END==================================
  */
 
-import io.axual.ksml.data.schema.StructSchema;
-import io.axual.ksml.definition.parser.ToTopicDefinitionParser;
-import io.axual.ksml.definition.parser.ToTopicNameExtractorDefinitionParser;
+import io.axual.ksml.data.value.Pair;
+import io.axual.ksml.definition.ToOperationDefinition;
+import io.axual.ksml.definition.TopicDefinition;
+import io.axual.ksml.definition.TopologyResource;
+import io.axual.ksml.definition.parser.ShortTopicDefinitionParser;
+import io.axual.ksml.definition.parser.StreamPartitionerDefinitionParser;
+import io.axual.ksml.definition.parser.TopicNameExtractorDefinitionParser;
 import io.axual.ksml.dsl.KSMLDSL;
-import io.axual.ksml.execution.FatalError;
 import io.axual.ksml.generator.TopologyResources;
 import io.axual.ksml.operation.ToOperation;
-import io.axual.ksml.parser.DefinitionParser;
-import io.axual.ksml.parser.StructParser;
+import io.axual.ksml.parser.ChoiceAttributeParser;
+import io.axual.ksml.parser.MultiSchemaParser;
+import lombok.Getter;
 
+import java.util.HashMap;
+import java.util.function.BiFunction;
+
+@Getter
 public class ToOperationParser extends OperationParser<ToOperation> {
-    private final ToTopicDefinitionParser topicParser;
-    private final ToTopicNameExtractorDefinitionParser tneParser;
-    private final StructSchema schema;
+    private final MultiSchemaParser<ToOperation> parser;
 
-    public ToOperationParser(TopologyResources resources) {
-        super("to", resources);
-        topicParser = new ToTopicDefinitionParser(resources());
-        tneParser = new ToTopicNameExtractorDefinitionParser(resources());
-        final var fields = topicParser.fields();
-        fields.addAll(tneParser.fields());
-        schema = structSchema(
-                ToOperation.class.getSimpleName(),
-                "Ends the pipeline by sending all messages to a fixed topic, or to a topic returned by a topic name extractor function",
-                fields);
-    }
+    public ToOperationParser(String namespace) {
+        super(namespace, "to");
 
-    private class ToOperationDefinitionParser extends DefinitionParser<ToOperation> {
-        @Override
-        protected StructParser<ToOperation> parser() {
-            return structParser(
-                    ToOperation.class,
-                    "Either a topic or topic name extractor that defines where to write pipeline messages to",
-                    topicParser,
-                    tneParser,
-                    (topic, tne) -> {
-                        if (topic != null && topic.topic() != null) {
-                            return new ToOperation(operationConfig(null), topic.topic(), topic.partitioner());
-                        }
-                        if (tne != null && tne.topicNameExtractor() != null) {
-                            return new ToOperation(operationConfig(null), tne.topicNameExtractor(), tne.partitioner());
-                        }
-                        throw FatalError.topologyError("Unknown target for pipeline \"to\" operation");
-                    });
-        }
-    }
-
-    @Override
-    public StructParser<ToOperation> parser() {
-        return lookupField(
-                "topic",
-                KSMLDSL.Operations.TO,
+        final var partitionerField = functionField(
+                KSMLDSL.Operations.To.PARTITIONER,
                 false,
+                "Controls how the output messages are partitioned",
+                new StreamPartitionerDefinitionParser());
+        final var toTopicParser = structParser(
+                ToOperationDefinition.class,
+                "Reference to a pre-defined topic, or an inline definition of a topic and an optional stream partitioner",
+                topicField(
+                        KSMLDSL.Operations.To.TOPIC,
+                        false,
+                        "Reference to a pre-defined topic, or an inline definition of a topic and an optional stream partitioner",
+                        new ShortTopicDefinitionParser()),
+                partitionerField,
+                (topic, partitioner) -> new ToOperationDefinition(topic, null, partitioner));
+        final var toTneParser = structParser(
+                ToOperationDefinition.class,
+                "Reference to a pre-defined topic name extractor, or an inline definition of a topic name extractor and an optional stream partitioner",
+                functionField(
+                        KSMLDSL.Operations.To.TOPIC_NAME_EXTRACTOR,
+                        true,
+                        "Reference to a pre-defined topic name extractor, or an inline definition of a topic name extractor",
+                        new TopicNameExtractorDefinitionParser()),
+                partitionerField,
+                (tne, partitioner) -> new ToOperationDefinition(null, tne, partitioner));
+
+        final var map = new HashMap<String, Pair<String, MultiSchemaParser<? extends ToOperationDefinition>>>();
+        map.put(KSMLDSL.Operations.To.TOPIC, Pair.of("Topic", toTopicParser));
+        map.put(KSMLDSL.Operations.To.TOPIC_NAME_EXTRACTOR, Pair.of("TopicNameExtractor", toTneParser));
+        final var toOperationDefinitionParser = new ChoiceAttributeParser<>("NoTarget", true, map);
+
+        final BiFunction<TopologyResources, String, TopicDefinition> lookupTopic = TopologyResources::topic;
+        parser = structParser(
+                ToOperation.class,
                 "Ends the pipeline by sending all messages to a fixed topic, or to a topic returned by a topic name extractor function",
-                name -> {
-                    final var topic = resources().topic(name);
-                    if (topic != null)
-                        return new ToOperation(operationConfig(null), topic, null);
-                    return null;
-                },
-                new ToOperationDefinitionParser());
+                resourceField(
+                        KSMLDSL.Operations.TO,
+                        false,
+                        "Either a topic or topic name extractor that defines where to write pipeline messages to",
+                        (resources, name) -> new ToOperationDefinition(new TopologyResource<>(name, lookupTopic, resources.topic(name)), null, null),
+                        toOperationDefinitionParser),
+                target -> new ToOperation(operationConfig("to"), target));
     }
 }

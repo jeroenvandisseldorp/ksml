@@ -23,14 +23,14 @@ package io.axual.ksml.operation.parser;
 import io.axual.ksml.dsl.KSMLDSL;
 import io.axual.ksml.generator.TopologyResources;
 import io.axual.ksml.operation.ConvertValueOperation;
-import io.axual.ksml.parser.StructParser;
+import io.axual.ksml.parser.MultiSchemaParser;
 
 public class ConvertValueOperationParser extends OperationParser<ConvertValueOperation> {
-    public ConvertValueOperationParser(TopologyResources resources) {
-        super("convertValue", resources);
+    public ConvertValueOperationParser(String namespace) {
+        super(namespace, "convertValue");
     }
 
-    public StructParser<ConvertValueOperation> parser() {
+    public MultiSchemaParser<ConvertValueOperation> parser() {
         return structParser(
                 ConvertValueOperation.class,
                 "An operation to convert the stream value type to another type. Conversion is only syntactic, eg. from Avro to XML.",

@@ -22,6 +22,7 @@ package io.axual.ksml.definition;
 
 import java.time.Duration;
 
-public record ProducerDefinition(FunctionDefinition generator, Duration interval, FunctionDefinition condition,
-                                 TopicDefinition target) {
+public record ProducerDefinition(TopologyResource<FunctionDefinition> generator, Duration interval,
+                                 TopologyResource<FunctionDefinition> condition,
+                                 TopologyResource<TopicDefinition> target) {
 }

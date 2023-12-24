@@ -22,6 +22,7 @@ package io.axual.ksml.operation;
 
 
 import io.axual.ksml.definition.FunctionDefinition;
+import io.axual.ksml.definition.TopologyResource;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.operation.processor.OperationProcessorSupplier;
 import io.axual.ksml.operation.processor.TransformKeyProcessor;
@@ -32,9 +33,9 @@ import org.apache.kafka.streams.kstream.KStream;
 
 public class TransformKeyOperation extends BaseOperation {
     private static final String MAPPER_NAME = "Mapper";
-    private final FunctionDefinition mapper;
+    private final TopologyResource<FunctionDefinition> mapper;
 
-    public TransformKeyOperation(OperationConfig config, FunctionDefinition mapper) {
+    public TransformKeyOperation(OperationConfig config, TopologyResource<FunctionDefinition> mapper) {
         super(config);
         this.mapper = mapper;
     }
@@ -50,10 +51,10 @@ public class TransformKeyOperation extends BaseOperation {
         checkNotNull(mapper, MAPPER_NAME.toLowerCase());
         final var k = input.keyType();
         final var v = input.valueType();
-        final var kr = streamDataTypeOf(firstSpecificType(mapper, k), true);
-        final var map = userFunctionOf(context, MAPPER_NAME, mapper, kr, superOf(k), superOf(v));
+        final var kr = streamDataTypeOf(firstSpecificType(context.get(mapper), k), true);
+        final var map = userFunctionOf(context, MAPPER_NAME, context.get(mapper), kr, superOf(k), superOf(v));
         final var userMap = new UserKeyTransformer(map);
-        final var storeNames = combineStoreNames(this.storeNames, mapper.storeNames().toArray(TEMPLATE));
+        final var storeNames = combineStoreNames(this.storeNames, context.get(mapper).storeNames().toArray(TEMPLATE));
         final var supplier = new OperationProcessorSupplier<>(
                 name,
                 TransformKeyProcessor::new,

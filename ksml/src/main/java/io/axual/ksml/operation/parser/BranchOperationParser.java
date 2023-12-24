@@ -22,30 +22,28 @@ package io.axual.ksml.operation.parser;
 
 import io.axual.ksml.definition.parser.BranchDefinitionParser;
 import io.axual.ksml.dsl.KSMLDSL;
-import io.axual.ksml.generator.TopologyResources;
 import io.axual.ksml.operation.BranchOperation;
-import io.axual.ksml.parser.StructParser;
+import io.axual.ksml.parser.MultiSchemaParser;
 
 public class BranchOperationParser extends OperationParser<BranchOperation> {
     private final boolean includePipelineSchema;
 
-    public BranchOperationParser(TopologyResources resources, boolean includePipelineSchema) {
-        super("branch", resources);
+    public BranchOperationParser(String namespace, boolean includePipelineSchema) {
+        super(namespace, "branch");
         this.includePipelineSchema = includePipelineSchema;
     }
 
     @Override
-    public StructParser<BranchOperation> parser() {
+    public MultiSchemaParser<BranchOperation> parser() {
         return structParser(
                 BranchOperation.class,
                 "Splits the pipeline result into multiple substreams. Each message gets sent down one stream, based on the first matching branch condition",
-                nameField(),
                 listField(
                         KSMLDSL.Operations.BRANCH,
                         "branch",
                         true,
                         "Defines a single branch, consisting of a condition and a pipeline to execute for messages that fulfil the predicate",
-                        new BranchDefinitionParser(resources(), includePipelineSchema)),
-                (name, branches) -> branches != null ? new BranchOperation(operationConfig(namespace(), null), branches) : null);
+                        new BranchDefinitionParser(namespace(), includePipelineSchema)),
+                branches -> branches != null ? new BranchOperation(operationConfig("branch", null), branches) : null);
     }
 }

@@ -25,6 +25,7 @@ import io.axual.ksml.data.type.DataType;
 import io.axual.ksml.data.type.UserTupleType;
 import io.axual.ksml.data.type.UserType;
 import io.axual.ksml.definition.FunctionDefinition;
+import io.axual.ksml.definition.TopologyResource;
 import io.axual.ksml.exception.KSMLExecutionException;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.operation.processor.OperationProcessorSupplier;
@@ -36,9 +37,9 @@ import org.apache.kafka.streams.kstream.KStream;
 
 public class TransformKeyValueOperation extends BaseOperation {
     private static final String MAPPER_NAME = "Mapper";
-    private final FunctionDefinition mapper;
+    private final TopologyResource<FunctionDefinition> mapper;
 
-    public TransformKeyValueOperation(OperationConfig config, FunctionDefinition mapper) {
+    public TransformKeyValueOperation(OperationConfig config, TopologyResource<FunctionDefinition> mapper) {
         super(config);
         this.mapper = mapper;
     }
@@ -54,15 +55,15 @@ public class TransformKeyValueOperation extends BaseOperation {
         checkNotNull(mapper, MAPPER_NAME.toLowerCase());
         final var k = input.keyType();
         final var v = input.valueType();
-        final var kvTuple = firstSpecificType(mapper, new UserType(new UserTupleType(k.userType(), v.userType())));
+        final var kvTuple = firstSpecificType(context.get(mapper), new UserType(new UserTupleType(k.userType(), v.userType())));
         checkTuple(MAPPER_NAME + " resultType", kvTuple, DataType.UNKNOWN, DataType.UNKNOWN);
-        final var map = userFunctionOf(context, MAPPER_NAME, mapper, kvTuple, superOf(k), superOf(v));
+        final var map = userFunctionOf(context, MAPPER_NAME, context.get(mapper), kvTuple, superOf(k), superOf(v));
 
         if (kvTuple.dataType() instanceof UserTupleType userTupleType && userTupleType.subTypeCount() == 2) {
             final var kr = streamDataTypeOf(userTupleType.getUserType(0), true);
             final var vr = streamDataTypeOf(userTupleType.getUserType(1), false);
             final var userMap = new UserKeyValueTransformer(map);
-            final var storeNames = combineStoreNames(this.storeNames, mapper.storeNames().toArray(TEMPLATE));
+            final var storeNames = combineStoreNames(this.storeNames, context.get(mapper).storeNames().toArray(TEMPLATE));
             final var supplier = new OperationProcessorSupplier<>(
                     name,
                     TransformKeyValueProcessor::new,

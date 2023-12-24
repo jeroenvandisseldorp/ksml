@@ -22,6 +22,7 @@ package io.axual.ksml.operation;
 
 
 import io.axual.ksml.definition.FunctionDefinition;
+import io.axual.ksml.definition.TopologyResource;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.KGroupedStreamWrapper;
 import io.axual.ksml.stream.KGroupedTableWrapper;
@@ -37,11 +38,11 @@ public class ReduceOperation extends StoreOperation {
     private static final String ADDER_NAME = "Adder";
     private static final String REDUCER_NAME = "Reducer";
     private static final String SUBTRACTOR_NAME = "Subtractor";
-    private final FunctionDefinition reducer;
-    private final FunctionDefinition adder;
-    private final FunctionDefinition subtractor;
+    private final TopologyResource<FunctionDefinition> reducer;
+    private final TopologyResource<FunctionDefinition> adder;
+    private final TopologyResource<FunctionDefinition> subtractor;
 
-    public ReduceOperation(StoreOperationConfig config, FunctionDefinition reducer, FunctionDefinition adder, FunctionDefinition subtractor) {
+    public ReduceOperation(StoreOperationConfig config, TopologyResource<FunctionDefinition> reducer, TopologyResource<FunctionDefinition> adder, TopologyResource<FunctionDefinition> subtractor) {
         super(config);
         this.reducer = reducer;
         this.adder = adder;
@@ -52,9 +53,9 @@ public class ReduceOperation extends StoreOperation {
     public StreamWrapper apply(KGroupedStreamWrapper input, TopologyBuildContext context) {
         final var k = input.keyType();
         final var v = input.valueType();
-        final var red = userFunctionOf(context, REDUCER_NAME, reducer, v, equalTo(v), equalTo(v));
+        final var red = userFunctionOf(context, REDUCER_NAME, context.get(reducer), v, equalTo(v), equalTo(v));
         final var userRed = new UserReducer(red);
-        final var kvStore = validateKeyValueStore(store(), k, v);
+        final var kvStore = validateKeyValueStore(context.get(store()), k, v);
         final var mat = materializedOf(context, kvStore);
         final var named = namedOf();
         final KTable<Object, Object> output = mat != null
@@ -77,11 +78,11 @@ public class ReduceOperation extends StoreOperation {
 
         final var k = input.keyType();
         final var v = input.valueType();
-        final var add = userFunctionOf(context, ADDER_NAME, adder, v, equalTo(v), equalTo(v));
+        final var add = userFunctionOf(context, ADDER_NAME, context.get(adder), v, equalTo(v), equalTo(v));
         final var userAdd = new UserReducer(add);
-        final var sub = userFunctionOf(context, SUBTRACTOR_NAME, subtractor, v, equalTo(v), equalTo(v));
+        final var sub = userFunctionOf(context, SUBTRACTOR_NAME, context.get(subtractor), v, equalTo(v), equalTo(v));
         final var userSub = new UserReducer(sub);
-        final var kvStore = validateKeyValueStore(store(), k, v);
+        final var kvStore = validateKeyValueStore(context.get(store()), k, v);
         final var mat = materializedOf(context, kvStore);
         final var named = namedOf();
         final KTable<Object, Object> output = mat != null
@@ -104,9 +105,9 @@ public class ReduceOperation extends StoreOperation {
         final var k = input.keyType();
         final var v = input.valueType();
         final var windowedK = windowedTypeOf(k);
-        final var red = userFunctionOf(context, REDUCER_NAME, reducer, v, equalTo(v), equalTo(v));
+        final var red = userFunctionOf(context, REDUCER_NAME, context.get(reducer), v, equalTo(v), equalTo(v));
         final var userRed = new UserReducer(red);
-        final var sessionStore = validateSessionStore(store(), k, v);
+        final var sessionStore = validateSessionStore(context.get(store()), k, v);
         final var mat = materializedOf(context, sessionStore);
         final var named = namedOf();
         final KTable<Windowed<Object>, Object> output = mat != null
@@ -129,9 +130,9 @@ public class ReduceOperation extends StoreOperation {
         final var k = input.keyType();
         final var v = input.valueType();
         final var windowedK = windowedTypeOf(k);
-        final var red = userFunctionOf(context, REDUCER_NAME, reducer, v, equalTo(v), equalTo(v));
+        final var red = userFunctionOf(context, REDUCER_NAME, context.get(reducer), v, equalTo(v), equalTo(v));
         final var userRed = new UserReducer(red);
-        final var windowStore = validateWindowStore(store(), k, v);
+        final var windowStore = validateWindowStore(context.get(store()), k, v);
         final var mat = materializedOf(context, windowStore);
         final var named = namedOf();
         final KTable<Windowed<Object>, Object> output = mat != null

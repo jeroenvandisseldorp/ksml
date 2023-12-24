@@ -1,0 +1,21 @@
+streams:
+  plaatje:
+    topic: nix
+    keyType: bla
+    valueType: bla
+
+tables:
+  name:
+    wrongKeyword: bla
+    keyType: string
+    valueType: string
+
+pipelines:
+  name:
+    from: name
+    via:
+      - type: aggregate
+        initializer: myinitializer
+        aggregator:
+          cod
+    to: out

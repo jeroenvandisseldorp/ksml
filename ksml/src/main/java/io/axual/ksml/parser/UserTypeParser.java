@@ -328,6 +328,6 @@ public class UserTypeParser {
         types.add("any");
         types.add("?");
         types.add("notation:schema");
-        return new EnumSchema(DefinitionParser.SCHEMA_NAMESPACE, "UserType", "UserTypes are the basic types used in streams and pipelines", types);
+        return new EnumSchema(MultiFormParser.SCHEMA_NAMESPACE, "UserType", "UserTypes are the basic types used in streams and pipelines", types);
     }
 }

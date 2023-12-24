@@ -25,8 +25,8 @@ import io.axual.ksml.data.object.DataInteger;
 import io.axual.ksml.data.object.DataString;
 import io.axual.ksml.data.type.StructType;
 import io.axual.ksml.data.type.UserType;
-import io.axual.ksml.definition.FunctionDefinition;
-import io.axual.ksml.definition.TopicDefinition;
+import io.axual.ksml.definition.ToOperationDefinition;
+import io.axual.ksml.definition.TopologyResource;
 import io.axual.ksml.execution.FatalError;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.KStreamWrapper;
@@ -39,26 +39,17 @@ import static io.axual.ksml.dsl.RecordContextSchema.RECORD_CONTEXT_SCHEMA;
 public class ToOperation extends BaseOperation {
     private static final String PARTITIONER_NAME = "Partitioner";
     private static final String TOPICNAMEEXTRACTOR_NAME = "TopicNameExtractor";
-    public final TopicDefinition topic;
-    private final FunctionDefinition partitioner;
-    private final FunctionDefinition topicNameExtractor;
+    public final TopologyResource<ToOperationDefinition> target;
 
-    public ToOperation(OperationConfig config, TopicDefinition topic, FunctionDefinition partitioner) {
+    public ToOperation(OperationConfig config, TopologyResource<ToOperationDefinition> target) {
         super(config);
-        this.topic = topic;
-        this.partitioner = partitioner;
-        this.topicNameExtractor = null;
-    }
-
-    public ToOperation(OperationConfig config, FunctionDefinition topicNameExtractor, FunctionDefinition partitioner) {
-        super(config);
-        this.topic = null;
-        this.topicNameExtractor = topicNameExtractor;
-        this.partitioner = partitioner;
+        this.target = target;
     }
 
     @Override
     public StreamWrapper apply(KStreamWrapper input, TopologyBuildContext context) {
+        final var to = context.get(target);
+        final var topic = context.get(to.topic());
         if (topic != null) {
             /*    Kafka Streams method signature:
              *    void to(
@@ -73,7 +64,7 @@ public class ToOperation extends BaseOperation {
             // Perform a dataType check to see if the key/value data types received matches the stream definition's types
             checkType("Target topic keyType", topic.keyType().dataType(), superOf(k));
             checkType("Target topic valueType", topic.valueType().dataType(), superOf(v));
-            final var part = userFunctionOf(context, PARTITIONER_NAME, partitioner, equalTo(DataInteger.DATATYPE), equalTo(DataString.DATATYPE), superOf(k), superOf(v), equalTo(DataInteger.DATATYPE));
+            final var part = userFunctionOf(context, PARTITIONER_NAME, context.get(to.partitioner()), equalTo(DataInteger.DATATYPE), equalTo(DataString.DATATYPE), superOf(k), superOf(v), equalTo(DataInteger.DATATYPE));
             final var userPart = part != null ? new UserStreamPartitioner(part) : null;
             final var produced = producedOf(kt, vt, userPart);
             if (produced != null)
@@ -83,7 +74,8 @@ public class ToOperation extends BaseOperation {
             return null;
         }
 
-        if (topicNameExtractor != null) {
+        final var tne = context.get(to.topicNameExtractor());
+        if (tne != null) {
             /*    Kafka Streams method signature:
              *    void to(
              *          final TopicNameExtractor<K, V> topicExtractor,
@@ -94,9 +86,9 @@ public class ToOperation extends BaseOperation {
             final var v = input.valueType();
             final var topicNameType = new UserType(DataString.DATATYPE);
             final var recordContextType = new UserType(new StructType(RECORD_CONTEXT_SCHEMA));
-            final var extract = userFunctionOf(context, TOPICNAMEEXTRACTOR_NAME, topicNameExtractor, topicNameType, superOf(k), superOf(v), superOf(recordContextType));
+            final var extract = userFunctionOf(context, TOPICNAMEEXTRACTOR_NAME, tne, topicNameType, superOf(k), superOf(v), superOf(recordContextType));
             final var userExtract = new UserTopicNameExtractor(extract);
-            final var part = userFunctionOf(context, PARTITIONER_NAME, partitioner, equalTo(DataInteger.DATATYPE), equalTo(DataString.DATATYPE), superOf(k), superOf(v), equalTo(DataInteger.DATATYPE));
+            final var part = userFunctionOf(context, PARTITIONER_NAME, context.get(to.partitioner()), equalTo(DataInteger.DATATYPE), equalTo(DataString.DATATYPE), superOf(k), superOf(v), equalTo(DataInteger.DATATYPE));
             final var userPart = part != null ? new UserStreamPartitioner(part) : null;
             final var produced = producedOf(k, v, userPart);
             if (produced != null)

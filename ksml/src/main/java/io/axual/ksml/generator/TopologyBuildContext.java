@@ -73,6 +73,16 @@ public class TopologyBuildContext {
         this.pythonContext = new PythonContext();
     }
 
+    public <T> T get(TopologyResource<T> resource) {
+        return resource.get(resources);
+    }
+
+    public <T, S extends T> S get(TopologyResource<T> resource, Class<S> expectedClass) {
+        final var result = resource.get(resources);
+        if (expectedClass.isInstance(result)) return (S) result;
+        throw FatalError.topologyError("Expected " + expectedClass.getSimpleName() + ", but found " + (result != null ? result.getClass().getSimpleName() : "null"));
+    }
+
     public DataObjectConverter getDataObjectConverter() {
         return new DataObjectConverter();
     }
@@ -112,10 +122,6 @@ public class TopologyBuildContext {
             final var storeBuilder = StoreUtil.getStoreBuilder(storeDef);
             builder.addStateStore(storeBuilder);
         }
-    }
-
-    public StreamWrapper getStreamWrapper(TopologyResource<TopicDefinition> resource) {
-        return getStreamWrapper(resource.name(), resource.definition());
     }
 
     public StreamWrapper getStreamWrapper(final String name, final TopicDefinition topicDefinition) {
@@ -257,7 +263,7 @@ public class TopologyBuildContext {
     // Results of pipelines can be registered in this build context for later use (see AsOperation). This is the entry
     // point for that operation to register pipeline outcomes as independent stream wrappers.
     public void registerStreamWrapper(String name, StreamWrapper wrapper) {
-        if (name==null) {
+        if (name == null) {
             throw FatalError.topologyError("Can not register " + wrapper.toString() + " without a name");
         }
         if (streamWrappersByName.containsKey(name)) {

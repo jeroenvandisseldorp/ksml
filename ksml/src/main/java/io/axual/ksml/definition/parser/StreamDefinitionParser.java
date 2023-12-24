@@ -22,12 +22,12 @@ package io.axual.ksml.definition.parser;
 
 
 import io.axual.ksml.definition.StreamDefinition;
-import io.axual.ksml.parser.DefinitionParser;
-import io.axual.ksml.parser.StructParser;
+import io.axual.ksml.parser.MultiFormParser;
+import io.axual.ksml.parser.MultiSchemaParser;
 
 import static io.axual.ksml.dsl.KSMLDSL.Streams;
 
-public class StreamDefinitionParser extends DefinitionParser<StreamDefinition> {
+public class StreamDefinitionParser extends MultiFormParser<StreamDefinition> {
     private final boolean requireKeyValueType;
 
     public StreamDefinitionParser(boolean requireKeyValueType) {
@@ -35,7 +35,7 @@ public class StreamDefinitionParser extends DefinitionParser<StreamDefinition> {
     }
 
     @Override
-    public StructParser<StreamDefinition> parser() {
+    public MultiSchemaParser<StreamDefinition> parser() {
         return structParser(
                 StreamDefinition.class,
                 "Contains a definition of a Stream, which can be referenced by producers and pipelines",

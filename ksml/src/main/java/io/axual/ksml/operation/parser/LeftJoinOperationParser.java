@@ -21,110 +21,69 @@ package io.axual.ksml.operation.parser;
  */
 
 
-import io.axual.ksml.data.schema.StructSchema;
-import io.axual.ksml.definition.GlobalTableDefinition;
-import io.axual.ksml.definition.StreamDefinition;
-import io.axual.ksml.definition.TableDefinition;
+import io.axual.ksml.data.value.Pair;
 import io.axual.ksml.definition.parser.GlobalTableDefinitionParser;
-import io.axual.ksml.definition.parser.JoinTargetDefinitionParser;
 import io.axual.ksml.definition.parser.StreamDefinitionParser;
 import io.axual.ksml.definition.parser.StreamPartitionerDefinitionParser;
 import io.axual.ksml.definition.parser.TableDefinitionParser;
 import io.axual.ksml.definition.parser.ValueJoinerDefinitionParser;
 import io.axual.ksml.dsl.KSMLDSL;
-import io.axual.ksml.exception.KSMLParseException;
-import io.axual.ksml.execution.FatalError;
-import io.axual.ksml.generator.TopologyResources;
-import io.axual.ksml.operation.JoinOperation;
 import io.axual.ksml.operation.LeftJoinOperation;
-import io.axual.ksml.parser.StructParser;
-import io.axual.ksml.parser.YamlNode;
-import org.apache.commons.collections4.ListUtils;
+import io.axual.ksml.parser.ChoiceAttributeParser;
+import io.axual.ksml.parser.MultiSchemaParser;
+import lombok.Getter;
+
+import java.util.LinkedHashMap;
 
 import static io.axual.ksml.dsl.KSMLDSL.Operations;
 
+@Getter
 public class LeftJoinOperationParser extends StoreOperationParser<LeftJoinOperation> {
-    private final StructParser<LeftJoinOperation> joinStreamParser;
-    private final StructParser<LeftJoinOperation> joinTableParser;
-    private final StructParser<LeftJoinOperation> joinGlobalTableParser;
-    private final StructSchema schema;
+    private final MultiSchemaParser<LeftJoinOperation> parser;
 
-    public LeftJoinOperationParser(TopologyResources resources) {
-        super("leftJoin", resources);
-        joinStreamParser = structParser(
+    public LeftJoinOperationParser(String namespace) {
+        super(namespace, "leftJoin");
+        final var joinStreamParser = structParser(
                 LeftJoinOperation.class,
                 "Operation to join with a stream",
                 operationTypeField(Operations.LEFT_JOIN),
                 nameField(),
                 topicField(Operations.Join.WITH_STREAM, true, "(Required for Stream joins) A reference to the Stream, or an inline definition of the Stream to join with", new StreamDefinitionParser(false)),
-                functionField(Operations.Join.VALUE_JOINER, "(Stream joins) A function that joins two values", new ValueJoinerDefinitionParser()),
+                functionField(Operations.Join.VALUE_JOINER, true, "(Stream joins) A function that joins two values", new ValueJoinerDefinitionParser()),
                 durationField(Operations.Join.TIME_DIFFERENCE, true, "(Stream joins) The maximum time difference for a join over two streams on the same key"),
                 durationField(Operations.Join.GRACE, false, "(Stream joins) The window grace period (the time to admit out-of-order events after the end of the window)"),
                 storeField(false, "Materialized view of the joined streams", null),
-                (type, name, stream, valueJoiner, timeDifference, grace, store) -> {
-                    if (stream instanceof StreamDefinition streamDef) {
-                        return new LeftJoinOperation(storeOperationConfig(name, null, store), streamDef, valueJoiner, timeDifference, grace);
-                    }
-                    throw FatalError.topologyError("Join stream not correct, should be a defined Stream");
-                });
+                (type, name, stream, valueJoiner, timeDifference, grace, store) -> new LeftJoinOperation(storeOperationConfig(name, null, store), stream, valueJoiner, timeDifference, grace));
 
-        joinTableParser = structParser(
+        final var joinTableParser = structParser(
                 LeftJoinOperation.class,
                 "Operation to join with a table",
                 stringField(KSMLDSL.Operations.TYPE_ATTRIBUTE, true, "The type of the operation, fixed value \"" + Operations.JOIN + "\""),
                 nameField(),
                 topicField(Operations.Join.WITH_TABLE, true, "(Required for Table joins) A reference to the Table, or an inline definition of the Table to join with", new TableDefinitionParser(false)),
-                functionField(Operations.Join.FOREIGN_KEY_EXTRACTOR, "(Table joins) A function that can translate the join table value to a primary key", new ValueJoinerDefinitionParser()),
-                functionField(Operations.Join.VALUE_JOINER, "(Table joins) A function that joins two values", new ValueJoinerDefinitionParser()),
+                functionField(Operations.Join.FOREIGN_KEY_EXTRACTOR, true, "(Table joins) A function that can translate the join table value to a primary key", new ValueJoinerDefinitionParser()),
+                functionField(Operations.Join.VALUE_JOINER, true, "(Table joins) A function that joins two values", new ValueJoinerDefinitionParser()),
                 durationField(Operations.Join.GRACE, false, "(Table joins) The window grace period (the time to admit out-of-order events after the end of the window)"),
                 functionField(Operations.Join.PARTITIONER, false, "(Table joins) A function that partitions the records on the primary table", new StreamPartitionerDefinitionParser()),
                 functionField(Operations.Join.OTHER_PARTITIONER, false, "(Table joins) A function that partitions the records on the join table", new StreamPartitionerDefinitionParser()),
                 storeField(false, "Materialized view of the joined streams", null),
-                (type, name, table, foreignKeyExtractor, valueJoiner, grace, partitioner, otherPartitioner, store) -> {
-                    if (table instanceof TableDefinition tableDef) {
-                        return new LeftJoinOperation(storeOperationConfig(name, null, store), tableDef, foreignKeyExtractor, valueJoiner, grace, partitioner, otherPartitioner);
-                    }
-                    throw FatalError.topologyError("Join table not correct, should be a defined Table");
-                });
+                (type, name, table, foreignKeyExtractor, valueJoiner, grace, partitioner, otherPartitioner, store) -> new LeftJoinOperation(storeOperationConfig(name, null, store), table, foreignKeyExtractor, valueJoiner, grace, partitioner, otherPartitioner));
 
-        joinGlobalTableParser = structParser(
+        final var joinGlobalTableParser = structParser(
                 LeftJoinOperation.class,
                 "Operation to join with a table",
                 stringField(KSMLDSL.Operations.TYPE_ATTRIBUTE, true, "The type of the operation, fixed value \"" + Operations.JOIN + "\""),
                 nameField(),
                 topicField(Operations.Join.WITH_GLOBAL_TABLE, true, "(Required for GlobalTable joins) A reference to the GlobalTable, or an inline definition of the GlobalTable to join with", new GlobalTableDefinitionParser(false)),
-                functionField(Operations.Join.MAPPER, "(GlobalTable joins) A function that maps the key value from the stream with the primary key of the GlobalTable", new ValueJoinerDefinitionParser()),
-                functionField(Operations.Join.VALUE_JOINER, "(GlobalTable joins) A function that joins two values", new ValueJoinerDefinitionParser()),
+                functionField(Operations.Join.MAPPER, true, "(GlobalTable joins) A function that maps the key value from the stream with the primary key of the GlobalTable", new ValueJoinerDefinitionParser()),
+                functionField(Operations.Join.VALUE_JOINER, true, "(GlobalTable joins) A function that joins two values", new ValueJoinerDefinitionParser()),
                 storeField(false, "Materialized view of the joined streams", null),
-                (type, name, globalTable, mapper, valueJoiner, store) -> {
-                    if (globalTable instanceof GlobalTableDefinition globalTableDef) {
-                        return new LeftJoinOperation(storeOperationConfig(name, null, store), globalTableDef, mapper, valueJoiner);
-                    }
-                    throw FatalError.topologyError("Join table not correct, should be a defined Table");
-                });
+                (type, name, globalTable, mapper, valueJoiner, store) -> new LeftJoinOperation(storeOperationConfig(name, null, store), globalTable, mapper, valueJoiner));
 
-        schema = structSchema(JoinOperation.class, "Defines a leftJoin operation", ListUtils.union(joinStreamParser.fields(), ListUtils.union(joinTableParser.fields(), joinGlobalTableParser.fields())));
-    }
-
-    public StructParser<LeftJoinOperation> parser() {
-        return new StructParser<>() {
-            @Override
-            public LeftJoinOperation parse(YamlNode node) {
-                if (node == null) return null;
-                final var joinTopic = new JoinTargetDefinitionParser(resources()).parse(node);
-                if (joinTopic.definition() instanceof StreamDefinition) return joinStreamParser.parse(node);
-                if (joinTopic.definition() instanceof TableDefinition) return joinTableParser.parse(node);
-                if (joinTopic.definition() instanceof GlobalTableDefinition) return joinGlobalTableParser.parse(node);
-
-                final var separator = joinTopic.name() != null && joinTopic.definition() != null ? ", " : "";
-                final var description = (joinTopic.name() != null ? joinTopic.name() : "") + separator + (joinTopic.definition() != null ? joinTopic.definition() : "");
-                throw new KSMLParseException(node, "Join stream not found: " + description);
-            }
-
-            @Override
-            public StructSchema schema() {
-                return schema;
-            }
-        };
+        final var map = new LinkedHashMap<String, Pair<String, MultiSchemaParser<? extends LeftJoinOperation>>>();
+        map.put(Operations.Join.WITH_STREAM, Pair.of("Stream", joinStreamParser));
+        map.put(Operations.Join.WITH_TABLE, Pair.of("Table", joinTableParser));
+        map.put(Operations.Join.WITH_GLOBAL_TABLE, Pair.of("GlobalTable", joinGlobalTableParser));
+        parser = new ChoiceAttributeParser<>("NoTarget", true, map);
     }
 }

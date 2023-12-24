@@ -21,19 +21,14 @@ package io.axual.ksml.parser;
  */
 
 
-import io.axual.ksml.data.schema.StructSchema;
-import io.axual.ksml.definition.FunctionDefinition;
-import io.axual.ksml.definition.TopicDefinition;
-import io.axual.ksml.definition.TopologyResource;
 import io.axual.ksml.execution.FatalError;
 import io.axual.ksml.generator.TopologyResources;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 
-public abstract class ContextAwareParser<T> extends DefinitionParser<T> {
+public abstract class ContextAwareParser<T> extends SingleFormParser<T> {
     private static final Map<String, AtomicInteger> typeInstanceCounters = new HashMap<>();
     // The set of streams, functions and stores that producers and pipelines can reference
     private final TopologyResources resources;
@@ -60,45 +55,36 @@ public abstract class ContextAwareParser<T> extends DefinitionParser<T> {
         return String.format("%s_%03d", basename, typeInstanceCounters.computeIfAbsent(basename, t -> new AtomicInteger(1)).getAndIncrement());
     }
 
-    protected <F extends FunctionDefinition> StructParser<FunctionDefinition> functionField(String childName, boolean mandatory, String doc, DefinitionParser<F> parser) {
-        final var resourceParser = new TopologyResourceParser<>("function", childName, doc, resources::function, parser);
-        final var schema = mandatory ? resourceParser.schema() : optional(resourceParser).schema();
-        return StructParser.of(node -> resourceParser.parseDefinition(node), schema);
-    }
+//    protected <F extends FunctionDefinition> MultiSchemaParser<FunctionDefinition> functionField(String childName, boolean required, String doc, MultiSchemaParser<? extends FunctionDefinition> parser) {
+//        final var resourceParser = new TopologyResourceParser<>("function", childName, required, doc, resources::function, parser);
+//        return MultiSchemaParser.of(resourceParser::parseDefinition, resourceParser.schema());
+//    }
 
-    protected <F extends FunctionDefinition> StructParser<FunctionDefinition> functionField(String childName, String doc, DefinitionParser<F> parser) {
-        return functionField(childName, true, doc, parser);
-    }
+//    protected <T> SingleSchemaParser<T> lookupField(String resourceType, String childName, boolean required, String doc, Function<String, T> lookup, StructuredParser<? extends T> parser) {
+//        final var resourceParser = new TopologyResourceParser<>("stream", childName, required, doc, lookup, parser);
+//        return new SingleSchemaParser<>() {
+//            @Override
+//            public T parse(YamlNode node) {
+//                if (node == null) return null;
+//                final var resource = resourceParser.parse(node);
+//                if (resource != null && (resource.definition() != null || !required)) return resource.definition();
+//                if (!required) return null;
+//                throw FatalError.parseError(node, resourceType + " not defined");
+//            }
+//
+//            @Override
+//            public StructSchema schema() {
+//                return resourceParser.schema();
+//            }
+//        };
+//    }
 
-    protected <T> StructParser<T> lookupField(String resourceType, String childName, boolean mandatory, String doc, Function<String, T> lookup, DefinitionParser<? extends T> parser) {
-        final var resourceParser = new TopologyResourceParser<>("stream", childName, doc, lookup, parser);
-        final var schema = mandatory ? resourceParser.schema() : optional(resourceParser).schema();
-        return new StructParser<>() {
-            @Override
-            public T parse(YamlNode node) {
-                if (node == null) return null;
-                final var resource = resourceParser.parse(node);
-                if (resource != null && (resource.definition() != null || !mandatory)) return resource.definition();
-                throw FatalError.parseError(node, resourceType + " not defined");
-            }
+//    public SingleSchemaParser<TopicDefinition> topicField(String childName, boolean required, String doc, StructuredParser<? extends TopicDefinition> parser) {
+//        return lookupField("topic", childName, required, doc, resources::topic, parser);
+//    }
 
-            @Override
-            public StructSchema schema() {
-                return schema;
-            }
-        };
-    }
-
-    protected <T> StructParser<TopologyResource<T>> topologyResourceField(String resourceType, String childName, String doc, Function<String, T> lookup, DefinitionParser<T> parser) {
-        final var resourceParser = new TopologyResourceParser<>(resourceType, childName, doc, lookup, parser, true);
-        return StructParser.of(resourceParser::parse, resourceParser.schema());
-    }
-
-    protected <F extends FunctionDefinition> StructParser<FunctionDefinition> optionalFunctionField(String childName, String doc, DefinitionParser<F> parser) {
-        return functionField(childName, false, doc, parser);
-    }
-
-    public StructParser<TopicDefinition> topicField(String childName, boolean mandatory, String doc, DefinitionParser<? extends TopicDefinition> parser) {
-        return lookupField("topic", childName, mandatory, doc, resources::topic, parser);
-    }
+//    protected <T> SingleSchemaParser<TopologyResource<T>> topologyResourceField(String resourceType, String childName, boolean required, String doc, Function<String, T> lookup, StructuredParser<T> parser) {
+//        final var resourceParser = new TopologyResourceParser<>(resourceType, childName, required, doc, lookup, parser, true);
+//        return SingleSchemaParser.of(resourceParser::parse, resourceParser.schema());
+//    }
 }

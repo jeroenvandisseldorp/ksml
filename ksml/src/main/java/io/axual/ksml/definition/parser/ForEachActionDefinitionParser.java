@@ -23,11 +23,11 @@ package io.axual.ksml.definition.parser;
 
 import io.axual.ksml.definition.ForEachActionDefinition;
 import io.axual.ksml.dsl.KSMLDSL;
-import io.axual.ksml.parser.StructParser;
+import io.axual.ksml.parser.MultiSchemaParser;
 
 public class ForEachActionDefinitionParser extends FunctionDefinitionParser<ForEachActionDefinition> {
     @Override
-    public StructParser<ForEachActionDefinition> parser() {
+    public MultiSchemaParser<ForEachActionDefinition> parser() {
         return parserWithStores(ForEachActionDefinition.class, KSMLDSL.Functions.TYPE_FOREACHACTION, "foreach action", ForEachActionDefinition::new);
     }
 }

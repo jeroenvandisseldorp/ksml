@@ -25,15 +25,15 @@ import io.axual.ksml.dsl.KSMLDSL;
 import io.axual.ksml.generator.TopologyResources;
 import io.axual.ksml.operation.GroupByKeyOperation;
 import io.axual.ksml.operation.StoreOperationConfig;
-import io.axual.ksml.parser.StructParser;
+import io.axual.ksml.parser.MultiSchemaParser;
 import io.axual.ksml.store.StoreType;
 
 public class GroupByKeyOperationParser extends StoreOperationParser<GroupByKeyOperation> {
-    public GroupByKeyOperationParser(TopologyResources resources) {
-        super("groupByKey", resources);
+    public GroupByKeyOperationParser(String namespace) {
+        super(namespace, "groupByKey");
     }
 
-    public StructParser<GroupByKeyOperation> parser() {
+    public MultiSchemaParser<GroupByKeyOperation> parser() {
         return structParser(
                 GroupByKeyOperation.class,
                 "Operation to group all messages with the same key together",

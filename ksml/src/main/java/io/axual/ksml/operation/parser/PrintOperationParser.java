@@ -24,23 +24,22 @@ import io.axual.ksml.definition.parser.KeyValuePrinterDefinitionParser;
 import io.axual.ksml.dsl.KSMLDSL;
 import io.axual.ksml.generator.TopologyResources;
 import io.axual.ksml.operation.PrintOperation;
-import io.axual.ksml.parser.StructParser;
+import io.axual.ksml.parser.MultiSchemaParser;
 
 public class PrintOperationParser extends OperationParser<PrintOperation> {
-    public PrintOperationParser(TopologyResources resources) {
-        super("print", resources);
+    public PrintOperationParser(String namespace) {
+        super(namespace, "print");
     }
 
     @Override
-    public StructParser<PrintOperation> parser() {
+    public MultiSchemaParser<PrintOperation> parser() {
         final var contentParser = structParser(
                 PrintOperation.class,
                 "Operation to print the contents of a pipeline on the screen or to write them to a file",
-                nameField(),
                 stringField(KSMLDSL.Operations.Print.FILENAME, false, "The filename to output records to. If nothing is specified, then messages will be printed on stdout"),
                 stringField(KSMLDSL.Operations.Print.LABEL, false, "A label to attach to the output records"),
                 functionField(KSMLDSL.Operations.Print.MAPPER, false, "A function to convert record into a string for output", new KeyValuePrinterDefinitionParser()),
-                (name, filename, label, mapper) -> new PrintOperation(operationConfig(name, null), filename, label, mapper));
+                (filename, label, mapper) -> new PrintOperation(operationConfig("print", null), filename, label, mapper));
         return structParser(
                 PrintOperation.class,
                 "Prints all messages resulting from a pipeline to a specified print target",

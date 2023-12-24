@@ -22,6 +22,7 @@ package io.axual.ksml.operation;
 
 import io.axual.ksml.data.object.DataString;
 import io.axual.ksml.definition.FunctionDefinition;
+import io.axual.ksml.definition.TopologyResource;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.stream.StreamWrapper;
@@ -31,9 +32,9 @@ public class PrintOperation extends BaseOperation {
     private static final String MAPPER_NAME = "Mapper";
     private final String filename;
     private final String label;
-    private final FunctionDefinition mapper;
+    private final TopologyResource<FunctionDefinition> mapper;
 
-    public PrintOperation(OperationConfig config, String filename, String label, FunctionDefinition mapper) {
+    public PrintOperation(OperationConfig config, String filename, String label, TopologyResource<FunctionDefinition> mapper) {
         super(config);
         this.filename = filename;
         this.label = label;
@@ -49,7 +50,7 @@ public class PrintOperation extends BaseOperation {
 
         final var k = input.keyType();
         final var v = input.valueType();
-        final var map = userFunctionOf(context, MAPPER_NAME, mapper, equalTo(DataString.DATATYPE), superOf(k), superOf(v));
+        final var map = userFunctionOf(context, MAPPER_NAME, context.get(mapper), equalTo(DataString.DATATYPE), superOf(k), superOf(v));
         final var userMap = map != null ? new UserKeyValuePrinter(map) : null;
         final var printed = printedOf(filename, label, userMap);
         input.stream.print(printed);

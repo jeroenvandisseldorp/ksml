@@ -25,18 +25,18 @@ import io.axual.ksml.definition.parser.ReducerDefinitionParser;
 import io.axual.ksml.generator.TopologyResources;
 import io.axual.ksml.operation.ReduceOperation;
 import io.axual.ksml.operation.StoreOperationConfig;
-import io.axual.ksml.parser.StructParser;
+import io.axual.ksml.parser.MultiSchemaParser;
 import io.axual.ksml.store.StoreType;
 
 import static io.axual.ksml.dsl.KSMLDSL.Operations;
 
 public class ReduceOperationParser extends StoreOperationParser<ReduceOperation> {
-    public ReduceOperationParser(TopologyResources resources) {
-        super("reduce", resources);
+    public ReduceOperationParser(String namespace) {
+        super(namespace, "reduce");
     }
 
     @Override
-    public StructParser<ReduceOperation> parser() {
+    public MultiSchemaParser<ReduceOperation> parser() {
         final var storeField = storeField(false, "Materialized view of the aggregation", StoreType.WINDOW_STORE);
         return structParser(
                 ReduceOperation.class,

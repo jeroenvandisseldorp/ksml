@@ -25,6 +25,7 @@ import io.axual.ksml.definition.FunctionDefinition;
 import io.axual.ksml.definition.StreamDefinition;
 import io.axual.ksml.definition.TableDefinition;
 import io.axual.ksml.definition.TopicDefinition;
+import io.axual.ksml.definition.TopologyResource;
 import io.axual.ksml.exception.KSMLTopologyException;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.KStreamWrapper;
@@ -39,18 +40,18 @@ import java.time.Duration;
 
 public class OuterJoinOperation extends BaseJoinOperation {
     private static final String VALUEJOINER_NAME = "ValueJoiner";
-    private final TopicDefinition joinTopic;
-    private final FunctionDefinition valueJoiner;
+    private final TopologyResource<TopicDefinition> joinTopic;
+    private final TopologyResource<FunctionDefinition> valueJoiner;
     private final JoinWindows joinWindows;
 
-    public OuterJoinOperation(StoreOperationConfig config, StreamDefinition joinStream, FunctionDefinition valueJoiner, Duration timeDifference, Duration gracePeriod) {
+    public OuterJoinOperation(StoreOperationConfig config, TopologyResource<TopicDefinition> joinStream, TopologyResource<FunctionDefinition> valueJoiner, Duration timeDifference, Duration gracePeriod) {
         super(config);
         this.joinTopic = joinStream;
         this.valueJoiner = valueJoiner;
         this.joinWindows = joinWindowsOf(timeDifference, gracePeriod);
     }
 
-    public OuterJoinOperation(StoreOperationConfig config, TableDefinition joinStream, FunctionDefinition valueJoiner) {
+    public OuterJoinOperation(StoreOperationConfig config, TopologyResource<TopicDefinition> joinStream, TopologyResource<FunctionDefinition> valueJoiner) {
         super(config);
         this.joinTopic = joinStream;
         this.valueJoiner = valueJoiner;
@@ -63,7 +64,8 @@ public class OuterJoinOperation extends BaseJoinOperation {
         final var k = input.keyType();
         final var v = input.valueType();
 
-        if (joinTopic instanceof StreamDefinition joinStream) {
+        final var joinTopicDef = context.get(joinTopic);
+        if (joinTopicDef instanceof StreamDefinition joinStream) {
             /*    Kafka Streams method signature:
              *    <VO, VR> KStream<K, VR> outerJoin(
              *          final KStream<K, VO> otherStream,
@@ -74,11 +76,11 @@ public class OuterJoinOperation extends BaseJoinOperation {
 
             final var otherStream = context.getStreamWrapper(joinStream);
             final var vo = otherStream.valueType();
-            final var vr = streamDataTypeOf(firstSpecificType(valueJoiner, vo, v), false);
+            final var vr = streamDataTypeOf(firstSpecificType(context.get(valueJoiner), vo, v), false);
             checkType("Join stream keyType", otherStream.keyType().userType().dataType(), equalTo(k));
-            final var joiner = userFunctionOf(context, VALUEJOINER_NAME, valueJoiner, vr, superOf(v), superOf(vo));
+            final var joiner = userFunctionOf(context, VALUEJOINER_NAME, context.get(valueJoiner), vr, superOf(v), superOf(vo));
             final var windowedK = windowedTypeOf(k);
-            final var windowStore = validateWindowStore(store(), k, vr);
+            final var windowStore = validateWindowStore(context.get(store()), k, vr);
             final var streamJoined = streamJoinedOf(windowStore, k, v, vo);
             final var userJoiner = new UserValueJoiner(joiner);
             final KStream<Object, Object> output = streamJoined != null
@@ -96,7 +98,8 @@ public class OuterJoinOperation extends BaseJoinOperation {
         final var k = input.keyType();
         final var v = input.valueType();
 
-        if (joinTopic instanceof TableDefinition joinTable) {
+        final var joinTopicDef = context.get(joinTopic);
+        if (joinTopicDef instanceof TableDefinition joinTable) {
             /*    Kafka Streams method signature:
              *    <VO, VR> KTable<K, VR> outerJoin(
              *          final KTable<K, VO> other,
@@ -108,11 +111,11 @@ public class OuterJoinOperation extends BaseJoinOperation {
             final var otherTable = context.getStreamWrapper(joinTable);
             checkNotNull(valueJoiner, VALUEJOINER_NAME.toLowerCase());
             final var vo = otherTable.valueType();
-            final var vr = streamDataTypeOf(firstSpecificType(valueJoiner, vo, v), false);
+            final var vr = streamDataTypeOf(firstSpecificType(context.get(valueJoiner), vo, v), false);
             checkType("Join table keyType", otherTable.keyType().userType(), equalTo(k));
-            final var joiner = userFunctionOf(context, VALUEJOINER_NAME, valueJoiner, subOf(vr), superOf(v), superOf(vo));
+            final var joiner = userFunctionOf(context, VALUEJOINER_NAME, context.get(valueJoiner), subOf(vr), superOf(v), superOf(vo));
             final var userJoiner = new UserValueJoiner(joiner);
-            final var kvStore = validateKeyValueStore(store(), k, vr);
+            final var kvStore = validateKeyValueStore(context.get(store()), k, vr);
             final var mat = materializedOf(context, kvStore);
             final var named = namedOf();
             final KTable<Object, Object> output = named != null

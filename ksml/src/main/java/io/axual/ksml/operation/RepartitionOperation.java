@@ -24,6 +24,7 @@ package io.axual.ksml.operation;
 import io.axual.ksml.data.object.DataInteger;
 import io.axual.ksml.data.object.DataString;
 import io.axual.ksml.definition.FunctionDefinition;
+import io.axual.ksml.definition.TopologyResource;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.stream.StreamWrapper;
@@ -32,9 +33,9 @@ import org.apache.kafka.streams.kstream.KStream;
 
 public class RepartitionOperation extends BaseOperation {
     private static final String PARTITIONER_NAME = "Partitioner";
-    private final FunctionDefinition partitioner;
+    private final TopologyResource<FunctionDefinition> partitioner;
 
-    public RepartitionOperation(OperationConfig config, FunctionDefinition partitioner) {
+    public RepartitionOperation(OperationConfig config, TopologyResource<FunctionDefinition> partitioner) {
         super(config);
         this.partitioner = partitioner;
     }
@@ -49,7 +50,7 @@ public class RepartitionOperation extends BaseOperation {
         checkNotNull(partitioner, "Partitioner must be defined");
         final var k = input.keyType();
         final var v = input.valueType();
-        final var part = userFunctionOf(context, PARTITIONER_NAME, partitioner, equalTo(DataInteger.DATATYPE), equalTo(DataString.DATATYPE), superOf(k), superOf(v), equalTo(DataInteger.DATATYPE));
+        final var part = userFunctionOf(context, PARTITIONER_NAME, context.get(partitioner), equalTo(DataInteger.DATATYPE), equalTo(DataString.DATATYPE), superOf(k), superOf(v), equalTo(DataInteger.DATATYPE));
         final var userPart = part != null ? new UserStreamPartitioner(part) : null;
         final var repartitioned = repartitionedOf(k, v, userPart);
         final KStream<Object, Object> output = repartitioned != null

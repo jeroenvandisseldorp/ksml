@@ -23,24 +23,23 @@ package io.axual.ksml.operation.parser;
 
 import io.axual.ksml.definition.parser.ValueTransformerDefinitionParser;
 import io.axual.ksml.dsl.KSMLDSL;
-import io.axual.ksml.generator.TopologyResources;
 import io.axual.ksml.operation.StoreOperationConfig;
 import io.axual.ksml.operation.TransformValueOperation;
-import io.axual.ksml.parser.StructParser;
+import io.axual.ksml.parser.MultiSchemaParser;
 
 public class TransformValueOperationParser extends StoreOperationParser<TransformValueOperation> {
-    public TransformValueOperationParser(TopologyResources resources) {
-        super("transformValue", resources);
+    public TransformValueOperationParser(String namespace) {
+        super(namespace, "transformValue");
     }
 
     @Override
-    protected StructParser<TransformValueOperation> parser() {
+    protected MultiSchemaParser<TransformValueOperation> parser() {
         return structParser(
                 TransformValueOperation.class,
                 "Convert the value of every record in the stream to another value",
                 operationTypeField(KSMLDSL.Operations.TRANSFORM_VALUE),
                 nameField(),
-                functionField(KSMLDSL.Operations.Transform.MAPPER, "A function that converts the value of every record into another value", new ValueTransformerDefinitionParser()),
+                functionField(KSMLDSL.Operations.Transform.MAPPER, true,"A function that converts the value of every record into another value", new ValueTransformerDefinitionParser()),
                 storeNamesField(),
                 (type, name, mapper, storeNames) -> new TransformValueOperation(new StoreOperationConfig(namespace(), name, storeNames, null), mapper));
     }

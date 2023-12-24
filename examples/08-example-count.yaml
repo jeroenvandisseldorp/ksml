@@ -5,6 +5,14 @@ streams:
     topic: ksml_sensordata_avro
     keyType: string
     valueType: avro:SensorData
+  sensor_count:
+    topic: ksml_sensordata_count
+    keyType: avro:WindowedString
+    valueType: long
+
+stores:
+  my:
+    type: window
 
 pipelines:
   main:
@@ -20,6 +28,7 @@ pipelines:
           resultType: string
       - type: windowByTime
         windowType: tumbling
+        grace: 10d
         duration: 20s
       - type: count
         store:
@@ -35,4 +44,4 @@ pipelines:
         forEach:
           code: log.info("key={}, value={}", key, value)
     to:
-      topic: ksml_sensordata_count
+      topic: sensor_count

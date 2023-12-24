@@ -25,6 +25,7 @@ import io.axual.ksml.data.type.DataType;
 import io.axual.ksml.data.type.ListType;
 import io.axual.ksml.data.type.UserType;
 import io.axual.ksml.definition.FunctionDefinition;
+import io.axual.ksml.definition.TopologyResource;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.operation.processor.FixedKeyOperationProcessorSupplier;
 import io.axual.ksml.operation.processor.TransformKeyValueToValueListProcessor;
@@ -34,9 +35,9 @@ import io.axual.ksml.user.UserKeyValueToValueListTransformer;
 
 public class TransformKeyValueToValueListOperation extends BaseOperation {
     private static final String MAPPER_NAME = "Mapper";
-    private final FunctionDefinition mapper;
+    private final TopologyResource<FunctionDefinition> mapper;
 
-    public TransformKeyValueToValueListOperation(OperationConfig config, FunctionDefinition mapper) {
+    public TransformKeyValueToValueListOperation(OperationConfig config, TopologyResource<FunctionDefinition> mapper) {
         super(config);
         this.mapper = mapper;
     }
@@ -52,10 +53,10 @@ public class TransformKeyValueToValueListOperation extends BaseOperation {
         checkNotNull(mapper, MAPPER_NAME.toLowerCase());
         final var k = input.keyType();
         final var v = input.valueType();
-        final var vr = streamDataTypeOf(firstSpecificType(mapper, new UserType(new ListType(DataType.UNKNOWN))), false);
-        final var map = userFunctionOf(context, MAPPER_NAME, mapper, subOf(vr), superOf(k), superOf(v));
+        final var vr = streamDataTypeOf(firstSpecificType(context.get(mapper), new UserType(new ListType(DataType.UNKNOWN))), false);
+        final var map = userFunctionOf(context, MAPPER_NAME, context.get(mapper), subOf(vr), superOf(k), superOf(v));
         final var userMap = new UserKeyValueToValueListTransformer(map);
-        final var storeNames = combineStoreNames(this.storeNames, mapper.storeNames().toArray(TEMPLATE));
+        final var storeNames = combineStoreNames(this.storeNames, context.get(mapper).storeNames().toArray(TEMPLATE));
         final var supplier = new FixedKeyOperationProcessorSupplier<>(
                 name,
                 TransformKeyValueToValueListProcessor::new,

@@ -23,11 +23,11 @@ package io.axual.ksml.definition.parser;
 
 import io.axual.ksml.definition.KeyValueMapperDefinition;
 import io.axual.ksml.dsl.KSMLDSL;
-import io.axual.ksml.parser.StructParser;
+import io.axual.ksml.parser.MultiSchemaParser;
 
 public class KeyValueMapperDefinitionParser extends FunctionDefinitionParser<KeyValueMapperDefinition> {
     @Override
-    public StructParser<KeyValueMapperDefinition> parser() {
+    public MultiSchemaParser<KeyValueMapperDefinition> parser() {
         return parserWithoutStores(KeyValueMapperDefinition.class, KSMLDSL.Functions.TYPE_KEYVALUEMAPPER, "keyvalue mapper", KeyValueMapperDefinition::new);
     }
 }

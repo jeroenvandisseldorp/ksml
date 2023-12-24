@@ -55,19 +55,6 @@ public class KafkaProducerRunner implements Runner {
         this.config = config;
     }
 
-    private static Map<String, String> getGenericConfigs() {
-        Map<String, String> configs = new HashMap<>();
-        configs.put(ACKS_CONFIG, "1");
-        configs.put(RETRIES_CONFIG, "0");
-        configs.put(RETRY_BACKOFF_MS_CONFIG, "1000");
-        configs.put(RECONNECT_BACKOFF_MAX_MS_CONFIG, "1000");
-        configs.put(MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "10");
-        configs.put(KEY_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getCanonicalName());
-        configs.put(VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getCanonicalName());
-        configs.put("specific.avro.reader", "true");
-        return configs;
-    }
-
     public void run() {
         log.info("Starting Kafka producer(s)");
         isRunning.set(true);
@@ -81,12 +68,12 @@ public class KafkaProducerRunner implements Runner {
                 });
                 // Schedule all defined producers
                 definition.producers().forEach((name, producer) -> {
-                    var target = producer.target();
-                    var gen = producer.generator();
-                    final var generator = gen.name() != null
+                    var target = producer.target().get(definition);
+                    var gen = producer.generator().get(definition);
+                    var cond = producer.condition().get(definition);
+                    final var generator = gen != null && gen.name() != null
                             ? PythonFunction.fromNamed(context, gen.name(), gen)
                             : PythonFunction.fromAnon(context, name, gen, "ksml.generator." + name);
-                    var cond = producer.condition();
                     final var condition = cond != null
                             ? cond.name() != null
                             ? PythonFunction.fromNamed(context, cond.name(), cond)
@@ -112,7 +99,7 @@ public class KafkaProducerRunner implements Runner {
                         }
                         Utils.sleep(10);
                     } catch (Exception e) {
-                        log.info("Produce exception.",e);
+                        log.info("Produce exception.", e);
                         hasFailed.set(true);
                         break;
                     }
@@ -124,6 +111,19 @@ public class KafkaProducerRunner implements Runner {
         }
         isRunning.set(false);
         log.info("Producer(s) stopped");
+    }
+
+    private static Map<String, String> getGenericConfigs() {
+        Map<String, String> configs = new HashMap<>();
+        configs.put(ACKS_CONFIG, "1");
+        configs.put(RETRIES_CONFIG, "0");
+        configs.put(RETRY_BACKOFF_MS_CONFIG, "1000");
+        configs.put(RECONNECT_BACKOFF_MAX_MS_CONFIG, "1000");
+        configs.put(MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "10");
+        configs.put(KEY_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getCanonicalName());
+        configs.put(VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getCanonicalName());
+        configs.put("specific.avro.reader", "true");
+        return configs;
     }
 
     private Map<String, Object> getProducerConfigs() {

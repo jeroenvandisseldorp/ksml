@@ -25,15 +25,15 @@ import io.axual.ksml.definition.parser.KeyTransformerDefinitionParser;
 import io.axual.ksml.dsl.KSMLDSL;
 import io.axual.ksml.generator.TopologyResources;
 import io.axual.ksml.operation.ToStreamOperation;
-import io.axual.ksml.parser.StructParser;
+import io.axual.ksml.parser.MultiSchemaParser;
 
 public class ToStreamOperationParser extends OperationParser<ToStreamOperation> {
-    public ToStreamOperationParser(TopologyResources resources) {
-        super("toStream", resources);
+    public ToStreamOperationParser(String namespace) {
+        super(namespace, "toStream");
     }
 
     @Override
-    public StructParser<ToStreamOperation> parser() {
+    public MultiSchemaParser<ToStreamOperation> parser() {
         return structParser(
                 ToStreamOperation.class,
                 "Convert a Table into a Stream, optionally through a custom key transformer",

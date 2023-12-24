@@ -131,10 +131,14 @@ public class TopologyGenerator {
 
         // Add source and target topics to the set of known topics
         specification.pipelines().forEach((name, def) -> {
-            if (def.source() != null && def.source().definition() != null)
-                knownTopics.add(def.source().definition().topic());
-            if (def.sink() instanceof ToOperation toOperation && toOperation.topic != null) {
-                knownTopics.add(toOperation.topic.topic());
+            if (def.source() != null && context.get(def.source()) != null)
+                knownTopics.add(context.get(def.source()).topic());
+            if (def.sink() instanceof ToOperation toOperation && toOperation.target != null) {
+                final var to = context.get(toOperation.target);
+                if (to.topic() != null) {
+                    final var topic = context.get(to.topic());
+                    knownTopics.add(topic.topic());
+                }
             }
         });
 
@@ -179,7 +183,8 @@ public class TopologyGenerator {
         specification.pipelines().forEach((name, pipeline) -> {
             LOG.info("Generating Kafka Streams topology:");
             // Use a cursor to keep track of where we are in the topology
-            StreamWrapper cursor = context.getStreamWrapper(pipeline.source());
+            final var source = context.get(pipeline.source());
+            StreamWrapper cursor = context.getStreamWrapper(source.topic(), source);
             LOG.info("  {}", cursor);
             // For each operation, advance the cursor by applying the operation
             for (StreamOperation operation : pipeline.chain()) {

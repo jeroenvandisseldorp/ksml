@@ -23,11 +23,11 @@ package io.axual.ksml.definition.parser;
 
 import io.axual.ksml.definition.ValueJoinerDefinition;
 import io.axual.ksml.dsl.KSMLDSL;
-import io.axual.ksml.parser.StructParser;
+import io.axual.ksml.parser.MultiSchemaParser;
 
 public class ValueJoinerDefinitionParser extends FunctionDefinitionParser<ValueJoinerDefinition> {
     @Override
-    public StructParser<ValueJoinerDefinition> parser() {
+    public MultiSchemaParser<ValueJoinerDefinition> parser() {
         return parserWithoutStores(ValueJoinerDefinition.class, KSMLDSL.Functions.TYPE_VALUEJOINER, "value joiner", ValueJoinerDefinition::new);
     }
 }

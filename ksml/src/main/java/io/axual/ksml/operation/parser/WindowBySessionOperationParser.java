@@ -22,18 +22,17 @@ package io.axual.ksml.operation.parser;
 
 
 import io.axual.ksml.dsl.KSMLDSL;
-import io.axual.ksml.generator.TopologyResources;
 import io.axual.ksml.operation.WindowBySessionOperation;
-import io.axual.ksml.parser.StructParser;
+import io.axual.ksml.parser.MultiSchemaParser;
 import org.apache.kafka.streams.kstream.SessionWindows;
 
 public class WindowBySessionOperationParser extends OperationParser<WindowBySessionOperation> {
-    public WindowBySessionOperationParser(TopologyResources resources) {
-        super("windowBySession", resources);
+    public WindowBySessionOperationParser(String namespace) {
+        super(namespace, "windowBySession");
     }
 
     @Override
-    public StructParser<WindowBySessionOperation> parser() {
+    public MultiSchemaParser<WindowBySessionOperation> parser() {
         return structParser(
                 WindowBySessionOperation.class,
                 "Operation to window messages by session, configured by an inactivity gap",

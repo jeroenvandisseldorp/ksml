@@ -23,11 +23,11 @@ package io.axual.ksml.definition.parser;
 
 import io.axual.ksml.definition.PredicateDefinition;
 import io.axual.ksml.dsl.KSMLDSL;
-import io.axual.ksml.parser.StructParser;
+import io.axual.ksml.parser.MultiSchemaParser;
 
 public class PredicateDefinitionParser extends FunctionDefinitionParser<PredicateDefinition> {
     @Override
-    public StructParser<PredicateDefinition> parser() {
+    public MultiSchemaParser<PredicateDefinition> parser() {
         return parserWithStores(PredicateDefinition.class, KSMLDSL.Functions.TYPE_PREDICATE, "predicate", PredicateDefinition::new);
     }
 }

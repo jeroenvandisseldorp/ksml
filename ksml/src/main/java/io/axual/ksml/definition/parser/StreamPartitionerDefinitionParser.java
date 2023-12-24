@@ -23,11 +23,11 @@ package io.axual.ksml.definition.parser;
 
 import io.axual.ksml.definition.StreamPartitionerDefinition;
 import io.axual.ksml.dsl.KSMLDSL;
-import io.axual.ksml.parser.StructParser;
+import io.axual.ksml.parser.MultiSchemaParser;
 
 public class StreamPartitionerDefinitionParser extends FunctionDefinitionParser<StreamPartitionerDefinition> {
     @Override
-    public StructParser<StreamPartitionerDefinition> parser() {
+    public MultiSchemaParser<StreamPartitionerDefinition> parser() {
         return parserWithoutStores(StreamPartitionerDefinition.class, KSMLDSL.Functions.TYPE_STREAMPARTITIONER, "stream partitioner", StreamPartitionerDefinition::new);
     }
 }

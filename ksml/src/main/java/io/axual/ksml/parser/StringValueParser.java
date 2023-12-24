@@ -21,8 +21,11 @@ package io.axual.ksml.parser;
  */
 
 import io.axual.ksml.data.schema.DataSchema;
+import io.axual.ksml.data.schema.UnionSchema;
 
-public class StringValueParser implements ParserWithSchema<String> {
+public class StringValueParser implements StructuredParser<String> {
+    private final boolean isCode;
+
     public interface BooleanToStringConverter {
         String interpret(boolean value);
     }
@@ -30,12 +33,14 @@ public class StringValueParser implements ParserWithSchema<String> {
     private final BooleanToStringConverter converter;
 
     public StringValueParser() {
-        this(null);
+        this(false);
     }
 
-    public StringValueParser(BooleanToStringConverter converter) {
-        this.converter = converter != null
-                ? converter
+    public StringValueParser(boolean isCode) {
+        this.isCode = isCode;
+        this.converter = isCode
+                // Use capitals with True/False for Python code
+                ? value -> value ? "True" : "False"
                 : value -> value ? "true" : "false";
     }
 
@@ -44,9 +49,10 @@ public class StringValueParser implements ParserWithSchema<String> {
         // This implementation catches a corner case, where Jackson parses a string as boolean, whereas it was meant
         // to be interpreted as a string literal for Python.
         if (node != null) {
+            // Parse any type and convert it to String as expected
             if (node.isBoolean()) return converter.interpret(node.asBoolean());
-            if (node.isDouble()) return "" + node.asDouble();
             if (node.isFloat()) return "" + node.asFloat();
+            if (node.isDouble()) return "" + node.asDouble();
             if (node.isShort()) return "" + node.asShort();
             if (node.isInt()) return "" + node.asInt();
             if (node.isLong()) return "" + node.asLong();
@@ -57,6 +63,17 @@ public class StringValueParser implements ParserWithSchema<String> {
 
     @Override
     public DataSchema schema() {
-        return DataSchema.stringSchema();
+        if (!isCode) return DataSchema.stringSchema();
+        // The string is parsed as code, so to enable proper syntax support with the generated JSON schena, we indicate
+        // the code field could contain many different kinds of types (eg. used in an "expression" field as part of
+        // a user function.
+        return new UnionSchema(
+                DataSchema.booleanSchema(),
+                DataSchema.floatSchema(),
+                DataSchema.doubleSchema(),
+                DataSchema.shortSchema(),
+                DataSchema.integerSchema(),
+                DataSchema.longSchema(),
+                DataSchema.stringSchema());
     }
 }

@@ -41,7 +41,7 @@ public class GroupByKeyOperation extends StoreOperation {
 
         final var k = input.keyType();
         final var v = input.valueType();
-        final var kvStore = validateKeyValueStore(store(), k, v);
+        final var kvStore = validateKeyValueStore(context.get(store()), k, v);
         final var grouped = groupedOf(k, v, kvStore);
         final KGroupedStream<Object, Object> output = grouped != null
                 ? input.stream.groupByKey(grouped)

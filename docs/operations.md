@@ -8,7 +8,7 @@
 1. [Operations](#transform-operations)
     * [aggregate](#aggregate)
     * [convertKey](#convertkey)
-   * [convertKeyValue](#convertkeyvalue)
+    * [convertKeyValue](#convertkeyvalue)
     * [convertValue](#convertvalue)
     * [count](#count)
     * [filter](#filter)

@@ -26,14 +26,14 @@ import io.axual.ksml.dsl.KSMLDSL;
 import io.axual.ksml.generator.TopologyResources;
 import io.axual.ksml.operation.FilterOperation;
 import io.axual.ksml.operation.StoreOperationConfig;
-import io.axual.ksml.parser.StructParser;
+import io.axual.ksml.parser.MultiSchemaParser;
 
 public class FilterOperationParser extends StoreOperationParser<FilterOperation> {
-    public FilterOperationParser(TopologyResources resources) {
-        super("filter", resources);
+    public FilterOperationParser(String namespace) {
+        super(namespace, "filter");
     }
 
-    public StructParser<FilterOperation> parser() {
+    public MultiSchemaParser<FilterOperation> parser() {
         return structParser(
                 FilterOperation.class,
                 "Filter records based on a predicate function",

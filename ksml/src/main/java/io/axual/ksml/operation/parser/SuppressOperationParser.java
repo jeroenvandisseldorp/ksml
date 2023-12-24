@@ -22,19 +22,18 @@ package io.axual.ksml.operation.parser;
 
 
 import io.axual.ksml.execution.FatalError;
-import io.axual.ksml.generator.TopologyResources;
 import io.axual.ksml.operation.SuppressOperation;
-import io.axual.ksml.parser.StructParser;
+import io.axual.ksml.parser.MultiSchemaParser;
 import org.apache.kafka.streams.kstream.Suppressed;
 
 import static io.axual.ksml.dsl.KSMLDSL.Operations;
 
 public class SuppressOperationParser extends OperationParser<SuppressOperation> {
-    public SuppressOperationParser(TopologyResources resources) {
-        super("suppress", resources);
+    public SuppressOperationParser(String namespace) {
+        super(namespace, "suppress");
     }
 
-    public StructParser<SuppressOperation> parser() {
+    public MultiSchemaParser<SuppressOperation> parser() {
         return structParser(
                 SuppressOperation.class,
                 "Operation to suppress messages in the source stream until a certain limit is reached",

@@ -23,6 +23,7 @@ package io.axual.ksml.operation;
 
 import io.axual.ksml.data.object.DataNull;
 import io.axual.ksml.definition.FunctionDefinition;
+import io.axual.ksml.definition.TopologyResource;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.operation.processor.FixedKeyOperationProcessorSupplier;
 import io.axual.ksml.operation.processor.PeekProcessor;
@@ -33,9 +34,9 @@ import org.apache.kafka.streams.kstream.Named;
 
 public class PeekOperation extends BaseOperation {
     private static final String FOREACHACTION_NAME = "ForEachAction";
-    private final FunctionDefinition forEachAction;
+    private final TopologyResource<FunctionDefinition> forEachAction;
 
-    public PeekOperation(OperationConfig config, FunctionDefinition forEachAction) {
+    public PeekOperation(OperationConfig config, TopologyResource<FunctionDefinition> forEachAction) {
         super(config);
         this.forEachAction = forEachAction;
     }
@@ -44,9 +45,9 @@ public class PeekOperation extends BaseOperation {
     public StreamWrapper apply(KStreamWrapper input, TopologyBuildContext context) {
         final var k = input.keyType();
         final var v = input.valueType();
-        final var action = userFunctionOf(context, FOREACHACTION_NAME, forEachAction, equalTo(DataNull.DATATYPE), superOf(k), superOf(v));
+        final var action = userFunctionOf(context, FOREACHACTION_NAME, context.get(forEachAction), equalTo(DataNull.DATATYPE), superOf(k), superOf(v));
         final var userAction = new UserForeachAction(action);
-        final var storeNames = combineStoreNames(this.storeNames, forEachAction.storeNames().toArray(TEMPLATE));
+        final var storeNames = combineStoreNames(this.storeNames, context.get(forEachAction).storeNames().toArray(TEMPLATE));
         final var supplier = new FixedKeyOperationProcessorSupplier<>(
                 name,
                 PeekProcessor::new,

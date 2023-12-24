@@ -35,18 +35,19 @@ public class UnionSchema extends DataSchema {
         this(true, possibleSchemas);
     }
 
-    public UnionSchema(boolean optimize, DataSchema... possibleSchemas) {
+    // Investigate later: may be an idea to add a "requireOne" field here if this would improve the JSON schema output
+    public UnionSchema(boolean flatten, DataSchema... possibleSchemas) {
         super(Type.UNION);
-        this.possibleSchemas = optimize ? getPossibleSchemas(possibleSchemas) : possibleSchemas;
+        this.possibleSchemas = flatten ? flattenSchemas(possibleSchemas) : possibleSchemas;
     }
 
-    public DataSchema[] getPossibleSchemas(DataSchema[] possibleSchemas) {
+    private DataSchema[] flattenSchemas(DataSchema[] possibleSchemas) {
         // Here we flatten the list of possible schemas by recursively walking through all possible types. Any sub-unions
         // are exploded and taken up in this union's list of possible types.
         final var result = new ArrayList<DataSchema>();
         for (final var possibleSchema : possibleSchemas) {
             if (possibleSchema instanceof UnionSchema unionSchema) {
-                final var subSchemas = getPossibleSchemas(unionSchema.possibleSchemas);
+                final var subSchemas = flattenSchemas(unionSchema.possibleSchemas);
                 result.addAll(Arrays.stream(subSchemas).toList());
             } else {
                 result.add(possibleSchema);

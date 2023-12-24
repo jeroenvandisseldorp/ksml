@@ -20,18 +20,14 @@ package io.axual.ksml.definition.parser;
  * =========================LICENSE_END==================================
  */
 
-import io.axual.ksml.data.schema.StructSchema;
 import io.axual.ksml.generator.TopologyDefinition;
-import io.axual.ksml.generator.TopologyResources;
-import io.axual.ksml.parser.DefinitionParser;
-import io.axual.ksml.parser.MapParser;
-import io.axual.ksml.parser.StructParser;
-import io.axual.ksml.parser.YamlNode;
+import io.axual.ksml.parser.MultiFormParser;
+import io.axual.ksml.parser.MultiSchemaParser;
 
 import static io.axual.ksml.dsl.KSMLDSL.PIPELINES;
 import static io.axual.ksml.dsl.KSMLDSL.PRODUCERS;
 
-public class TopologyDefinitionParser extends DefinitionParser<TopologyDefinition> {
+public class TopologyDefinitionParser extends MultiFormParser<TopologyDefinition> {
     private final TopologyResourcesParser resourcesParser;
 
     public TopologyDefinitionParser(String namespace) {
@@ -39,34 +35,26 @@ public class TopologyDefinitionParser extends DefinitionParser<TopologyDefinitio
     }
 
     @Override
-    public StructParser<TopologyDefinition> parser() {
-        final var fields = resourcesParser.fields();
-        final var dummyResources = new TopologyResources("dummy");
-        final var pipelinesParser = mapField(PIPELINES, "pipeline", false, "Collection of named pipelines", new PipelineDefinitionParser(dummyResources));
-        final var producersParser = mapField(PRODUCERS, "producer", false, "Collection of named producers", new ProducerDefinitionParser(dummyResources));
-        fields.addAll(pipelinesParser.fields());
-        fields.addAll(producersParser.fields());
-        final var schema = structSchema(TopologyDefinition.class, "A KSML topology description", fields);
-        return new StructParser<>() {
-            @Override
-            public TopologyDefinition parse(YamlNode node) {
-                final var resources = resourcesParser.parse(node);
-                final var result = new TopologyDefinition(resources.namespace());
-                // Copy the resources into the topology definition
-                resources.topics().forEach(result::register);
-                resources.stateStores().forEach(result::register);
-                resources.functions().forEach(result::register);
-                // Parse all defined pipelines, using this topology's name as operation prefix
-                new MapParser<>("pipeline definition", new PipelineDefinitionParser(resources)).parse(node.get(PIPELINES)).forEach(result::register);
-                // Parse all defined producers, using this topology's name as operation prefix
-                new MapParser<>("producer definition", new ProducerDefinitionParser(resources)).parse(node.get(PRODUCERS)).forEach(result::register);
-                return result;
-            }
-
-            @Override
-            public StructSchema schema() {
-                return schema;
-            }
-        };
+    public MultiSchemaParser<TopologyDefinition> parser() {
+        final var pipelinesParser = mapField(PIPELINES, "pipeline", false, "Collection of named pipelines", new PipelineDefinitionParser(resourcesParser.namespace()));
+        final var producersParser = mapField(PRODUCERS, "producer", false, "Collection of named producers", new ProducerDefinitionParser(resourcesParser.namespace()));
+        return structParser(
+                TopologyDefinition.class,
+                "A KSML topology description",
+                resourcesParser,
+                pipelinesParser,
+                producersParser,
+                (resources, pipelines, producers) -> {
+                    final var result = new TopologyDefinition(resources.namespace());
+                    // Copy the resources into the topology definition
+                    resources.topics().forEach(result::register);
+                    resources.stateStores().forEach(result::register);
+                    resources.functions().forEach(result::register);
+                    // Parse all defined pipelines, using this topology's name as operation prefix
+                    pipelines.forEach(result::register);
+                    // Parse all defined producers, using this topology's name as operation prefix
+                    producers.forEach(result::register);
+                    return result;
+                });
     }
 }

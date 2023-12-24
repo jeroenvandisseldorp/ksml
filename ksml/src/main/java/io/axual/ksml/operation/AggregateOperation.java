@@ -22,6 +22,7 @@ package io.axual.ksml.operation;
 
 
 import io.axual.ksml.definition.FunctionDefinition;
+import io.axual.ksml.definition.TopologyResource;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.CogroupedKStreamWrapper;
 import io.axual.ksml.stream.KGroupedStreamWrapper;
@@ -44,13 +45,13 @@ public class AggregateOperation extends StoreOperation {
     private static final String INITIALIZER_NAME = "Initializer";
     private static final String MERGER_NAME = "Merger";
     private static final String SUBTRACTOR_NAME = "Subtractor";
-    private final FunctionDefinition initializer;
-    private final FunctionDefinition aggregator;
-    private final FunctionDefinition merger;
-    private final FunctionDefinition adder;
-    private final FunctionDefinition subtractor;
+    private final TopologyResource<FunctionDefinition> initializer;
+    private final TopologyResource<FunctionDefinition> aggregator;
+    private final TopologyResource<FunctionDefinition> merger;
+    private final TopologyResource<FunctionDefinition> adder;
+    private final TopologyResource<FunctionDefinition> subtractor;
 
-    public AggregateOperation(StoreOperationConfig config, FunctionDefinition initializer, FunctionDefinition aggregator, FunctionDefinition merger, FunctionDefinition adder, FunctionDefinition subtractor) {
+    public AggregateOperation(StoreOperationConfig config, TopologyResource<FunctionDefinition> initializer, TopologyResource<FunctionDefinition> aggregator, TopologyResource<FunctionDefinition> merger, TopologyResource<FunctionDefinition> adder, TopologyResource<FunctionDefinition> subtractor) {
         super(config);
         this.initializer = initializer;
         this.aggregator = aggregator;
@@ -72,12 +73,12 @@ public class AggregateOperation extends StoreOperation {
         checkNotNull(initializer, INITIALIZER_NAME.toLowerCase());
         final var k = input.keyType();
         final var v = input.valueType();
-        final var vr = streamDataTypeOf(firstSpecificType(initializer, aggregator), false);
-        final var init = userFunctionOf(context, INITIALIZER_NAME, initializer, vr);
+        final var vr = streamDataTypeOf(firstSpecificType(context.get(initializer), context.get(aggregator)), false);
+        final var init = userFunctionOf(context, INITIALIZER_NAME, context.get(initializer), vr);
         final var userInit = new UserInitializer(init);
-        final var aggr = userFunctionOf(context, AGGREGATOR_NAME, aggregator, vr, superOf(k), superOf(v), superOf(vr));
+        final var aggr = userFunctionOf(context, AGGREGATOR_NAME, context.get(aggregator), vr, superOf(k), superOf(v), superOf(vr));
         final var userAggr = new UserAggregator(aggr);
-        final var kvStore = validateKeyValueStore(store(), k, vr);
+        final var kvStore = validateKeyValueStore(context.get(store()), k, vr);
         final var mat = materializedOf(context, kvStore);
         final var named = namedOf();
         final KTable<Object, Object> output = mat != null
@@ -102,14 +103,14 @@ public class AggregateOperation extends StoreOperation {
         checkNotNull(initializer, INITIALIZER_NAME.toLowerCase());
         final var k = input.keyType();
         final var v = input.valueType();
-        final var vr = streamDataTypeOf(firstSpecificType(initializer, adder, subtractor), false);
-        final var init = userFunctionOf(context, INITIALIZER_NAME, initializer, vr);
+        final var vr = streamDataTypeOf(firstSpecificType(context.get(initializer), context.get(adder), context.get(subtractor)), false);
+        final var init = userFunctionOf(context, INITIALIZER_NAME, context.get(initializer), vr);
         final var userInit = new UserInitializer(init);
-        final var add = userFunctionOf(context, ADDER_NAME, adder, vr, superOf(k), superOf(v), superOf(vr));
+        final var add = userFunctionOf(context, ADDER_NAME, context.get(adder), vr, superOf(k), superOf(v), superOf(vr));
         final var userAdd = new UserAggregator(add);
-        final var sub = userFunctionOf(context, SUBTRACTOR_NAME, subtractor, vr, superOf(k), superOf(vr), superOf(vr));
+        final var sub = userFunctionOf(context, SUBTRACTOR_NAME, context.get(subtractor), vr, superOf(k), superOf(vr), superOf(vr));
         final var userSub = new UserAggregator(sub);
-        final var kvStore = validateKeyValueStore(store(), k, vr);
+        final var kvStore = validateKeyValueStore(context.get(store()), k, vr);
         final var mat = materializedOf(context, kvStore);
         final var named = namedOf();
         final KTable<Object, Object> output = named != null
@@ -137,14 +138,14 @@ public class AggregateOperation extends StoreOperation {
         final var k = input.keyType();
         final var v = input.valueType();
         final var windowedK = windowedTypeOf(k);
-        final var vr = streamDataTypeOf(firstSpecificType(initializer, aggregator, merger), false);
-        final var init = userFunctionOf(context, INITIALIZER_NAME, initializer, vr);
+        final var vr = streamDataTypeOf(firstSpecificType(context.get(initializer), context.get(aggregator), context.get(merger)), false);
+        final var init = userFunctionOf(context, INITIALIZER_NAME, context.get(initializer), vr);
         final var userInit = new UserInitializer(init);
-        final var aggr = userFunctionOf(context, AGGREGATOR_NAME, aggregator, vr, superOf(k), superOf(v), superOf(vr));
+        final var aggr = userFunctionOf(context, AGGREGATOR_NAME, context.get(aggregator), vr, superOf(k), superOf(v), superOf(vr));
         final var userAggr = new UserAggregator(aggr);
-        final var merg = userFunctionOf(context, MERGER_NAME, merger, vr, superOf(k), equalTo(vr), superOf(vr));
+        final var merg = userFunctionOf(context, MERGER_NAME, context.get(merger), vr, superOf(k), equalTo(vr), superOf(vr));
         final var userMerg = new UserMerger(merg);
-        final var sessionStore = validateSessionStore(store(), k, vr);
+        final var sessionStore = validateSessionStore(context.get(store()), k, vr);
         final var mat = materializedOf(context, sessionStore);
         final var named = namedOf();
         final KTable<Windowed<Object>, Object> output = named != null
@@ -172,12 +173,12 @@ public class AggregateOperation extends StoreOperation {
         final var k = input.keyType();
         final var v = input.valueType();
         final var windowedK = windowedTypeOf(k);
-        final var vr = streamDataTypeOf(firstSpecificType(initializer, aggregator), false);
-        final var init = userFunctionOf(context, INITIALIZER_NAME, initializer, vr);
+        final var vr = streamDataTypeOf(firstSpecificType(context.get(initializer), context.get(aggregator)), false);
+        final var init = userFunctionOf(context, INITIALIZER_NAME, context.get(initializer), vr);
         final var userInit = new UserInitializer(init);
-        final var aggr = userFunctionOf(context, AGGREGATOR_NAME, aggregator, vr, superOf(k), superOf(v), superOf(vr));
+        final var aggr = userFunctionOf(context, AGGREGATOR_NAME, context.get(aggregator), vr, superOf(k), superOf(v), superOf(vr));
         final var userAggr = new UserAggregator(aggr);
-        final var windowStore = validateWindowStore(store(), k, vr);
+        final var windowStore = validateWindowStore(context.get(store()), k, vr);
         final var mat = materializedOf(context, windowStore);
         final var named = namedOf();
         final KTable<Windowed<Object>, Object> output = named != null
@@ -203,9 +204,9 @@ public class AggregateOperation extends StoreOperation {
         checkNotNull(initializer, INITIALIZER_NAME.toLowerCase());
         final var k = input.keyType();
         final var vout = input.valueType();
-        final var init = userFunctionOf(context, INITIALIZER_NAME, initializer, vout);
+        final var init = userFunctionOf(context, INITIALIZER_NAME, context.get(initializer), vout);
         final var userInit = new UserInitializer(init);
-        final var kvStore = validateKeyValueStore(store(), k, vout);
+        final var kvStore = validateKeyValueStore(context.get(store()), k, vout);
         final var mat = materializedOf(context, kvStore);
         final var named = namedOf();
         final KTable<Object, Object> output = named != null
@@ -231,9 +232,9 @@ public class AggregateOperation extends StoreOperation {
         checkNotNull(initializer, INITIALIZER_NAME.toLowerCase());
         final var k = input.keyType();
         final var v = input.valueType();
-        final var init = userFunctionOf(context, INITIALIZER_NAME, initializer, v);
+        final var init = userFunctionOf(context, INITIALIZER_NAME, context.get(initializer), v);
         final var userInit = new UserInitializer(init);
-        final var kvStore = validateWindowStore(store(), k, v);
+        final var kvStore = validateWindowStore(context.get(store()), k, v);
         final var mat = materializedOf(context, kvStore);
         final var named = namedOf();
         final KTable<Windowed<Object>, Object> output = named != null
@@ -260,11 +261,11 @@ public class AggregateOperation extends StoreOperation {
         checkNotNull(initializer, INITIALIZER_NAME.toLowerCase());
         final var k = input.keyType();
         final var v = input.valueType();
-        final var init = userFunctionOf(context, INITIALIZER_NAME, initializer, v);
+        final var init = userFunctionOf(context, INITIALIZER_NAME, context.get(initializer), v);
         final var userInit = new UserInitializer(init);
-        final var merg = userFunctionOf(context, MERGER_NAME, merger, v);
+        final var merg = userFunctionOf(context, MERGER_NAME, context.get(merger), v);
         final var userMerg = new UserMerger(merg);
-        final var sessionStore = validateSessionStore(store(), k, v);
+        final var sessionStore = validateSessionStore(context.get(store()), k, v);
         final var mat = materializedOf(context, sessionStore);
         final var named = namedOf();
         final KTable<Windowed<Object>, Object> output = named != null

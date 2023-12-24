@@ -28,6 +28,7 @@ import io.axual.ksml.definition.GlobalTableDefinition;
 import io.axual.ksml.definition.StreamDefinition;
 import io.axual.ksml.definition.TableDefinition;
 import io.axual.ksml.definition.TopicDefinition;
+import io.axual.ksml.definition.TopologyResource;
 import io.axual.ksml.exception.KSMLTopologyException;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.KStreamWrapper;
@@ -49,16 +50,16 @@ public class JoinOperation extends BaseJoinOperation {
     private static final String FOREIGN_KEY_EXTRACTOR_NAME = "ForeignKeyExtractor";
     private static final String PARTITIONER_NAME = "Partitioner";
     private static final String VALUEJOINER_NAME = "ValueJoiner";
-    private final TopicDefinition joinTopic;
-    private final FunctionDefinition keySelector;
-    private final FunctionDefinition foreignKeyExtractor;
-    private final FunctionDefinition valueJoiner;
+    private final TopologyResource<TopicDefinition> joinTopic;
+    private final TopologyResource<FunctionDefinition> keySelector;
+    private final TopologyResource<FunctionDefinition> foreignKeyExtractor;
+    private final TopologyResource<FunctionDefinition> valueJoiner;
     private final JoinWindows joinWindows;
     private final Duration gracePeriod;
-    private final FunctionDefinition partitioner;
-    private final FunctionDefinition otherPartitioner;
+    private final TopologyResource<FunctionDefinition> partitioner;
+    private final TopologyResource<FunctionDefinition> otherPartitioner;
 
-    public JoinOperation(StoreOperationConfig config, StreamDefinition joinStream, FunctionDefinition valueJoiner, Duration timeDifference, Duration gracePeriod) {
+    public JoinOperation(StoreOperationConfig config, TopologyResource<TopicDefinition> joinStream, TopologyResource<FunctionDefinition> valueJoiner, Duration timeDifference, Duration gracePeriod) {
         super(config);
         this.joinTopic = joinStream;
         this.keySelector = null;
@@ -70,7 +71,7 @@ public class JoinOperation extends BaseJoinOperation {
         this.otherPartitioner = null;
     }
 
-    public JoinOperation(StoreOperationConfig config, TableDefinition joinTable, FunctionDefinition foreignKeyExtractor, FunctionDefinition valueJoiner, Duration gracePeriod, FunctionDefinition partitioner, FunctionDefinition otherPartitioner) {
+    public JoinOperation(StoreOperationConfig config, TopologyResource<TopicDefinition> joinTable, TopologyResource<FunctionDefinition> foreignKeyExtractor, TopologyResource<FunctionDefinition> valueJoiner, Duration gracePeriod, TopologyResource<FunctionDefinition> partitioner, TopologyResource<FunctionDefinition> otherPartitioner) {
         super(config);
         this.joinTopic = joinTable;
         this.keySelector = null;
@@ -82,7 +83,7 @@ public class JoinOperation extends BaseJoinOperation {
         this.otherPartitioner = otherPartitioner;
     }
 
-    public JoinOperation(StoreOperationConfig config, GlobalTableDefinition joinGlobalTable, FunctionDefinition keySelector, FunctionDefinition valueJoiner) {
+    public JoinOperation(StoreOperationConfig config, TopologyResource<TopicDefinition> joinGlobalTable, TopologyResource<FunctionDefinition> keySelector, TopologyResource<FunctionDefinition> valueJoiner) {
         super(config);
         this.joinTopic = joinGlobalTable;
         this.keySelector = keySelector;
@@ -100,7 +101,8 @@ public class JoinOperation extends BaseJoinOperation {
         final var k = input.keyType();
         final var v = input.valueType();
 
-        if (joinTopic instanceof StreamDefinition joinStream) {
+        final var joinTopicDef = context.get(joinTopic);
+        if (joinTopicDef instanceof StreamDefinition joinStream) {
             /*    Kafka Streams method signature:
              *    <VO, VR> KStream<K, VR> join(
              *          final KStream<K, VO> otherStream,
@@ -111,11 +113,11 @@ public class JoinOperation extends BaseJoinOperation {
 
             final var otherStream = context.getStreamWrapper(joinStream);
             final var vo = otherStream.valueType();
-            final var vr = streamDataTypeOf(firstSpecificType(valueJoiner, vo, v), false);
+            final var vr = streamDataTypeOf(firstSpecificType(context.get(valueJoiner), vo, v), false);
             checkType("Join stream keyType", vo, equalTo(k));
-            final var joiner = userFunctionOf(context, VALUEJOINER_NAME, valueJoiner, vr, superOf(k), superOf(v), superOf(vo));
+            final var joiner = userFunctionOf(context, VALUEJOINER_NAME, context.get(valueJoiner), vr, superOf(k), superOf(v), superOf(vo));
             final var windowedK = windowedTypeOf(k);
-            final var windowStore = validateWindowStore(store(), k, vr);
+            final var windowStore = validateWindowStore(context.get(store()), k, vr);
             final var streamJoined = streamJoinedOf(windowStore, k, v, vo);
             final var userJoiner = new UserValueJoinerWithKey(joiner);
             final KStream<Object, Object> output = streamJoined != null
@@ -124,7 +126,7 @@ public class JoinOperation extends BaseJoinOperation {
             return new KStreamWrapper(output, windowedK, vr);
         }
 
-        if (joinTopic instanceof TableDefinition joinTable) {
+        if (joinTopicDef instanceof TableDefinition joinTable) {
             /*    Kafka Streams method signature:
              *    <VT, VR> KStream<K, VR> join(
              *          final KTable<K, VT> table,
@@ -134,9 +136,9 @@ public class JoinOperation extends BaseJoinOperation {
 
             final var otherTable = context.getStreamWrapper(joinTable);
             final var vt = otherTable.valueType();
-            final var vr = streamDataTypeOf(firstSpecificType(valueJoiner, vt, v), false);
+            final var vr = streamDataTypeOf(firstSpecificType(context.get(valueJoiner), vt, v), false);
             checkType("Join table keyType", otherTable.keyType(), equalTo(k));
-            final var joiner = userFunctionOf(context, VALUEJOINER_NAME, valueJoiner, vr, superOf(k), superOf(v), superOf(vt));
+            final var joiner = userFunctionOf(context, VALUEJOINER_NAME, context.get(valueJoiner), vr, superOf(k), superOf(v), superOf(vt));
             final var joined = joinedOf(name, k, v, vt, gracePeriod);
             final var userJoiner = new UserValueJoinerWithKey(joiner);
             final KStream<Object, Object> output = joined != null
@@ -145,7 +147,7 @@ public class JoinOperation extends BaseJoinOperation {
             return new KStreamWrapper(output, k, vr);
         }
 
-        if (joinTopic instanceof GlobalTableDefinition joinGlobalTable) {
+        if (joinTopicDef instanceof GlobalTableDefinition joinGlobalTable) {
             /*    Kafka Streams method signature:
              *    <GK, GV, RV> KStream<K, RV> join(
              *          final GlobalKTable<GK, GV> globalTable,
@@ -158,10 +160,10 @@ public class JoinOperation extends BaseJoinOperation {
             checkNotNull(keySelector, KEYSELECTOR_NAME.toLowerCase());
             final var gk = otherGlobalKTable.keyType();
             final var gv = otherGlobalKTable.valueType();
-            final var rv = streamDataTypeOf(firstSpecificType(valueJoiner, gv, v), false);
+            final var rv = streamDataTypeOf(firstSpecificType(context.get(valueJoiner), gv, v), false);
             checkType("Join globalKTable keyType", otherGlobalKTable.keyType(), equalTo(k));
-            final var sel = userFunctionOf(context, KEYSELECTOR_NAME, keySelector, subOf(gk), superOf(k), superOf(v));
-            final var joiner = userFunctionOf(context, VALUEJOINER_NAME, valueJoiner, subOf(rv), superOf(k), superOf(v), superOf(gv));
+            final var sel = userFunctionOf(context, KEYSELECTOR_NAME, context.get(keySelector), subOf(gk), superOf(k), superOf(v));
+            final var joiner = userFunctionOf(context, VALUEJOINER_NAME, context.get(valueJoiner), subOf(rv), superOf(k), superOf(v), superOf(gv));
             final var userSel = new UserKeyTransformer(sel);
             final var userJoiner = new UserValueJoinerWithKey(joiner);
             final var named = namedOf();
@@ -180,13 +182,14 @@ public class JoinOperation extends BaseJoinOperation {
         final var k = input.keyType();
         final var v = input.valueType();
 
-        if (joinTopic instanceof TableDefinition joinTable) {
+        final var joinTopicDef = context.get(joinTopic);
+        if (joinTopicDef instanceof TableDefinition joinTable) {
             final var otherTable = context.getStreamWrapper(joinTable);
             final var ko = otherTable.keyType();
             final var vo = otherTable.valueType();
-            final var vr = streamDataTypeOf(firstSpecificType(valueJoiner, vo, v), false);
+            final var vr = streamDataTypeOf(firstSpecificType(context.get(valueJoiner), vo, v), false);
             checkType("Join table keyType", otherTable.keyType(), equalTo(k));
-            final var fkExtract = userFunctionOf(context, FOREIGN_KEY_EXTRACTOR_NAME, foreignKeyExtractor, equalTo(v), equalTo(ko));
+            final var fkExtract = userFunctionOf(context, FOREIGN_KEY_EXTRACTOR_NAME, context.get(foreignKeyExtractor), equalTo(v), equalTo(ko));
             if (fkExtract != null) {
                 /*    Kafka Streams method signature:
                  *    <VO, VR> KTable<K, VR> join(
@@ -198,14 +201,14 @@ public class JoinOperation extends BaseJoinOperation {
                  */
 
                 final var userFkExtract = new UserForeignKeyExtractor(fkExtract);
-                final var joiner = userFunctionOf(context, VALUEJOINER_NAME, valueJoiner, equalTo(vr), equalTo(v), equalTo(vo));
+                final var joiner = userFunctionOf(context, VALUEJOINER_NAME, context.get(valueJoiner), equalTo(vr), equalTo(v), equalTo(vo));
                 final var userJoiner = new UserValueJoiner(joiner);
-                final var part = userFunctionOf(context, PARTITIONER_NAME, partitioner, equalTo(DataInteger.DATATYPE), equalTo(DataString.DATATYPE), superOf(k), superOf(v), equalTo(DataInteger.DATATYPE));
+                final var part = userFunctionOf(context, PARTITIONER_NAME, context.get(partitioner), equalTo(DataInteger.DATATYPE), equalTo(DataString.DATATYPE), superOf(k), superOf(v), equalTo(DataInteger.DATATYPE));
                 final var userPart = part != null ? new UserStreamPartitioner(part) : null;
-                final var otherPart = userFunctionOf(context, PARTITIONER_NAME, otherPartitioner, equalTo(DataInteger.DATATYPE), equalTo(DataString.DATATYPE), superOf(k), superOf(v), equalTo(DataInteger.DATATYPE));
+                final var otherPart = userFunctionOf(context, PARTITIONER_NAME, context.get(otherPartitioner), equalTo(DataInteger.DATATYPE), equalTo(DataString.DATATYPE), superOf(k), superOf(v), equalTo(DataInteger.DATATYPE));
                 final var userOtherPart = part != null ? new UserStreamPartitioner(otherPart) : null;
                 final var tableJoined = tableJoinedOf(userPart, userOtherPart);
-                final var kvStore = validateKeyValueStore(store(), k, vr);
+                final var kvStore = validateKeyValueStore(context.get(store()), k, vr);
                 final var mat = materializedOf(context, kvStore);
                 final KTable<Object, Object> output = tableJoined != null
                         ? mat != null
@@ -224,9 +227,9 @@ public class JoinOperation extends BaseJoinOperation {
                  *          final Materialized<K, VR, KeyValueStore<Bytes, byte[]>> materialized)
                  */
 
-                final var joiner = userFunctionOf(context, VALUEJOINER_NAME, valueJoiner, subOf(vr), superOf(v), superOf(vo));
+                final var joiner = userFunctionOf(context, VALUEJOINER_NAME, context.get(valueJoiner), subOf(vr), superOf(v), superOf(vo));
                 final var userJoiner = new UserValueJoiner(joiner);
-                final var kvStore = validateKeyValueStore(store(), k, vr);
+                final var kvStore = validateKeyValueStore(context.get(store()), k, vr);
                 final var mat = materializedOf(context, kvStore);
                 final var named = namedOf();
                 final KTable<Object, Object> output = named != null

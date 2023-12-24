@@ -26,21 +26,21 @@ import io.axual.ksml.dsl.KSMLDSL;
 import io.axual.ksml.generator.TopologyResources;
 import io.axual.ksml.operation.StoreOperationConfig;
 import io.axual.ksml.operation.TransformKeyValueOperation;
-import io.axual.ksml.parser.StructParser;
+import io.axual.ksml.parser.MultiSchemaParser;
 
 public class TransformKeyValueOperationParser extends OperationParser<TransformKeyValueOperation> {
-    public TransformKeyValueOperationParser(TopologyResources resources) {
-        super("transformKey", resources);
+    public TransformKeyValueOperationParser(String namespace) {
+        super(namespace, "transformKey");
     }
 
     @Override
-    protected StructParser<TransformKeyValueOperation> parser() {
+    protected MultiSchemaParser<TransformKeyValueOperation> parser() {
         return structParser(
                 TransformKeyValueOperation.class,
                 "Convert the key/value of every record in the stream to another key/value",
                 operationTypeField(KSMLDSL.Operations.TRANSFORM_KEY_VALUE),
                 nameField(),
-                functionField(KSMLDSL.Operations.Transform.MAPPER, "A function that computes a new key/value for each record", new KeyValueTransformerDefinitionParser()),
+                functionField(KSMLDSL.Operations.Transform.MAPPER, true, "A function that computes a new key/value for each record", new KeyValueTransformerDefinitionParser()),
                 storeNamesField(),
                 (type, name, mapper, storeNames) -> new TransformKeyValueOperation(new StoreOperationConfig(namespace(), name, storeNames, null), mapper));
     }

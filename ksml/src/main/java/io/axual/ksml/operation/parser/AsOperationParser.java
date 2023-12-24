@@ -21,16 +21,15 @@ package io.axual.ksml.operation.parser;
  */
 
 import io.axual.ksml.dsl.KSMLDSL;
-import io.axual.ksml.generator.TopologyResources;
 import io.axual.ksml.operation.AsOperation;
-import io.axual.ksml.parser.StructParser;
+import io.axual.ksml.parser.MultiSchemaParser;
 
 public class AsOperationParser extends OperationParser<AsOperation> {
-    public AsOperationParser(TopologyResources resources) {
-        super("as", resources);
+    public AsOperationParser(String namespace) {
+        super(namespace, "as");
     }
 
-    public StructParser<AsOperation> parser() {
+    public MultiSchemaParser<AsOperation> parser() {
         return structParser(
                 AsOperation.class,
                 "An operation to close the pipeline and save the result under a given name",

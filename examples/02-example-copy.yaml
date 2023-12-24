@@ -32,5 +32,5 @@ pipelines:
         forEach:
           code: log.info("SECONDARY PIPELINE - key={}, value={}", key, value)
     to:
-      topic: ksml_sensordata_copy
+      topic: sensor_copy
       # No need to explicitly reference key/value types, since they are derived from previous steps in the pipeline

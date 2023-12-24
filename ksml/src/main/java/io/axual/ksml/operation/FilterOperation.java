@@ -24,6 +24,7 @@ package io.axual.ksml.operation;
 import io.axual.ksml.data.object.DataBoolean;
 import io.axual.ksml.data.type.UserType;
 import io.axual.ksml.definition.FunctionDefinition;
+import io.axual.ksml.definition.TopologyResource;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.operation.processor.FilterProcessor;
 import io.axual.ksml.operation.processor.FixedKeyOperationProcessorSupplier;
@@ -35,9 +36,9 @@ import org.apache.kafka.streams.kstream.Named;
 
 public class FilterOperation extends StoreOperation {
     private static final String PREDICATE_NAME = "Predicate";
-    private final FunctionDefinition predicate;
+    private final TopologyResource<FunctionDefinition> predicate;
 
-    public FilterOperation(StoreOperationConfig config, FunctionDefinition predicate) {
+    public FilterOperation(StoreOperationConfig config, TopologyResource<FunctionDefinition> predicate) {
         super(config);
         this.predicate = predicate;
     }
@@ -52,9 +53,9 @@ public class FilterOperation extends StoreOperation {
 
         final var k = input.keyType();
         final var v = input.valueType();
-        final var pred = userFunctionOf(context, PREDICATE_NAME, predicate, new UserType(DataBoolean.DATATYPE), superOf(k), superOf(v));
+        final var pred = userFunctionOf(context, PREDICATE_NAME, context.get(predicate), new UserType(DataBoolean.DATATYPE), superOf(k), superOf(v));
         final var userPred = new UserPredicate(pred);
-        final var storeNames = combineStoreNames(this.storeNames, predicate.storeNames().toArray(TEMPLATE));
+        final var storeNames = combineStoreNames(this.storeNames, context.get(predicate).storeNames().toArray(TEMPLATE));
         final var supplier = new FixedKeyOperationProcessorSupplier<>(
                 name,
                 FilterProcessor::new,
@@ -76,9 +77,9 @@ public class FilterOperation extends StoreOperation {
 
         final var k = input.keyType();
         final var v = input.valueType();
-        final var pred = userFunctionOf(context, PREDICATE_NAME, predicate, new UserType(DataBoolean.DATATYPE), superOf(k), superOf(v));
+        final var pred = userFunctionOf(context, PREDICATE_NAME, context.get(predicate), new UserType(DataBoolean.DATATYPE), superOf(k), superOf(v));
         final var userPred = new UserPredicate(pred);
-        final var kvStore = validateKeyValueStore(store(), k, v);
+        final var kvStore = validateKeyValueStore(context.get(store()), k, v);
         final var mat = materializedOf(context, kvStore);
         final var named = namedOf();
         final var output = named != null

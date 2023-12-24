@@ -22,12 +22,13 @@ package io.axual.ksml.operation;
 
 
 import io.axual.ksml.definition.FunctionDefinition;
+import io.axual.ksml.definition.TopologyResource;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.stream.StreamWrapper;
 
 public class ForEachOperation extends PeekOperation {
-    public ForEachOperation(OperationConfig config, FunctionDefinition forEachAction) {
+    public ForEachOperation(OperationConfig config, TopologyResource<FunctionDefinition> forEachAction) {
         super(config, forEachAction);
     }
 

@@ -26,14 +26,14 @@ import io.axual.ksml.dsl.KSMLDSL;
 import io.axual.ksml.generator.TopologyResources;
 import io.axual.ksml.operation.PeekOperation;
 import io.axual.ksml.operation.StoreOperationConfig;
-import io.axual.ksml.parser.StructParser;
+import io.axual.ksml.parser.MultiSchemaParser;
 
 public class PeekOperationParser extends OperationParser<PeekOperation> {
-    public PeekOperationParser(TopologyResources resources) {
-        super("peek", resources);
+    public PeekOperationParser(String namespace) {
+        super(namespace, "peek");
     }
 
-    public StructParser<PeekOperation> parser() {
+    public MultiSchemaParser<PeekOperation> parser() {
         return structParser(
                 PeekOperation.class,
                 "Operation to peek into a stream, without modifying the stream contents",

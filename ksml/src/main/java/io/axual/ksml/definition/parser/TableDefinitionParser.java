@@ -20,25 +20,15 @@ package io.axual.ksml.definition.parser;
  * =========================LICENSE_END==================================
  */
 
-import io.axual.ksml.data.schema.DataField;
-import io.axual.ksml.data.schema.DataSchema;
-import io.axual.ksml.data.schema.StructSchema;
-import io.axual.ksml.data.schema.UnionSchema;
 import io.axual.ksml.data.type.UserType;
-import io.axual.ksml.definition.KeyValueStateStoreDefinition;
 import io.axual.ksml.definition.TableDefinition;
 import io.axual.ksml.execution.FatalError;
-import io.axual.ksml.parser.DefinitionParser;
-import io.axual.ksml.parser.StructParser;
-import io.axual.ksml.parser.TopologyResourceParser;
-import io.axual.ksml.parser.YamlNode;
-import io.axual.ksml.store.StoreType;
-
-import java.util.List;
+import io.axual.ksml.parser.MultiFormParser;
+import io.axual.ksml.parser.MultiSchemaParser;
 
 import static io.axual.ksml.dsl.KSMLDSL.Streams;
 
-public class TableDefinitionParser extends DefinitionParser<TableDefinition> {
+public class TableDefinitionParser extends MultiFormParser<TableDefinition> {
     private final boolean requireKeyValueType;
 
     public TableDefinitionParser(boolean requireKeyValueType) {
@@ -46,14 +36,14 @@ public class TableDefinitionParser extends DefinitionParser<TableDefinition> {
     }
 
     @Override
-    public StructParser<TableDefinition> parser() {
+    public MultiSchemaParser<TableDefinition> parser() {
         return structParser(
                 TableDefinition.class,
                 "Contains a definition of a Table, which can be referenced by producers and pipelines",
                 stringField(Streams.TOPIC, true, "The name of the Kafka topic for this table"),
                 userTypeField(Streams.KEY_TYPE, requireKeyValueType, "The key type of the table"),
                 userTypeField(Streams.VALUE_TYPE, requireKeyValueType, "The value type of the table"),
-                storeField(),
+                customField(Streams.STORE, false, "Keyvalue store associated with this table", new KeyValueStateStoreDefinitionParser(false)),
                 (topic, keyType, valueType, store) -> {
                     keyType = keyType != null ? keyType : UserType.UNKNOWN;
                     valueType = valueType != null ? valueType : UserType.UNKNOWN;
@@ -67,24 +57,5 @@ public class TableDefinitionParser extends DefinitionParser<TableDefinition> {
                     }
                     return new TableDefinition(topic, keyType, valueType, store);
                 });
-    }
-
-    private StructParser<KeyValueStateStoreDefinition> storeField() {
-        final var resourceParser = new TopologyResourceParser<>("state store", Streams.STORE, "State store definition", null, new StateStoreDefinitionParser(StoreType.KEYVALUE_STORE));
-        final var field = new DataField(Streams.STORE, new UnionSchema(DataSchema.nullSchema(), resourceParser.schema()), "Definition of the keyValue state store associated with the table", false);
-        final var schema = structSchema(KeyValueStateStoreDefinition.class, field.doc(), List.of(field));
-        return new StructParser<>() {
-            @Override
-            public KeyValueStateStoreDefinition parse(YamlNode node) {
-                final var resource = resourceParser.parse(node);
-                if (resource != null && resource.definition() instanceof KeyValueStateStoreDefinition def) return def;
-                return null;
-            }
-
-            @Override
-            public StructSchema schema() {
-                return schema;
-            }
-        };
     }
 }

@@ -53,7 +53,7 @@ public class CountOperation extends StoreOperation {
 
         final var k = input.keyType();
         final var vr = streamDataTypeOf(new UserType(DataLong.DATATYPE), false);
-        final var kvStore = validateKeyValueStore(store(), k, vr);
+        final var kvStore = validateKeyValueStore(context.get(store()), k, vr);
         final Materialized<Object, Long, KeyValueStore<Bytes, byte[]>> mat = materializedOf(context, kvStore);
         final var named = namedOf();
         final KTable<Object, Long> output = named != null
@@ -76,7 +76,7 @@ public class CountOperation extends StoreOperation {
 
         final var k = input.keyType();
         final var vr = streamDataTypeOf(new UserType(DataLong.DATATYPE), false);
-        final var kvStore = validateKeyValueStore(store(), k, vr);
+        final var kvStore = validateKeyValueStore(context.get(store()), k, vr);
         final Materialized<Object, Long, KeyValueStore<Bytes, byte[]>> mat = materializedOf(context, kvStore);
         final var named = namedOf();
         final KTable<Object, Long> output = named != null
@@ -100,7 +100,7 @@ public class CountOperation extends StoreOperation {
         final var k = input.keyType();
         final var vr = streamDataTypeOf(new UserType(DataLong.DATATYPE), false);
         final var windowedK = windowedTypeOf(k);
-        final var sessionStore = validateSessionStore(store(), k, vr);
+        final var sessionStore = validateSessionStore(context.get(store()), k, vr);
         final Materialized<Object, Long, SessionStore<Bytes, byte[]>> mat = materializedOf(context, sessionStore);
         final var named = namedOf();
         final KTable<Windowed<Object>, Long> output = named != null
@@ -124,7 +124,7 @@ public class CountOperation extends StoreOperation {
         final var k = input.keyType();
         final var vr = streamDataTypeOf(new UserType(DataLong.DATATYPE), false);
         final var windowedK = windowedTypeOf(k);
-        final var windowStore = validateWindowStore(store(), k, vr);
+        final var windowStore = validateWindowStore(context.get(store()), k, vr);
         final Materialized<Object, Long, WindowStore<Bytes, byte[]>> mat = materializedOf(context, windowStore);
         final var named = namedOf();
         final KTable<Windowed<Object>, Long> output = named != null

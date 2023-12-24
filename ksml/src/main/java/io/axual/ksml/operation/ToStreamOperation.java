@@ -22,6 +22,7 @@ package io.axual.ksml.operation;
 
 
 import io.axual.ksml.definition.FunctionDefinition;
+import io.axual.ksml.definition.TopologyResource;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.stream.KTableWrapper;
@@ -32,9 +33,9 @@ import org.apache.kafka.streams.kstream.KeyValueMapper;
 
 public class ToStreamOperation extends BaseOperation {
     private static final String MAPPER_NAME = "Mapper";
-    private final FunctionDefinition mapper;
+    private final TopologyResource<FunctionDefinition> mapper;
 
-    public ToStreamOperation(OperationConfig config, FunctionDefinition mapper) {
+    public ToStreamOperation(OperationConfig config, TopologyResource<FunctionDefinition> mapper) {
         super(config);
         this.mapper = mapper;
     }
@@ -43,8 +44,8 @@ public class ToStreamOperation extends BaseOperation {
     public StreamWrapper apply(KTableWrapper input, TopologyBuildContext context) {
         final var k = input.keyType();
         final var v = input.valueType();
-        final var kr = mapper != null ? streamDataTypeOf(firstSpecificType(mapper, k), true) : k;
-        final var map = mapper != null ? userFunctionOf(context, MAPPER_NAME, mapper, kr, superOf(k), superOf(v)) : null;
+        final var kr = mapper != null ? streamDataTypeOf(firstSpecificType(context.get(mapper), k), true) : k;
+        final var map = mapper != null ? userFunctionOf(context, MAPPER_NAME, context.get(mapper), kr, superOf(k), superOf(v)) : null;
         final KeyValueMapper<Object, Object, Object> userMap = map != null
                 ? new UserKeyTransformer(map)
                 : null;

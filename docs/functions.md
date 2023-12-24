@@ -34,7 +34,7 @@ Functions are defined by the following tags:
 |Parameter|Value Type|Default|Description
 |:---|:---|:---|:---
 |`type`|`string`|`generic`|The [type](#function-types) of the function defined
-|`parameters`|List of parameter definitions|_empty list_|A list of parameters, each of which contains the mandatory fields `name` and `type`. See example above.
+|`parameters`|List of parameter definitions|_empty list_|A list of parameters, each of which contains the required fields `name` and `type`. See example above.
 |`globalCode`|`string`|_empty_|Snippet of Python code that is executed once upon creation of the Kafka Streams topology. This section can contain statements like `import` to import function libraries used in the `code` and `expression` sections.
 |`code`|`string`|_empty_|Python source code, which will be included in the called function.|Bla
 |`expression`|`string`|_empty_|Python expression that contains the returned function result.|Typically the code `"return expression"` is generated for the Python interpreter. For example `expression: key` would generate the Python code `return key` for the function.

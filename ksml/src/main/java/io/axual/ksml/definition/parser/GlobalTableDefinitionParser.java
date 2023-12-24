@@ -23,10 +23,10 @@ package io.axual.ksml.definition.parser;
 
 import io.axual.ksml.definition.GlobalTableDefinition;
 import io.axual.ksml.dsl.KSMLDSL;
-import io.axual.ksml.parser.DefinitionParser;
-import io.axual.ksml.parser.StructParser;
+import io.axual.ksml.parser.MultiFormParser;
+import io.axual.ksml.parser.MultiSchemaParser;
 
-public class GlobalTableDefinitionParser extends DefinitionParser<GlobalTableDefinition> {
+public class GlobalTableDefinitionParser extends MultiFormParser<GlobalTableDefinition> {
     private final boolean requireKeyValueType;
 
     public GlobalTableDefinitionParser(boolean requireKeyValueType) {
@@ -34,7 +34,7 @@ public class GlobalTableDefinitionParser extends DefinitionParser<GlobalTableDef
     }
 
     @Override
-    public StructParser<GlobalTableDefinition> parser() {
+    public MultiSchemaParser<GlobalTableDefinition> parser() {
         return structParser(
                 GlobalTableDefinition.class,
                 "Contains a definition of a GlobalTable, which can be referenced by producers and pipelines",

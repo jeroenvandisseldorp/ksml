@@ -64,7 +64,8 @@ pipelines:
         forEach:
           code: log.info("STRING TO XML - key={}, value={}", key, value)
     to:
-      topic: ksml_sensordata_xml
+      topic:
+        topic: ksml_sensordata_xml
 
   # The alternative pipeline achieves the same, but by inlining the target topic definition and its
   # data types (conversion is done implicitly on writing to the target topic)

@@ -22,21 +22,21 @@ package io.axual.ksml.definition.parser;
 
 
 import io.axual.ksml.definition.FunctionDefinition;
-import io.axual.ksml.parser.ChoiceParser;
-import io.axual.ksml.parser.StructParser;
+import io.axual.ksml.parser.ChoiceFieldParser;
+import io.axual.ksml.parser.MultiSchemaParser;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static io.axual.ksml.dsl.KSMLDSL.Functions;
 
-public class TypedFunctionDefinitionParser extends ChoiceParser<FunctionDefinition> {
+public class TypedFunctionDefinitionParser extends ChoiceFieldParser<FunctionDefinition> {
     public TypedFunctionDefinitionParser() {
         super(Functions.TYPE, "function", Functions.TYPE_GENERIC, parsers());
     }
 
-    private static Map<String, StructParser<? extends FunctionDefinition>> parsers() {
-        final var result = new HashMap<String, StructParser<? extends FunctionDefinition>>();
+    private static Map<String, MultiSchemaParser<? extends FunctionDefinition>> parsers() {
+        final var result = new HashMap<String, MultiSchemaParser<? extends FunctionDefinition>>();
         result.put(Functions.TYPE_AGGREGATOR, new AggregatorDefinitionParser());
         result.put(Functions.TYPE_FOREACHACTION, new ForEachActionDefinitionParser());
         result.put(Functions.TYPE_FOREIGN_KEY_EXTRACTOR, new ForeignKeyExtractorDefinitionParser());

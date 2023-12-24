@@ -21,31 +21,30 @@ package io.axual.ksml.definition.parser;
  */
 
 
-import io.axual.ksml.data.schema.StructSchema;
 import io.axual.ksml.definition.BranchDefinition;
 import io.axual.ksml.dsl.KSMLDSL;
-import io.axual.ksml.generator.TopologyResources;
-import io.axual.ksml.parser.ContextAwareParser;
-import io.axual.ksml.parser.StructParser;
-import org.apache.commons.collections4.ListUtils;
+import io.axual.ksml.parser.MultiFormParser;
+import io.axual.ksml.parser.MultiSchemaParser;
+import io.axual.ksml.parser.Utils;
 
-public class BranchDefinitionParser extends ContextAwareParser<BranchDefinition> {
+import java.util.ArrayList;
+
+public class BranchDefinitionParser extends MultiFormParser<BranchDefinition> {
     private final boolean includePipelineSchema;
 
-    public BranchDefinitionParser(TopologyResources resources, boolean includePipelineSchema) {
-        super(resources);
+    public BranchDefinitionParser(String namespace, boolean includePipelineSchema) {
+        super(namespace);
         this.includePipelineSchema = includePipelineSchema;
     }
 
     @Override
-    public StructParser<BranchDefinition> parser() {
+    public MultiSchemaParser<BranchDefinition> parser() {
         // This parser uses the PipelineDefinitionParser recursively, hence requires a special implementation to not
         // make the associated DataSchema recurse infinitely.
-        final var predParser = functionField(KSMLDSL.Operations.Branch.PREDICATE, "Defines the condition under which messages get sent down this branch", new PredicateDefinitionParser());
-        final var pipelineParser = new PipelineDefinitionParser(resources(), false);
-        final StructSchema schema = includePipelineSchema
-                ? structSchema(BranchDefinition.class.getSimpleName(), "Defines one branch in a BranchOperation", ListUtils.union(predParser.fields(), pipelineParser.fields()))
-                : structSchema(BranchDefinition.class.getSimpleName(), "Defines one branch in a BranchOperation", predParser.fields());
-        return StructParser.of(node -> new BranchDefinition(predParser.parse(node), pipelineParser.parse(node)), schema);
+        final var predParser = functionField(KSMLDSL.Operations.Branch.PREDICATE, false, "Defines the condition under which messages get sent down this branch", new PredicateDefinitionParser());
+        final var pipelineParser = new PipelineDefinitionParser(namespace(), false);
+        final var schemas = new ArrayList<>(predParser.schemas());
+        if (includePipelineSchema) Utils.addToSchemas(schemas, "name", "doc", pipelineParser);
+        return MultiSchemaParser.of(node -> new BranchDefinition(predParser.parse(node), pipelineParser.parse(node)), schemas);
     }
 }

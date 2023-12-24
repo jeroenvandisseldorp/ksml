@@ -22,32 +22,31 @@ package io.axual.ksml.operation.parser;
 
 import io.axual.ksml.data.schema.StructSchema;
 import io.axual.ksml.dsl.KSMLDSL;
-import io.axual.ksml.generator.TopologyResources;
 import io.axual.ksml.operation.BaseOperation;
 import io.axual.ksml.operation.OperationConfig;
-import io.axual.ksml.parser.ContextAwareParser;
+import io.axual.ksml.parser.MultiSchemaParser;
+import io.axual.ksml.parser.SingleFormParser;
+import io.axual.ksml.parser.SingleSchemaParser;
 import io.axual.ksml.parser.StringValueParser;
-import io.axual.ksml.parser.StructParser;
 import io.axual.ksml.parser.YamlNode;
 
 import java.util.List;
 
-public abstract class OperationParser<T extends BaseOperation> extends ContextAwareParser<T> {
-    private static final String[] TEMPLATE = new String[0];
+public abstract class OperationParser<T extends BaseOperation> extends SingleFormParser<T> {
     private final String type;
 
-    public OperationParser(String type, TopologyResources resources) {
-        super(resources);
+    public OperationParser(String namespace, String type) {
+        super(namespace);
         this.type = type;
     }
 
-    protected StructParser<String> operationTypeField(String fixedType) {
+    protected MultiSchemaParser<String> operationTypeField(String fixedType) {
         return fixedStringField(KSMLDSL.Operations.TYPE_ATTRIBUTE, true, fixedType, "The type of the operation");
     }
 
-    protected StructParser<String> nameField() {
-        final var stringParser = stringField(KSMLDSL.Operations.NAME_ATTRIBUTE, false, type, "The name of the operation processor");
-        return new StructParser<>() {
+    protected SingleSchemaParser<String> nameField() {
+        final var stringParser = stringField(KSMLDSL.Operations.NAME_ATTRIBUTE, false, null, "The name of the operation processor");
+        return new SingleSchemaParser<>() {
             @Override
             public String parse(YamlNode node) {
                 final var name = stringParser.parse(node);
@@ -62,7 +61,7 @@ public abstract class OperationParser<T extends BaseOperation> extends ContextAw
         };
     }
 
-    protected StructParser<List<String>> storeNamesField() {
+    protected MultiSchemaParser<List<String>> storeNamesField() {
         return listField(KSMLDSL.Operations.STORE_NAMES_ATTRIBUTE, "state store name", false, "The names of all state stores used by the function", new StringValueParser());
     }
 
@@ -73,7 +72,7 @@ public abstract class OperationParser<T extends BaseOperation> extends ContextAw
     protected OperationConfig operationConfig(String name, List<String> storeNames) {
         return new OperationConfig(
                 namespace(),
-                name != null ? determineName(name) : determineName(getClass().getSimpleName()),
-                storeNames != null ? storeNames.toArray(TEMPLATE) : null);
+                name != null ? name : getClass().getSimpleName(),
+                storeNames != null ? storeNames.toArray(String[]::new) : null);
     }
 }

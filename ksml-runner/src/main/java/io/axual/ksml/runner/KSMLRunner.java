@@ -56,6 +56,7 @@ import io.axual.ksml.runner.backend.KafkaStreamsRunner;
 import io.axual.ksml.runner.backend.Runner;
 import io.axual.ksml.runner.config.KSMLErrorHandlingConfig;
 import io.axual.ksml.runner.config.KSMLRunnerConfig;
+import io.axual.ksml.runner.doc.DocWriter;
 import io.axual.ksml.runner.exception.ConfigException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.serialization.Serdes;
@@ -104,6 +105,11 @@ public class KSMLRunner {
                 log.info("Could not load manifest file, using default values");
             }
 
+            // Check if we need to output the schema and then exit
+            checkForSchemaOutput(args);
+            // Check if we need to output the documentation and then exit
+            checkForDocOutput(args);
+
             log.info("Starting {} {}", executableName, executableVersion);
             final var configFile = new File(args.length == 0 ? DEFAULT_CONFIG_FILE_SHORT : args[0]);
             if (!configFile.exists()) {
@@ -149,15 +155,6 @@ public class KSMLRunner {
             final Map<String, TopologyDefinition> pipelineSpecs = new HashMap<>();
             definitions.forEach((name, definition) -> {
                 final var parser = new TopologyDefinitionParser(name);
-                final var schema = new JsonSchemaMapper().fromDataSchema((DataSchema) parser.schema());
-                try {
-                    final var writer = new PrintWriter(config.getKsmlConfig().getConfigDirectory() + "/ksml.json");
-                    writer.println(schema);
-                    writer.close();
-                } catch (Exception e) {
-                    // Ignore
-                }
-                log.info("Schema: {}", schema);
                 final var specification = parser.parse(YamlNode.fromRoot(definition, name));
                 if (!specification.producers().isEmpty()) producerSpecs.put(name, specification);
                 if (!specification.pipelines().isEmpty()) pipelineSpecs.put(name, specification);
@@ -251,6 +248,43 @@ public class KSMLRunner {
         }
     }
 
+    private static void checkForSchemaOutput(String[] args) {
+        // Check if the runner was started with "--schema". If so, then we output the JSON schema to validate the
+        // KSML definitions with on stdout and exit
+        if (args.length >= 1 && "--schema".equals(args[0])) {
+            final var parser = new TopologyDefinitionParser("dummy");
+            final var schema = new JsonSchemaMapper().fromDataSchema((DataSchema) parser.schema());
+
+            final var filename = args.length >= 2 ? args[1] : null;
+            if (filename != null) {
+                try {
+                    final var writer = new PrintWriter(filename);
+                    writer.println(schema);
+                    writer.close();
+                    System.out.println("KSML schema written to file: " + filename);
+                } catch (Exception e) {
+                    // Ignore
+                    System.err.println("Error writing KSML schema to file: " + filename);
+                    System.err.println("Error: " + e.getMessage());
+                }
+            } else {
+                System.out.println(parser.schema());
+            }
+            System.exit(0);
+        }
+    }
+
+    private static void checkForDocOutput(String[] args) {
+        // Check if the runner was started with "--schema". If so, then we output the JSON schema to validate the
+        // KSML definitions with on stdout and exit
+        if (args.length >= 1 && "--doc".equals(args[0])) {
+            final var parser = new TopologyDefinitionParser("dummy");
+            final var docWriter = new DocWriter();
+            final var directory = args.length >= 2 ? args[1] : "";
+//            docWriter.writeTo(parser.schema(), directory);
+        }
+    }
+
     private static KSMLRunnerConfig readConfiguration(File configFile) {
         final var mapper = new ObjectMapper(new YAMLFactory());
         try {
@@ -272,7 +306,8 @@ public class KSMLRunner {
 
     private static ErrorHandler getErrorHandler(KSMLErrorHandlingConfig.ErrorHandlingConfig config, String
             loggerName) {
-        if (config == null) return new ErrorHandler(true, false, loggerName, ErrorHandler.HandlerType.STOP_ON_FAIL);
+        if (config == null)
+            return new ErrorHandler(true, false, loggerName, ErrorHandler.HandlerType.STOP_ON_FAIL);
         final var handlerType = switch (config.getHandler()) {
             case CONTINUE -> ErrorHandler.HandlerType.CONTINUE_ON_FAIL;
             case STOP -> ErrorHandler.HandlerType.STOP_ON_FAIL;

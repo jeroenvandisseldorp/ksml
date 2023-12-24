@@ -25,15 +25,15 @@ import io.axual.ksml.dsl.KSMLDSL;
 import io.axual.ksml.execution.FatalError;
 import io.axual.ksml.generator.TopologyResources;
 import io.axual.ksml.operation.ConvertKeyValueOperation;
-import io.axual.ksml.parser.StructParser;
+import io.axual.ksml.parser.MultiSchemaParser;
 
 public class ConvertKeyValueOperationParser extends OperationParser<ConvertKeyValueOperation> {
-    public ConvertKeyValueOperationParser(TopologyResources resources) {
-        super("convertKeyValue", resources);
+    public ConvertKeyValueOperationParser(String namespace) {
+        super(namespace, "convertKeyValue");
     }
 
     @Override
-    public StructParser<ConvertKeyValueOperation> parser() {
+    public MultiSchemaParser<ConvertKeyValueOperation> parser() {
         return structParser(
                 ConvertKeyValueOperation.class,
                 "An operation to convert the stream key and value types to other types. Conversion is only syntactic, eg. from Avro to XML.",

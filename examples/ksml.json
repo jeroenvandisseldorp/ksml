@@ -1,0 +1,5111 @@
+{
+  "additionalProperties": false,
+  "definitions": {
+    "AggregateOperation": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "adder": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/AggregatorDefinition"
+            }
+          ],
+          "description": "(GroupedTable) A function that adds a record to the aggregation result"
+        },
+        "aggregator": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/AggregatorDefinition"
+            }
+          ],
+          "description": "(GroupedStream, SessionWindowedStream, TimeWindowedStream) The aggregator function, which combines a value with the previous aggregation result and outputs a new aggregation result"
+        },
+        "initializer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/InitializerDefinition"
+            }
+          ],
+          "description": "The initializer function, which generates an initial value for every set of aggregated records"
+        },
+        "merger": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/MergerDefinition"
+            }
+          ],
+          "description": "(SessionWindowedStream, SessionWindowedCogroupedStream) A function that combines two aggregation results"
+        },
+        "name": {
+          "description": "The name of the operation processor",
+          "type": "string"
+        },
+        "store": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/WindowStateStoreDefinition"
+            }
+          ],
+          "description": "Materialized view of the aggregation"
+        },
+        "subtractor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/AggregatorDefinition"
+            }
+          ],
+          "description": "(GroupedTable) A function that removes a record from the aggregation result"
+        },
+        "type": {
+          "description": "The type of the operation, fixed value \"aggregate\"",
+          "enum": [
+            "aggregate"
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "type",
+        "initializer",
+        "aggregator",
+        "merger",
+        "adder",
+        "subtractor",
+        "store"
+      ],
+      "title": "AggregateOperation",
+      "type": "object"
+    },
+    "AggregatorDefinition": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "code": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The (multiline) code of the aggregator"
+        },
+        "expression": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The expression returned by the aggregator"
+        },
+        "globalCode": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Global (multiline) code that gets loaded into the Python context outside of the aggregator. Can be used for defining eg. global variables."
+        },
+        "name": {
+          "description": "The name of the aggregator. If this field is not defined, then the name is derived from the context.",
+          "type": "string"
+        },
+        "parameters": {
+          "description": "A list of parameters to be passed into the aggregator",
+          "items": {
+            "$ref": "#/definitions/ParameterDefinition"
+          },
+          "type": "array"
+        },
+        "resultType": {
+          "description": "The data type returned by the aggregator",
+          "type": "string"
+        },
+        "stores": {
+          "description": "A list of store names that the aggregator uses. Required if the function wants to use a state store.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": {
+          "description": "The type of the function, fixed value \"aggregator\"",
+          "enum": [
+            "aggregator"
+          ]
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "AggregatorDefinition",
+      "type": "object"
+    },
+    "CogroupOperation": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "aggregator": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/AggregatorDefinition"
+            }
+          ],
+          "description": "(GroupedStream, SessionWindowedStream, TimeWindowedStream) The aggregator function, which combines a value with the previous aggregation result and outputs a new aggregation result"
+        },
+        "name": {
+          "description": "The name of the operation processor",
+          "type": "string"
+        },
+        "store": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/WindowStateStoreDefinition"
+            }
+          ],
+          "description": "Materialized view of the cogroup"
+        },
+        "type": {
+          "description": "The type of the operation, fixed value \"cogroup\"",
+          "enum": [
+            "cogroup"
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "type",
+        "aggregator",
+        "store"
+      ],
+      "title": "CogroupOperation",
+      "type": "object"
+    },
+    "ConvertKeyOperation": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "into": {
+          "description": "The type to convert the stream key into",
+          "type": "string"
+        },
+        "name": {
+          "description": "The name of the operation processor",
+          "type": "string"
+        },
+        "type": {
+          "description": "The type of the operation, fixed value \"convertKey\"",
+          "enum": [
+            "convertKey"
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "type",
+        "into"
+      ],
+      "title": "ConvertKeyOperation",
+      "type": "object"
+    },
+    "ConvertKeyValueOperation": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "into": {
+          "description": "The tuple type to convert the stream key/value into",
+          "type": "string"
+        },
+        "name": {
+          "description": "The name of the operation processor",
+          "type": "string"
+        },
+        "type": {
+          "description": "The type of the operation, fixed value \"convertKeyValue\"",
+          "enum": [
+            "convertKeyValue"
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "type",
+        "into"
+      ],
+      "title": "ConvertKeyValueOperation",
+      "type": "object"
+    },
+    "ConvertValueOperation": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "into": {
+          "description": "The type to convert the stream value into",
+          "type": "string"
+        },
+        "name": {
+          "description": "The name of the operation processor",
+          "type": "string"
+        },
+        "type": {
+          "description": "The type of the operation, fixed value \"convertValue\"",
+          "enum": [
+            "convertValue"
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "type",
+        "into"
+      ],
+      "title": "ConvertValueOperation",
+      "type": "object"
+    },
+    "CountOperation": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "name": {
+          "description": "The name of the operation processor",
+          "type": "string"
+        },
+        "store": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/KeyValueStateStoreDefinition"
+            },
+            {
+              "$ref": "#/definitions/SessionStateStoreDefinition"
+            },
+            {
+              "$ref": "#/definitions/WindowStateStoreDefinition"
+            }
+          ],
+          "description": "Materialized view of the count operation's result"
+        },
+        "type": {
+          "description": "The type of the operation, fixed value \"count\"",
+          "enum": [
+            "count"
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "type",
+        "store"
+      ],
+      "title": "CountOperation",
+      "type": "object"
+    },
+    "FilterNotOperation": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "if": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/PredicateDefinition"
+            }
+          ],
+          "description": "A function that returns \"false\" when records are accepted, \"true\" otherwise"
+        },
+        "name": {
+          "description": "The name of the operation processor",
+          "type": "string"
+        },
+        "stores": {
+          "description": "The names of all state stores used by the function",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": {
+          "description": "The type of the operation, fixed value \"filterNot\"",
+          "enum": [
+            "filterNot"
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "type",
+        "if"
+      ],
+      "title": "FilterNotOperation",
+      "type": "object"
+    },
+    "FilterOperation": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "if": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/PredicateDefinition"
+            }
+          ],
+          "description": "A function that returns \"true\" when records are accepted, \"false\" otherwise"
+        },
+        "name": {
+          "description": "The name of the operation processor",
+          "type": "string"
+        },
+        "stores": {
+          "description": "The names of all state stores used by the function",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": {
+          "description": "The type of the operation, fixed value \"filter\"",
+          "enum": [
+            "filter"
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "type",
+        "if"
+      ],
+      "title": "FilterOperation",
+      "type": "object"
+    },
+    "ForEachActionDefinition": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "code": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The (multiline) code of the foreach action"
+        },
+        "expression": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The expression returned by the foreach action"
+        },
+        "globalCode": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Global (multiline) code that gets loaded into the Python context outside of the foreach action. Can be used for defining eg. global variables."
+        },
+        "name": {
+          "description": "The name of the foreach action. If this field is not defined, then the name is derived from the context.",
+          "type": "string"
+        },
+        "parameters": {
+          "description": "A list of parameters to be passed into the foreach action",
+          "items": {
+            "$ref": "#/definitions/ParameterDefinition"
+          },
+          "type": "array"
+        },
+        "resultType": {
+          "description": "The data type returned by the foreach action",
+          "type": "string"
+        },
+        "stores": {
+          "description": "A list of store names that the foreach action uses. Required if the function wants to use a state store.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": {
+          "description": "The type of the function, fixed value \"forEach\"",
+          "enum": [
+            "forEach"
+          ]
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "ForEachActionDefinition",
+      "type": "object"
+    },
+    "ForeignKeyExtractorDefinition": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "code": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The (multiline) code of the foreign key extractor"
+        },
+        "expression": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The expression returned by the foreign key extractor"
+        },
+        "globalCode": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Global (multiline) code that gets loaded into the Python context outside of the foreign key extractor. Can be used for defining eg. global variables."
+        },
+        "name": {
+          "description": "The name of the foreign key extractor. If this field is not defined, then the name is derived from the context.",
+          "type": "string"
+        },
+        "parameters": {
+          "description": "A list of parameters to be passed into the foreign key extractor",
+          "items": {
+            "$ref": "#/definitions/ParameterDefinition"
+          },
+          "type": "array"
+        },
+        "resultType": {
+          "description": "The data type returned by the foreign key extractor",
+          "type": "string"
+        },
+        "stores": {
+          "description": "A list of store names that the foreign key extractor uses. Required if the function wants to use a state store.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": {
+          "description": "The type of the function, fixed value \"forEach\"",
+          "enum": [
+            "forEach"
+          ]
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "ForeignKeyExtractorDefinition",
+      "type": "object"
+    },
+    "GeneratorDefinition": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "code": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The (multiline) code of the message generator"
+        },
+        "expression": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The expression returned by the message generator"
+        },
+        "globalCode": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Global (multiline) code that gets loaded into the Python context outside of the message generator. Can be used for defining eg. global variables."
+        },
+        "name": {
+          "description": "The name of the message generator. If this field is not defined, then the name is derived from the context.",
+          "type": "string"
+        },
+        "parameters": {
+          "description": "A list of parameters to be passed into the message generator",
+          "items": {
+            "$ref": "#/definitions/ParameterDefinition"
+          },
+          "type": "array"
+        },
+        "resultType": {
+          "description": "The data type returned by the message generator",
+          "type": "string"
+        },
+        "stores": {
+          "description": "A list of store names that the message generator uses. Required if the function wants to use a state store.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": {
+          "description": "The type of the function, fixed value \"generator\"",
+          "enum": [
+            "generator"
+          ]
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "GeneratorDefinition",
+      "type": "object"
+    },
+    "GenericFunctionDefinition": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "code": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The (multiline) code of the generic function"
+        },
+        "expression": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The expression returned by the generic function"
+        },
+        "globalCode": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Global (multiline) code that gets loaded into the Python context outside of the generic function. Can be used for defining eg. global variables."
+        },
+        "name": {
+          "description": "The name of the generic function. If this field is not defined, then the name is derived from the context.",
+          "type": "string"
+        },
+        "parameters": {
+          "description": "A list of parameters to be passed into the generic function",
+          "items": {
+            "$ref": "#/definitions/ParameterDefinition"
+          },
+          "type": "array"
+        },
+        "resultType": {
+          "description": "The data type returned by the generic function",
+          "type": "string"
+        },
+        "stores": {
+          "description": "A list of store names that the generic function uses. Required if the function wants to use a state store.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": {
+          "description": "The type of the function, fixed value \"generic\"",
+          "enum": [
+            "generic"
+          ]
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "GenericFunctionDefinition",
+      "type": "object"
+    },
+    "GlobalTable": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "globalTable": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/GlobalTableDefinition"
+            }
+          ],
+          "description": "(Required for GlobalTable joins) A reference to the GlobalTable, or an inline definition of the GlobalTable to join with"
+        },
+        "mapper": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/ValueJoinerDefinition"
+            }
+          ],
+          "description": "(GlobalTable joins) A function that maps the key value from the stream with the primary key of the GlobalTable"
+        },
+        "name": {
+          "description": "The name of the operation processor",
+          "type": "string"
+        },
+        "store": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/KeyValueStateStoreDefinition"
+            },
+            {
+              "$ref": "#/definitions/SessionStateStoreDefinition"
+            },
+            {
+              "$ref": "#/definitions/WindowStateStoreDefinition"
+            }
+          ],
+          "description": "Materialized view of the joined streams"
+        },
+        "type": {
+          "description": "The type of the operation, fixed value \"join\"",
+          "type": "string"
+        },
+        "valueJoiner": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/ValueJoinerDefinition"
+            }
+          ],
+          "description": "(GlobalTable joins) A function that joins two values"
+        }
+      },
+      "required": [
+        "type",
+        "type",
+        "globalTable",
+        "mapper",
+        "valueJoiner",
+        "store"
+      ],
+      "title": "GlobalTable",
+      "type": "object"
+    },
+    "GlobalTableDefinition": {
+      "additionalProperties": false,
+      "description": "Contains a definition of a GlobalTable, which can be referenced by producers and pipelines",
+      "properties": {
+        "keyType": {
+          "description": "The key type of the global table",
+          "type": "string"
+        },
+        "topic": {
+          "description": "The name of the Kafka topic for this global table",
+          "type": "string"
+        },
+        "valueType": {
+          "description": "The value type of the global table",
+          "type": "string"
+        }
+      },
+      "required": [
+        "topic",
+        "keyType",
+        "valueType"
+      ],
+      "title": "GlobalTableDefinition",
+      "type": "object"
+    },
+    "GroupByKeyOperation": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "name": {
+          "description": "The name of the operation processor",
+          "type": "string"
+        },
+        "store": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/KeyValueStateStoreDefinition"
+            }
+          ],
+          "description": "Materialized view of the grouped stream"
+        },
+        "type": {
+          "description": "The type of the operation, fixed value \"groupByKey\"",
+          "enum": [
+            "groupByKey"
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "type",
+        "store"
+      ],
+      "title": "GroupByKeyOperation",
+      "type": "object"
+    },
+    "GroupByOperation": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "mapper": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/KeyValueMapperDefinition"
+            }
+          ],
+          "description": "Function to map records to a key they can be grouped on"
+        },
+        "name": {
+          "description": "The name of the operation processor",
+          "type": "string"
+        },
+        "store": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/KeyValueStateStoreDefinition"
+            }
+          ],
+          "description": "Materialized view of the grouped stream or table"
+        },
+        "type": {
+          "description": "The type of the operation, fixed value \"groupByKey\"",
+          "enum": [
+            "groupByKey"
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "type",
+        "mapper",
+        "store"
+      ],
+      "title": "GroupByOperation",
+      "type": "object"
+    },
+    "InitializerDefinition": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "code": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The (multiline) code of the initializer"
+        },
+        "expression": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The expression returned by the initializer"
+        },
+        "globalCode": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Global (multiline) code that gets loaded into the Python context outside of the initializer. Can be used for defining eg. global variables."
+        },
+        "name": {
+          "description": "The name of the initializer. If this field is not defined, then the name is derived from the context.",
+          "type": "string"
+        },
+        "parameters": {
+          "description": "A list of parameters to be passed into the initializer",
+          "items": {
+            "$ref": "#/definitions/ParameterDefinition"
+          },
+          "type": "array"
+        },
+        "resultType": {
+          "description": "The data type returned by the initializer",
+          "type": "string"
+        },
+        "stores": {
+          "description": "A list of store names that the initializer uses. Required if the function wants to use a state store.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": {
+          "description": "The type of the function, fixed value \"initializer\"",
+          "enum": [
+            "initializer"
+          ]
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "InitializerDefinition",
+      "type": "object"
+    },
+    "KeyTransformerDefinition": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "code": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The (multiline) code of the key transformer"
+        },
+        "expression": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The expression returned by the key transformer"
+        },
+        "globalCode": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Global (multiline) code that gets loaded into the Python context outside of the key transformer. Can be used for defining eg. global variables."
+        },
+        "name": {
+          "description": "The name of the key transformer. If this field is not defined, then the name is derived from the context.",
+          "type": "string"
+        },
+        "parameters": {
+          "description": "A list of parameters to be passed into the key transformer",
+          "items": {
+            "$ref": "#/definitions/ParameterDefinition"
+          },
+          "type": "array"
+        },
+        "resultType": {
+          "description": "The data type returned by the key transformer",
+          "type": "string"
+        },
+        "stores": {
+          "description": "A list of store names that the key transformer uses. Required if the function wants to use a state store.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": {
+          "description": "The type of the function, fixed value \"keyTransformer\"",
+          "enum": [
+            "keyTransformer"
+          ]
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "KeyTransformerDefinition",
+      "type": "object"
+    },
+    "KeyValueMapperDefinition": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "code": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The (multiline) code of the keyvalue mapper"
+        },
+        "expression": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The expression returned by the keyvalue mapper"
+        },
+        "globalCode": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Global (multiline) code that gets loaded into the Python context outside of the keyvalue mapper. Can be used for defining eg. global variables."
+        },
+        "name": {
+          "description": "The name of the keyvalue mapper. If this field is not defined, then the name is derived from the context.",
+          "type": "string"
+        },
+        "parameters": {
+          "description": "A list of parameters to be passed into the keyvalue mapper",
+          "items": {
+            "$ref": "#/definitions/ParameterDefinition"
+          },
+          "type": "array"
+        },
+        "resultType": {
+          "description": "The data type returned by the keyvalue mapper",
+          "type": "string"
+        },
+        "stores": {
+          "description": "A list of store names that the keyvalue mapper uses. Required if the function wants to use a state store.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": {
+          "description": "The type of the function, fixed value \"keyValueMapper\"",
+          "enum": [
+            "keyValueMapper"
+          ]
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "KeyValueMapperDefinition",
+      "type": "object"
+    },
+    "KeyValuePrinterDefinition": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "code": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The (multiline) code of the keyvalue printer"
+        },
+        "expression": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The expression returned by the keyvalue printer"
+        },
+        "globalCode": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Global (multiline) code that gets loaded into the Python context outside of the keyvalue printer. Can be used for defining eg. global variables."
+        },
+        "name": {
+          "description": "The name of the keyvalue printer. If this field is not defined, then the name is derived from the context.",
+          "type": "string"
+        },
+        "parameters": {
+          "description": "A list of parameters to be passed into the keyvalue printer",
+          "items": {
+            "$ref": "#/definitions/ParameterDefinition"
+          },
+          "type": "array"
+        },
+        "resultType": {
+          "description": "The data type returned by the keyvalue printer",
+          "type": "string"
+        },
+        "stores": {
+          "description": "A list of store names that the keyvalue printer uses. Required if the function wants to use a state store.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": {
+          "description": "The type of the function, fixed value \"keyValuePrinter\"",
+          "enum": [
+            "keyValuePrinter"
+          ]
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "KeyValuePrinterDefinition",
+      "type": "object"
+    },
+    "KeyValueStateStoreDefinition": {
+      "additionalProperties": false,
+      "description": "Definition of a keyValue state store",
+      "properties": {
+        "caching": {
+          "description": "\"true\" if changed to the keyValue store need to be buffered and periodically released, \"false\" to emit all changes directly",
+          "type": "boolean"
+        },
+        "historyRetention": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "(Versioned only) The duration for which old record versions are available for query (cannot be negative)"
+        },
+        "keyType": {
+          "description": "The key type of the keyValue store",
+          "type": "string"
+        },
+        "logging": {
+          "description": "\"true\" if a changelog topic should be set up on Kafka for this keyValue store, \"false\" otherwise",
+          "type": "boolean"
+        },
+        "name": {
+          "description": "The name of the keyValue store. If this field is not defined, then the name is derived from the context.",
+          "type": "string"
+        },
+        "persistent": {
+          "description": "\"true\" if this keyValue store needs to be stored on disk, \"false\" otherwise",
+          "type": "boolean"
+        },
+        "segmentInterval": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Size of segments for storing old record versions (must be positive). Old record versions for the same key in a single segment are stored (updated and accessed) together. The only impact of this parameter is performance. If segments are large and a workload results in many record versions for the same key being collected in a single segment, performance may degrade as a result. On the other hand, historical reads (which access older segments) and out-of-order writes may slow down if there are too many segments."
+        },
+        "timestamped": {
+          "description": "\"true\" if elements in the store are timestamped, \"false\" otherwise",
+          "type": "boolean"
+        },
+        "type": {
+          "description": "The type of the state store, fixed value \"keyValue\"",
+          "enum": [
+            "keyValue"
+          ]
+        },
+        "valueType": {
+          "description": "The value type of the keyValue store",
+          "type": "string"
+        },
+        "versioned": {
+          "description": "\"true\" if elements in the store are versioned, \"false\" otherwise",
+          "type": "boolean"
+        }
+      },
+      "title": "KeyValueStateStoreDefinition",
+      "type": "object"
+    },
+    "KeyValueToKeyValueListTransformerDefinition": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "code": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The (multiline) code of the keyvalue-to-keyvaluelist transformer"
+        },
+        "expression": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The expression returned by the keyvalue-to-keyvaluelist transformer"
+        },
+        "globalCode": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Global (multiline) code that gets loaded into the Python context outside of the keyvalue-to-keyvaluelist transformer. Can be used for defining eg. global variables."
+        },
+        "name": {
+          "description": "The name of the keyvalue-to-keyvaluelist transformer. If this field is not defined, then the name is derived from the context.",
+          "type": "string"
+        },
+        "parameters": {
+          "description": "A list of parameters to be passed into the keyvalue-to-keyvaluelist transformer",
+          "items": {
+            "$ref": "#/definitions/ParameterDefinition"
+          },
+          "type": "array"
+        },
+        "resultType": {
+          "description": "The data type returned by the keyvalue-to-keyvaluelist transformer",
+          "type": "string"
+        },
+        "stores": {
+          "description": "A list of store names that the keyvalue-to-keyvaluelist transformer uses. Required if the function wants to use a state store.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": {
+          "description": "The type of the function, fixed value \"keyValueToKeyValueListTransformer\"",
+          "enum": [
+            "keyValueToKeyValueListTransformer"
+          ]
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "KeyValueToKeyValueListTransformerDefinition",
+      "type": "object"
+    },
+    "KeyValueToValueListTransformerDefinition": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "code": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The (multiline) code of the keyvalue-to-valuelist transformer"
+        },
+        "expression": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The expression returned by the keyvalue-to-valuelist transformer"
+        },
+        "globalCode": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Global (multiline) code that gets loaded into the Python context outside of the keyvalue-to-valuelist transformer. Can be used for defining eg. global variables."
+        },
+        "name": {
+          "description": "The name of the keyvalue-to-valuelist transformer. If this field is not defined, then the name is derived from the context.",
+          "type": "string"
+        },
+        "parameters": {
+          "description": "A list of parameters to be passed into the keyvalue-to-valuelist transformer",
+          "items": {
+            "$ref": "#/definitions/ParameterDefinition"
+          },
+          "type": "array"
+        },
+        "resultType": {
+          "description": "The data type returned by the keyvalue-to-valuelist transformer",
+          "type": "string"
+        },
+        "stores": {
+          "description": "A list of store names that the keyvalue-to-valuelist transformer uses. Required if the function wants to use a state store.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": {
+          "description": "The type of the function, fixed value \"keyValueToValueListTransformer\"",
+          "enum": [
+            "keyValueToValueListTransformer"
+          ]
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "KeyValueToValueListTransformerDefinition",
+      "type": "object"
+    },
+    "KeyValueTransformerDefinition": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "code": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The (multiline) code of the keyvalue transformer"
+        },
+        "expression": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The expression returned by the keyvalue transformer"
+        },
+        "globalCode": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Global (multiline) code that gets loaded into the Python context outside of the keyvalue transformer. Can be used for defining eg. global variables."
+        },
+        "name": {
+          "description": "The name of the keyvalue transformer. If this field is not defined, then the name is derived from the context.",
+          "type": "string"
+        },
+        "parameters": {
+          "description": "A list of parameters to be passed into the keyvalue transformer",
+          "items": {
+            "$ref": "#/definitions/ParameterDefinition"
+          },
+          "type": "array"
+        },
+        "resultType": {
+          "description": "The data type returned by the keyvalue transformer",
+          "type": "string"
+        },
+        "stores": {
+          "description": "A list of store names that the keyvalue transformer uses. Required if the function wants to use a state store.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": {
+          "description": "The type of the function, fixed value \"keyValueTransformer\"",
+          "enum": [
+            "keyValueTransformer"
+          ]
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "KeyValueTransformerDefinition",
+      "type": "object"
+    },
+    "MergeOperation": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "name": {
+          "description": "The name of the operation processor",
+          "type": "string"
+        },
+        "stream": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/StreamDefinition"
+            }
+          ],
+          "description": "The stream to merge with"
+        },
+        "type": {
+          "description": "The type of the operation, fixed value \"merge\"",
+          "enum": [
+            "merge"
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "type",
+        "stream"
+      ],
+      "title": "MergeOperation",
+      "type": "object"
+    },
+    "MergerDefinition": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "code": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The (multiline) code of the merger"
+        },
+        "expression": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The expression returned by the merger"
+        },
+        "globalCode": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Global (multiline) code that gets loaded into the Python context outside of the merger. Can be used for defining eg. global variables."
+        },
+        "name": {
+          "description": "The name of the merger. If this field is not defined, then the name is derived from the context.",
+          "type": "string"
+        },
+        "parameters": {
+          "description": "A list of parameters to be passed into the merger",
+          "items": {
+            "$ref": "#/definitions/ParameterDefinition"
+          },
+          "type": "array"
+        },
+        "resultType": {
+          "description": "The data type returned by the merger",
+          "type": "string"
+        },
+        "stores": {
+          "description": "A list of store names that the merger uses. Required if the function wants to use a state store.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": {
+          "description": "The type of the function, fixed value \"merger\"",
+          "enum": [
+            "merger"
+          ]
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "MergerDefinition",
+      "type": "object"
+    },
+    "ParameterDefinition": {
+      "additionalProperties": false,
+      "description": "Defines a parameter for a user function",
+      "properties": {
+        "defaultValue": {
+          "description": "The default value for the parameter",
+          "type": "string"
+        },
+        "name": {
+          "description": "The name of the parameter",
+          "type": "string"
+        },
+        "type": {
+          "description": "The type of the parameter",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "type"
+      ],
+      "title": "ParameterDefinition",
+      "type": "object"
+    },
+    "PeekOperation": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "forEach": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/ForEachActionDefinition"
+            }
+          ],
+          "description": "A function that gets called for every message in the stream"
+        },
+        "name": {
+          "description": "The name of the operation processor",
+          "type": "string"
+        },
+        "stores": {
+          "description": "The names of all state stores used by the function",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": {
+          "description": "The type of the operation, fixed value \"peek\"",
+          "enum": [
+            "peek"
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "type",
+        "forEach"
+      ],
+      "title": "PeekOperation",
+      "type": "object"
+    },
+    "PipelineDefinitionWithAsSink": {
+      "additionalProperties": false,
+      "description": "Defines a pipeline through a source, a series of operations to perform on it and a sink operation to close the stream with",
+      "properties": {
+        "as": {
+          "description": "The name to register the pipeline result under, which can be used as source by follow-up pipelines",
+          "type": "string"
+        },
+        "from": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/TopicDefinition"
+            }
+          ],
+          "description": "Pipeline source"
+        },
+        "via": {
+          "description": "A series of operations performed on the input stream",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/AggregateOperation"
+              },
+              {
+                "$ref": "#/definitions/CogroupOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertKeyValueOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertValueOperation"
+              },
+              {
+                "$ref": "#/definitions/CountOperation"
+              },
+              {
+                "$ref": "#/definitions/FilterOperation"
+              },
+              {
+                "$ref": "#/definitions/FilterNotOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueToKeyValueListOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueToValueListOperation"
+              },
+              {
+                "$ref": "#/definitions/GroupByOperation"
+              },
+              {
+                "$ref": "#/definitions/GroupByKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/Stream"
+              },
+              {
+                "$ref": "#/definitions/Table"
+              },
+              {
+                "$ref": "#/definitions/GlobalTable"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformValueOperation"
+              },
+              {
+                "$ref": "#/definitions/MergeOperation"
+              },
+              {
+                "$ref": "#/definitions/PeekOperation"
+              },
+              {
+                "$ref": "#/definitions/ReduceOperation"
+              },
+              {
+                "$ref": "#/definitions/RepartitionOperation"
+              },
+              {
+                "$ref": "#/definitions/SuppressOperation"
+              },
+              {
+                "$ref": "#/definitions/ToStreamOperation"
+              },
+              {
+                "$ref": "#/definitions/ToTableOperation"
+              },
+              {
+                "$ref": "#/definitions/WindowBySessionOperation"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithHoppingWindowDefinition"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithSlidingWindowDefinition"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithTumblingWindowDefinition"
+              }
+            ]
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "from",
+        "as"
+      ],
+      "title": "PipelineDefinitionWithAsSink",
+      "type": "object"
+    },
+    "PipelineDefinitionWithBranchSink": {
+      "additionalProperties": false,
+      "description": "Defines a pipeline through a source, a series of operations to perform on it and a sink operation to close the stream with",
+      "properties": {
+        "branch": {
+          "description": "Defines a single branch, consisting of a condition and a pipeline to execute for messages that fulfil the predicate",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/nameWithPipelineDefinitionWithAsSink"
+              },
+              {
+                "$ref": "#/definitions/nameWithPipelineDefinitionWithBranchSink"
+              },
+              {
+                "$ref": "#/definitions/nameWithPipelineDefinitionWithForEachSink"
+              },
+              {
+                "$ref": "#/definitions/nameWithPipelineDefinitionWithPrintSink"
+              },
+              {
+                "$ref": "#/definitions/nameWithPipelineDefinitionWithToSink"
+              },
+              {
+                "$ref": "#/definitions/nameWithPipelineDefinitionWithNoSink"
+              }
+            ]
+          },
+          "type": "array"
+        },
+        "from": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/TopicDefinition"
+            }
+          ],
+          "description": "Pipeline source"
+        },
+        "via": {
+          "description": "A series of operations performed on the input stream",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/AggregateOperation"
+              },
+              {
+                "$ref": "#/definitions/CogroupOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertKeyValueOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertValueOperation"
+              },
+              {
+                "$ref": "#/definitions/CountOperation"
+              },
+              {
+                "$ref": "#/definitions/FilterOperation"
+              },
+              {
+                "$ref": "#/definitions/FilterNotOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueToKeyValueListOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueToValueListOperation"
+              },
+              {
+                "$ref": "#/definitions/GroupByOperation"
+              },
+              {
+                "$ref": "#/definitions/GroupByKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/Stream"
+              },
+              {
+                "$ref": "#/definitions/Table"
+              },
+              {
+                "$ref": "#/definitions/GlobalTable"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformValueOperation"
+              },
+              {
+                "$ref": "#/definitions/MergeOperation"
+              },
+              {
+                "$ref": "#/definitions/PeekOperation"
+              },
+              {
+                "$ref": "#/definitions/ReduceOperation"
+              },
+              {
+                "$ref": "#/definitions/RepartitionOperation"
+              },
+              {
+                "$ref": "#/definitions/SuppressOperation"
+              },
+              {
+                "$ref": "#/definitions/ToStreamOperation"
+              },
+              {
+                "$ref": "#/definitions/ToTableOperation"
+              },
+              {
+                "$ref": "#/definitions/WindowBySessionOperation"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithHoppingWindowDefinition"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithSlidingWindowDefinition"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithTumblingWindowDefinition"
+              }
+            ]
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "from",
+        "branch"
+      ],
+      "title": "PipelineDefinitionWithBranchSink",
+      "type": "object"
+    },
+    "PipelineDefinitionWithForEachSink": {
+      "additionalProperties": false,
+      "description": "Defines a pipeline through a source, a series of operations to perform on it and a sink operation to close the stream with",
+      "properties": {
+        "forEach": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/ForEachActionDefinition"
+            }
+          ],
+          "description": "A function that gets called for every message"
+        },
+        "from": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/TopicDefinition"
+            }
+          ],
+          "description": "Pipeline source"
+        },
+        "via": {
+          "description": "A series of operations performed on the input stream",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/AggregateOperation"
+              },
+              {
+                "$ref": "#/definitions/CogroupOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertKeyValueOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertValueOperation"
+              },
+              {
+                "$ref": "#/definitions/CountOperation"
+              },
+              {
+                "$ref": "#/definitions/FilterOperation"
+              },
+              {
+                "$ref": "#/definitions/FilterNotOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueToKeyValueListOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueToValueListOperation"
+              },
+              {
+                "$ref": "#/definitions/GroupByOperation"
+              },
+              {
+                "$ref": "#/definitions/GroupByKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/Stream"
+              },
+              {
+                "$ref": "#/definitions/Table"
+              },
+              {
+                "$ref": "#/definitions/GlobalTable"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformValueOperation"
+              },
+              {
+                "$ref": "#/definitions/MergeOperation"
+              },
+              {
+                "$ref": "#/definitions/PeekOperation"
+              },
+              {
+                "$ref": "#/definitions/ReduceOperation"
+              },
+              {
+                "$ref": "#/definitions/RepartitionOperation"
+              },
+              {
+                "$ref": "#/definitions/SuppressOperation"
+              },
+              {
+                "$ref": "#/definitions/ToStreamOperation"
+              },
+              {
+                "$ref": "#/definitions/ToTableOperation"
+              },
+              {
+                "$ref": "#/definitions/WindowBySessionOperation"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithHoppingWindowDefinition"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithSlidingWindowDefinition"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithTumblingWindowDefinition"
+              }
+            ]
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "from"
+      ],
+      "title": "PipelineDefinitionWithForEachSink",
+      "type": "object"
+    },
+    "PipelineDefinitionWithNoSink": {
+      "additionalProperties": false,
+      "description": "Defines a pipeline through a source, a series of operations to perform on it and a sink operation to close the stream with",
+      "properties": {
+        "from": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/TopicDefinition"
+            }
+          ],
+          "description": "Pipeline source"
+        },
+        "via": {
+          "description": "A series of operations performed on the input stream",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/AggregateOperation"
+              },
+              {
+                "$ref": "#/definitions/CogroupOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertKeyValueOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertValueOperation"
+              },
+              {
+                "$ref": "#/definitions/CountOperation"
+              },
+              {
+                "$ref": "#/definitions/FilterOperation"
+              },
+              {
+                "$ref": "#/definitions/FilterNotOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueToKeyValueListOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueToValueListOperation"
+              },
+              {
+                "$ref": "#/definitions/GroupByOperation"
+              },
+              {
+                "$ref": "#/definitions/GroupByKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/Stream"
+              },
+              {
+                "$ref": "#/definitions/Table"
+              },
+              {
+                "$ref": "#/definitions/GlobalTable"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformValueOperation"
+              },
+              {
+                "$ref": "#/definitions/MergeOperation"
+              },
+              {
+                "$ref": "#/definitions/PeekOperation"
+              },
+              {
+                "$ref": "#/definitions/ReduceOperation"
+              },
+              {
+                "$ref": "#/definitions/RepartitionOperation"
+              },
+              {
+                "$ref": "#/definitions/SuppressOperation"
+              },
+              {
+                "$ref": "#/definitions/ToStreamOperation"
+              },
+              {
+                "$ref": "#/definitions/ToTableOperation"
+              },
+              {
+                "$ref": "#/definitions/WindowBySessionOperation"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithHoppingWindowDefinition"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithSlidingWindowDefinition"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithTumblingWindowDefinition"
+              }
+            ]
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "from"
+      ],
+      "title": "PipelineDefinitionWithNoSink",
+      "type": "object"
+    },
+    "PipelineDefinitionWithPrintSink": {
+      "additionalProperties": false,
+      "description": "Defines a pipeline through a source, a series of operations to perform on it and a sink operation to close the stream with",
+      "properties": {
+        "from": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/TopicDefinition"
+            }
+          ],
+          "description": "Pipeline source"
+        },
+        "print": {
+          "$ref": "#/definitions/PrintOperation",
+          "description": "The specification of where to print messages to"
+        },
+        "via": {
+          "description": "A series of operations performed on the input stream",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/AggregateOperation"
+              },
+              {
+                "$ref": "#/definitions/CogroupOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertKeyValueOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertValueOperation"
+              },
+              {
+                "$ref": "#/definitions/CountOperation"
+              },
+              {
+                "$ref": "#/definitions/FilterOperation"
+              },
+              {
+                "$ref": "#/definitions/FilterNotOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueToKeyValueListOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueToValueListOperation"
+              },
+              {
+                "$ref": "#/definitions/GroupByOperation"
+              },
+              {
+                "$ref": "#/definitions/GroupByKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/Stream"
+              },
+              {
+                "$ref": "#/definitions/Table"
+              },
+              {
+                "$ref": "#/definitions/GlobalTable"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformValueOperation"
+              },
+              {
+                "$ref": "#/definitions/MergeOperation"
+              },
+              {
+                "$ref": "#/definitions/PeekOperation"
+              },
+              {
+                "$ref": "#/definitions/ReduceOperation"
+              },
+              {
+                "$ref": "#/definitions/RepartitionOperation"
+              },
+              {
+                "$ref": "#/definitions/SuppressOperation"
+              },
+              {
+                "$ref": "#/definitions/ToStreamOperation"
+              },
+              {
+                "$ref": "#/definitions/ToTableOperation"
+              },
+              {
+                "$ref": "#/definitions/WindowBySessionOperation"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithHoppingWindowDefinition"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithSlidingWindowDefinition"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithTumblingWindowDefinition"
+              }
+            ]
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "from"
+      ],
+      "title": "PipelineDefinitionWithPrintSink",
+      "type": "object"
+    },
+    "PipelineDefinitionWithToSink": {
+      "additionalProperties": false,
+      "description": "Defines a pipeline through a source, a series of operations to perform on it and a sink operation to close the stream with",
+      "properties": {
+        "from": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/TopicDefinition"
+            }
+          ],
+          "description": "Pipeline source"
+        },
+        "to": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/TopicNameExtractor"
+            },
+            {
+              "$ref": "#/definitions/Topic"
+            }
+          ],
+          "description": "Either a topic or topic name extractor that defines where to write pipeline messages to"
+        },
+        "via": {
+          "description": "A series of operations performed on the input stream",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/AggregateOperation"
+              },
+              {
+                "$ref": "#/definitions/CogroupOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertKeyValueOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertValueOperation"
+              },
+              {
+                "$ref": "#/definitions/CountOperation"
+              },
+              {
+                "$ref": "#/definitions/FilterOperation"
+              },
+              {
+                "$ref": "#/definitions/FilterNotOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueToKeyValueListOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueToValueListOperation"
+              },
+              {
+                "$ref": "#/definitions/GroupByOperation"
+              },
+              {
+                "$ref": "#/definitions/GroupByKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/Stream"
+              },
+              {
+                "$ref": "#/definitions/Table"
+              },
+              {
+                "$ref": "#/definitions/GlobalTable"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformValueOperation"
+              },
+              {
+                "$ref": "#/definitions/MergeOperation"
+              },
+              {
+                "$ref": "#/definitions/PeekOperation"
+              },
+              {
+                "$ref": "#/definitions/ReduceOperation"
+              },
+              {
+                "$ref": "#/definitions/RepartitionOperation"
+              },
+              {
+                "$ref": "#/definitions/SuppressOperation"
+              },
+              {
+                "$ref": "#/definitions/ToStreamOperation"
+              },
+              {
+                "$ref": "#/definitions/ToTableOperation"
+              },
+              {
+                "$ref": "#/definitions/WindowBySessionOperation"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithHoppingWindowDefinition"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithSlidingWindowDefinition"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithTumblingWindowDefinition"
+              }
+            ]
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "from"
+      ],
+      "title": "PipelineDefinitionWithToSink",
+      "type": "object"
+    },
+    "PredicateDefinition": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "code": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The (multiline) code of the predicate"
+        },
+        "expression": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The expression returned by the predicate"
+        },
+        "globalCode": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Global (multiline) code that gets loaded into the Python context outside of the predicate. Can be used for defining eg. global variables."
+        },
+        "name": {
+          "description": "The name of the predicate. If this field is not defined, then the name is derived from the context.",
+          "type": "string"
+        },
+        "parameters": {
+          "description": "A list of parameters to be passed into the predicate",
+          "items": {
+            "$ref": "#/definitions/ParameterDefinition"
+          },
+          "type": "array"
+        },
+        "resultType": {
+          "description": "The data type returned by the predicate",
+          "type": "string"
+        },
+        "stores": {
+          "description": "A list of store names that the predicate uses. Required if the function wants to use a state store.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": {
+          "description": "The type of the function, fixed value \"predicate\"",
+          "enum": [
+            "predicate"
+          ]
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "PredicateDefinition",
+      "type": "object"
+    },
+    "PrintOperation": {
+      "additionalProperties": false,
+      "description": "Operation to print the contents of a pipeline on the screen or to write them to a file",
+      "properties": {
+        "filename": {
+          "description": "The filename to output records to. If nothing is specified, then messages will be printed on stdout",
+          "type": "string"
+        },
+        "label": {
+          "description": "A label to attach to the output records",
+          "type": "string"
+        },
+        "mapper": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/KeyValuePrinterDefinition"
+            }
+          ],
+          "description": "A function to convert record into a string for output"
+        }
+      },
+      "title": "PrintOperation",
+      "type": "object"
+    },
+    "ProducerDefinition": {
+      "additionalProperties": false,
+      "description": "Definition of a Producer that regularly generates messages for a topic",
+      "properties": {
+        "condition": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/PredicateDefinition"
+            }
+          ],
+          "description": "A function that validates the generator's result message. Returns \"true\" when the message may be produced on the topic, \"false\" otherwise."
+        },
+        "generator": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/GeneratorDefinition"
+            }
+          ],
+          "description": "The function that generates records"
+        },
+        "interval": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The interval with which the generator is called"
+        },
+        "to": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/ShortTopicDefinition"
+            }
+          ],
+          "description": "The topic to produce to"
+        }
+      },
+      "required": [
+        "generator",
+        "interval",
+        "to"
+      ],
+      "title": "ProducerDefinition",
+      "type": "object"
+    },
+    "ReduceOperation": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "adder": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/ReducerDefinition"
+            }
+          ],
+          "description": "A function that adds a record to the aggregate result"
+        },
+        "name": {
+          "description": "The name of the operation processor",
+          "type": "string"
+        },
+        "reducer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/ReducerDefinition"
+            }
+          ],
+          "description": "A function that computes a new aggregate result"
+        },
+        "store": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/WindowStateStoreDefinition"
+            }
+          ],
+          "description": "Materialized view of the aggregation"
+        },
+        "subtractor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/ReducerDefinition"
+            }
+          ],
+          "description": "A function that removes a record from the aggregate result"
+        },
+        "type": {
+          "description": "The type of the operation, fixed value \"reduce\"",
+          "enum": [
+            "reduce"
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "type",
+        "reducer",
+        "adder",
+        "subtractor",
+        "store"
+      ],
+      "title": "ReduceOperation",
+      "type": "object"
+    },
+    "ReducerDefinition": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "code": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The (multiline) code of the reducer"
+        },
+        "expression": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The expression returned by the reducer"
+        },
+        "globalCode": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Global (multiline) code that gets loaded into the Python context outside of the reducer. Can be used for defining eg. global variables."
+        },
+        "name": {
+          "description": "The name of the reducer. If this field is not defined, then the name is derived from the context.",
+          "type": "string"
+        },
+        "parameters": {
+          "description": "A list of parameters to be passed into the reducer",
+          "items": {
+            "$ref": "#/definitions/ParameterDefinition"
+          },
+          "type": "array"
+        },
+        "resultType": {
+          "description": "The data type returned by the reducer",
+          "type": "string"
+        },
+        "stores": {
+          "description": "A list of store names that the reducer uses. Required if the function wants to use a state store.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": {
+          "description": "The type of the function, fixed value \"reducer\"",
+          "enum": [
+            "reducer"
+          ]
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "ReducerDefinition",
+      "type": "object"
+    },
+    "RepartitionOperation": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "name": {
+          "description": "The name of the operation processor",
+          "type": "string"
+        },
+        "partitioner": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/StreamPartitionerDefinition"
+            }
+          ],
+          "description": "A function that partitions stream records"
+        },
+        "type": {
+          "description": "The type of the operation, fixed value \"repartition\"",
+          "enum": [
+            "repartition"
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "type",
+        "partitioner"
+      ],
+      "title": "RepartitionOperation",
+      "type": "object"
+    },
+    "SessionStateStoreDefinition": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "caching": {
+          "description": "\"true\" if changed to the session store need to be buffered and periodically released, \"false\" to emit all changes directly",
+          "type": "boolean"
+        },
+        "keyType": {
+          "description": "The key type of the session store",
+          "type": "string"
+        },
+        "logging": {
+          "description": "\"true\" if a changelog topic should be set up on Kafka for this session store, \"false\" otherwise",
+          "type": "boolean"
+        },
+        "name": {
+          "description": "The name of the session store. If this field is not defined, then the name is derived from the context.",
+          "type": "string"
+        },
+        "persistent": {
+          "description": "\"true\" if this session store needs to be stored on disk, \"false\" otherwise",
+          "type": "boolean"
+        },
+        "retention": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The duration for which elements in the session store are retained"
+        },
+        "timestamped": {
+          "description": "\"true\" if elements in the store are timestamped, \"false\" otherwise",
+          "type": "boolean"
+        },
+        "type": {
+          "description": "The type of the state store, fixed value \"session\"",
+          "enum": [
+            "session"
+          ]
+        },
+        "valueType": {
+          "description": "The value type of the session store",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "type"
+      ],
+      "title": "SessionStateStoreDefinition",
+      "type": "object"
+    },
+    "ShortTopicDefinition": {
+      "additionalProperties": false,
+      "description": "Contains a definition of a Topic, which can be referenced by producers and pipelines",
+      "properties": {
+        "keyType": {
+          "description": "The key type of the topic",
+          "type": "string"
+        },
+        "topic": {
+          "description": "The name of the Kafka topic",
+          "type": "string"
+        },
+        "valueType": {
+          "description": "The value type of the topic",
+          "type": "string"
+        }
+      },
+      "required": [
+        "topic"
+      ],
+      "title": "ShortTopicDefinition",
+      "type": "object"
+    },
+    "Stream": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "grace": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "(Stream joins) The window grace period (the time to admit out-of-order events after the end of the window)"
+        },
+        "name": {
+          "description": "The name of the operation processor",
+          "type": "string"
+        },
+        "store": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/KeyValueStateStoreDefinition"
+            },
+            {
+              "$ref": "#/definitions/SessionStateStoreDefinition"
+            },
+            {
+              "$ref": "#/definitions/WindowStateStoreDefinition"
+            }
+          ],
+          "description": "Materialized view of the joined streams"
+        },
+        "stream": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/StreamDefinition"
+            }
+          ],
+          "description": "(Required for Stream joins) A reference to the Stream, or an inline definition of the Stream to join with"
+        },
+        "type": {
+          "description": "The type of the operation, fixed value \"join\"",
+          "enum": [
+            "join"
+          ]
+        },
+        "valueJoiner": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/ValueJoinerDefinition"
+            }
+          ],
+          "description": "(Stream joins) A function that joins two values"
+        },
+        "window": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "(Stream joins) The maximum time difference for a join over two streams on the same key"
+        }
+      },
+      "required": [
+        "type",
+        "type",
+        "stream",
+        "valueJoiner",
+        "window",
+        "store"
+      ],
+      "title": "Stream",
+      "type": "object"
+    },
+    "StreamDefinition": {
+      "additionalProperties": false,
+      "description": "Contains a definition of a Stream, which can be referenced by producers and pipelines",
+      "properties": {
+        "keyType": {
+          "description": "The key type of the stream",
+          "type": "string"
+        },
+        "topic": {
+          "description": "The name of the Kafka topic for this stream",
+          "type": "string"
+        },
+        "valueType": {
+          "description": "The value type of the stream",
+          "type": "string"
+        }
+      },
+      "required": [
+        "topic",
+        "keyType",
+        "valueType"
+      ],
+      "title": "StreamDefinition",
+      "type": "object"
+    },
+    "StreamPartitionerDefinition": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "code": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The (multiline) code of the stream partitioner"
+        },
+        "expression": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The expression returned by the stream partitioner"
+        },
+        "globalCode": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Global (multiline) code that gets loaded into the Python context outside of the stream partitioner. Can be used for defining eg. global variables."
+        },
+        "name": {
+          "description": "The name of the stream partitioner. If this field is not defined, then the name is derived from the context.",
+          "type": "string"
+        },
+        "parameters": {
+          "description": "A list of parameters to be passed into the stream partitioner",
+          "items": {
+            "$ref": "#/definitions/ParameterDefinition"
+          },
+          "type": "array"
+        },
+        "resultType": {
+          "description": "The data type returned by the stream partitioner",
+          "type": "string"
+        },
+        "stores": {
+          "description": "A list of store names that the stream partitioner uses. Required if the function wants to use a state store.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": {
+          "description": "The type of the function, fixed value \"streamPartitioner\"",
+          "enum": [
+            "streamPartitioner"
+          ]
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "StreamPartitionerDefinition",
+      "type": "object"
+    },
+    "SuppressOperation": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "bufferFullStrategy": {
+          "description": "What to do when the buffer is full, either \"emitEarlyWhenFull\", or \"shutdownWhenFull\"",
+          "type": "string"
+        },
+        "duration": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The duration for which messages are suppressed"
+        },
+        "maxBytes": {
+          "description": "The maximum number of bytes in the buffer",
+          "type": "string"
+        },
+        "maxRecords": {
+          "description": "The maximum number of records in the buffer",
+          "type": "string"
+        },
+        "name": {
+          "description": "The name of the operation processor",
+          "type": "string"
+        },
+        "type": {
+          "description": "The type of the operation, fixed value \"suppress\"",
+          "enum": [
+            "suppress"
+          ]
+        },
+        "until": {
+          "description": "The method by which messages are held, either \"timeLimit\", or \"windowCloses\"",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "type",
+        "until",
+        "duration"
+      ],
+      "title": "SuppressOperation",
+      "type": "object"
+    },
+    "Table": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "foreignKeyExtractor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/ValueJoinerDefinition"
+            }
+          ],
+          "description": "(Table joins) A function that can translate the join table value to a primary key"
+        },
+        "grace": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "(Table joins) The window grace period (the time to admit out-of-order events after the end of the window)"
+        },
+        "name": {
+          "description": "The name of the operation processor",
+          "type": "string"
+        },
+        "otherPartitioner": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/StreamPartitionerDefinition"
+            }
+          ],
+          "description": "(Table joins) A function that partitions the records on the join table"
+        },
+        "partitioner": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/StreamPartitionerDefinition"
+            }
+          ],
+          "description": "(Table joins) A function that partitions the records on the primary table"
+        },
+        "store": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/KeyValueStateStoreDefinition"
+            },
+            {
+              "$ref": "#/definitions/SessionStateStoreDefinition"
+            },
+            {
+              "$ref": "#/definitions/WindowStateStoreDefinition"
+            }
+          ],
+          "description": "Materialized view of the joined streams"
+        },
+        "table": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/TableDefinition"
+            }
+          ],
+          "description": "(Required for Table joins) A reference to the Table, or an inline definition of the Table to join with"
+        },
+        "type": {
+          "description": "The type of the operation, fixed value \"join\"",
+          "type": "string"
+        },
+        "valueJoiner": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/ValueJoinerDefinition"
+            }
+          ],
+          "description": "(Table joins) A function that joins two values"
+        }
+      },
+      "required": [
+        "type",
+        "type",
+        "table",
+        "foreignKeyExtractor",
+        "valueJoiner",
+        "store"
+      ],
+      "title": "Table",
+      "type": "object"
+    },
+    "TableDefinition": {
+      "additionalProperties": false,
+      "description": "Contains a definition of a Table, which can be referenced by producers and pipelines",
+      "properties": {
+        "keyType": {
+          "description": "The key type of the table",
+          "type": "string"
+        },
+        "store": {
+          "$ref": "#/definitions/KeyValueStateStoreDefinition",
+          "description": "Keyvalue store associated with this table"
+        },
+        "topic": {
+          "description": "The name of the Kafka topic for this table",
+          "type": "string"
+        },
+        "valueType": {
+          "description": "The value type of the table",
+          "type": "string"
+        }
+      },
+      "required": [
+        "topic",
+        "keyType",
+        "valueType"
+      ],
+      "title": "TableDefinition",
+      "type": "object"
+    },
+    "ToStreamOperation": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "mapper": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/KeyTransformerDefinition"
+            }
+          ],
+          "description": "A function that computes the output key for every record"
+        },
+        "name": {
+          "description": "The name of the operation processor",
+          "type": "string"
+        },
+        "type": {
+          "description": "The type of the operation, fixed value \"toStream\"",
+          "enum": [
+            "toStream"
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "type",
+        "mapper"
+      ],
+      "title": "ToStreamOperation",
+      "type": "object"
+    },
+    "ToTableOperation": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "name": {
+          "description": "The name of the operation processor",
+          "type": "string"
+        },
+        "store": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/KeyValueStateStoreDefinition"
+            }
+          ],
+          "description": "Materialized view of the Table"
+        },
+        "type": {
+          "description": "The type of the operation, fixed value \"toTable\"",
+          "enum": [
+            "toTable"
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "type",
+        "store"
+      ],
+      "title": "ToTableOperation",
+      "type": "object"
+    },
+    "Topic": {
+      "additionalProperties": false,
+      "description": "Reference to a pre-defined topic, or an inline definition of a topic and an optional stream partitioner",
+      "properties": {
+        "partitioner": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/StreamPartitionerDefinition"
+            }
+          ],
+          "description": "Controls how the output messages are partitioned"
+        },
+        "topic": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/ShortTopicDefinition"
+            }
+          ],
+          "description": "Reference to a pre-defined topic, or an inline definition of a topic and an optional stream partitioner"
+        }
+      },
+      "title": "Topic",
+      "type": "object"
+    },
+    "TopicDefinition": {
+      "additionalProperties": false,
+      "description": "Contains a definition of a Topic, which can be referenced by producers and pipelines",
+      "properties": {
+        "keyType": {
+          "description": "The key type of the topic",
+          "type": "string"
+        },
+        "topic": {
+          "description": "The name of the Kafka topic",
+          "type": "string"
+        },
+        "valueType": {
+          "description": "The value type of the topic",
+          "type": "string"
+        }
+      },
+      "required": [
+        "topic",
+        "keyType",
+        "valueType"
+      ],
+      "title": "TopicDefinition",
+      "type": "object"
+    },
+    "TopicNameExtractor": {
+      "additionalProperties": false,
+      "description": "Reference to a pre-defined topic name extractor, or an inline definition of a topic name extractor and an optional stream partitioner",
+      "properties": {
+        "partitioner": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/StreamPartitionerDefinition"
+            }
+          ],
+          "description": "Controls how the output messages are partitioned"
+        },
+        "topicNameExtractor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/TopicNameExtractorDefinition"
+            }
+          ],
+          "description": "Reference to a pre-defined topic name extractor, or an inline definition of a topic name extractor"
+        }
+      },
+      "required": [
+        "topicNameExtractor"
+      ],
+      "title": "TopicNameExtractor",
+      "type": "object"
+    },
+    "TopicNameExtractorDefinition": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "code": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The (multiline) code of the topic name extractor"
+        },
+        "expression": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The expression returned by the topic name extractor"
+        },
+        "globalCode": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Global (multiline) code that gets loaded into the Python context outside of the topic name extractor. Can be used for defining eg. global variables."
+        },
+        "name": {
+          "description": "The name of the topic name extractor. If this field is not defined, then the name is derived from the context.",
+          "type": "string"
+        },
+        "parameters": {
+          "description": "A list of parameters to be passed into the topic name extractor",
+          "items": {
+            "$ref": "#/definitions/ParameterDefinition"
+          },
+          "type": "array"
+        },
+        "resultType": {
+          "description": "The data type returned by the topic name extractor",
+          "type": "string"
+        },
+        "stores": {
+          "description": "A list of store names that the topic name extractor uses. Required if the function wants to use a state store.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": {
+          "description": "The type of the function, fixed value \"topicNameExtractor\"",
+          "enum": [
+            "topicNameExtractor"
+          ]
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "TopicNameExtractorDefinition",
+      "type": "object"
+    },
+    "TransformKeyOperation": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "mapper": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/KeyTransformerDefinition"
+            }
+          ],
+          "description": "A function that computes a new key for each record"
+        },
+        "name": {
+          "description": "The name of the operation processor",
+          "type": "string"
+        },
+        "stores": {
+          "description": "The names of all state stores used by the function",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": {
+          "description": "The type of the operation, fixed value \"transformKey\"",
+          "enum": [
+            "transformKey"
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "type",
+        "mapper"
+      ],
+      "title": "TransformKeyOperation",
+      "type": "object"
+    },
+    "TransformKeyValueOperation": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "mapper": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/KeyValueTransformerDefinition"
+            }
+          ],
+          "description": "A function that computes a new key/value for each record"
+        },
+        "name": {
+          "description": "The name of the operation processor",
+          "type": "string"
+        },
+        "stores": {
+          "description": "The names of all state stores used by the function",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": {
+          "description": "The type of the operation, fixed value \"transformKeyValue\"",
+          "enum": [
+            "transformKeyValue"
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "type",
+        "mapper"
+      ],
+      "title": "TransformKeyValueOperation",
+      "type": "object"
+    },
+    "TransformKeyValueToKeyValueListOperation": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "mapper": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/KeyValueToKeyValueListTransformerDefinition"
+            }
+          ],
+          "description": "A function that converts every record of a stream to a list of output records."
+        },
+        "name": {
+          "description": "The name of the operation processor",
+          "type": "string"
+        },
+        "stores": {
+          "description": "The names of all state stores used by the function",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": {
+          "description": "The type of the operation, fixed value \"transformKeyValueToKeyValueList\"",
+          "enum": [
+            "transformKeyValueToKeyValueList"
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "type",
+        "mapper"
+      ],
+      "title": "TransformKeyValueToKeyValueListOperation",
+      "type": "object"
+    },
+    "TransformKeyValueToValueListOperation": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "mapper": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/KeyValueToValueListTransformerDefinition"
+            }
+          ],
+          "description": "A function that converts every key/value into a list of result values, which will be combined with the original key in the output stream"
+        },
+        "name": {
+          "description": "The name of the operation processor",
+          "type": "string"
+        },
+        "stores": {
+          "description": "The names of all state stores used by the function",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": {
+          "description": "The type of the operation, fixed value \"transformKeyValueToValueList\"",
+          "enum": [
+            "transformKeyValueToValueList"
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "type",
+        "mapper"
+      ],
+      "title": "TransformKeyValueToValueListOperation",
+      "type": "object"
+    },
+    "TransformValueOperation": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "mapper": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/ValueTransformerDefinition"
+            }
+          ],
+          "description": "A function that converts the value of every record into another value"
+        },
+        "name": {
+          "description": "The name of the operation processor",
+          "type": "string"
+        },
+        "stores": {
+          "description": "The names of all state stores used by the function",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": {
+          "description": "The type of the operation, fixed value \"transformValue\"",
+          "enum": [
+            "transformValue"
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "type",
+        "mapper"
+      ],
+      "title": "TransformValueOperation",
+      "type": "object"
+    },
+    "ValueJoinerDefinition": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "code": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The (multiline) code of the value joiner"
+        },
+        "expression": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The expression returned by the value joiner"
+        },
+        "globalCode": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Global (multiline) code that gets loaded into the Python context outside of the value joiner. Can be used for defining eg. global variables."
+        },
+        "name": {
+          "description": "The name of the value joiner. If this field is not defined, then the name is derived from the context.",
+          "type": "string"
+        },
+        "parameters": {
+          "description": "A list of parameters to be passed into the value joiner",
+          "items": {
+            "$ref": "#/definitions/ParameterDefinition"
+          },
+          "type": "array"
+        },
+        "resultType": {
+          "description": "The data type returned by the value joiner",
+          "type": "string"
+        },
+        "stores": {
+          "description": "A list of store names that the value joiner uses. Required if the function wants to use a state store.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": {
+          "description": "The type of the function, fixed value \"valueJoiner\"",
+          "enum": [
+            "valueJoiner"
+          ]
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "ValueJoinerDefinition",
+      "type": "object"
+    },
+    "ValueTransformerDefinition": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "code": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The (multiline) code of the value transformer"
+        },
+        "expression": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The expression returned by the value transformer"
+        },
+        "globalCode": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Global (multiline) code that gets loaded into the Python context outside of the value transformer. Can be used for defining eg. global variables."
+        },
+        "name": {
+          "description": "The name of the value transformer. If this field is not defined, then the name is derived from the context.",
+          "type": "string"
+        },
+        "parameters": {
+          "description": "A list of parameters to be passed into the value transformer",
+          "items": {
+            "$ref": "#/definitions/ParameterDefinition"
+          },
+          "type": "array"
+        },
+        "resultType": {
+          "description": "The data type returned by the value transformer",
+          "type": "string"
+        },
+        "stores": {
+          "description": "A list of store names that the value transformer uses. Required if the function wants to use a state store.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": {
+          "description": "The type of the function, fixed value \"valueTransformer\"",
+          "enum": [
+            "valueTransformer"
+          ]
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "ValueTransformerDefinition",
+      "type": "object"
+    },
+    "WindowBySessionOperation": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "grace": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "(Tumbling, Hopping) The grace period, during which out-of-order records can still be processed"
+        },
+        "inactivityGap": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The inactivity gap, below which two messages are considered to be of the same session"
+        },
+        "name": {
+          "description": "The name of the operation processor",
+          "type": "string"
+        },
+        "type": {
+          "description": "The type of the operation, fixed value \"windowBySession\"",
+          "enum": [
+            "windowBySession"
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "type",
+        "inactivityGap"
+      ],
+      "title": "WindowBySessionOperation",
+      "type": "object"
+    },
+    "WindowByTimeOperationWithHoppingWindowDefinition": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "advanceBy": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The amount of time to increase time windows by"
+        },
+        "duration": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The duration of time windows"
+        },
+        "grace": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The grace period, during which out-of-order records can still be processed"
+        },
+        "name": {
+          "description": "The name of the operation processor",
+          "type": "string"
+        },
+        "type": {
+          "description": "The type of the operation, fixed value \"windowByTime\"",
+          "enum": [
+            "windowByTime"
+          ]
+        },
+        "windowType": {
+          "description": "The type of window, fixed value \"hopping\"",
+          "enum": [
+            "hopping"
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "type",
+        "windowType",
+        "duration"
+      ],
+      "title": "WindowByTimeOperationWithHoppingWindowDefinition",
+      "type": "object"
+    },
+    "WindowByTimeOperationWithSlidingWindowDefinition": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "grace": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The grace period, during which out-of-order records can still be processed"
+        },
+        "name": {
+          "description": "The name of the operation processor",
+          "type": "string"
+        },
+        "timeDifference": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The maximum amount of time difference between two records"
+        },
+        "type": {
+          "description": "The type of the operation, fixed value \"windowByTime\"",
+          "enum": [
+            "windowByTime"
+          ]
+        },
+        "windowType": {
+          "description": "The type of window, fixed value \"sliding\"",
+          "enum": [
+            "sliding"
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "type",
+        "windowType"
+      ],
+      "title": "WindowByTimeOperationWithSlidingWindowDefinition",
+      "type": "object"
+    },
+    "WindowByTimeOperationWithTumblingWindowDefinition": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "duration": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The duration of time windows"
+        },
+        "grace": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The grace period, during which out-of-order records can still be processed"
+        },
+        "name": {
+          "description": "The name of the operation processor",
+          "type": "string"
+        },
+        "type": {
+          "description": "The type of the operation, fixed value \"windowByTime\"",
+          "enum": [
+            "windowByTime"
+          ]
+        },
+        "windowType": {
+          "description": "The type of window, fixed value \"tumbling\"",
+          "enum": [
+            "tumbling"
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "type",
+        "windowType",
+        "duration"
+      ],
+      "title": "WindowByTimeOperationWithTumblingWindowDefinition",
+      "type": "object"
+    },
+    "WindowStateStoreDefinition": {
+      "additionalProperties": false,
+      "description": "",
+      "properties": {
+        "caching": {
+          "description": "\"true\" if changed to the window store need to be buffered and periodically released, \"false\" to emit all changes directly",
+          "type": "boolean"
+        },
+        "keyType": {
+          "description": "The key type of the window store",
+          "type": "string"
+        },
+        "logging": {
+          "description": "\"true\" if a changelog topic should be set up on Kafka for this window store, \"false\" otherwise",
+          "type": "boolean"
+        },
+        "name": {
+          "description": "The name of the window store. If this field is not defined, then the name is derived from the context.",
+          "type": "string"
+        },
+        "persistent": {
+          "description": "\"true\" if this window store needs to be stored on disk, \"false\" otherwise",
+          "type": "boolean"
+        },
+        "retainDuplicates": {
+          "description": "Whether or not to retain duplicates",
+          "type": "boolean"
+        },
+        "retention": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "The duration for which elements in the window store are retained"
+        },
+        "timestamped": {
+          "description": "\"true\" if elements in the store are timestamped, \"false\" otherwise",
+          "type": "boolean"
+        },
+        "type": {
+          "description": "The type of the state store, fixed value \"window\"",
+          "enum": [
+            "window"
+          ]
+        },
+        "valueType": {
+          "description": "The value type of the window store",
+          "type": "string"
+        },
+        "windowSize": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Size of the windows (cannot be negative)"
+        }
+      },
+      "required": [
+        "type",
+        "type"
+      ],
+      "title": "WindowStateStoreDefinition",
+      "type": "object"
+    },
+    "nameWithPipelineDefinitionWithAsSink": {
+      "additionalProperties": false,
+      "description": "doc",
+      "properties": {
+        "as": {
+          "description": "The name to register the pipeline result under, which can be used as source by follow-up pipelines",
+          "type": "string"
+        },
+        "if": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/PredicateDefinition"
+            }
+          ],
+          "description": "Defines the condition under which messages get sent down this branch"
+        },
+        "via": {
+          "description": "A series of operations performed on the input stream",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/AggregateOperation"
+              },
+              {
+                "$ref": "#/definitions/CogroupOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertKeyValueOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertValueOperation"
+              },
+              {
+                "$ref": "#/definitions/CountOperation"
+              },
+              {
+                "$ref": "#/definitions/FilterOperation"
+              },
+              {
+                "$ref": "#/definitions/FilterNotOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueToKeyValueListOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueToValueListOperation"
+              },
+              {
+                "$ref": "#/definitions/GroupByOperation"
+              },
+              {
+                "$ref": "#/definitions/GroupByKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/Stream"
+              },
+              {
+                "$ref": "#/definitions/Table"
+              },
+              {
+                "$ref": "#/definitions/GlobalTable"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformValueOperation"
+              },
+              {
+                "$ref": "#/definitions/MergeOperation"
+              },
+              {
+                "$ref": "#/definitions/PeekOperation"
+              },
+              {
+                "$ref": "#/definitions/ReduceOperation"
+              },
+              {
+                "$ref": "#/definitions/RepartitionOperation"
+              },
+              {
+                "$ref": "#/definitions/SuppressOperation"
+              },
+              {
+                "$ref": "#/definitions/ToStreamOperation"
+              },
+              {
+                "$ref": "#/definitions/ToTableOperation"
+              },
+              {
+                "$ref": "#/definitions/WindowBySessionOperation"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithHoppingWindowDefinition"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithSlidingWindowDefinition"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithTumblingWindowDefinition"
+              }
+            ]
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "as"
+      ],
+      "title": "nameWithPipelineDefinitionWithAsSink",
+      "type": "object"
+    },
+    "nameWithPipelineDefinitionWithBranchSink": {
+      "additionalProperties": false,
+      "description": "doc",
+      "properties": {
+        "branch": {
+          "description": "Defines a single branch, consisting of a condition and a pipeline to execute for messages that fulfil the predicate",
+          "items": {
+            "$ref": "#/definitions/streamif"
+          },
+          "type": "array"
+        },
+        "if": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/PredicateDefinition"
+            }
+          ],
+          "description": "Defines the condition under which messages get sent down this branch"
+        },
+        "via": {
+          "description": "A series of operations performed on the input stream",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/AggregateOperation"
+              },
+              {
+                "$ref": "#/definitions/CogroupOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertKeyValueOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertValueOperation"
+              },
+              {
+                "$ref": "#/definitions/CountOperation"
+              },
+              {
+                "$ref": "#/definitions/FilterOperation"
+              },
+              {
+                "$ref": "#/definitions/FilterNotOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueToKeyValueListOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueToValueListOperation"
+              },
+              {
+                "$ref": "#/definitions/GroupByOperation"
+              },
+              {
+                "$ref": "#/definitions/GroupByKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/Stream"
+              },
+              {
+                "$ref": "#/definitions/Table"
+              },
+              {
+                "$ref": "#/definitions/GlobalTable"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformValueOperation"
+              },
+              {
+                "$ref": "#/definitions/MergeOperation"
+              },
+              {
+                "$ref": "#/definitions/PeekOperation"
+              },
+              {
+                "$ref": "#/definitions/ReduceOperation"
+              },
+              {
+                "$ref": "#/definitions/RepartitionOperation"
+              },
+              {
+                "$ref": "#/definitions/SuppressOperation"
+              },
+              {
+                "$ref": "#/definitions/ToStreamOperation"
+              },
+              {
+                "$ref": "#/definitions/ToTableOperation"
+              },
+              {
+                "$ref": "#/definitions/WindowBySessionOperation"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithHoppingWindowDefinition"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithSlidingWindowDefinition"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithTumblingWindowDefinition"
+              }
+            ]
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "branch"
+      ],
+      "title": "nameWithPipelineDefinitionWithBranchSink",
+      "type": "object"
+    },
+    "nameWithPipelineDefinitionWithForEachSink": {
+      "additionalProperties": false,
+      "description": "doc",
+      "properties": {
+        "forEach": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/ForEachActionDefinition"
+            }
+          ],
+          "description": "A function that gets called for every message"
+        },
+        "if": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/PredicateDefinition"
+            }
+          ],
+          "description": "Defines the condition under which messages get sent down this branch"
+        },
+        "via": {
+          "description": "A series of operations performed on the input stream",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/AggregateOperation"
+              },
+              {
+                "$ref": "#/definitions/CogroupOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertKeyValueOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertValueOperation"
+              },
+              {
+                "$ref": "#/definitions/CountOperation"
+              },
+              {
+                "$ref": "#/definitions/FilterOperation"
+              },
+              {
+                "$ref": "#/definitions/FilterNotOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueToKeyValueListOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueToValueListOperation"
+              },
+              {
+                "$ref": "#/definitions/GroupByOperation"
+              },
+              {
+                "$ref": "#/definitions/GroupByKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/Stream"
+              },
+              {
+                "$ref": "#/definitions/Table"
+              },
+              {
+                "$ref": "#/definitions/GlobalTable"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformValueOperation"
+              },
+              {
+                "$ref": "#/definitions/MergeOperation"
+              },
+              {
+                "$ref": "#/definitions/PeekOperation"
+              },
+              {
+                "$ref": "#/definitions/ReduceOperation"
+              },
+              {
+                "$ref": "#/definitions/RepartitionOperation"
+              },
+              {
+                "$ref": "#/definitions/SuppressOperation"
+              },
+              {
+                "$ref": "#/definitions/ToStreamOperation"
+              },
+              {
+                "$ref": "#/definitions/ToTableOperation"
+              },
+              {
+                "$ref": "#/definitions/WindowBySessionOperation"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithHoppingWindowDefinition"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithSlidingWindowDefinition"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithTumblingWindowDefinition"
+              }
+            ]
+          },
+          "type": "array"
+        }
+      },
+      "title": "nameWithPipelineDefinitionWithForEachSink",
+      "type": "object"
+    },
+    "nameWithPipelineDefinitionWithNoSink": {
+      "additionalProperties": false,
+      "description": "doc",
+      "properties": {
+        "if": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/PredicateDefinition"
+            }
+          ],
+          "description": "Defines the condition under which messages get sent down this branch"
+        },
+        "via": {
+          "description": "A series of operations performed on the input stream",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/AggregateOperation"
+              },
+              {
+                "$ref": "#/definitions/CogroupOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertKeyValueOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertValueOperation"
+              },
+              {
+                "$ref": "#/definitions/CountOperation"
+              },
+              {
+                "$ref": "#/definitions/FilterOperation"
+              },
+              {
+                "$ref": "#/definitions/FilterNotOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueToKeyValueListOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueToValueListOperation"
+              },
+              {
+                "$ref": "#/definitions/GroupByOperation"
+              },
+              {
+                "$ref": "#/definitions/GroupByKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/Stream"
+              },
+              {
+                "$ref": "#/definitions/Table"
+              },
+              {
+                "$ref": "#/definitions/GlobalTable"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformValueOperation"
+              },
+              {
+                "$ref": "#/definitions/MergeOperation"
+              },
+              {
+                "$ref": "#/definitions/PeekOperation"
+              },
+              {
+                "$ref": "#/definitions/ReduceOperation"
+              },
+              {
+                "$ref": "#/definitions/RepartitionOperation"
+              },
+              {
+                "$ref": "#/definitions/SuppressOperation"
+              },
+              {
+                "$ref": "#/definitions/ToStreamOperation"
+              },
+              {
+                "$ref": "#/definitions/ToTableOperation"
+              },
+              {
+                "$ref": "#/definitions/WindowBySessionOperation"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithHoppingWindowDefinition"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithSlidingWindowDefinition"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithTumblingWindowDefinition"
+              }
+            ]
+          },
+          "type": "array"
+        }
+      },
+      "title": "nameWithPipelineDefinitionWithNoSink",
+      "type": "object"
+    },
+    "nameWithPipelineDefinitionWithPrintSink": {
+      "additionalProperties": false,
+      "description": "doc",
+      "properties": {
+        "if": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/PredicateDefinition"
+            }
+          ],
+          "description": "Defines the condition under which messages get sent down this branch"
+        },
+        "print": {
+          "$ref": "#/definitions/PrintOperation",
+          "description": "The specification of where to print messages to"
+        },
+        "via": {
+          "description": "A series of operations performed on the input stream",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/AggregateOperation"
+              },
+              {
+                "$ref": "#/definitions/CogroupOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertKeyValueOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertValueOperation"
+              },
+              {
+                "$ref": "#/definitions/CountOperation"
+              },
+              {
+                "$ref": "#/definitions/FilterOperation"
+              },
+              {
+                "$ref": "#/definitions/FilterNotOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueToKeyValueListOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueToValueListOperation"
+              },
+              {
+                "$ref": "#/definitions/GroupByOperation"
+              },
+              {
+                "$ref": "#/definitions/GroupByKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/Stream"
+              },
+              {
+                "$ref": "#/definitions/Table"
+              },
+              {
+                "$ref": "#/definitions/GlobalTable"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformValueOperation"
+              },
+              {
+                "$ref": "#/definitions/MergeOperation"
+              },
+              {
+                "$ref": "#/definitions/PeekOperation"
+              },
+              {
+                "$ref": "#/definitions/ReduceOperation"
+              },
+              {
+                "$ref": "#/definitions/RepartitionOperation"
+              },
+              {
+                "$ref": "#/definitions/SuppressOperation"
+              },
+              {
+                "$ref": "#/definitions/ToStreamOperation"
+              },
+              {
+                "$ref": "#/definitions/ToTableOperation"
+              },
+              {
+                "$ref": "#/definitions/WindowBySessionOperation"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithHoppingWindowDefinition"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithSlidingWindowDefinition"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithTumblingWindowDefinition"
+              }
+            ]
+          },
+          "type": "array"
+        }
+      },
+      "title": "nameWithPipelineDefinitionWithPrintSink",
+      "type": "object"
+    },
+    "nameWithPipelineDefinitionWithToSink": {
+      "additionalProperties": false,
+      "description": "doc",
+      "properties": {
+        "if": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/PredicateDefinition"
+            }
+          ],
+          "description": "Defines the condition under which messages get sent down this branch"
+        },
+        "to": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/TopicNameExtractor"
+            },
+            {
+              "$ref": "#/definitions/Topic"
+            }
+          ],
+          "description": "Either a topic or topic name extractor that defines where to write pipeline messages to"
+        },
+        "via": {
+          "description": "A series of operations performed on the input stream",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/AggregateOperation"
+              },
+              {
+                "$ref": "#/definitions/CogroupOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertKeyValueOperation"
+              },
+              {
+                "$ref": "#/definitions/ConvertValueOperation"
+              },
+              {
+                "$ref": "#/definitions/CountOperation"
+              },
+              {
+                "$ref": "#/definitions/FilterOperation"
+              },
+              {
+                "$ref": "#/definitions/FilterNotOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueToKeyValueListOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueToValueListOperation"
+              },
+              {
+                "$ref": "#/definitions/GroupByOperation"
+              },
+              {
+                "$ref": "#/definitions/GroupByKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/Stream"
+              },
+              {
+                "$ref": "#/definitions/Table"
+              },
+              {
+                "$ref": "#/definitions/GlobalTable"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyValueOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformKeyOperation"
+              },
+              {
+                "$ref": "#/definitions/TransformValueOperation"
+              },
+              {
+                "$ref": "#/definitions/MergeOperation"
+              },
+              {
+                "$ref": "#/definitions/PeekOperation"
+              },
+              {
+                "$ref": "#/definitions/ReduceOperation"
+              },
+              {
+                "$ref": "#/definitions/RepartitionOperation"
+              },
+              {
+                "$ref": "#/definitions/SuppressOperation"
+              },
+              {
+                "$ref": "#/definitions/ToStreamOperation"
+              },
+              {
+                "$ref": "#/definitions/ToTableOperation"
+              },
+              {
+                "$ref": "#/definitions/WindowBySessionOperation"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithHoppingWindowDefinition"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithSlidingWindowDefinition"
+              },
+              {
+                "$ref": "#/definitions/WindowByTimeOperationWithTumblingWindowDefinition"
+              }
+            ]
+          },
+          "type": "array"
+        }
+      },
+      "title": "nameWithPipelineDefinitionWithToSink",
+      "type": "object"
+    },
+    "streamif": {
+      "additionalProperties": false,
+      "description": "Defines the condition under which messages get sent down this branch",
+      "properties": {
+        "if": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/PredicateDefinition"
+            }
+          ],
+          "description": "Defines the condition under which messages get sent down this branch"
+        }
+      },
+      "title": "streamif",
+      "type": "object"
+    }
+  },
+  "description": "A KSML topology description",
+  "properties": {
+    "functions": {
+      "description": "Functions that can be referenced in producers and pipelines",
+      "patternProperties": {
+        "^[a-zA-Z0-9_]+$": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/AggregatorDefinition"
+            },
+            {
+              "$ref": "#/definitions/ForEachActionDefinition"
+            },
+            {
+              "$ref": "#/definitions/ForeignKeyExtractorDefinition"
+            },
+            {
+              "$ref": "#/definitions/GeneratorDefinition"
+            },
+            {
+              "$ref": "#/definitions/GenericFunctionDefinition"
+            },
+            {
+              "$ref": "#/definitions/InitializerDefinition"
+            },
+            {
+              "$ref": "#/definitions/KeyTransformerDefinition"
+            },
+            {
+              "$ref": "#/definitions/KeyValueMapperDefinition"
+            },
+            {
+              "$ref": "#/definitions/KeyValuePrinterDefinition"
+            },
+            {
+              "$ref": "#/definitions/KeyValueToKeyValueListTransformerDefinition"
+            },
+            {
+              "$ref": "#/definitions/KeyValueToValueListTransformerDefinition"
+            },
+            {
+              "$ref": "#/definitions/KeyValueTransformerDefinition"
+            },
+            {
+              "$ref": "#/definitions/MergerDefinition"
+            },
+            {
+              "$ref": "#/definitions/PredicateDefinition"
+            },
+            {
+              "$ref": "#/definitions/ReducerDefinition"
+            },
+            {
+              "$ref": "#/definitions/StreamPartitionerDefinition"
+            },
+            {
+              "$ref": "#/definitions/TopicNameExtractorDefinition"
+            },
+            {
+              "$ref": "#/definitions/ValueJoinerDefinition"
+            },
+            {
+              "$ref": "#/definitions/ValueTransformerDefinition"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "globalTables": {
+      "description": "GlobalTables that can be referenced in producers and pipelines",
+      "patternProperties": {
+        "^[a-zA-Z0-9_]+$": {
+          "$ref": "#/definitions/GlobalTableDefinition"
+        }
+      },
+      "type": "object"
+    },
+    "pipelines": {
+      "description": "Collection of named pipelines",
+      "patternProperties": {
+        "^[a-zA-Z0-9_]+$": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/PipelineDefinitionWithAsSink"
+            },
+            {
+              "$ref": "#/definitions/PipelineDefinitionWithBranchSink"
+            },
+            {
+              "$ref": "#/definitions/PipelineDefinitionWithForEachSink"
+            },
+            {
+              "$ref": "#/definitions/PipelineDefinitionWithPrintSink"
+            },
+            {
+              "$ref": "#/definitions/PipelineDefinitionWithToSink"
+            },
+            {
+              "$ref": "#/definitions/PipelineDefinitionWithNoSink"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "producers": {
+      "description": "Collection of named producers",
+      "patternProperties": {
+        "^[a-zA-Z0-9_]+$": {
+          "$ref": "#/definitions/ProducerDefinition"
+        }
+      },
+      "type": "object"
+    },
+    "stores": {
+      "description": "State stores that can be referenced in producers and pipelines",
+      "patternProperties": {
+        "^[a-zA-Z0-9_]+$": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/KeyValueStateStoreDefinition"
+            },
+            {
+              "$ref": "#/definitions/SessionStateStoreDefinition"
+            },
+            {
+              "$ref": "#/definitions/WindowStateStoreDefinition"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "streams": {
+      "description": "Streams that can be referenced in producers and pipelines",
+      "patternProperties": {
+        "^[a-zA-Z0-9_]+$": {
+          "$ref": "#/definitions/StreamDefinition"
+        }
+      },
+      "type": "object"
+    },
+    "tables": {
+      "description": "Tables that can be referenced in producers and pipelines",
+      "patternProperties": {
+        "^[a-zA-Z0-9_]+$": {
+          "$ref": "#/definitions/TableDefinition"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "title": "TopologyDefinition",
+  "type": "object"
+}

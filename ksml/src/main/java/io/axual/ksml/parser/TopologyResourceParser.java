@@ -26,39 +26,44 @@ import io.axual.ksml.data.schema.DataSchema;
 import io.axual.ksml.data.schema.StructSchema;
 import io.axual.ksml.data.schema.UnionSchema;
 import io.axual.ksml.definition.TopologyResource;
-import io.axual.ksml.execution.FatalError;
+import io.axual.ksml.generator.TopologyResources;
+import lombok.Getter;
 
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 // Certain KSML resources (like streams, tables and functions) can be referenced from pipelines,
 // or they can be defined inline. This parser distinguishes between the two.
-public class TopologyResourceParser<T, F extends T> extends DefinitionParser<TopologyResource<T>> {
+public class TopologyResourceParser<T, F extends T> extends MultiFormParser<TopologyResource<T>> {
     private final String resourceType;
     private final String childName;
+    private final boolean required;
     private final String doc;
-    private final Function<String, T> lookup;
-    private final ParserWithSchema<F> inlineParser;
+    private final BiFunction<TopologyResources, String, T> lookup;
+    private final StructuredParser<? extends F> inlineParser;
     private final boolean allowLookupFail;
+    @Getter
+    private final StructSchema schema;
 
-    public TopologyResourceParser(String resourceType, String childName, String doc, Function<String, T> lookup, ParserWithSchema<F> inlineParser) {
-        this(resourceType, childName, doc, lookup, inlineParser, false);
+    public TopologyResourceParser(String resourceType, String childName, boolean required, String doc, BiFunction<TopologyResources, String, T> lookup, StructuredParser<? extends F> inlineParser) {
+        this(resourceType, childName, required, doc, lookup, inlineParser, false);
     }
 
-    public TopologyResourceParser(String resourceType, String childName, String doc, Function<String, T> lookup, ParserWithSchema<F> inlineParser, boolean allowLookupFail) {
+    public TopologyResourceParser(String resourceType, String childName, boolean required, String doc, BiFunction<TopologyResources, String, T> lookup, StructuredParser<? extends F> inlineParser, boolean allowLookupFail) {
         this.resourceType = resourceType;
         this.childName = childName;
+        this.required = required;
         this.doc = doc;
         this.lookup = lookup;
         this.inlineParser = inlineParser;
         this.allowLookupFail = allowLookupFail;
+        this.schema = structSchema(resourceType + childName, doc, List.of(new DataField(childName, new UnionSchema(DataSchema.stringSchema(), inlineParser.schema()), doc, required)));
     }
 
     @Override
-    public StructParser<TopologyResource<T>> parser() {
-        final var schema = structSchema((String) null, null, List.of(new DataField(childName, new UnionSchema(DataSchema.stringSchema(), inlineParser.schema()), doc)));
+    public MultiSchemaParser<TopologyResource<T>> parser() {
         final var stringParser = stringField(childName, false, null, doc);
-        return new StructParser<>() {
+        return new SingleSchemaParser<>() {
             @Override
             public TopologyResource<T> parse(YamlNode node) {
                 if (node == null) return null;
@@ -66,22 +71,18 @@ public class TopologyResourceParser<T, F extends T> extends DefinitionParser<Top
                 // Check if the node is a text node --> parse as direct reference
                 final var resourceToFind = stringParser.parse(node);
                 if (resourceToFind != null) {
-                    final var resource = lookup.apply(resourceToFind);
-                    if (resource == null && !allowLookupFail) {
-                        throw FatalError.parseError(node, "Unknown " + resourceType + " \"" + resourceToFind + "\"");
-                    }
-                    return new TopologyResource<>(resourceToFind, resource);
+                    return new TopologyResource<>(resourceToFind, lookup, null);
                 }
 
                 // Parse as anonymous inline definition using the supplied inline parser
                 final var childNode = node.get(childName);
                 if (childNode != null) {
                     final var name = childNode.longName();
-                    return new TopologyResource<>(name, inlineParser.parse(childNode));
+                    return new TopologyResource<>(name, null, inlineParser.parse(childNode));
                 }
 
                 final var name = node.appendName(childName).longName();
-                return new TopologyResource<>(name, null);
+                return new TopologyResource<>(name, null, null);
             }
 
             @Override
@@ -89,10 +90,5 @@ public class TopologyResourceParser<T, F extends T> extends DefinitionParser<Top
                 return schema;
             }
         };
-    }
-
-    public T parseDefinition(YamlNode node) {
-        final var result = parse(node);
-        return result != null ? result.definition() : null;
     }
 }

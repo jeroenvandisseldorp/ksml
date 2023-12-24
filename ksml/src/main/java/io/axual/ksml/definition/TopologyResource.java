@@ -20,5 +20,17 @@ package io.axual.ksml.definition;
  * =========================LICENSE_END==================================
  */
 
-public record TopologyResource<T>(String name, T definition) {
+import io.axual.ksml.generator.TopologyResources;
+
+import java.util.function.BiFunction;
+
+public record TopologyResource<T>(String name, BiFunction<TopologyResources, String, T> lookup, T resource) {
+    public T get(TopologyResources resources) {
+        if (resource != null) return resource;
+        if (lookup != null && name != null) {
+            final var result = lookup.apply(resources, name);
+            return result;
+        }
+        return null;
+    }
 }

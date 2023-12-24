@@ -23,11 +23,11 @@ package io.axual.ksml.definition.parser;
 
 import io.axual.ksml.definition.ValueTransformerDefinition;
 import io.axual.ksml.dsl.KSMLDSL;
-import io.axual.ksml.parser.StructParser;
+import io.axual.ksml.parser.MultiSchemaParser;
 
 public class ValueTransformerDefinitionParser extends FunctionDefinitionParser<ValueTransformerDefinition> {
     @Override
-    public StructParser<ValueTransformerDefinition> parser() {
+    public MultiSchemaParser<ValueTransformerDefinition> parser() {
         return parserWithStores(ValueTransformerDefinition.class, KSMLDSL.Functions.TYPE_VALUETRANSFORMER, "value transformer", ValueTransformerDefinition::new);
     }
 }

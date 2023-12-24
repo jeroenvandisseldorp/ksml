@@ -21,5 +21,5 @@ package io.axual.ksml.definition;
  */
 
 
-public record BranchDefinition(FunctionDefinition predicate, PipelineDefinition pipeline) {
+public record BranchDefinition(TopologyResource<FunctionDefinition> predicate, PipelineDefinition pipeline) {
 }

@@ -43,5 +43,4 @@ pipelines:
       code: log_message(key, value, format="JSON")
   consume_xml:
     from: sensor_source_xml
-    forEach:
-      code: log_message(key, value, format="XML")
+    print: nix

@@ -22,19 +22,18 @@ package io.axual.ksml.operation.parser;
 
 
 import io.axual.ksml.dsl.KSMLDSL;
-import io.axual.ksml.generator.TopologyResources;
 import io.axual.ksml.operation.StoreOperationConfig;
 import io.axual.ksml.operation.ToTableOperation;
-import io.axual.ksml.parser.StructParser;
+import io.axual.ksml.parser.MultiSchemaParser;
 import io.axual.ksml.store.StoreType;
 
 public class ToTableOperationParser extends StoreOperationParser<ToTableOperation> {
-    public ToTableOperationParser(TopologyResources resources) {
-        super("toTable", resources);
+    public ToTableOperationParser(String namespace) {
+        super(namespace, "toTable");
     }
 
     @Override
-    public StructParser<ToTableOperation> parser() {
+    public MultiSchemaParser<ToTableOperation> parser() {
         return structParser(
                 ToTableOperation.class,
                 "Convert a Stream into a Table",

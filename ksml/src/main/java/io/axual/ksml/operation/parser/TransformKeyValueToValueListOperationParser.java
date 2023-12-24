@@ -26,21 +26,21 @@ import io.axual.ksml.dsl.KSMLDSL;
 import io.axual.ksml.generator.TopologyResources;
 import io.axual.ksml.operation.StoreOperationConfig;
 import io.axual.ksml.operation.TransformKeyValueToValueListOperation;
-import io.axual.ksml.parser.StructParser;
+import io.axual.ksml.parser.MultiSchemaParser;
 
 public class TransformKeyValueToValueListOperationParser extends OperationParser<TransformKeyValueToValueListOperation> {
-    public TransformKeyValueToValueListOperationParser(TopologyResources resources) {
-        super("transformKeyValueToValueList", resources);
+    public TransformKeyValueToValueListOperationParser(String namespace) {
+        super(namespace, "transformKeyValueToValueList");
     }
 
     @Override
-    protected StructParser<TransformKeyValueToValueListOperation> parser() {
+    protected MultiSchemaParser<TransformKeyValueToValueListOperation> parser() {
         return structParser(
                 TransformKeyValueToValueListOperation.class,
                 "Convert every record in the stream to a list of output records with the same key",
                 operationTypeField(KSMLDSL.Operations.TRANSFORM_KEY_VALUE_TO_VALUE_LIST),
                 nameField(),
-                functionField(KSMLDSL.Operations.Transform.MAPPER, "A function that converts every key/value into a list of result values, which will be combined with the original key in the output stream", new KeyValueToValueListTransformerDefinitionParser()),
+                functionField(KSMLDSL.Operations.Transform.MAPPER, true, "A function that converts every key/value into a list of result values, which will be combined with the original key in the output stream", new KeyValueToValueListTransformerDefinitionParser()),
                 storeNamesField(),
                 (type, name, mapper, storeNames) -> new TransformKeyValueToValueListOperation(new StoreOperationConfig(namespace(), name, storeNames, null), mapper));
     }

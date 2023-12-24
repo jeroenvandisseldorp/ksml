@@ -22,27 +22,20 @@ package io.axual.ksml.definition.parser;
 
 
 import io.axual.ksml.definition.TopicDefinition;
-import io.axual.ksml.parser.DefinitionParser;
-import io.axual.ksml.parser.StructParser;
+import io.axual.ksml.parser.MultiFormParser;
+import io.axual.ksml.parser.MultiSchemaParser;
 
 import static io.axual.ksml.dsl.KSMLDSL.Streams;
 
-public class TopicDefinitionParser extends DefinitionParser<TopicDefinition> {
-    private final boolean requireKeyValueType;
-
-    public TopicDefinitionParser(boolean requireKeyValueType) {
-        super(null);
-        this.requireKeyValueType = requireKeyValueType;
-    }
-
+public class TopicDefinitionParser extends MultiFormParser<TopicDefinition> {
     @Override
-    public StructParser<TopicDefinition> parser() {
+    public MultiSchemaParser<TopicDefinition> parser() {
         return structParser(
                 TopicDefinition.class,
                 "Contains a definition of a Topic, which can be referenced by producers and pipelines",
                 stringField(Streams.TOPIC, true, "The name of the Kafka topic"),
-                userTypeField(Streams.KEY_TYPE, requireKeyValueType, "The key type of the topic"),
-                userTypeField(Streams.VALUE_TYPE, requireKeyValueType, "The value type of the topic"),
+                userTypeField(Streams.KEY_TYPE, true, "The key type of the topic"),
+                userTypeField(Streams.VALUE_TYPE, true, "The value type of the topic"),
                 (topic, keyType, valueType) -> new TopicDefinition("Topic", topic, keyType, valueType));
     }
 }

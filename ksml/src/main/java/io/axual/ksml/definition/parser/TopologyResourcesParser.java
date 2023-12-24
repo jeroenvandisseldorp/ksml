@@ -21,20 +21,18 @@ package io.axual.ksml.definition.parser;
  */
 
 import io.axual.ksml.generator.TopologyResources;
-import io.axual.ksml.parser.DefinitionParser;
-import io.axual.ksml.parser.StructParser;
+import io.axual.ksml.parser.MultiFormParser;
+import io.axual.ksml.parser.MultiSchemaParser;
 
 import static io.axual.ksml.dsl.KSMLDSL.*;
 
-public class TopologyResourcesParser extends DefinitionParser<TopologyResources> {
-    private final String namespace;
-
+public class TopologyResourcesParser extends MultiFormParser<TopologyResources> {
     public TopologyResourcesParser(String namespace) {
-        this.namespace = namespace;
+        super(namespace);
     }
 
     @Override
-    public StructParser<TopologyResources> parser() {
+    public MultiSchemaParser<TopologyResources> parser() {
         return structParser(
                 TopologyResources.class,
                 "Contains a list of streams, functions and state stores to be used in producers and pipelines",
@@ -44,7 +42,7 @@ public class TopologyResourcesParser extends DefinitionParser<TopologyResources>
                 mapField(STORES, "state store definition", false, "State stores that can be referenced in producers and pipelines", new StateStoreDefinitionParser()),
                 mapField(FUNCTIONS, "function definition", false, "Functions that can be referenced in producers and pipelines", new TypedFunctionDefinitionParser()),
                 (streams, tables, globalTables, stores, functions) -> {
-                    final var result = new TopologyResources(namespace);
+                    final var result = new TopologyResources(namespace());
                     if (streams != null) streams.forEach(result::register);
                     if (tables != null) tables.forEach(result::register);
                     if (globalTables != null) globalTables.forEach(result::register);

@@ -22,23 +22,24 @@ package io.axual.ksml.operation.parser;
 
 import io.axual.ksml.definition.parser.ForEachActionDefinitionParser;
 import io.axual.ksml.dsl.KSMLDSL;
-import io.axual.ksml.generator.TopologyResources;
 import io.axual.ksml.operation.ForEachOperation;
 import io.axual.ksml.operation.StoreOperationConfig;
-import io.axual.ksml.parser.StructParser;
+import io.axual.ksml.parser.MultiSchemaParser;
 
 public class ForEachOperationParser extends OperationParser<ForEachOperation> {
-    public ForEachOperationParser(TopologyResources resources) {
-        super("forEach", resources);
+    public ForEachOperationParser(String namespace) {
+        super(namespace, "forEach");
     }
 
-    public StructParser<ForEachOperation> parser() {
+    public MultiSchemaParser<ForEachOperation> parser() {
         return structParser(
                 ForEachOperation.class,
-                "Operation to call a function for every record in the stream",
-                nameField(),
-                functionField(KSMLDSL.Operations.FOR_EACH, true, "A function that gets called for every message in the stream", new ForEachActionDefinitionParser()),
-                storeNamesField(),
-                (name, action, stores) -> action != null ? new ForEachOperation(new StoreOperationConfig(namespace(), name, stores, null), action) : null);
+                "Operation to call a function for every record",
+                functionField(
+                        KSMLDSL.Operations.FOR_EACH,
+                        false,
+                        "A function that gets called for every message",
+                        new ForEachActionDefinitionParser()),
+                action -> new ForEachOperation(new StoreOperationConfig(namespace(), "forEach", null, null), action));
     }
 }

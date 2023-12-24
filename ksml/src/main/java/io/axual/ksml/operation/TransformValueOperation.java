@@ -23,6 +23,7 @@ package io.axual.ksml.operation;
 
 import io.axual.ksml.data.object.DataObject;
 import io.axual.ksml.definition.FunctionDefinition;
+import io.axual.ksml.definition.TopologyResource;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.operation.processor.FixedKeyOperationProcessorSupplier;
 import io.axual.ksml.operation.processor.TransformValueProcessor;
@@ -37,9 +38,9 @@ import org.apache.kafka.streams.kstream.ValueTransformerWithKeySupplier;
 
 public class TransformValueOperation extends StoreOperation {
     private static final String MAPPER_NAME = "Mapper";
-    private final FunctionDefinition mapper;
+    private final TopologyResource<FunctionDefinition> mapper;
 
-    public TransformValueOperation(StoreOperationConfig config, FunctionDefinition mapper) {
+    public TransformValueOperation(StoreOperationConfig config, TopologyResource<FunctionDefinition> mapper) {
         super(config);
         this.mapper = mapper;
     }
@@ -55,10 +56,10 @@ public class TransformValueOperation extends StoreOperation {
         checkNotNull(mapper, MAPPER_NAME.toLowerCase());
         final var k = input.keyType();
         final var v = input.valueType();
-        final var vr = streamDataTypeOf(firstSpecificType(mapper, v.userType()), false);
-        final var map = userFunctionOf(context, MAPPER_NAME, mapper, vr, superOf(k), superOf(v));
+        final var vr = streamDataTypeOf(firstSpecificType(context.get(mapper), v.userType()), false);
+        final var map = userFunctionOf(context, MAPPER_NAME, context.get(mapper), vr, superOf(k), superOf(v));
         final var userMap = new UserValueTransformer(map);
-        final var storeNames = combineStoreNames(this.storeNames, mapper.storeNames().toArray(TEMPLATE));
+        final var storeNames = combineStoreNames(this.storeNames, context.get(mapper).storeNames().toArray(TEMPLATE));
         final var supplier = new FixedKeyOperationProcessorSupplier<>(
                 name,
                 TransformValueProcessor::new,
@@ -83,10 +84,10 @@ public class TransformValueOperation extends StoreOperation {
         checkNotNull(mapper, MAPPER_NAME.toLowerCase());
         final var k = input.keyType();
         final var v = input.valueType();
-        final var vr = streamDataTypeOf(firstSpecificType(mapper, v.userType()), false);
-        final var map = userFunctionOf(context, MAPPER_NAME, mapper, vr, superOf(k), superOf(v));
+        final var vr = streamDataTypeOf(firstSpecificType(context.get(mapper), v.userType()), false);
+        final var map = userFunctionOf(context, MAPPER_NAME, context.get(mapper), vr, superOf(k), superOf(v));
         final var userMap = new UserValueTransformerWithKey(map);
-        final var kvStore = validateKeyValueStore(store(), k, vr);
+        final var kvStore = validateKeyValueStore(context.get(store()), k, vr);
         final ValueTransformerWithKeySupplier<Object, Object, DataObject> supplier = () -> userMap;
         final var named = namedOf();
         final var mat = materializedOf(context, kvStore);

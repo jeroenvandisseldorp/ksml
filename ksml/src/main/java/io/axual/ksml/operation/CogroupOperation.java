@@ -22,6 +22,7 @@ package io.axual.ksml.operation;
 
 
 import io.axual.ksml.definition.FunctionDefinition;
+import io.axual.ksml.definition.TopologyResource;
 import io.axual.ksml.execution.FatalError;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.CogroupedKStreamWrapper;
@@ -32,9 +33,9 @@ import org.apache.kafka.streams.kstream.CogroupedKStream;
 
 public class CogroupOperation extends StoreOperation {
     private static final String AGGREGATOR_NAME = "Aggregator";
-    private final FunctionDefinition aggregator;
+    private final TopologyResource<FunctionDefinition> aggregator;
 
-    public CogroupOperation(StoreOperationConfig config, FunctionDefinition aggregator) {
+    public CogroupOperation(StoreOperationConfig config, TopologyResource<FunctionDefinition> aggregator) {
         super(config);
         this.aggregator = aggregator;
     }
@@ -49,10 +50,10 @@ public class CogroupOperation extends StoreOperation {
         checkNotNull(aggregator, AGGREGATOR_NAME.toLowerCase());
         final var k = input.keyType();
         final var v = input.valueType();
-        final var vout = streamDataTypeOf(aggregator.resultType(), false);
-        final var aggr = userFunctionOf(context, AGGREGATOR_NAME, aggregator, vout, superOf(k), superOf(v), equalTo(vout));
+        final var vout = streamDataTypeOf(context.get(aggregator).resultType(), false);
+        final var aggr = userFunctionOf(context, AGGREGATOR_NAME, context.get(aggregator), vout, superOf(k), superOf(v), equalTo(vout));
         final var userAggr = new UserAggregator(aggr);
-        final var kvStore = validateKeyValueStore(store(), k, vout);
+        final var kvStore = validateKeyValueStore(context.get(store()), k, vout);
         final var mat = materializedOf(context, kvStore);
         final var named = namedOf();
         final CogroupedKStream<Object, Object> output = input.groupedStream.cogroup(userAggr);

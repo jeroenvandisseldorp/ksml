@@ -21,13 +21,14 @@ package io.axual.ksml.operation;
  */
 
 import io.axual.ksml.definition.StateStoreDefinition;
+import io.axual.ksml.definition.TopologyResource;
 
 import java.util.List;
 
 public class StoreOperationConfig extends OperationConfig {
-    public final StateStoreDefinition store;
+    public final TopologyResource<StateStoreDefinition> store;
 
-    public StoreOperationConfig(String namespace, String name, List<String> storeNames, StateStoreDefinition store) {
+    public StoreOperationConfig(String namespace, String name, List<String> storeNames, TopologyResource<StateStoreDefinition> store) {
         super(namespace, name, storeNames != null ? storeNames.toArray(new String[]{}) : null);
         this.store = store;
     }

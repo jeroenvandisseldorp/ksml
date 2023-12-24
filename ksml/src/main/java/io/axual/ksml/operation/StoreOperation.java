@@ -25,6 +25,7 @@ import io.axual.ksml.data.type.UserType;
 import io.axual.ksml.definition.KeyValueStateStoreDefinition;
 import io.axual.ksml.definition.SessionStateStoreDefinition;
 import io.axual.ksml.definition.StateStoreDefinition;
+import io.axual.ksml.definition.TopologyResource;
 import io.axual.ksml.definition.WindowStateStoreDefinition;
 import io.axual.ksml.execution.FatalError;
 import io.axual.ksml.generator.StreamDataType;
@@ -32,7 +33,7 @@ import lombok.Getter;
 
 @Getter
 public class StoreOperation extends BaseOperation {
-    private final StateStoreDefinition store;
+    private final TopologyResource<StateStoreDefinition> store;
 
     public StoreOperation(StoreOperationConfig config) {
         super(config);

@@ -22,14 +22,16 @@ package io.axual.ksml.operation;
 
 
 import io.axual.ksml.definition.StreamDefinition;
+import io.axual.ksml.definition.TopicDefinition;
+import io.axual.ksml.definition.TopologyResource;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.stream.StreamWrapper;
 
 public class MergeOperation extends BaseOperation {
-    private final StreamDefinition mergeStream;
+    private final TopologyResource<TopicDefinition> mergeStream;
 
-    public MergeOperation(OperationConfig config, StreamDefinition mergeStream) {
+    public MergeOperation(OperationConfig config, TopologyResource<TopicDefinition> mergeStream) {
         super(config);
         this.mergeStream = mergeStream;
     }
@@ -42,7 +44,8 @@ public class MergeOperation extends BaseOperation {
          *          final Named named)
          */
 
-        final var otherStream = context.getStreamWrapper(mergeStream);
+        final var streamDef = context.get(mergeStream, StreamDefinition.class);
+        final var otherStream = context.getStreamWrapper(streamDef);
         final var k = input.keyType();
         final var v = input.valueType();
         checkType("Merge stream keyType", otherStream.keyType().userType(), equalTo(k));

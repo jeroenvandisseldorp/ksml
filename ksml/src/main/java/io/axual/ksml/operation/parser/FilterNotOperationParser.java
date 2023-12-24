@@ -26,14 +26,14 @@ import io.axual.ksml.dsl.KSMLDSL;
 import io.axual.ksml.generator.TopologyResources;
 import io.axual.ksml.operation.FilterNotOperation;
 import io.axual.ksml.operation.StoreOperationConfig;
-import io.axual.ksml.parser.StructParser;
+import io.axual.ksml.parser.MultiSchemaParser;
 
 public class FilterNotOperationParser extends StoreOperationParser<FilterNotOperation> {
-    public FilterNotOperationParser(TopologyResources resources) {
-        super("filterNot", resources);
+    public FilterNotOperationParser(String namespace) {
+        super(namespace, "filterNot");
     }
 
-    public StructParser<FilterNotOperation> parser() {
+    public MultiSchemaParser<FilterNotOperation> parser() {
         return structParser(
                 FilterNotOperation.class,
                 "Filter records based on the inverse result of a predicate function",

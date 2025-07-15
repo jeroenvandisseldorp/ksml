@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>Working with Aggregations in KSML - KSML Documentation</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../../../css/brands.min.css" rel="stylesheet">
+        <link href="../../../css/solid.min.css" rel="stylesheet">
+        <link href="../../../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../../..">KSML Documentation</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="../../.." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../getting-started/" class="nav-link">Getting Started</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../core-concepts/" class="nav-link">Core Concepts</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../" class="nav-link">Tutorials</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../use-cases/" class="nav-link">Use Case Guides</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../reference/" class="nav-link">Reference</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../resources/" class="nav-link">Resources</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../about/" class="nav-link">About</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#working-with-aggregations-in-ksml" class="nav-link">Working with Aggregations in KSML</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#introduction-to-aggregations" class="nav-link">Introduction to Aggregations</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#prerequisites" class="nav-link">Prerequisites</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#types-of-aggregations-in-ksml" class="nav-link">Types of Aggregations in KSML</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#working-with-windows" class="nav-link">Working with Windows</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#practical-example-sales-analytics" class="nav-link">Practical Example: Sales Analytics</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#best-practices-for-aggregations" class="nav-link">Best Practices for Aggregations</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#conclusion" class="nav-link">Conclusion</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#further-reading" class="nav-link">Further Reading</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="working-with-aggregations-in-ksml">Working with Aggregations in KSML</h1>
+<p>This tutorial explores how to implement aggregation operations in KSML, allowing you to combine multiple messages into meaningful summaries and statistics.</p>
+<h2 id="introduction-to-aggregations">Introduction to Aggregations</h2>
+<p>Aggregations are stateful operations that combine multiple messages to produce a single result. They're essential for:</p>
+<ul>
+<li>Computing statistics (sums, averages, counts)</li>
+<li>Building summaries of streaming data</li>
+<li>Reducing data volume by consolidating related messages</li>
+<li>Creating time-based analytics</li>
+</ul>
+<p>In KSML, aggregations are implemented using the Kafka Streams stateful operations, but with the added flexibility of Python functions.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Before starting this tutorial, you should:</p>
+<ul>
+<li>Understand basic KSML concepts (streams, functions, pipelines)</li>
+<li>Have completed the <a href="../../getting-started/basics-tutorial/">KSML Basics Tutorial</a></li>
+<li>Be familiar with <a href="../../../core-concepts/operations/#stateful-operations">Stateful Operations</a></li>
+</ul>
+<h2 id="types-of-aggregations-in-ksml">Types of Aggregations in KSML</h2>
+<p>KSML supports several types of aggregation operations:</p>
+<h3 id="count">Count</h3>
+<p>The simplest aggregation is <code>count</code>, which counts the number of messages with the same key:</p>
+<pre><code class="language-yaml">pipelines:
+  count_by_user:
+    from: user_actions
+    groupByKey:
+    count:
+    to: user_action_counts
+</code></pre>
+<h3 id="reduce">Reduce</h3>
+<p>The <code>reduce</code> operation combines messages with the same key using a reducer function:</p>
+<pre><code class="language-yaml">functions:
+  sum_amounts:
+    type: reducer
+    expression: value1 + value2
+
+pipelines:
+  sum_transactions:
+    from: financial_transactions
+    groupByKey:
+    reduce: sum_amounts
+    to: transaction_sums
+</code></pre>
+<h3 id="aggregate">Aggregate</h3>
+<p>The most flexible aggregation is <code>aggregate</code>, which uses an initializer function to create the initial aggregation value and an aggregator function to update it:</p>
+<pre><code class="language-yaml">functions:
+  init_stats:
+    type: initializer
+    expression: {&quot;count&quot;: 0, &quot;sum&quot;: 0, &quot;min&quot;: None, &quot;max&quot;: None}
+
+  update_stats:
+    type: aggregator
+    code: |
+      if aggregatedValue is None:
+        aggregatedValue = {&quot;count&quot;: 0, &quot;sum&quot;: 0, &quot;min&quot;: None, &quot;max&quot;: None}
+
+      amount = value.get(&quot;amount&quot;, 0)
+
+      # Update count and sum
+      aggregatedValue[&quot;count&quot;] += 1
+      aggregatedValue[&quot;sum&quot;] += amount
+
+      # Update min and max
+      if aggregatedValue[&quot;min&quot;] is None or amount &lt; aggregatedValue[&quot;min&quot;]:
+        aggregatedValue[&quot;min&quot;] = amount
+      if aggregatedValue[&quot;max&quot;] is None or amount &gt; aggregatedValue[&quot;max&quot;]:
+        aggregatedValue[&quot;max&quot;] = amount
+
+      return aggregatedValue
+
+pipelines:
+  calculate_statistics:
+    from: payment_stream
+    groupByKey:
+    aggregate:
+      initializer: init_stats
+      aggregator: update_stats
+    to: payment_statistics
+</code></pre>
+<h2 id="working-with-windows">Working with Windows</h2>
+<p>Aggregations become even more powerful when combined with windowing operations, which group messages into time-based windows:</p>
+<pre><code class="language-yaml">pipelines:
+  hourly_statistics:
+    from: sensor_readings
+    groupByKey:
+    windowByTime:
+      size: 1h
+      advanceBy: 1h
+      grace: 10m
+    aggregate:
+      initializer: init_stats
+      aggregator: update_stats
+    to: hourly_sensor_statistics
+</code></pre>
+<p>This creates hourly statistics for each sensor (assuming the sensor ID is the key).</p>
+<h2 id="practical-example-sales-analytics">Practical Example: Sales Analytics</h2>
+<p>Let's build a complete example that calculates sales analytics by region and product:</p>
+<pre><code class="language-yaml">streams:
+  sales_events:
+    topic: retail_sales
+    keyType: string  # Product ID
+    valueType: json  # Sale details including region, amount, quantity
+
+  sales_by_region:
+    topic: sales_by_region
+    keyType: string  # Region
+    valueType: json  # Aggregated sales statistics
+
+functions:
+  extract_region:
+    type: keyTransformer
+    code: |
+      # Extract region from the sale event and use it as the new key
+      return value.get(&quot;region&quot;, &quot;unknown&quot;)
+
+  initialize_sales_stats:
+    type: initializer
+    expression: {&quot;total_sales&quot;: 0, &quot;total_quantity&quot;: 0, &quot;transaction_count&quot;: 0, &quot;products&quot;: {}}
+
+  aggregate_sales:
+    type: aggregator
+    code: |
+      # Initialize if needed
+      if aggregatedValue is None:
+        aggregatedValue = {&quot;total_sales&quot;: 0, &quot;total_quantity&quot;: 0, &quot;transaction_count&quot;: 0, &quot;products&quot;: {}}
+
+      # Extract data from the sale
+      product_id = key
+      amount = value.get(&quot;amount&quot;, 0)
+      quantity = value.get(&quot;quantity&quot;, 0)
+
+      # Update aggregated values
+      aggregatedValue[&quot;total_sales&quot;] += amount
+      aggregatedValue[&quot;total_quantity&quot;] += quantity
+      aggregatedValue[&quot;transaction_count&quot;] += 1
+
+      # Track per-product statistics
+      if product_id not in aggregatedValue[&quot;products&quot;]:
+        aggregatedValue[&quot;products&quot;][product_id] = {&quot;sales&quot;: 0, &quot;quantity&quot;: 0}
+
+      aggregatedValue[&quot;products&quot;][product_id][&quot;sales&quot;] += amount
+      aggregatedValue[&quot;products&quot;][product_id][&quot;quantity&quot;] += quantity
+
+      return aggregatedValue
+
+pipelines:
+  regional_sales_analytics:
+    from: sales_events
+    # Group by region instead of product ID
+    groupBy: extract_region
+    # Use tumbling window of 1 day
+    windowByTime:
+      size: 1d
+      advanceBy: 1d
+    # Aggregate sales data
+    aggregate:
+      initializer: initialize_sales_stats
+      aggregator: aggregate_sales
+    # Output to region-specific topic
+    to: sales_by_region
+</code></pre>
+<p>This pipeline:
+1. Takes sales events with product IDs as keys
+2. Regroups them by region
+3. Creates daily windows
+4. Aggregates sales statistics including per-product breakdowns
+5. Outputs the results to a new topic</p>
+<h2 id="best-practices-for-aggregations">Best Practices for Aggregations</h2>
+<h3 id="performance-considerations">Performance Considerations</h3>
+<ul>
+<li><strong>Memory Usage</strong>: Aggregations store state, which consumes memory. Be mindful of the volume of unique keys.</li>
+<li><strong>Window Size</strong>: Larger windows require more state storage. Choose appropriate window sizes.</li>
+<li><strong>Serialization</strong>: Complex aggregated objects can be expensive to serialize/deserialize.</li>
+</ul>
+<h3 id="design-patterns">Design Patterns</h3>
+<ul>
+<li><strong>Two-Phase Aggregation</strong>: For high-cardinality data, consider aggregating in two phases (local then global).</li>
+<li><strong>Pre-Filtering</strong>: Filter unnecessary data before aggregation to reduce state size.</li>
+<li><strong>Downsampling</strong>: For time series data, consider downsampling before aggregation.</li>
+</ul>
+<h3 id="error-handling">Error Handling</h3>
+<p>Always handle potential errors in your aggregator functions:</p>
+<pre><code class="language-yaml">functions:
+  safe_aggregator:
+    type: aggregator
+    code: |
+      try:
+        # Your aggregation logic here
+        return result
+      except Exception as e:
+        log.error(&quot;Error in aggregation: {}&quot;, str(e))
+        # Return previous state to avoid losing data
+        return aggregatedValue
+</code></pre>
+<h2 id="conclusion">Conclusion</h2>
+<p>Aggregations are powerful tools for deriving insights from streaming data. By combining KSML's aggregation operations with Python functions, you can implement sophisticated analytics that would be complex to build with traditional Kafka Streams applications.</p>
+<p>In the next tutorial, we'll explore how to <a href="../joins/">implement joins</a> to combine data from multiple streams.</p>
+<h2 id="further-reading">Further Reading</h2>
+<ul>
+<li><a href="../../../core-concepts/operations/">Core Concepts: Operations</a></li>
+<li><a href="../../../core-concepts/functions/">Core Concepts: Functions</a></li>
+<li><a href="../../../reference/operations-reference/">Reference: Aggregation Operations</a></li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../../../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../js/base.js"></script>
+        <script src="../../../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

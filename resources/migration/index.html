@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>KSML Migration Guide - KSML Documentation</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../../css/brands.min.css" rel="stylesheet">
+        <link href="../../css/solid.min.css" rel="stylesheet">
+        <link href="../../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../..">KSML Documentation</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="../.." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../tutorials/getting-started/" class="nav-link">Getting Started</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../core-concepts/" class="nav-link">Core Concepts</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../tutorials/" class="nav-link">Tutorials</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../use-cases/" class="nav-link">Use Case Guides</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../reference/" class="nav-link">Reference</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../" class="nav-link">Resources</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../about/" class="nav-link">About</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#ksml-migration-guide" class="nav-link">KSML Migration Guide</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#migrating-between-ksml-versions" class="nav-link">Migrating Between KSML Versions</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#migrating-from-other-frameworks-to-ksml" class="nav-link">Migrating from Other Frameworks to KSML</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#best-practices-for-migration" class="nav-link">Best Practices for Migration</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#related-resources" class="nav-link">Related Resources</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="ksml-migration-guide">KSML Migration Guide</h1>
+<p>This document provides guidance for migrating between different versions of KSML, as well as migrating from other stream processing frameworks to KSML.</p>
+<h2 id="migrating-between-ksml-versions">Migrating Between KSML Versions</h2>
+<h3 id="migrating-from-1x-to-2x">Migrating from 1.x to 2.x</h3>
+<p>KSML 2.x introduces several breaking changes and new features compared to KSML 1.x. This section outlines the key differences and provides guidance on how to update your KSML applications.</p>
+<h4 id="key-changes">Key Changes</h4>
+<ol>
+<li><strong>New Pipeline Syntax</strong></li>
+</ol>
+<p>KSML 2.x introduces a more concise and expressive pipeline syntax:</p>
+<p><strong>KSML 1.x:</strong>
+   <code>yaml
+   pipelines:
+     my_pipeline:
+       source:
+         stream: input_stream
+       processors:
+         - type: filter
+           condition:
+             expression: value.get("amount") &gt; 0
+         - type: mapValues
+           mapper:
+             code: transform_value(value)
+       sink:
+         stream: output_stream</code></p>
+<p><strong>KSML 2.x:</strong>
+   <code>yaml
+   pipelines:
+     my_pipeline:
+       from: input_stream
+       via:
+         - type: filter
+           if:
+             expression: value.get("amount") &gt; 0
+         - type: mapValues
+           mapper:
+             code: transform_value(value)
+       to: output_stream</code></p>
+<ol>
+<li><strong>Function Definitions</strong></li>
+</ol>
+<p>KSML 2.x requires explicit function types:</p>
+<p><strong>KSML 1.x:</strong>
+   <code>yaml
+   functions:
+     transform_value:
+       code: |
+         return {"id": value.get("id"), "amount": value.get("amount") * 2}</code></p>
+<p><strong>KSML 2.x:</strong>
+   <code>yaml
+   functions:
+     transform_value:
+       type: mapper
+       code: |
+         return {"id": value.get("id"), "amount": value.get("amount") * 2}</code></p>
+<ol>
+<li><strong>Stream Definitions</strong></li>
+</ol>
+<p>KSML 2.x uses a more structured approach for defining streams:</p>
+<p><strong>KSML 1.x:</strong>
+   <code>yaml
+   streams:
+     input_stream: 
+       topic: input-topic
+       key-type: string
+       value-type: json</code></p>
+<p><strong>KSML 2.x:</strong>
+   <code>yaml
+   streams:
+     input_stream:
+       topic: input-topic
+       keyType: string
+       valueType: json</code></p>
+<ol>
+<li><strong>Error Handling</strong></li>
+</ol>
+<p>KSML 2.x introduces improved error handling capabilities:</p>
+<p><strong>KSML 1.x:</strong>
+   <code>yaml
+   # Limited error handling capabilities</code></p>
+<p><strong>KSML 2.x:</strong>
+   <code>yaml
+   pipelines:
+     my_pipeline:
+       from: input_stream
+       via:
+         - type: try
+           operations:
+             - type: mapValues
+               mapper:
+                 code: process_data(value)
+           catch:
+             - type: mapValues
+               mapper:
+                 code: |
+                   log.error("Error processing data: {}", exception)
+                   return {"error": str(exception), "original": value}
+       to: output_stream</code></p>
+<h4 id="migration-steps">Migration Steps</h4>
+<ol>
+<li><strong>Update Stream Definitions</strong></li>
+<li>Replace hyphenated property names with camelCase (e.g., <code>key-type</code> → <code>keyType</code>)</li>
+<li>
+<p>Review and update data type definitions</p>
+</li>
+<li>
+<p><strong>Update Function Definitions</strong></p>
+</li>
+<li>Add explicit function types to all functions</li>
+<li>
+<p>Review function parameters and return types</p>
+</li>
+<li>
+<p><strong>Update Pipeline Definitions</strong></p>
+</li>
+<li>Replace <code>source</code> and <code>sink</code> with <code>from</code> and <code>to</code></li>
+<li>Replace <code>processors</code> with <code>via</code></li>
+<li>
+<p>Update operation syntax (e.g., <code>condition</code> → <code>if</code>)</p>
+</li>
+<li>
+<p><strong>Update Error Handling</strong></p>
+</li>
+<li>
+<p>Implement the new error handling capabilities where appropriate</p>
+</li>
+<li>
+<p><strong>Test Thoroughly</strong></p>
+</li>
+<li>Run tests to ensure the migrated application behaves as expected</li>
+<li>Monitor for any performance differences</li>
+</ol>
+<h3 id="migrating-from-2x-to-3x">Migrating from 2.x to 3.x</h3>
+<p>KSML 3.x focuses on performance improvements, enhanced state management, and better integration with external systems.</p>
+<h4 id="key-changes_1">Key Changes</h4>
+<ol>
+<li><strong>State Store Management</strong></li>
+</ol>
+<p>KSML 3.x introduces a more flexible state store configuration:</p>
+<p><strong>KSML 2.x:</strong>
+   <code>yaml
+   tables:
+     user_profiles:
+       topic: user-profiles
+       keyType: string
+       valueType: avro:UserProfile
+       store: user_profiles_store</code></p>
+<p><strong>KSML 3.x:</strong>
+   <code>yaml
+   tables:
+     user_profiles:
+       topic: user-profiles
+       keyType: string
+       valueType: avro:UserProfile
+       store:
+         name: user_profiles_store
+         type: persistent
+         config:
+           retention.ms: 604800000  # 7 days</code></p>
+<ol>
+<li><strong>Enhanced Schema Management</strong></li>
+</ol>
+<p>KSML 3.x provides better schema evolution support:</p>
+<p><strong>KSML 2.x:</strong>
+   <code>yaml
+   streams:
+     sensor_data:
+       topic: sensor-readings
+       keyType: string
+       valueType: avro:SensorReading
+       schemaRegistry: http://schema-registry:8081</code></p>
+<p><strong>KSML 3.x:</strong>
+   <code>yaml
+   streams:
+     sensor_data:
+       topic: sensor-readings
+       keyType: string
+       valueType: avro:SensorReading
+       schema:
+         registry: http://schema-registry:8081
+         compatibility: BACKWARD
+         subject: sensor-readings-value</code></p>
+<ol>
+<li><strong>Improved Metrics</strong></li>
+</ol>
+<p>KSML 3.x offers more comprehensive metrics and monitoring:</p>
+<p><strong>KSML 2.x:</strong>
+   <code>yaml
+   config:
+     metrics:
+       reporters:
+         - type: jmx</code></p>
+<p><strong>KSML 3.x:</strong>
+   <code>yaml
+   config:
+     metrics:
+       reporters:
+         - type: jmx
+         - type: prometheus
+           port: 8080
+           path: /metrics
+       tags:
+         application: "ksml-app"
+         environment: "${ENV:-dev}"</code></p>
+<h4 id="migration-steps_1">Migration Steps</h4>
+<ol>
+<li><strong>Update State Store Configurations</strong></li>
+<li>Expand state store configurations with the new options</li>
+<li>
+<p>Consider retention periods and cleanup policies</p>
+</li>
+<li>
+<p><strong>Update Schema Management</strong></p>
+</li>
+<li>Enhance schema configurations with compatibility settings</li>
+<li>
+<p>Review subject naming strategies</p>
+</li>
+<li>
+<p><strong>Enhance Metrics Configuration</strong></p>
+</li>
+<li>Add additional metrics reporters as needed</li>
+<li>
+<p>Configure tags for better metrics organization</p>
+</li>
+<li>
+<p><strong>Test Thoroughly</strong></p>
+</li>
+<li>Verify state store behavior</li>
+<li>Check schema evolution handling</li>
+<li>Monitor metrics collection</li>
+</ol>
+<h2 id="migrating-from-other-frameworks-to-ksml">Migrating from Other Frameworks to KSML</h2>
+<h3 id="migrating-from-kafka-streams-java-api">Migrating from Kafka Streams Java API</h3>
+<p>If you're currently using the Kafka Streams Java API directly, migrating to KSML can significantly reduce code complexity while maintaining the same processing capabilities.</p>
+<h4 id="example-migration">Example Migration</h4>
+<p><strong>Kafka Streams Java API:</strong></p>
+<pre><code>// Example Java code (simplified for illustration)
+StreamsBuilder builder = new StreamsBuilder();
+
+// Define streams
+KStream&lt;String, Order&gt; orders = builder.stream(
+    &quot;orders&quot;,
+    Consumed.with(Serdes.String(), orderSerde)
+);
+
+// Filter and transform
+KStream&lt;String, EnrichedOrder&gt; processedOrders = orders
+    .filter((key, order) -&gt; order.getAmount() &gt; 0)
+    .mapValues(order -&gt; {
+        EnrichedOrder enriched = new EnrichedOrder();
+        enriched.setOrderId(order.getOrderId());
+        enriched.setAmount(order.getAmount());
+        enriched.setProcessedTime(System.currentTimeMillis());
+        return enriched;
+    });
+
+// Write to output topic
+processedOrders.to(
+    &quot;processed-orders&quot;,
+    Produced.with(Serdes.String(), enrichedOrderSerde)
+);
+</code></pre>
+<p><strong>Equivalent KSML:</strong></p>
+<pre><code class="language-yaml">streams:
+  orders:
+    topic: orders
+    keyType: string
+    valueType: avro:Order
+
+  processed_orders:
+    topic: processed-orders
+    keyType: string
+    valueType: avro:EnrichedOrder
+
+functions:
+  enrich_order:
+    type: mapper
+    code: |
+      return {
+        &quot;orderId&quot;: value.get(&quot;orderId&quot;),
+        &quot;amount&quot;: value.get(&quot;amount&quot;),
+        &quot;processedTime&quot;: int(time.time() * 1000)
+      }
+
+pipelines:
+  process_orders:
+    from: orders
+    via:
+      - type: filter
+        if:
+          expression: value.get(&quot;amount&quot;) &gt; 0
+      - type: mapValues
+        mapper:
+          code: enrich_order(key, value)
+    to: processed_orders
+</code></pre>
+<h4 id="migration-steps_2">Migration Steps</h4>
+<ol>
+<li><strong>Identify Streams and Tables</strong></li>
+<li>Map each <code>KStream</code> and <code>KTable</code> to KSML stream and table definitions</li>
+<li>
+<p>Determine key and value types</p>
+</li>
+<li>
+<p><strong>Extract Processing Logic</strong></p>
+</li>
+<li>Convert stateless operations (filter, map, etc.) to KSML operations</li>
+<li>
+<p>Extract complex logic into KSML functions</p>
+</li>
+<li>
+<p><strong>Define Pipelines</strong></p>
+</li>
+<li>Create KSML pipelines that connect streams and operations</li>
+<li>
+<p>Ensure the processing order is maintained</p>
+</li>
+<li>
+<p><strong>Configure Serialization</strong></p>
+</li>
+<li>Set up appropriate serialization formats in KSML</li>
+<li>
+<p>Configure schema registry if using AVRO</p>
+</li>
+<li>
+<p><strong>Test and Validate</strong></p>
+</li>
+<li>Compare the output of both implementations</li>
+<li>Verify performance characteristics</li>
+</ol>
+<h3 id="migrating-from-kafka-connect-transformations">Migrating from Kafka Connect Transformations</h3>
+<p>If you're using Kafka Connect with SMTs (Single Message Transformations), you can migrate some of this logic to KSML for more flexible processing.</p>
+<h4 id="example-migration_1">Example Migration</h4>
+<p><strong>Kafka Connect SMT Configuration:</strong></p>
+<pre><code class="language-properties">transforms=extractField,filterNull
+transforms.extractField.type=org.apache.kafka.connect.transforms.ExtractField$Value
+transforms.extractField.field=payload
+transforms.filterNull.type=org.apache.kafka.connect.transforms.Filter
+transforms.filterNull.predicate=isNull
+transforms.filterNull.negate=true
+</code></pre>
+<p><strong>Equivalent KSML:</strong></p>
+<pre><code class="language-yaml">streams:
+  input_stream:
+    topic: connect-input
+    keyType: string
+    valueType: json
+
+  output_stream:
+    topic: processed-output
+    keyType: string
+    valueType: json
+
+pipelines:
+  process_connect_data:
+    from: input_stream
+    via:
+      - type: mapValues
+        mapper:
+          expression: value.get(&quot;payload&quot;)
+      - type: filter
+        if:
+          expression: value is not None
+    to: output_stream
+</code></pre>
+<h4 id="migration-steps_3">Migration Steps</h4>
+<ol>
+<li><strong>Identify Connect Pipelines</strong></li>
+<li>Map Kafka Connect source and sink connectors to KSML streams</li>
+<li>
+<p>Identify the transformations being applied</p>
+</li>
+<li>
+<p><strong>Convert Transformations to KSML Operations</strong></p>
+</li>
+<li>Map each SMT to an equivalent KSML operation</li>
+<li>
+<p>Combine multiple SMTs into a single KSML pipeline</p>
+</li>
+<li>
+<p><strong>Enhance with KSML Capabilities</strong></p>
+</li>
+<li>Add additional processing that wasn't possible with SMTs</li>
+<li>
+<p>Implement stateful processing if needed</p>
+</li>
+<li>
+<p><strong>Test and Validate</strong></p>
+</li>
+<li>Verify that the KSML pipeline produces the same output as the Connect pipeline</li>
+<li>Check for any performance differences</li>
+</ol>
+<h3 id="migrating-from-apache-flink">Migrating from Apache Flink</h3>
+<p>Migrating from Apache Flink to KSML involves mapping Flink's DataStream operations to KSML operations.</p>
+<h4 id="example-migration_2">Example Migration</h4>
+<p><strong>Apache Flink:</strong></p>
+<pre><code>// Example Java code (simplified for illustration)
+StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+
+// Create a stream from a Kafka source
+DataStream&lt;Order&gt; orders = env
+    .addSource(new FlinkKafkaConsumer&lt;&gt;(&quot;orders&quot;, new OrderDeserializationSchema(), properties));
+
+// Process the stream
+DataStream&lt;EnrichedOrder&gt; processedOrders = orders
+    .filter(order -&gt; order.getAmount() &gt; 0)
+    .map(order -&gt; {
+        EnrichedOrder enriched = new EnrichedOrder();
+        enriched.setOrderId(order.getOrderId());
+        enriched.setAmount(order.getAmount());
+        enriched.setProcessedTime(System.currentTimeMillis());
+        return enriched;
+    });
+
+// Write to Kafka sink
+processedOrders
+    .addSink(new FlinkKafkaProducer&lt;&gt;(&quot;processed-orders&quot;, new EnrichedOrderSerializationSchema(), properties));
+</code></pre>
+<p><strong>Equivalent KSML:</strong></p>
+<pre><code class="language-yaml">streams:
+  orders:
+    topic: orders
+    keyType: string
+    valueType: avro:Order
+
+  processed_orders:
+    topic: processed-orders
+    keyType: string
+    valueType: avro:EnrichedOrder
+
+functions:
+  enrich_order:
+    type: mapper
+    code: |
+      return {
+        &quot;orderId&quot;: value.get(&quot;orderId&quot;),
+        &quot;amount&quot;: value.get(&quot;amount&quot;),
+        &quot;processedTime&quot;: int(time.time() * 1000)
+      }
+
+pipelines:
+  process_orders:
+    from: orders
+    via:
+      - type: filter
+        if:
+          expression: value.get(&quot;amount&quot;) &gt; 0
+      - type: mapValues
+        mapper:
+          code: enrich_order(key, value)
+    to: processed_orders
+</code></pre>
+<h4 id="migration-steps_4">Migration Steps</h4>
+<ol>
+<li><strong>Identify Stream Sources and Sinks</strong></li>
+<li>Map Flink sources to KSML stream definitions</li>
+<li>
+<p>Map Flink sinks to KSML stream destinations</p>
+</li>
+<li>
+<p><strong>Convert DataStream Operations</strong></p>
+</li>
+<li>Map Flink's DataStream operations to KSML operations</li>
+<li>
+<p>Extract complex logic into KSML functions</p>
+</li>
+<li>
+<p><strong>Handle State Differently</strong></p>
+</li>
+<li>Redesign stateful operations to use Kafka Streams state stores</li>
+<li>
+<p>Consider windowing differences between Flink and Kafka Streams</p>
+</li>
+<li>
+<p><strong>Adjust for Processing Guarantees</strong></p>
+</li>
+<li>Configure KSML for appropriate processing guarantees</li>
+<li>
+<p>Be aware of the differences in exactly-once semantics</p>
+</li>
+<li>
+<p><strong>Test and Validate</strong></p>
+</li>
+<li>Compare the output of both implementations</li>
+<li>Monitor performance differences</li>
+</ol>
+<h2 id="best-practices-for-migration">Best Practices for Migration</h2>
+<ol>
+<li><strong>Incremental Migration</strong></li>
+<li>Migrate one pipeline or component at a time</li>
+<li>
+<p>Run old and new implementations in parallel initially</p>
+</li>
+<li>
+<p><strong>Thorough Testing</strong></p>
+</li>
+<li>Create comprehensive test cases before migration</li>
+<li>
+<p>Verify that the migrated application produces the same results</p>
+</li>
+<li>
+<p><strong>Performance Monitoring</strong></p>
+</li>
+<li>Monitor performance metrics before and after migration</li>
+<li>
+<p>Tune configurations as needed</p>
+</li>
+<li>
+<p><strong>Documentation</strong></p>
+</li>
+<li>Document the migration process and decisions</li>
+<li>
+<p>Update operational procedures for the new implementation</p>
+</li>
+<li>
+<p><strong>Training</strong></p>
+</li>
+<li>Provide training for team members on KSML</li>
+<li>Highlight the differences from the previous framework</li>
+</ol>
+<h2 id="related-resources">Related Resources</h2>
+<ul>
+<li><a href="../../reference/language-reference/">KSML Language Reference</a></li>
+<li><a href="../../reference/operations-reference/">Operations Reference</a></li>
+<li><a href="../../reference/functions-reference/">Functions Reference</a></li>
+<li><a href="../../reference/configuration-reference/">Configuration Reference</a></li>
+<li><a href="../troubleshooting/">Troubleshooting Guide</a></li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js"></script>
+        <script src="../../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

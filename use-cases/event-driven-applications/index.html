@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Event-Driven Applications with KSML - KSML Documentation</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../../css/brands.min.css" rel="stylesheet">
+        <link href="../../css/solid.min.css" rel="stylesheet">
+        <link href="../../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../..">KSML Documentation</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="../.." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../tutorials/getting-started/" class="nav-link">Getting Started</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../core-concepts/" class="nav-link">Core Concepts</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../tutorials/" class="nav-link">Tutorials</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../" class="nav-link">Use Case Guides</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../reference/" class="nav-link">Reference</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../resources/" class="nav-link">Resources</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../about/" class="nav-link">About</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#event-driven-applications-with-ksml" class="nav-link">Event-Driven Applications with KSML</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#introduction" class="nav-link">Introduction</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#prerequisites" class="nav-link">Prerequisites</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#the-use-case" class="nav-link">The Use Case</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#setting-up-the-environment" class="nav-link">Setting Up the Environment</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#defining-the-data-models" class="nav-link">Defining the Data Models</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#creating-the-ksml-definition" class="nav-link">Creating the KSML Definition</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#running-the-application" class="nav-link">Running the Application</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#testing-the-event-driven-system" class="nav-link">Testing the Event-Driven System</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#extending-the-event-driven-system" class="nav-link">Extending the Event-Driven System</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#best-practices-for-event-driven-applications" class="nav-link">Best Practices for Event-Driven Applications</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#conclusion" class="nav-link">Conclusion</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#next-steps" class="nav-link">Next Steps</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="event-driven-applications-with-ksml">Event-Driven Applications with KSML</h1>
+<p>This tutorial demonstrates how to build event-driven applications using KSML. You'll learn how to detect specific events in your data streams and trigger appropriate actions in response.</p>
+<h2 id="introduction">Introduction</h2>
+<p>Event-driven architecture is a powerful paradigm for building responsive, real-time applications. In this approach:</p>
+<ul>
+<li>Systems react to events as they occur</li>
+<li>Components communicate through events rather than direct calls</li>
+<li>Business logic is triggered by changes in state</li>
+<li>Applications can scale and evolve independently</li>
+</ul>
+<p>KSML is particularly well-suited for event-driven applications because it allows you to:</p>
+<ul>
+<li>Process streams of events in real-time</li>
+<li>Detect complex patterns and conditions</li>
+<li>Transform events into actionable insights</li>
+<li>Trigger downstream processes automatically</li>
+</ul>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Before starting this tutorial, you should:</p>
+<ul>
+<li>Understand basic KSML concepts (streams, functions, pipelines)</li>
+<li>Have completed the <a href="../../tutorials/getting-started/basics-tutorial/">KSML Basics Tutorial</a></li>
+<li>Be familiar with <a href="../../tutorials/beginner/filtering-transforming/">Filtering and Transforming</a></li>
+<li>Have a basic understanding of <a href="../../tutorials/advanced/complex-event-processing/">Complex Event Processing</a></li>
+</ul>
+<h2 id="the-use-case">The Use Case</h2>
+<p>In this tutorial, we'll build an event-driven inventory management system for an e-commerce platform. The system will:</p>
+<ol>
+<li>Monitor product inventory levels in real-time</li>
+<li>Detect when items are running low</li>
+<li>Generate reorder events for the procurement system</li>
+<li>Alert warehouse staff about critical inventory situations</li>
+<li>Update inventory dashboards in real-time</li>
+</ol>
+<h2 id="setting-up-the-environment">Setting Up the Environment</h2>
+<p>First, let's set up our environment with Docker Compose:</p>
+<pre><code class="language-yaml">version: '3'
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  ksml-runner:
+    image: axual/ksml-runner:latest
+    depends_on:
+      - kafka
+    volumes:
+      - ./config:/config
+      - ./definitions:/definitions
+</code></pre>
+<h2 id="defining-the-data-models">Defining the Data Models</h2>
+<h3 id="inventory-update-events">Inventory Update Events</h3>
+<pre><code class="language-json">{
+  &quot;product_id&quot;: &quot;prod-123&quot;,
+  &quot;product_name&quot;: &quot;Wireless Headphones&quot;,
+  &quot;category&quot;: &quot;electronics&quot;,
+  &quot;current_stock&quot;: 15,
+  &quot;warehouse_id&quot;: &quot;wh-east-1&quot;,
+  &quot;timestamp&quot;: 1625097600000,
+  &quot;unit_price&quot;: 79.99
+}
+</code></pre>
+<h3 id="order-events">Order Events</h3>
+<pre><code class="language-json">{
+  &quot;order_id&quot;: &quot;order-456&quot;,
+  &quot;customer_id&quot;: &quot;cust-789&quot;,
+  &quot;items&quot;: [
+    {
+      &quot;product_id&quot;: &quot;prod-123&quot;,
+      &quot;quantity&quot;: 2,
+      &quot;unit_price&quot;: 79.99
+    }
+  ],
+  &quot;order_total&quot;: 159.98,
+  &quot;timestamp&quot;: 1625097600000
+}
+</code></pre>
+<h3 id="reorder-events-output">Reorder Events (Output)</h3>
+<pre><code class="language-json">{
+  &quot;event_id&quot;: &quot;reorder-789&quot;,
+  &quot;product_id&quot;: &quot;prod-123&quot;,
+  &quot;product_name&quot;: &quot;Wireless Headphones&quot;,
+  &quot;current_stock&quot;: 5,
+  &quot;reorder_quantity&quot;: 50,
+  &quot;priority&quot;: &quot;normal&quot;,
+  &quot;warehouse_id&quot;: &quot;wh-east-1&quot;,
+  &quot;timestamp&quot;: 1625097600000
+}
+</code></pre>
+<h3 id="alert-events-output">Alert Events (Output)</h3>
+<pre><code class="language-json">{
+  &quot;alert_id&quot;: &quot;alert-123&quot;,
+  &quot;alert_type&quot;: &quot;critical_inventory&quot;,
+  &quot;product_id&quot;: &quot;prod-123&quot;,
+  &quot;product_name&quot;: &quot;Wireless Headphones&quot;,
+  &quot;current_stock&quot;: 2,
+  &quot;threshold&quot;: 5,
+  &quot;warehouse_id&quot;: &quot;wh-east-1&quot;,
+  &quot;timestamp&quot;: 1625097600000,
+  &quot;message&quot;: &quot;Critical inventory level: Wireless Headphones (2 units remaining)&quot;
+}
+</code></pre>
+<h2 id="creating-the-ksml-definition">Creating the KSML Definition</h2>
+<p>Now, let's create our KSML definition file:</p>
+<pre><code class="language-yaml">streams:
+  inventory_updates:
+    topic: inventory_updates
+    keyType: string  # product_id
+    valueType: json  # inventory data
+
+  order_events:
+    topic: order_events
+    keyType: string  # order_id
+    valueType: json  # order data
+
+  product_reference:
+    topic: product_reference
+    keyType: string  # product_id
+    valueType: json  # product details including thresholds
+
+  reorder_events:
+    topic: reorder_events
+    keyType: string  # event_id
+    valueType: json  # reorder data
+
+  inventory_alerts:
+    topic: inventory_alerts
+    keyType: string  # alert_id
+    valueType: json  # alert data
+
+functions:
+  generate_reorder_event:
+    type: mapValues
+    parameters:
+      - name: inventory
+        type: object
+      - name: product_info
+        type: object
+    code: |
+      import uuid
+      import time
+
+      # Get reorder threshold and quantity from product reference data
+      reorder_threshold = product_info.get(&quot;reorder_threshold&quot;, 10)
+      reorder_quantity = product_info.get(&quot;reorder_quantity&quot;, 50)
+
+      # Determine priority based on current stock
+      current_stock = inventory.get(&quot;current_stock&quot;, 0)
+      priority = &quot;urgent&quot; if current_stock &lt;= 5 else &quot;normal&quot;
+
+      # Generate event ID
+      event_id = f&quot;reorder-{uuid.uuid4().hex[:8]}&quot;
+
+      # Create reorder event
+      return {
+        &quot;event_id&quot;: event_id,
+        &quot;product_id&quot;: inventory.get(&quot;product_id&quot;),
+        &quot;product_name&quot;: inventory.get(&quot;product_name&quot;),
+        &quot;current_stock&quot;: current_stock,
+        &quot;reorder_quantity&quot;: reorder_quantity,
+        &quot;priority&quot;: priority,
+        &quot;warehouse_id&quot;: inventory.get(&quot;warehouse_id&quot;),
+        &quot;timestamp&quot;: int(time.time() * 1000)
+      }
+
+  generate_alert:
+    type: mapValues
+    parameters:
+      - name: inventory
+        type: object
+      - name: product_info
+        type: object
+    code: |
+      import uuid
+      import time
+
+      # Get critical threshold from product reference data
+      critical_threshold = product_info.get(&quot;critical_threshold&quot;, 5)
+
+      # Get current stock
+      current_stock = inventory.get(&quot;current_stock&quot;, 0)
+      product_name = inventory.get(&quot;product_name&quot;, &quot;Unknown Product&quot;)
+
+      # Generate alert ID
+      alert_id = f&quot;alert-{uuid.uuid4().hex[:8]}&quot;
+
+      # Create alert message
+      message = f&quot;Critical inventory level: {product_name} ({current_stock} units remaining)&quot;
+
+      # Create alert event
+      return {
+        &quot;alert_id&quot;: alert_id,
+        &quot;alert_type&quot;: &quot;critical_inventory&quot;,
+        &quot;product_id&quot;: inventory.get(&quot;product_id&quot;),
+        &quot;product_name&quot;: product_name,
+        &quot;current_stock&quot;: current_stock,
+        &quot;threshold&quot;: critical_threshold,
+        &quot;warehouse_id&quot;: inventory.get(&quot;warehouse_id&quot;),
+        &quot;timestamp&quot;: int(time.time() * 1000),
+        &quot;message&quot;: message
+      }
+
+  update_inventory_from_order:
+    type: mapValues
+    parameters:
+      - name: order
+        type: object
+      - name: inventory
+        type: object
+    code: |
+      if inventory is None or order is None:
+        return None
+
+      # Find the item in the order that matches this product
+      product_id = inventory.get(&quot;product_id&quot;)
+      order_items = order.get(&quot;items&quot;, [])
+
+      ordered_quantity = 0
+      for item in order_items:
+        if item.get(&quot;product_id&quot;) == product_id:
+          ordered_quantity += item.get(&quot;quantity&quot;, 0)
+
+      # If this product wasn't in the order, return unchanged inventory
+      if ordered_quantity == 0:
+        return None
+
+      # Update inventory with new stock level
+      current_stock = inventory.get(&quot;current_stock&quot;, 0)
+      new_stock = max(0, current_stock - ordered_quantity)
+
+      return {
+        **inventory,
+        &quot;current_stock&quot;: new_stock,
+        &quot;last_order_id&quot;: order.get(&quot;order_id&quot;),
+        &quot;last_updated&quot;: int(time.time() * 1000)
+      }
+
+pipelines:
+  # Pipeline for detecting low inventory and generating reorder events
+  reorder_pipeline:
+    from: inventory_updates
+    via:
+      - type: join
+        with: product_reference
+      - type: filter
+        if:
+          code: |
+            reorder_threshold = foreignValue.get(&quot;reorder_threshold&quot;, 10)
+            return value.get(&quot;current_stock&quot;, 0) &lt;= reorder_threshold
+      - type: mapValues
+        mapper:
+          code: generate_reorder_event(value, foreignValue)
+    to: reorder_events
+
+  # Pipeline for detecting critical inventory levels and generating alerts
+  alert_pipeline:
+    from: inventory_updates
+    via:
+      - type: join
+        with: product_reference
+      - type: filter
+        if:
+          code: |
+            critical_threshold = foreignValue.get(&quot;critical_threshold&quot;, 5)
+            return value.get(&quot;current_stock&quot;, 0) &lt;= critical_threshold
+      - type: mapValues
+        mapper:
+          code: generate_alert(value, foreignValue)
+    to: inventory_alerts
+
+  # Pipeline for updating inventory based on orders
+  order_processing_pipeline:
+    from: order_events
+    via:
+      - type: flatMap
+        mapper:
+          code: |
+            # For each item in the order, emit a key-value pair with product_id as key
+            result = []
+            for item in value.get(&quot;items&quot;, []):
+              product_id = item.get(&quot;product_id&quot;)
+              if product_id:
+                result.append((product_id, value))
+            return result
+      - type: join
+        with: inventory_updates
+      - type: mapValues
+        mapper:
+          code: update_inventory_from_order(value, foreignValue)
+      - type: filter
+        if:
+          expression: value is not None
+    to: inventory_updates
+</code></pre>
+<h2 id="running-the-application">Running the Application</h2>
+<p>To run the application:</p>
+<ol>
+<li>Save the KSML definition to <code>definitions/event_driven.yaml</code></li>
+<li>Create a configuration file at <code>config/application.properties</code> with your Kafka connection details</li>
+<li>Start the Docker Compose environment: <code>docker-compose up -d</code></li>
+<li>Produce sample data to the input topics</li>
+<li>Monitor the output topics to see the events being generated</li>
+</ol>
+<h2 id="testing-the-event-driven-system">Testing the Event-Driven System</h2>
+<p>You can test the system by producing sample data to the input topics:</p>
+<pre><code class="language-bash"># Produce product reference data
+echo 'prod-123:{&quot;product_id&quot;:&quot;prod-123&quot;,&quot;reorder_threshold&quot;:10,&quot;reorder_quantity&quot;:50,&quot;critical_threshold&quot;:5}' | \
+  kafka-console-producer --broker-list localhost:9092 --topic product_reference --property &quot;parse.key=true&quot; --property &quot;key.separator=:&quot;
+
+# Produce inventory update
+echo 'prod-123:{&quot;product_id&quot;:&quot;prod-123&quot;,&quot;product_name&quot;:&quot;Wireless Headphones&quot;,&quot;category&quot;:&quot;electronics&quot;,&quot;current_stock&quot;:8,&quot;warehouse_id&quot;:&quot;wh-east-1&quot;,&quot;timestamp&quot;:1625097600000,&quot;unit_price&quot;:79.99}' | \
+  kafka-console-producer --broker-list localhost:9092 --topic inventory_updates --property &quot;parse.key=true&quot; --property &quot;key.separator=:&quot;
+
+# Produce order event
+echo 'order-456:{&quot;order_id&quot;:&quot;order-456&quot;,&quot;customer_id&quot;:&quot;cust-789&quot;,&quot;items&quot;:[{&quot;product_id&quot;:&quot;prod-123&quot;,&quot;quantity&quot;:3,&quot;unit_price&quot;:79.99}],&quot;order_total&quot;:239.97,&quot;timestamp&quot;:1625097600000}' | \
+  kafka-console-producer --broker-list localhost:9092 --topic order_events --property &quot;parse.key=true&quot; --property &quot;key.separator=:&quot;
+</code></pre>
+<p>Then, consume from the output topics to see the events being generated:</p>
+<pre><code class="language-bash"># Monitor reorder events
+kafka-console-consumer --bootstrap-server localhost:9092 --topic reorder_events --from-beginning
+
+# Monitor alerts
+kafka-console-consumer --bootstrap-server localhost:9092 --topic inventory_alerts --from-beginning
+
+# Monitor updated inventory
+kafka-console-consumer --bootstrap-server localhost:9092 --topic inventory_updates --from-beginning
+</code></pre>
+<h2 id="extending-the-event-driven-system">Extending the Event-Driven System</h2>
+<h3 id="integration-with-external-systems">Integration with External Systems</h3>
+<p>To make this event-driven system truly useful, you can integrate it with external systems:</p>
+<ol>
+<li><strong>Procurement System</strong>: Connect the reorder events to your procurement system to automatically create purchase orders</li>
+<li><strong>Notification Service</strong>: Send the alerts to a notification service that can email or text warehouse staff</li>
+<li><strong>Analytics Platform</strong>: Stream all events to an analytics platform for business intelligence</li>
+<li><strong>Dashboard</strong>: Connect to a real-time dashboard for inventory visualization</li>
+</ol>
+<h3 id="adding-more-event-types">Adding More Event Types</h3>
+<p>You can extend the system with additional event types:</p>
+<ul>
+<li><strong>Price Change Events</strong>: Automatically adjust prices based on inventory levels or competitor data</li>
+<li><strong>Promotion Events</strong>: Trigger promotions for overstocked items</li>
+<li><strong>Fraud Detection Events</strong>: Flag suspicious order patterns</li>
+<li><strong>Shipping Delay Events</strong>: Notify customers about potential delays due to inventory issues</li>
+</ul>
+<h2 id="best-practices-for-event-driven-applications">Best Practices for Event-Driven Applications</h2>
+<p>When building event-driven applications with KSML, consider these best practices:</p>
+<ol>
+<li><strong>Event Schema Design</strong>: Design your events to be self-contained and include all necessary context</li>
+<li><strong>Idempotent Processing</strong>: Ensure your event handlers can process the same event multiple times without side effects</li>
+<li><strong>Event Versioning</strong>: Include version information in your events to handle schema evolution</li>
+<li><strong>Monitoring and Observability</strong>: Add logging and metrics to track event flow and processing</li>
+<li><strong>Error Handling</strong>: Implement proper error handling and dead-letter queues for failed events</li>
+</ol>
+<h2 id="conclusion">Conclusion</h2>
+<p>In this tutorial, you've learned how to:</p>
+<ul>
+<li>Build an event-driven application using KSML</li>
+<li>Detect specific conditions in your data streams</li>
+<li>Generate events in response to those conditions</li>
+<li>Process events to update state and trigger further actions</li>
+<li>Design an end-to-end event-driven architecture</li>
+</ul>
+<p>Event-driven applications are a powerful use case for KSML, allowing you to build responsive, real-time systems that react automatically to changing conditions.</p>
+<h2 id="next-steps">Next Steps</h2>
+<ul>
+<li>Learn about <a href="../real-time-analytics/">Real-Time Analytics</a> to analyze your event data</li>
+<li>Explore <a href="../data-transformation/">Data Transformation</a> for more complex event processing</li>
+<li>Check out <a href="../../tutorials/advanced/external-integration/">External Integration</a> for connecting your events to external systems</li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js"></script>
+        <script src="../../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

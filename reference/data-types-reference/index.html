@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>KSML Data Types Reference - KSML Documentation</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../../css/brands.min.css" rel="stylesheet">
+        <link href="../../css/solid.min.css" rel="stylesheet">
+        <link href="../../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../..">KSML Documentation</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="../.." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../tutorials/getting-started/" class="nav-link">Getting Started</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../core-concepts/" class="nav-link">Core Concepts</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../tutorials/" class="nav-link">Tutorials</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../use-cases/" class="nav-link">Use Case Guides</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../" class="nav-link">Reference</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../resources/" class="nav-link">Resources</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../about/" class="nav-link">About</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#ksml-data-types-reference" class="nav-link">KSML Data Types Reference</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#data-types-in-ksml" class="nav-link">Data Types in KSML</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#primitive-types" class="nav-link">Primitive Types</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#complex-types" class="nav-link">Complex Types</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#the-any-type" class="nav-link">The Any Type</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#type-conversion" class="nav-link">Type Conversion</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#best-practices" class="nav-link">Best Practices</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#related-topics" class="nav-link">Related Topics</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="ksml-data-types-reference">KSML Data Types Reference</h1>
+<p>KSML supports a wide range of data types for both keys and values in your streams. Understanding these types is
+essential for properly defining your streams and functions that process your data.</p>
+<h2 id="data-types-in-ksml">Data Types in KSML</h2>
+<h2 id="primitive-types">Primitive Types</h2>
+<p>KSML supports the following primitive types:</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+<th>Example</th>
+<th>Java Equivalent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>boolean</code></td>
+<td>True or false values</td>
+<td><code>true</code>, <code>false</code></td>
+<td><code>Boolean</code></td>
+</tr>
+<tr>
+<td><code>byte</code></td>
+<td>8-bit integer</td>
+<td><code>42</code></td>
+<td><code>Byte</code></td>
+</tr>
+<tr>
+<td><code>short</code></td>
+<td>16-bit integer</td>
+<td><code>1000</code></td>
+<td><code>Short</code></td>
+</tr>
+<tr>
+<td><code>int</code></td>
+<td>32-bit integer</td>
+<td><code>1000000</code></td>
+<td><code>Integer</code></td>
+</tr>
+<tr>
+<td><code>long</code></td>
+<td>64-bit integer</td>
+<td><code>9223372036854775807</code></td>
+<td><code>Long</code></td>
+</tr>
+<tr>
+<td><code>float</code></td>
+<td>Single-precision floating point</td>
+<td><code>3.14</code></td>
+<td><code>Float</code></td>
+</tr>
+<tr>
+<td><code>double</code></td>
+<td>Double-precision floating point</td>
+<td><code>3.141592653589793</code></td>
+<td><code>Double</code></td>
+</tr>
+<tr>
+<td><code>string</code></td>
+<td>Text string</td>
+<td><code>"Hello, World!"</code></td>
+<td><code>String</code></td>
+</tr>
+<tr>
+<td><code>bytes</code></td>
+<td>Array of bytes</td>
+<td>Binary data</td>
+<td><code>byte[]</code></td>
+</tr>
+<tr>
+<td><code>null</code></td>
+<td>Null value</td>
+<td><code>null</code></td>
+<td><code>null</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="complex-types">Complex Types</h2>
+<p>KSML also supports several complex types that can contain multiple values:</p>
+<h3 id="enum">Enum</h3>
+<p>An enumeration defines a set of allowed values.</p>
+<h4 id="syntax">Syntax</h4>
+<pre><code class="language-yaml">valueType: &quot;enum(&lt;value1&gt;, &lt;value2&gt;, ...)&quot;
+</code></pre>
+<p>Where <code>&lt;value1&gt;</code>, <code>&lt;value2&gt;</code>, etc. are the allowed values.</p>
+<h4 id="example">Example</h4>
+<pre><code class="language-yaml"># Enum type for status values
+streams:
+  order_status_stream:
+    topic: order-statuses
+    keyType: string
+    valueType: &quot;enum(PENDING, PROCESSING, SHIPPED, DELIVERED, CANCELLED)&quot;
+</code></pre>
+<p>In Python code, an enum value is always represented as a string:</p>
+<pre><code class="language-yaml">functions:
+  update_status:
+    type: valueTransformer
+    code: |
+      if value.get(&quot;shipped&quot;):
+        return &quot;SHIPPED&quot;
+      elif value.get(&quot;processing&quot;):
+        return &quot;PROCESSING&quot;
+    expression: &quot;PENDING&quot;
+    resultType: string
+</code></pre>
+<p>Note that the <code>expression</code> here is mandatory, since the <code>valueTransformer</code> function type determines that the function
+is required to return a value.</p>
+<h3 id="list">List</h3>
+<p>A list contains multiple elements of the same type.</p>
+<h4 id="syntax_1">Syntax</h4>
+<pre><code class="language-yaml">valueType: &quot;[&lt;element_type&gt;]&quot;
+</code></pre>
+<p>Where <code>&lt;element_type&gt;</code> can be any valid KSML type.</p>
+<h4 id="examples">Examples</h4>
+<pre><code class="language-yaml"># Example 1: List of strings
+streams:
+  tags_stream:
+    topic: tags
+    keyType: string
+    valueType: &quot;[string]&quot;
+
+  orders_stream:
+    topic: orders
+    keyType: string
+    valueType: &quot;[struct]&quot;
+</code></pre>
+<p>In Python code, a list is represented as a Python list:</p>
+<pre><code class="language-yaml">functions:
+  extract_tags:
+    type: keyValueToValueListTransformer
+    expression: value.get(&quot;tags&quot;, [])
+    resultType: &quot;[string]&quot;
+</code></pre>
+<h3 id="struct">Struct</h3>
+<p>A struct is a key-value map where all keys are strings. This is the most common complex type and is used for JSON
+objects, AVRO records, etc.</p>
+<h4 id="syntax_2">Syntax</h4>
+<pre><code class="language-yaml">valueType: struct
+</code></pre>
+<h4 id="example_1">Example</h4>
+<pre><code class="language-yaml">streams:
+  user_profiles:
+    topic: user-profiles
+    keyType: string
+    valueType: struct
+</code></pre>
+<p>In Python code, a struct is represented as a dictionary:</p>
+<pre><code class="language-yaml">functions:
+  create_user:
+    type: valueTransformer
+    expression: |
+      return {
+        &quot;id&quot;: value.get(&quot;user_id&quot;),
+        &quot;name&quot;: value.get(&quot;first_name&quot;) + &quot; &quot; + value.get(&quot;last_name&quot;),
+        &quot;email&quot;: value.get(&quot;email&quot;),
+        &quot;age&quot;: value.get(&quot;age&quot;)
+      }
+</code></pre>
+<h3 id="tuple">Tuple</h3>
+<p>A tuple combines multiple elements of different types into a single value. Note that the elements in a tuple have no
+name, only a data type.</p>
+<h4 id="syntax_3">Syntax</h4>
+<pre><code class="language-yaml">valueType: &quot;(&lt;type1&gt;, &lt;type2&gt;, ...)&quot;
+</code></pre>
+<p>Where <code>&lt;type1&gt;</code>, <code>&lt;type2&gt;</code>, etc. can be any valid KSML type.</p>
+<p>Note that tuples can be used as keyType or valueType on Kafka topics, since KSML comes with its own schema format for
+tuples. These schemas are generated dynamically based on the tuple's element types. For example, a tuple defined as
+<code>(string, int, struct)</code> will lead to the following schema:</p>
+<pre><code class="language-yaml">namespace: io.axual.ksml.data
+name: TupleOfStringAndIntAndStruct
+doc: &quot;Tuple of 3 fields&quot;
+fields:
+  - name: elem1
+    type: string
+  - name: elem2
+    type: int
+  - name: elem3
+    type: struct
+</code></pre>
+<p>Since tuple schemas are dynamic, when you want to use a tuple as <code>keyType</code> or <code>valueType</code> on a topic, be aware that the
+tuple is serialized as a struct. So the schema will be registered by the serializer in the corresponding schema
+registry, or expected to be registered on the topic by the deserializer. If the latter is not the case, but you
+still want to maintain strong typing, then save the generated schema in your desired format (AVRO, JSON Schema, ...) to
+a local file from which KSML can read it. Then you will be able to (re)use it in other pipelines as
+<code>avro:TupleOfStringAndIntAndStruct</code> for AVRO, <code>json:TupleOfStringAndIntAndStruct</code> for JSON, etc.</p>
+<h4 id="example_2">Example</h4>
+<pre><code class="language-yaml"># Example: Tuple of string and SensorData
+streams:
+  sensor_stream:
+    topic: tags
+    keyType: string
+    valueType: &quot;(string, avro:SensorData)&quot;
+</code></pre>
+<p>In Python code, a tuple is represented as a Python tuple:</p>
+<pre><code class="language-yaml">functions:
+  create_user_age_pair:
+    type: keyValueTransformer
+    expression: |
+      (value.get(&quot;name&quot;), value.get(&quot;age&quot;))
+    resultType: &quot;(string, int)&quot;
+</code></pre>
+<h3 id="union">Union</h3>
+<p>A union type can be one of several possible types.</p>
+<h4 id="syntax_4">Syntax</h4>
+<pre><code class="language-yaml">valueType: &quot;union(&lt;type1&gt;, &lt;type2&gt;, ...)&quot;
+</code></pre>
+<p>Where <code>&lt;type1&gt;</code>, <code>&lt;type2&gt;</code>, etc. can be any valid KSML type.</p>
+<h4 id="example_3">Example</h4>
+<p>Unions are serializable to Kafka topics. KSML comes with an internal UnionSerde. Upon serialization, it will use the
+serde that belongs to the value stored in the union. When deserializing it will try all serdes associated with the
+member types until one is able to decode the message without throwing exceptions.</p>
+<pre><code class="language-yaml"># Union type that can be either null or a string
+streams:
+  optional_message_stream:
+    topic: optional-messages
+    keyType: string
+    valueType: &quot;union(null, string)&quot;
+</code></pre>
+<p>In Python code, a union is represented as a value of one of the specified types:</p>
+<pre><code class="language-yaml">functions:
+  get_message:
+    type: valueMapper
+    code: |
+      message = value.get(&quot;message&quot;)
+    expression: message if message else None
+</code></pre>
+<h3 id="windowed">Windowed</h3>
+<p>Some operations group messages on an input stream together in user-defined windows. If the input stream's <code>keyType</code> is
+<code>string</code>, then the resulting stream will have a <code>keyType</code> of <code>windowed(string)</code>. Sometimes you need to specify this
+type explicitly in your KSML definition, which is why it will be recognized as its own type.</p>
+<p>Whenever a <code>windowed</code> type is exposed to a Kafka topic, or to Python code, KSML converts the <code>Windowed</code> object from
+Kafka Streams into a struct with five fields. This is dynamically done, and the output depends on the type of key.
+For example, a <code>windowed(string)</code> type is converted into the following struct schema:</p>
+<pre><code class="language-yaml">namespace: io.axual.ksml.data
+name: WindowedString
+doc: Windowed String
+fields:
+  - name: start
+    type: long
+    doc: &quot;Start timestamp in milliseconds&quot;
+  - name: end
+    type: long
+    doc: &quot;End timestamp in milliseconds&quot;
+  - name: startTime
+    type: string
+    doc: &quot;Start time in UTC&quot;
+  - name: endTime
+    type: string
+    doc: &quot;End time in UTC&quot;
+  - name: key
+    type: string # This is determined by the windowed type within brackets
+    doc: &quot;Window key&quot;
+</code></pre>
+<h4 id="syntax_5">Syntax</h4>
+<pre><code class="language-yaml">keyType: &quot;windowed(&lt;base_type&gt;)&quot;
+</code></pre>
+<p>Where <code>&lt;base_type&gt;</code> is the type of the key within the window.</p>
+<h4 id="example_4">Example</h4>
+<pre><code class="language-yaml"># Windowed key type
+streams:
+  windowed_counts:
+    topic: windowed-counts
+    keyType: &quot;windowed(string)&quot;
+    valueType: long
+</code></pre>
+<p>In Python code, a windowed key provides access to both the key and the window:</p>
+<pre><code class="language-yaml">functions:
+  format_windowed_result:
+    type: keyValueTransformer
+    expression: |
+      (None, {
+        &quot;key&quot;: key.key(),
+        &quot;start&quot;: key.start(),
+        &quot;end&quot;: key.end(),
+        &quot;count&quot;: value
+      })
+    resultType: &quot;(null, struct)&quot;
+</code></pre>
+<h2 id="the-any-type">The Any Type</h2>
+<p>The special type <code>?</code> or <code>any</code> can be used when the exact type is unknown or variable. Code that deals with this type
+should always perform proper type checking.</p>
+<h4 id="syntax_6">Syntax</h4>
+<pre><code class="language-yaml"># Either of these can be used:
+# resultType: &quot;?&quot;
+# resultType: &quot;any&quot;
+</code></pre>
+<h4 id="example_5">Example</h4>
+<p>It is not possible to use the <code>any</code> type on a Kafka topic, as KSML would not be able to tie the type to the right
+serde. Therefore, on Kafka topics you always need to specify a precise type.</p>
+<p>In Python code, you should check the type before using values of the <code>any</code> type:</p>
+<pre><code class="language-yaml">functions:
+  process_any:
+    type: valueTransformer
+    code: |
+      if isinstance(value, dict):
+        return {&quot;type&quot;: &quot;object&quot;, &quot;value&quot;: value}
+      elif isinstance(value, list):
+        return {&quot;type&quot;: &quot;array&quot;, &quot;value&quot;: value}
+      elif isinstance(value, str):
+        return {&quot;type&quot;: &quot;string&quot;, &quot;value&quot;: value}
+      elif isinstance(value, (int, float)):
+        return {&quot;type&quot;: &quot;number&quot;, &quot;value&quot;: value}
+    expression: |
+      {&quot;type&quot;: &quot;unknown&quot;, &quot;value&quot;: str(value)}
+    resultType: struct
+</code></pre>
+<h2 id="type-conversion">Type Conversion</h2>
+<p>KSML automatically performs type conversion wherever required and possible. This holds for numbers (integer to long,
+etc.) but also for enums, lists, structs, tuples, and unions. Given a value and the desired data type, KSML will try
+the best possible conversion to allow developers to focus on their logic instead of data type compatibility.</p>
+<p>Below is an example of a function that returns a string</p>
+<pre><code class="language-yaml">functions:
+  generate_message:
+    type: generator
+    globalCode: |
+      import random
+      sensorCounter = 0
+    code: |
+      global sensorCounter
+
+      # Generate key
+      key = &quot;sensor&quot;+str(sensorCounter)           # Set the key to return (&quot;sensor0&quot; to &quot;sensor9&quot;)
+      sensorCounter = (sensorCounter+1) % 10      # Increase the counter for next iteration
+
+      # Generate temperature data as CSV, Temperature.csv file contains: &quot;type,unit,value&quot;
+      value = &quot;TEMPERATURE,C,&quot;+str(random.randrange(-100, 100)
+    expression: (key, value)                      # Return a message tuple with the key and value
+    resultType: (string, csv:Temperature)         # Value is converted to {&quot;type&quot;:&quot;TEMPERATURE&quot;, &quot;unit&quot;:&quot;C&quot;, &quot;value&quot;:&quot;83&quot;}
+</code></pre>
+<h2 id="best-practices">Best Practices</h2>
+<ol>
+<li><strong>Be specific about your types</strong>: Avoid using <code>any</code> when possible</li>
+<li><strong>Use complex types to represent structured data</strong>: Use structs, lists, etc. to represent structured data</li>
+<li><strong>Consider schema evolution</strong>: Use AVRO with a schema registry for production systems</li>
+<li><strong>Choose the right notation for your use case</strong>: Consider compatibility with upstream and downstream systems</li>
+<li><strong>Validate data</strong>: Check that data conforms to expected types and formats</li>
+<li><strong>Handle missing or null values</strong>: Always handle the case where a value might be null</li>
+<li><strong>Document your types</strong>: Add comments to explain complex type structures</li>
+</ol>
+<h2 id="related-topics">Related Topics</h2>
+<ul>
+<li><a href="../language-reference/">KSML Language Reference</a></li>
+<li><a href="../operations-reference/">Operations Reference</a></li>
+<li><a href="../functions-reference/">Functions Reference</a></li>
+<li><a href="../configuration-reference/">Configuration Reference</a></li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js"></script>
+        <script src="../../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

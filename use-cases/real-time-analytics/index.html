@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Real-Time Analytics with KSML - KSML Documentation</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../../css/brands.min.css" rel="stylesheet">
+        <link href="../../css/solid.min.css" rel="stylesheet">
+        <link href="../../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../..">KSML Documentation</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="../.." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../tutorials/getting-started/" class="nav-link">Getting Started</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../core-concepts/" class="nav-link">Core Concepts</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../tutorials/" class="nav-link">Tutorials</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../" class="nav-link">Use Case Guides</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../reference/" class="nav-link">Reference</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../resources/" class="nav-link">Resources</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../about/" class="nav-link">About</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#real-time-analytics-with-ksml" class="nav-link">Real-Time Analytics with KSML</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#introduction" class="nav-link">Introduction</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#prerequisites" class="nav-link">Prerequisites</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#the-use-case" class="nav-link">The Use Case</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#setting-up-the-environment" class="nav-link">Setting Up the Environment</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#defining-the-data-model" class="nav-link">Defining the Data Model</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#creating-the-ksml-definition" class="nav-link">Creating the KSML Definition</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#running-the-application" class="nav-link">Running the Application</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#visualizing-the-results" class="nav-link">Visualizing the Results</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#extending-the-application" class="nav-link">Extending the Application</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#conclusion" class="nav-link">Conclusion</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#next-steps" class="nav-link">Next Steps</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="real-time-analytics-with-ksml">Real-Time Analytics with KSML</h1>
+<p>This tutorial demonstrates how to build a real-time analytics application using KSML. You'll learn how to process streaming data, calculate metrics in real-time, and visualize the results.</p>
+<h2 id="introduction">Introduction</h2>
+<p>Real-time analytics is one of the most common use cases for stream processing. By analyzing data as it arrives, you can:</p>
+<ul>
+<li>Detect trends and patterns as they emerge</li>
+<li>Respond quickly to changing conditions</li>
+<li>Make data-driven decisions with minimal latency</li>
+<li>Provide up-to-date dashboards and visualizations</li>
+</ul>
+<p>In this tutorial, we'll build a real-time analytics pipeline that processes a stream of e-commerce transactions, calculates various metrics, and makes the results available for visualization.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Before starting this tutorial, you should:</p>
+<ul>
+<li>Understand basic KSML concepts (streams, functions, pipelines)</li>
+<li>Have completed the <a href="../../tutorials/getting-started/basics-tutorial/">KSML Basics Tutorial</a></li>
+<li>Be familiar with <a href="../../tutorials/intermediate/aggregations/">Aggregations</a></li>
+<li>Have a basic understanding of <a href="../../tutorials/intermediate/windowed-operations/">Windowed Operations</a></li>
+</ul>
+<h2 id="the-use-case">The Use Case</h2>
+<p>Imagine you're running an e-commerce platform and want to analyze transaction data in real-time. You want to track:</p>
+<ul>
+<li>Total sales by product category</li>
+<li>Average order value</li>
+<li>Transaction volume by region</li>
+<li>Conversion rates from different marketing channels</li>
+</ul>
+<h2 id="setting-up-the-environment">Setting Up the Environment</h2>
+<p>First, let's set up our environment with Docker Compose:</p>
+<pre><code class="language-yaml">version: '3'
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  ksml-runner:
+    image: axual/ksml-runner:latest
+    depends_on:
+      - kafka
+    volumes:
+      - ./config:/config
+      - ./definitions:/definitions
+</code></pre>
+<h2 id="defining-the-data-model">Defining the Data Model</h2>
+<p>Our transaction data will have the following structure:</p>
+<pre><code class="language-json">{
+  &quot;transaction_id&quot;: &quot;12345&quot;,
+  &quot;timestamp&quot;: 1625097600000,
+  &quot;customer_id&quot;: &quot;cust-789&quot;,
+  &quot;product_id&quot;: &quot;prod-456&quot;,
+  &quot;product_category&quot;: &quot;electronics&quot;,
+  &quot;quantity&quot;: 1,
+  &quot;price&quot;: 499.99,
+  &quot;region&quot;: &quot;north_america&quot;,
+  &quot;marketing_channel&quot;: &quot;social_media&quot;
+}
+</code></pre>
+<h2 id="creating-the-ksml-definition">Creating the KSML Definition</h2>
+<p>Now, let's create our KSML definition file:</p>
+<pre><code class="language-yaml">streams:
+  transactions:
+    topic: ecommerce_transactions
+    keyType: string  # transaction_id
+    valueType: json  # transaction data
+
+  sales_by_category:
+    topic: sales_by_category
+    keyType: string  # product_category
+    valueType: json  # aggregated sales data
+
+  avg_order_value:
+    topic: avg_order_value
+    keyType: string  # time window
+    valueType: json  # average order value
+
+  transactions_by_region:
+    topic: transactions_by_region
+    keyType: string  # region
+    valueType: json  # transaction count
+
+  conversion_by_channel:
+    topic: conversion_by_channel
+    keyType: string  # marketing_channel
+    valueType: json  # conversion metrics
+
+functions:
+  extract_category:
+    type: mapValues
+    parameters:
+      - name: value
+        type: object
+    code: |
+      return value.get(&quot;product_category&quot;)
+
+  calculate_total:
+    type: aggregate
+    parameters:
+      - name: value
+        type: object
+      - name: aggregate
+        type: object
+    code: |
+      if aggregate is None:
+        return {&quot;total_sales&quot;: value.get(&quot;price&quot;) * value.get(&quot;quantity&quot;), &quot;count&quot;: 1}
+      else:
+        return {
+          &quot;total_sales&quot;: aggregate.get(&quot;total_sales&quot;) + (value.get(&quot;price&quot;) * value.get(&quot;quantity&quot;)),
+          &quot;count&quot;: aggregate.get(&quot;count&quot;) + 1
+        }
+
+pipelines:
+  # Pipeline for sales by category
+  sales_by_category_pipeline:
+    from: transactions
+    via:
+      - type: selectKey
+        keySelector:
+          expression: value.get(&quot;product_category&quot;)
+      - type: groupByKey
+      - type: aggregate
+        initializer:
+          expression: {&quot;total_sales&quot;: 0, &quot;count&quot;: 0}
+        aggregator:
+          code: calculate_total(value, aggregate)
+    to: sales_by_category
+
+  # Pipeline for average order value (windowed)
+  avg_order_value_pipeline:
+    from: transactions
+    via:
+      - type: groupByKey
+      - type: windowedBy
+        timeDifference: 60000  # 1 minute window
+      - type: aggregate
+        initializer:
+          expression: {&quot;total_sales&quot;: 0, &quot;count&quot;: 0}
+        aggregator:
+          code: calculate_total(value, aggregate)
+      - type: mapValues
+        mapper:
+          expression: {&quot;avg_order_value&quot;: aggregate.get(&quot;total_sales&quot;) / aggregate.get(&quot;count&quot;)}
+    to: avg_order_value
+
+  # Pipeline for transactions by region
+  transactions_by_region_pipeline:
+    from: transactions
+    via:
+      - type: selectKey
+        keySelector:
+          expression: value.get(&quot;region&quot;)
+      - type: groupByKey
+      - type: count
+    to: transactions_by_region
+
+  # Pipeline for conversion by marketing channel
+  conversion_by_channel_pipeline:
+    from: transactions
+    via:
+      - type: selectKey
+        keySelector:
+          expression: value.get(&quot;marketing_channel&quot;)
+      - type: groupByKey
+      - type: aggregate
+        initializer:
+          expression: {&quot;views&quot;: 0, &quot;purchases&quot;: 1, &quot;conversion_rate&quot;: 0}
+        aggregator:
+          code: |
+            if aggregate is None:
+              return {&quot;views&quot;: 0, &quot;purchases&quot;: 1, &quot;conversion_rate&quot;: 0}
+            else:
+              purchases = aggregate.get(&quot;purchases&quot;) + 1
+              views = aggregate.get(&quot;views&quot;)
+              return {
+                &quot;views&quot;: views,
+                &quot;purchases&quot;: purchases,
+                &quot;conversion_rate&quot;: purchases / views if views &gt; 0 else 0
+              }
+    to: conversion_by_channel
+</code></pre>
+<h2 id="running-the-application">Running the Application</h2>
+<p>To run the application:</p>
+<ol>
+<li>Save the KSML definition to <code>definitions/analytics.yaml</code></li>
+<li>Create a configuration file at <code>config/application.properties</code> with your Kafka connection details</li>
+<li>Start the Docker Compose environment: <code>docker-compose up -d</code></li>
+<li>Monitor the output topics to see the real-time analytics results</li>
+</ol>
+<h2 id="visualizing-the-results">Visualizing the Results</h2>
+<p>You can connect the output topics to visualization tools like:</p>
+<ul>
+<li>Grafana</li>
+<li>Kibana</li>
+<li>Custom dashboards using web frameworks</li>
+</ul>
+<p>For example, to create a simple dashboard with Grafana:</p>
+<ol>
+<li>Set up Grafana to connect to your Kafka topics</li>
+<li>Create dashboards for each metric:</li>
+<li>Bar chart for sales by category</li>
+<li>Line chart for average order value over time</li>
+<li>Map visualization for transactions by region</li>
+<li>Gauge charts for conversion rates</li>
+</ol>
+<h2 id="extending-the-application">Extending the Application</h2>
+<p>You can extend this application in several ways:</p>
+<ul>
+<li>Add anomaly detection to identify unusual patterns</li>
+<li>Implement trend analysis to detect changing consumer behavior</li>
+<li>Create alerts for specific conditions (e.g., sales dropping below a threshold)</li>
+<li>Enrich the data with additional information from reference data sources</li>
+</ul>
+<h2 id="conclusion">Conclusion</h2>
+<p>In this tutorial, you've learned how to:</p>
+<ul>
+<li>Process streaming transaction data in real-time</li>
+<li>Calculate various business metrics using KSML</li>
+<li>Structure a real-time analytics application</li>
+<li>Prepare the results for visualization</li>
+</ul>
+<p>Real-time analytics is a powerful use case for KSML, allowing you to gain immediate insights from your streaming data without complex coding.</p>
+<h2 id="next-steps">Next Steps</h2>
+<ul>
+<li>Learn about <a href="../data-transformation/">Data Transformation</a> for more complex processing</li>
+<li>Explore <a href="../event-driven-applications/">Event-Driven Applications</a> to trigger actions based on analytics</li>
+<li>Check out <a href="../../tutorials/advanced/performance-optimization/">Performance Optimization</a> for handling high-volume data</li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js"></script>
+        <script src="../../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

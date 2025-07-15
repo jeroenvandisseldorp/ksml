@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Data Transformation with KSML - KSML Documentation</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../../css/brands.min.css" rel="stylesheet">
+        <link href="../../css/solid.min.css" rel="stylesheet">
+        <link href="../../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../..">KSML Documentation</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="../.." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../tutorials/getting-started/" class="nav-link">Getting Started</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../core-concepts/" class="nav-link">Core Concepts</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../tutorials/" class="nav-link">Tutorials</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../" class="nav-link">Use Case Guides</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../reference/" class="nav-link">Reference</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../resources/" class="nav-link">Resources</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../about/" class="nav-link">About</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#data-transformation-with-ksml" class="nav-link">Data Transformation with KSML</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#introduction" class="nav-link">Introduction</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#prerequisites" class="nav-link">Prerequisites</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#the-use-case" class="nav-link">The Use Case</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#defining-the-data-models" class="nav-link">Defining the Data Models</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#creating-the-ksml-definition" class="nav-link">Creating the KSML Definition</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#setting-up-two-producers-for-test-data" class="nav-link">Setting up two producers for test data</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#running-the-application" class="nav-link">Running the Application</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#advanced-transformation-techniques" class="nav-link">Advanced Transformation Techniques</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#conclusion" class="nav-link">Conclusion</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#next-steps" class="nav-link">Next Steps</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="data-transformation-with-ksml">Data Transformation with KSML</h1>
+<p>This tutorial demonstrates how to build a data transformation pipeline using KSML. You'll learn how to convert data
+between different formats, enrich data with additional information, and handle complex transformations.</p>
+<h2 id="introduction">Introduction</h2>
+<p>Data transformation is a fundamental use case for stream processing. It allows you to:</p>
+<ul>
+<li>Convert data between different formats (JSON, XML, Avro, etc.)</li>
+<li>Normalize and clean data from various sources</li>
+<li>Enrich data with additional context or reference information</li>
+<li>Restructure data to meet downstream system requirements</li>
+<li>Filter out unnecessary information</li>
+</ul>
+<p>In this tutorial, we'll build a data transformation pipeline that processes customer data from a legacy system,
+transforms it into a standardized format, enriches it with additional information, and makes it available for downstream
+applications.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Before starting this tutorial, you should:</p>
+<ul>
+<li>Understand basic KSML concepts (streams, functions, pipelines)</li>
+<li>Have completed the <a href="../../tutorials/getting-started/basics-tutorial/">KSML Basics Tutorial</a></li>
+<li>Be familiar with <a href="../../tutorials/beginner/filtering-transforming/">Filtering and Transforming</a></li>
+<li>Have a basic understanding of <a href="../../tutorials/intermediate/joins/">Joins</a> for data enrichment</li>
+</ul>
+<h2 id="the-use-case">The Use Case</h2>
+<p>Imagine you're working with a company that has acquired another business. You need to integrate customer data from the
+acquired company's legacy system into your modern data platform. The legacy data:</p>
+<ul>
+<li>Is in a different format (XML) than your system (JSON)</li>
+<li>Uses different field names and conventions</li>
+<li>Contains some fields you don't need</li>
+<li>Is missing some information that you need to add from reference data</li>
+</ul>
+<h2 id="defining-the-data-models">Defining the Data Models</h2>
+<h3 id="source-data-xml">Source Data (XML)</h3>
+<p>The legacy system provides customer data in XML format:</p>
+<pre><code class="language-xml">
+&lt;customer&gt;
+    &lt;cust_id&gt;12345&lt;/cust_id&gt;
+    &lt;fname&gt;John&lt;/fname&gt;
+    &lt;lname&gt;Doe&lt;/lname&gt;
+    &lt;dob&gt;1980-01-15&lt;/dob&gt;
+    &lt;addr&gt;
+        &lt;street&gt;123 Main St&lt;/street&gt;
+        &lt;city&gt;Anytown&lt;/city&gt;
+        &lt;state&gt;CA&lt;/state&gt;
+        &lt;zip&gt;90210&lt;/zip&gt;
+    &lt;/addr&gt;
+    &lt;phone&gt;555-123-4567&lt;/phone&gt;
+    &lt;legacy_segment&gt;A&lt;/legacy_segment&gt;
+    &lt;account_created&gt;2015-03-20&lt;/account_created&gt;
+&lt;/customer&gt;
+</code></pre>
+<h3 id="reference-data-json">Reference Data (JSON)</h3>
+<p>You have a reference table topic with segment code (key) mappings to segment details (value):</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td><code>{"segment_name": "Premium", "discount_tier": "Tier 1", "marketing_group": "High Value"}</code></td>
+</tr>
+<tr>
+<td>B</td>
+<td><code>{"segment_name": "Standard", "discount_tier": "Tier 2", "marketing_group": "Medium Value"}</code></td>
+</tr>
+<tr>
+<td>C</td>
+<td><code>{"segment_name": "Basic", "discount_tier": "Tier 3", "marketing_group": "Growth Target" }</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="target-data-json">Target Data (JSON)</h3>
+<p>You want to transform the data into this format:</p>
+<pre><code class="language-json">{
+  &quot;customer_id&quot;: &quot;12345&quot;,
+  &quot;name&quot;: {
+    &quot;first&quot;: &quot;John&quot;,
+    &quot;last&quot;: &quot;Doe&quot;
+  },
+  &quot;contact_info&quot;: {
+    &quot;email&quot;: &quot;john.doe@example.com&quot;,
+    &quot;phone&quot;: &quot;555-123-4567&quot;,
+    &quot;address&quot;: {
+      &quot;street&quot;: &quot;123 Main St&quot;,
+      &quot;city&quot;: &quot;Anytown&quot;,
+      &quot;state&quot;: &quot;CA&quot;,
+      &quot;postal_code&quot;: &quot;90210&quot;,
+      &quot;country&quot;: &quot;USA&quot;
+    }
+  },
+  &quot;birth_date&quot;: &quot;1980-01-15&quot;,
+  &quot;customer_since&quot;: &quot;2015-03-20&quot;,
+  &quot;segment&quot;: &quot;Premium&quot;,
+  &quot;marketing_preferences&quot;: {
+    &quot;group&quot;: &quot;High Value&quot;,
+    &quot;discount_tier&quot;: &quot;Tier 1&quot;
+  },
+  &quot;metadata&quot;: {
+    &quot;source&quot;: &quot;legacy_system&quot;,
+    &quot;last_updated&quot;: &quot;2023-07-01T12:00:00Z&quot;
+  }
+}
+</code></pre>
+<h2 id="creating-the-ksml-definition">Creating the KSML Definition</h2>
+<p>Now, let's create our KSML definition file:</p>
+<pre><code class="language-yaml">streams:
+  legacy_customers:
+    topic: legacy_customer_data
+    keyType: string  # customer_id
+    valueType: xml  # XML customer data
+
+  transformed_customers:
+    topic: standardized_customer_data
+    keyType: string  # customer_id
+    valueType: json  # transformed customer data
+
+tables:
+  segment_reference:
+    topic: customer_segments
+    keyType: string  # segment code
+    valueType: json  # segment details
+
+functions:
+  transform_customer:
+    type: mapValues
+    code: |
+      import datetime
+
+      # Extract values from XML
+      customer_id = value.get(&quot;cust_id&quot;)
+      first_name = value.get(&quot;fname&quot;)
+      last_name = value.get(&quot;lname&quot;)
+      birth_date = value.get(&quot;dob&quot;)
+      phone = value.get(&quot;phone&quot;)
+      legacy_segment = value.get(&quot;legacy_segment&quot;)
+      customer_since = value.get(&quot;account_created&quot;)
+
+      # Extract address
+      address = value.get(&quot;addr&quot;)
+      street = address.get(&quot;street&quot;)
+      city = address.get(&quot;city&quot;)
+      state = address.get(&quot;state&quot;)
+      zip_code = address.get(&quot;zip&quot;)
+
+      # Generate email (not in source data)
+      email = f&quot;{first_name.lower()}.{last_name.lower()}@example.com&quot;
+
+      # Get segment info from reference data
+      segment_info = value.get(&quot;segment_info&quot;)
+      segment_name = segment_info.get(&quot;segment_name&quot;) if segment_info else &quot;Unknown&quot;
+      discount_tier = segment_info.get(&quot;discount_tier&quot;) if segment_info else &quot;Unknown&quot;
+      marketing_group = segment_info.get(&quot;marketing_group&quot;) if segment_info else &quot;Unknown&quot;
+
+      # Current timestamp for metadata
+      current_time = datetime.datetime.now().strftime(&quot;%Y-%m-%dT%H:%M:%SZ&quot;)
+
+      # Create transformed customer object
+      return {
+        &quot;customer_id&quot;: customer_id,
+        &quot;name&quot;: {
+          &quot;first&quot;: first_name,
+          &quot;last&quot;: last_name
+        },
+        &quot;contact_info&quot;: {
+          &quot;email&quot;: email,
+          &quot;phone&quot;: phone,
+          &quot;address&quot;: {
+            &quot;street&quot;: street,
+            &quot;city&quot;: city,
+            &quot;state&quot;: state,
+            &quot;postal_code&quot;: zip_code,
+            &quot;country&quot;: &quot;USA&quot;  # Default value not in source
+          }
+        },
+        &quot;birth_date&quot;: birth_date,
+        &quot;customer_since&quot;: customer_since,
+        &quot;segment&quot;: segment_name,
+        &quot;marketing_preferences&quot;: {
+          &quot;group&quot;: marketing_group,
+          &quot;discount_tier&quot;: discount_tier
+        },
+        &quot;metadata&quot;: {
+          &quot;source&quot;: &quot;legacy_system&quot;,
+          &quot;last_updated&quot;: current_time
+        }
+      }
+    resultType: json
+
+pipelines:
+  customer_transformation_pipeline:
+    from: legacy_customers
+    via:
+      - type: peek
+        forEach:
+          code: |
+            log.info(&quot;Processing customer: {}&quot;, key)
+      - type: leftJoin
+        foreignKeyExtractor:
+          code: value.get(&quot;legacy_segment&quot;)
+        table: segment_reference
+        valueJoiner:
+          expression: |
+            {
+              **value1,
+              &quot;segment_info&quot;: value2
+            }
+      - type: transformValue
+        mapper: transform_customer
+      - type: peek
+        forEach:
+          code: |
+            log.info(&quot;Transformed customer: {}&quot;, key)
+    to: transformed_customers
+</code></pre>
+<h2 id="setting-up-two-producers-for-test-data">Setting up two producers for test data</h2>
+<p>To test out the topology above, we create two test data producers.</p>
+<p>The first producer is a <em>single shot producer</em> that generates data for the <code>customer_segments</code> topic:</p>
+<pre><code class="language-yaml">tables:
+  customer_segments:
+    topic: customer_segments
+    keyType: string  # segment code
+    valueType: json  # segment details
+
+functions:
+  customer_segment_generator:
+    globalCode: |
+      import random
+      count = 0
+    code: |
+      refs = {
+        0: {&quot;key&quot;: &quot;A&quot;, &quot;value&quot;: {&quot;segment_name&quot;: &quot;Premium&quot;, &quot;discount_tier&quot;: &quot;Tier 1&quot;, &quot;marketing_group&quot;: &quot;High Value&quot;}},
+        1: {&quot;key&quot;: &quot;B&quot;, &quot;value&quot;: {&quot;segment_name&quot;: &quot;Standard&quot;, &quot;discount_tier&quot;: &quot;Tier 2&quot;, &quot;marketing_group&quot;: &quot;Medium Value&quot;}},
+        2: {&quot;key&quot;: &quot;C&quot;, &quot;value&quot;: {&quot;segment_name&quot;: &quot;Basic&quot;, &quot;discount_tier&quot;: &quot;Tier 3&quot;, &quot;marketing_group&quot;: &quot;Growth Target&quot; }}
+      }
+      key = refs.get(count)[&quot;key&quot;]
+      value = refs.get(count)[&quot;value&quot;]
+      count = (count + 1) % 3
+      return (key, value)
+    resultType: (string, struct)
+
+producers:
+  customer_segment_producer:
+    generator: customer_segment_generator
+    to: customer_segments
+    interval: 1
+    count: 3
+</code></pre>
+<p>The second producer produces a message every second to the <code>legacy_customer_data</code> topic, using a randomly chosen segment:</p>
+<pre><code class="language-yaml">streams:
+  legacy_customer_data:
+    topic: legacy_customer_data
+    keyType: string  # customer_id
+    valueType: xml  # XML customer data
+
+functions:
+  legacy_customer_data_generator:
+    globalCode: |
+      import random
+    code: |
+      key = &quot;A&quot;
+      value = {
+        &quot;cust_id&quot;: &quot;12345&quot;,
+        &quot;fname&quot;: &quot;John&quot;,
+        &quot;lname&quot;: &quot;Doe&quot;,
+        &quot;dob&quot;: &quot;1980-01-15&quot;,
+        &quot;addr&quot;: {
+          &quot;street&quot;: &quot;123 Main St&quot;,
+          &quot;city&quot;: &quot;Anytown&quot;,
+          &quot;state&quot;: &quot;CA&quot;,
+          &quot;zip&quot;: &quot;90210&quot;
+        },
+        &quot;phone&quot;: &quot;555-123-4567&quot;,
+        &quot;legacy_segment&quot;: random.choice([&quot;A&quot;,&quot;B&quot;,&quot;C&quot;]),
+        &quot;account_created&quot;: &quot;2015-03-20&quot;
+      }
+      return (key, value)
+    resultType: (string, struct)
+
+producers:
+  legacy_customer_data_producer:
+    generator: legacy_customer_data_generator
+    to: legacy_customer_data
+    interval: 1s
+</code></pre>
+<h2 id="running-the-application">Running the Application</h2>
+<p>To run the application:</p>
+<ol>
+<li>Save the KSML definition to <code>data_transformation.yaml</code>.</li>
+<li>Save the producers to <code>customer_segment_producer.yaml</code> and <code>legacy_customer_data_producer.yaml</code>.</li>
+<li>Set up your <code>ksml-runner.yaml</code> configuration, pointing to your Kafka installation.</li>
+<li>Start the <code>customer_segment_producer</code> to produce the sample segment information to Kafka.</li>
+<li>Start the <code>legacy_customer_data_producer</code> to produce some sample data to the input topic.</li>
+<li>Start the <code>data_transformation</code> topology to initiate the continuous data transformation logic.</li>
+<li>Monitor the output topic to see the transformed data.</li>
+</ol>
+<h2 id="advanced-transformation-techniques">Advanced Transformation Techniques</h2>
+<h3 id="handling-missing-or-invalid-data">Handling Missing or Invalid Data</h3>
+<p>In real-world scenarios, source data often has missing or invalid fields. You can enhance the transformation function to
+handle these cases:</p>
+<pre><code class="language-python"># Check if a field exists before accessing it
+birth_date = value.get(&quot;dob&quot;) if value.get(&quot;dob&quot;) is not None else &quot;Unknown&quot;
+
+# Provide default values
+state = address.get(&quot;state&quot;, &quot;N/A&quot;)
+
+# Validate data
+if phone and not phone.startswith(&quot;555-&quot;):
+    log.warn(&quot;Invalid phone format for customer {}: {}&quot;, customer_id, phone)
+    phone = &quot;Unknown&quot;
+</code></pre>
+<h3 id="schema-evolution-handling">Schema Evolution Handling</h3>
+<p>To handle changes in the source or target schema over time:</p>
+<pre><code class="language-python"># Version-aware transformation
+schema_version = value.get(&quot;version&quot;, &quot;1.0&quot;)
+if schema_version == &quot;1.0&quot;:
+# Original transformation logic
+elif schema_version == &quot;2.0&quot;:
+# Updated transformation logic for new schema
+else:
+    log.error(&quot;Unknown schema version: {}&quot;, schema_version)
+</code></pre>
+<h2 id="conclusion">Conclusion</h2>
+<p>In this tutorial, you've learned how to:</p>
+<ul>
+<li>Transform data between different formats (XML to JSON)</li>
+<li>Restructure data to match a target schema</li>
+<li>Enrich data with information from reference sources</li>
+<li>Handle missing or derived fields</li>
+<li>Process and validate data during transformation</li>
+</ul>
+<p>Data transformation is a powerful use case for KSML, allowing you to integrate data from various sources and prepare it
+for downstream applications without complex coding.</p>
+<h2 id="next-steps">Next Steps</h2>
+<ul>
+<li>Learn about <a href="../real-time-analytics/">Real-Time Analytics</a> to analyze your transformed data</li>
+<li>Explore <a href="../event-driven-applications/">Event-Driven Applications</a> to trigger actions based on data changes</li>
+<li>Check out <a href="../../tutorials/advanced/external-integration/">External Integration</a> for connecting to external systems</li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js"></script>
+        <script src="../../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

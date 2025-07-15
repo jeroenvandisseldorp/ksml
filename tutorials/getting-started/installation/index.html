@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>Installation and Setup - KSML Documentation</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../../../css/brands.min.css" rel="stylesheet">
+        <link href="../../../css/solid.min.css" rel="stylesheet">
+        <link href="../../../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../../..">KSML Documentation</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="../../.." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../" class="nav-link">Getting Started</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../core-concepts/" class="nav-link">Core Concepts</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../" class="nav-link">Tutorials</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../use-cases/" class="nav-link">Use Case Guides</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../reference/" class="nav-link">Reference</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../resources/" class="nav-link">Resources</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../about/" class="nav-link">About</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#installation-and-setup" class="nav-link">Installation and Setup</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#prerequisites" class="nav-link">Prerequisites</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#setting-up-a-development-environment" class="nav-link">Setting Up a Development Environment</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#running-your-first-ksml-application" class="nav-link">Running Your First KSML Application</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#troubleshooting" class="nav-link">Troubleshooting</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#next-steps" class="nav-link">Next Steps</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="installation-and-setup">Installation and Setup</h1>
+<p>This guide will walk you through setting up a development environment for KSML and running your first KSML application.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Before you begin, make sure you have the following installed:</p>
+<ul>
+<li><strong>Docker</strong>: KSML examples and development environment run in Docker containers</li>
+<li><strong>Git</strong>: To clone the KSML repository (if you want to run the examples)</li>
+<li><strong>Basic understanding of Kafka</strong>: Familiarity with Kafka concepts like topics and messages</li>
+</ul>
+<h2 id="setting-up-a-development-environment">Setting Up a Development Environment</h2>
+<p>There are two main ways to set up KSML:</p>
+<ol>
+<li>Using the provided Docker Compose setup (recommended for beginners)</li>
+<li>Configuring KSML to connect to an existing Kafka cluster</li>
+</ol>
+<h3 id="option-1-using-docker-compose">Option 1: Using Docker Compose</h3>
+<p>The easiest way to get started with KSML is to use the provided Docker Compose setup, which includes:</p>
+<ul>
+<li>Zookeeper</li>
+<li>Kafka broker</li>
+<li>Schema Registry</li>
+<li>Example data producer</li>
+<li>KSML runner</li>
+</ul>
+<h4 id="step-1-clone-the-repository">Step 1: Clone the Repository</h4>
+<p>If you haven't already, clone the KSML repository:</p>
+<pre><code class="language-bash">git clone https://github.com/axual/ksml.git
+cd ksml
+</code></pre>
+<h4 id="step-2-start-the-environment">Step 2: Start the Environment</h4>
+<p>Start the Docker Compose environment:</p>
+<pre><code class="language-bash">docker compose up -d
+</code></pre>
+<p>This command starts all the necessary services in the background. You can check the logs to verify everything is running correctly:</p>
+<pre><code class="language-bash">docker compose logs -f
+</code></pre>
+<p>You should see log messages indicating that the services are running, including messages from the example producer that's generating random sensor data:</p>
+<pre><code>example-producer-1 | 2024-03-06T20:24:49,480Z INFO i.a.k.r.backend.KafkaProducerRunner Calling generate_sensordata_message
+example-producer-1 | 2024-03-06T20:24:49,480Z INFO i.a.k.r.backend.ExecutableProducer Message: key=sensor2, value=SensorData: {&quot;city&quot;:&quot;Utrecht&quot;, &quot;color&quot;:&quot;white&quot;, &quot;name&quot;:&quot;sensor2&quot;, &quot;owner&quot;:&quot;Alice&quot;, &quot;timestamp&quot;:1709756689480, &quot;type&quot;:&quot;HUMIDITY&quot;, &quot;unit&quot;:&quot;%&quot;, &quot;value&quot;:&quot;66&quot;}
+</code></pre>
+<p>Press CTRL-C to stop following the logs when you're satisfied that the environment is running correctly.</p>
+<h3 id="option-2-connecting-to-an-existing-kafka-cluster">Option 2: Connecting to an Existing Kafka Cluster</h3>
+<p>If you already have a Kafka cluster and want to use KSML with it, you'll need to configure the KSML runner to connect to your cluster.</p>
+<h4 id="step-1-create-a-configuration-file">Step 1: Create a Configuration File</h4>
+<p>Create a file named <code>ksml-runner.yaml</code> with the following content, adjusting the values to match your Kafka cluster configuration:</p>
+<pre><code class="language-yaml">kafka:
+  bootstrap.servers: your-kafka-broker:9092
+  # Add any other Kafka client properties here
+
+schemaRegistry:
+  url: http://your-schema-registry:8081
+  # Add any other Schema Registry properties here
+
+# Path to your KSML definition files
+definitions:
+  - path/to/your/ksml/definition.yaml
+</code></pre>
+<h4 id="step-2-run-the-ksml-runner">Step 2: Run the KSML Runner</h4>
+<p>Run the KSML runner with your configuration:</p>
+<pre><code class="language-bash">docker run -v $(pwd):/app axual/ksml-runner:latest --config /app/ksml-runner.yaml
+</code></pre>
+<h2 id="running-your-first-ksml-application">Running Your First KSML Application</h2>
+<p>Now that you have a running environment, let's run a simple KSML application that processes the example sensor data.</p>
+<h3 id="step-1-run-the-example-ksml-runner">Step 1: Run the Example KSML Runner</h3>
+<p>If you're using the Docker Compose setup, after building a local KSML image, you can run the example KSML runner with:</p>
+<pre><code class="language-bash">./examples/run-local.sh
+</code></pre>
+<p>This will start a KSML runner container that processes the example KSML definitions. You should see output similar to:</p>
+<pre><code>2024-03-06T20:24:51,921Z INFO io.axual.ksml.runner.KSMLRunner Starting KSML Runner 1.76.0.0
+...
+2024-03-06T20:24:57,196Z INFO ksml.functions.log_message Consumed AVRO message - key=sensor9, value={'city': 'Alkmaar', 'color': 'yellow', 'name': 'sensor9', 'owner': 'Bob', 'timestamp': 1709749917190, 'type': 'LENGTH', 'unit': 'm', 'value': '562', '@type': 'SensorData', '@schema': { &lt;&lt;Cleaned KSML Representation of Avro Schema&gt;&gt;}}
+</code></pre>
+<h3 id="step-2-explore-the-example-ksml-definitions">Step 2: Explore the Example KSML Definitions</h3>
+<p>The example KSML definitions are located in the <code>examples</code> directory. Take a look at some of the simpler examples to understand how KSML works:</p>
+<ul>
+<li><code>01-example-inspect.yaml</code>: Shows how to read and log messages from a topic</li>
+<li><code>02-example-copy.yaml</code>: Demonstrates copying messages from one topic to another</li>
+<li><code>03-example-filter.yaml</code>: Shows how to filter messages based on their content</li>
+</ul>
+<h3 id="step-3-modify-an-example">Step 3: Modify an Example</h3>
+<p>Try modifying one of the examples to see how changes affect the behavior. For instance, you could change the filter condition in <code>03-example-filter.yaml</code> to filter based on a different field or value.</p>
+<ol>
+<li>Edit the file using your favorite text editor</li>
+<li>Restart the KSML runner to apply your changes:
+   <code>bash
+   docker compose restart ksml-runner</code></li>
+<li>Check the logs to see the effect of your changes:
+   <code>bash
+   docker compose logs -f ksml-runner</code></li>
+</ol>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="common-issues">Common Issues</h3>
+<ul>
+<li><strong>Connection refused errors</strong>: Make sure all the Docker containers are running with <code>docker compose ps</code></li>
+<li><strong>Schema not found errors</strong>: Ensure the Schema Registry is running and accessible</li>
+<li><strong>KSML syntax errors</strong>: Check your YAML syntax for proper indentation and formatting</li>
+</ul>
+<h3 id="getting-help">Getting Help</h3>
+<p>If you encounter issues not covered here:</p>
+<ul>
+<li>Check the <a href="../../../resources/troubleshooting/">Troubleshooting Guide</a> for more detailed solutions</li>
+<li>Visit the <a href="../../../resources/community/">Community and Support</a> page for information on how to get help from the KSML community</li>
+</ul>
+<h2 id="next-steps">Next Steps</h2>
+<p>Now that you have KSML up and running, you can:</p>
+<ul>
+<li>Follow the <a href="../basics-tutorial/">KSML Basics Tutorial</a> to learn how to build your first KSML pipeline from scratch</li>
+<li>Explore the <a href="../../../reference/stream-types-reference/">Core Concepts</a> to deepen your understanding of KSML</li>
+<li>Browse the <a href="../../../resources/examples-library/">Examples Library</a> for inspiration and ready-to-use patterns</li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../../../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../js/base.js"></script>
+        <script src="../../../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

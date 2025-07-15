@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Streams and Data Types - KSML Documentation</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../../css/brands.min.css" rel="stylesheet">
+        <link href="../../css/solid.min.css" rel="stylesheet">
+        <link href="../../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../..">KSML Documentation</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="../.." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../tutorials/getting-started/" class="nav-link">Getting Started</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../core-concepts/" class="nav-link">Core Concepts</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../tutorials/" class="nav-link">Tutorials</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../use-cases/" class="nav-link">Use Case Guides</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../" class="nav-link">Reference</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../resources/" class="nav-link">Resources</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../about/" class="nav-link">About</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#streams-and-data-types" class="nav-link">Streams and Data Types</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#understanding-streams-in-ksml" class="nav-link">Understanding Streams in KSML</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#best-practices" class="nav-link">Best Practices</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#examples" class="nav-link">Examples</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#conclusion" class="nav-link">Conclusion</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="streams-and-data-types">Streams and Data Types</h1>
+<p>This page explains the fundamental concepts of streams and data types in KSML, providing a foundation for understanding
+how data flows through your KSML applications.</p>
+<h2 id="understanding-streams-in-ksml">Understanding Streams in KSML</h2>
+<p>In KSML, streams represent continuous flows of data. Every KSML definition file contains a list of declared streams that
+connect to Kafka topics. These streams are the entry and exit points for your data processing pipelines.</p>
+<h3 id="types-of-streams">Types of Streams</h3>
+<p>KSML supports three types of streams, each with different characteristics and use cases:</p>
+<h4 id="kstream">KStream</h4>
+<p>A KStream represents an unbounded sequence of records. Each record in a KStream is an independent entity or event.</p>
+<p><strong>Key characteristics:</strong></p>
+<ul>
+<li>Records are immutable (once created, they cannot be changed)</li>
+<li>New records can be added to the stream at any time</li>
+<li>Records are processed one at a time in the order they arrive</li>
+<li>Ideal for event-based processing</li>
+</ul>
+<p><strong>Example use cases:</strong></p>
+<ul>
+<li>Processing individual user actions (clicks, purchases, etc.)</li>
+<li>Handling sensor readings or log entries</li>
+<li>Processing transactions</li>
+</ul>
+<p><strong>KSML definition:</strong></p>
+<pre><code class="language-yaml">streams:
+  user_clicks_stream:
+    topic: user-clicks
+    keyType: string
+    valueType: json
+</code></pre>
+<h4 id="ktable">KTable</h4>
+<p>A KTable represents a changelog stream from a primary-keyed table. Each record in a KTable is an update to a key in the
+table.</p>
+<p><strong>Key characteristics:</strong></p>
+<ul>
+<li>Records with the same key represent updates to the same entity</li>
+<li>The latest record for a key represents the current state</li>
+<li>Records are compacted (only the latest value for each key is retained)</li>
+<li>Ideal for state-based processing</li>
+</ul>
+<p><strong>Example use cases:</strong></p>
+<ul>
+<li>Maintaining user profiles or preferences</li>
+<li>Tracking current inventory levels</li>
+<li>Storing configuration settings</li>
+</ul>
+<p><strong>KSML definition:</strong></p>
+<pre><code class="language-yaml">tables:
+  user_profiles_table:
+    topic: user-profiles
+    keyType: string
+    valueType: avro:UserProfile
+    store: user_profiles_store
+</code></pre>
+<h4 id="globalktable">GlobalKTable</h4>
+<p>A GlobalKTable is similar to a KTable, but with one key difference: it's fully replicated on each instance of your
+application.</p>
+<p><strong>Key characteristics:</strong></p>
+<ul>
+<li>Contains the same data as a KTable</li>
+<li>Fully replicated on each instance (not partitioned)</li>
+<li>Allows joins without requiring co-partitioning</li>
+<li>Ideal for reference data that needs to be available on all instances</li>
+</ul>
+<p><strong>Example use cases:</strong></p>
+<ul>
+<li>Reference data (product catalogs, country codes, etc.)</li>
+<li>Configuration settings needed by all instances</li>
+<li>Small to medium-sized datasets that change infrequently</li>
+</ul>
+<p><strong>KSML definition:</strong></p>
+<pre><code class="language-yaml">globalTables:
+  product_catalog:
+    topic: product-catalog
+    keyType: string
+    valueType: avro:Product
+    store: product_catalog_store
+</code></pre>
+<h3 id="optional-settings-for-all-stream-types">Optional settings for all stream types</h3>
+<p>Each stream type allows the following additional settings to be specified:</p>
+<ul>
+<li><strong>offsetResetPolicy</strong>: the policy to use when there is no (valid) consumer group offset in Kafka. Choice of <code>earliest</code>,
+  <code>latest</code>, <code>none</code>, or <code>by_duration:&lt;duration&gt;</code>. In the latter case, you can pass in a custom duration.</li>
+<li><strong>timestampExtractor</strong>: a function that is able to extract a timestamp from a consumed message, to be used by Kafka
+  Streams as the message timestamp in all pipeline processing.</li>
+<li><strong>partitioner</strong>: a stream partitioner that determines to which topic partitions an output record needs to be written.</li>
+</ul>
+<h3 id="choosing-the-right-stream-type">Choosing the Right Stream Type</h3>
+<p>The choice between KStream, KTable, and GlobalKTable depends on your specific use case:</p>
+<table>
+<thead>
+<tr>
+<th>If you need to...</th>
+<th>Consider using...</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Process individual events as they occur</td>
+<td>KStream</td>
+</tr>
+<tr>
+<td>Maintain the latest state of entities</td>
+<td>KTable</td>
+</tr>
+<tr>
+<td>Join with data that's needed across all partitions</td>
+<td>GlobalKTable</td>
+</tr>
+<tr>
+<td>Process time-ordered events</td>
+<td>KStream</td>
+</tr>
+<tr>
+<td>Track changes to state over time</td>
+<td>KTable</td>
+</tr>
+<tr>
+<td>Access reference data without worrying about partitioning</td>
+<td>GlobalKTable</td>
+</tr>
+</tbody>
+</table>
+<h2 id="best-practices">Best Practices</h2>
+<p>Here are some best practices for working with streams and data types in KSML:</p>
+<ol>
+<li><strong>Choose the right stream type for your use case</strong>:</li>
+<li>Use KStream for event processing</li>
+<li>Use KTable for state tracking</li>
+<li>
+<p>Use GlobalKTable for reference data</p>
+</li>
+<li>
+<p><strong>Use appropriate data types</strong>:</p>
+</li>
+<li>Be specific about your types (avoid using <code>any</code> when possible)</li>
+<li>Use complex types (struct, list, etc.) to represent structured data</li>
+<li>
+<p>Consider using windowed types for time-based aggregations</p>
+</li>
+<li>
+<p><strong>Select the right notation</strong>:</p>
+</li>
+<li>Use AVRO for production systems with schema evolution</li>
+<li>Use JSON for development and debugging</li>
+<li>
+<p>Consider compatibility with upstream and downstream systems</p>
+</li>
+<li>
+<p><strong>Manage schemas effectively</strong>:</p>
+</li>
+<li>Use a schema registry for AVRO schemas in production</li>
+<li>Keep schemas under version control</li>
+<li>
+<p>Plan for schema evolution</p>
+</li>
+<li>
+<p><strong>Consider performance implications</strong>:</p>
+</li>
+<li>GlobalKTables replicate data to all instances, which can impact memory usage</li>
+<li>Complex types and notations may have serialization/deserialization overhead</li>
+<li>Large schemas can impact performance</li>
+</ol>
+<h2 id="examples">Examples</h2>
+<h3 id="example-1-event-processing-with-kstream">Example 1: Event Processing with KStream</h3>
+<pre><code class="language-yaml">streams:
+  page_views:
+    topic: page-views
+    keyType: string  # User ID
+    valueType: json  # Page view event
+    offsetResetPolicy: earliest
+
+pipelines:
+  process_page_views:
+    from: page_views
+    via:
+      - type: filter
+        if:
+          expression: value.get('duration') &gt; 10  # Only process views longer than 10 seconds
+      # Additional processing steps...
+    to: processed_page_views
+</code></pre>
+<h3 id="example-2-user-profile-management-with-ktable">Example 2: User Profile Management with KTable</h3>
+<pre><code class="language-yaml">tables:
+  user_profiles:
+    topic: user-profiles
+    keyType: string  # User ID
+    valueType: avro:UserProfile
+    store: user_profiles_store
+
+pipelines:
+  update_user_preferences:
+    from: user_preference_updates
+    via:
+      - type: join
+        with: user_profiles
+        valueJoiner:
+          expression: { &quot;userId&quot;: key, &quot;name&quot;: value2.get('name'), &quot;preferences&quot;: value1 }
+          resultType: struct
+      # Additional processing steps...
+    to: updated_user_profiles
+</code></pre>
+<h3 id="example-3-product-catalog-as-globalktable">Example 3: Product Catalog as GlobalKTable</h3>
+<pre><code class="language-yaml">globalTables:
+  product_catalog:
+    topic: product-catalog
+    keyType: string  # Product ID
+    valueType: avro:Product
+
+pipelines:
+  enrich_orders:
+    from: orders
+    via:
+      - type: join
+        with: product_catalog
+        mapper:
+          expression: value.get('productId')  # Map from order to product ID
+          resultType: string
+        valueJoiner:
+          expression: { &quot;orderId&quot;: value1.get('orderId'), &quot;product&quot;: value2, &quot;quantity&quot;: value1.get('quantity') }
+          resultType: struct
+      # Additional processing steps...
+    to: enriched_orders
+</code></pre>
+<h2 id="conclusion">Conclusion</h2>
+<p>Understanding streams and data types is fundamental to building effective KSML applications. By choosing the right
+stream types, data types, and notations for your use case, you can create efficient, maintainable, and scalable stream
+processing pipelines.</p>
+<p>For more detailed information, refer to the <a href="/docs/reference/ksml-language-reference.md">KSML Language Reference</a>
+and <a href="/docs/reference/data-types-reference.md">Data Types Reference</a>.</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js"></script>
+        <script src="../../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

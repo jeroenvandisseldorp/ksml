@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Functions - KSML Documentation</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../../css/brands.min.css" rel="stylesheet">
+        <link href="../../css/solid.min.css" rel="stylesheet">
+        <link href="../../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../..">KSML Documentation</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="../.." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../tutorials/getting-started/" class="nav-link">Getting Started</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../" class="nav-link">Core Concepts</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../tutorials/" class="nav-link">Tutorials</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../use-cases/" class="nav-link">Use Case Guides</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../reference/" class="nav-link">Reference</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../resources/" class="nav-link">Resources</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../about/" class="nav-link">About</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#functions" class="nav-link">Functions</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#what-are-functions-in-ksml" class="nav-link">What are Functions in KSML?</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#types-of-functions-in-ksml" class="nav-link">Types of Functions in KSML</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#writing-python-functions" class="nav-link">Writing Python Functions</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#function-execution-context" class="nav-link">Function Execution Context</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#best-practices-for-functions" class="nav-link">Best Practices for Functions</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#examples" class="nav-link">Examples</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#related-topics" class="nav-link">Related Topics</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="functions">Functions</h1>
+<p>Discover how to use Python functions in your KSML applications and understand their role in stream processing.</p>
+<h2 id="what-are-functions-in-ksml">What are Functions in KSML?</h2>
+<p>Functions in KSML allow you to implement custom logic for processing your streaming data. They provide the flexibility
+to go beyond the built-in operations and implement specific business logic, transformations, and data processing
+requirements.</p>
+<p>KSML functions are written in Python, making them accessible to data scientists, analysts, and developers who may not be
+familiar with Java or Kafka Streams API. This approach combines the power of Kafka Streams with the simplicity and
+expressiveness of Python.</p>
+<h2 id="types-of-functions-in-ksml">Types of Functions in KSML</h2>
+<p>KSML supports various function types, each designed for specific purposes in stream processing:</p>
+<h3 id="functions-used-by-stateless-operations">Functions used by stateless operations</h3>
+<p>These functions process each message independently without maintaining state between invocations:</p>
+<ul>
+<li><a href="../../reference/functions-reference/#foreach">forEach</a>: Process each message for side effects</li>
+<li><a href="../../reference/functions-reference/#keyTransformer">keyTransformer</a>: Convert a key to another type or value</li>
+<li><a href="../../reference/functions-reference/#keyValueToKeyValueListTransformer">keyValueToKeyValueListTransformer</a>: Convert key and value to a list of key/values</li>
+<li><a href="../../reference/functions-reference/#keyValueToValueListTransformer">keyValueToValueListTransformer</a>: Convert key and value to a list of values</li>
+<li><a href="../../reference/functions-reference/#keyValueTransformer">keyValueTransformer</a>: Convert key and value to another key and value</li>
+<li><a href="../../reference/functions-reference/#predicate">predicate</a>: Return true/false based on message content</li>
+<li><a href="../../reference/functions-reference/#valueTransformer">valueTransformer</a>: Convert value to another type or value</li>
+</ul>
+<h3 id="functions-used-by-stateful-operations">Functions used by stateful operations</h3>
+<p>These functions maintain state across multiple messages:</p>
+<ul>
+<li><a href="#aggregator">aggregator</a>: Incrementally build aggregated results</li>
+<li><a href="#initializer">initializer</a>: Provide initial values for aggregations</li>
+<li><a href="#merger">merger</a>: Merge two aggregation results into one</li>
+<li><a href="#reducer">reducer</a>: Combine two values into one</li>
+</ul>
+<h3 id="special-purpose-functions">Special Purpose Functions</h3>
+<ul>
+<li><a href="#foreignKeyExtractor">foreignKeyExtractor</a>: Extract a key from a join table's record</li>
+<li><a href="#generator">generator</a>: Function used in producers to generate a message</li>
+<li><a href="#keyValueMapper">keyValueMapper</a>: Convert key and value into a single output value</li>
+<li><a href="#keyValuePrinter">keyValuePrinter</a>: Output key and value</li>
+<li><a href="#metadataTransformer">metadataTransformer</a>: Convert Kafka headers and timestamps</li>
+<li><a href="#valueJoiner">valueJoiner</a>: Combine data from multiple streams</li>
+</ul>
+<h3 id="stream-related-functions">Stream Related Functions</h3>
+<ul>
+<li><a href="#timestampExtractor">timestampExtractor</a>: Extract timestamps from messages</li>
+<li><a href="#topicNameExtractor">topicNameExtractor</a>: Derive a target topic name from key and value</li>
+<li><a href="#streamPartitioner">streamPartitioner</a>: Determine to which partition(s) a record is produced</li>
+</ul>
+<h3 id="other-functions">Other Functions</h3>
+<ul>
+<li><a href="#generic">generic</a>: Generic custom function</li>
+</ul>
+<h2 id="writing-python-functions">Writing Python Functions</h2>
+<p>KSML functions are defined in the <code>functions</code> section of your KSML definition file. A typical function definition
+includes:</p>
+<ul>
+<li><strong>Type</strong>: Specifies the function's purpose and behavior</li>
+<li><strong>Parameters</strong>: Input parameters the function accepts</li>
+<li><strong>GlobalCode</strong>: Python code that is executed only once upon application start</li>
+<li><strong>Code</strong>: Python code implementing the function's logic</li>
+<li><strong>Expression</strong>: Shorthand for simple return expressions</li>
+</ul>
+<p>Functions can range from simple one-liners to complex implementations with multiple operations.</p>
+<h2 id="function-execution-context">Function Execution Context</h2>
+<p>When your Python functions execute, they have access to:</p>
+<ul>
+<li><strong>Logger</strong>: For outputting information to the application logs</li>
+<li><strong>Metrics</strong>: For monitoring function performance and behavior</li>
+<li><strong>State Stores</strong>: For maintaining state between function invocations (when configured)</li>
+</ul>
+<p>This execution context provides the tools needed for debugging, monitoring, and implementing stateful processing.</p>
+<h2 id="best-practices-for-functions">Best Practices for Functions</h2>
+<ul>
+<li><strong>Keep functions focused</strong>: Each function should do one thing well</li>
+<li><strong>Handle errors gracefully</strong>: Use try/except blocks to prevent pipeline failures</li>
+<li><strong>Consider performance</strong>: Python functions introduce some overhead, so keep them efficient</li>
+<li><strong>Use appropriate function types</strong>: Choose the right function type for your use case</li>
+<li><strong>Leverage state stores</strong>: For complex stateful operations, use state stores rather than global variables</li>
+</ul>
+<h2 id="examples">Examples</h2>
+<h3 id="simple-predicate-function">Simple Predicate Function</h3>
+<pre><code class="language-yaml">functions:
+  temperature_filter:
+    type: predicate
+    expression: value.get('temperature') &gt; 30
+</code></pre>
+<h3 id="value-transformation-function">Value Transformation Function</h3>
+<pre><code class="language-yaml">functions:
+  celsius_to_fahrenheit:
+    type: valueTransformer
+    code: |
+      if value is not None and 'temperature' in value:
+        celsius = value['temperature']
+        value['temperature_f'] = (celsius * 9/5) + 32
+      return value
+    resultType: struct
+</code></pre>
+<h3 id="stateful-aggregation-function">Stateful Aggregation Function</h3>
+<pre><code class="language-yaml">functions:
+  average_calculator:
+    type: aggregator
+    code: |
+      if aggregatedValue is None:
+        return {'count': 1, 'sum': value['amount'], 'average': value['amount']}
+      else:
+        count = aggregatedValue['count'] + 1
+        sum = aggregatedValue['sum'] + value['amount']
+        return {'count': count, 'sum': sum, 'average': sum / count}
+    resultType: struct
+</code></pre>
+<h2 id="related-topics">Related Topics</h2>
+<ul>
+<li><a href="../pipelines/">Pipelines</a>: Learn how functions fit into the overall pipeline structure</li>
+<li><a href="../operations/">Operations</a>: Discover the operations that use functions</li>
+<li><a href="../../reference/stream-types-reference/">Streams and Data Types</a>: Understand the data types that functions work with</li>
+</ul>
+<p>By mastering functions in KSML, you gain the ability to implement custom logic that goes beyond the built-in operations,
+allowing you to solve complex stream processing challenges with elegant Python code.</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js"></script>
+        <script src="../../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

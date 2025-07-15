@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>Error Handling and Recovery in KSML - KSML Documentation</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../../../css/brands.min.css" rel="stylesheet">
+        <link href="../../../css/solid.min.css" rel="stylesheet">
+        <link href="../../../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../../..">KSML Documentation</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="../../.." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../getting-started/" class="nav-link">Getting Started</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../core-concepts/" class="nav-link">Core Concepts</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../" class="nav-link">Tutorials</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../use-cases/" class="nav-link">Use Case Guides</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../reference/" class="nav-link">Reference</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../resources/" class="nav-link">Resources</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../about/" class="nav-link">About</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#error-handling-and-recovery-in-ksml" class="nav-link">Error Handling and Recovery in KSML</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#introduction-to-error-handling" class="nav-link">Introduction to Error Handling</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#prerequisites" class="nav-link">Prerequisites</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#error-handling-strategies-in-ksml" class="nav-link">Error Handling Strategies in KSML</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#implementing-recovery-mechanisms" class="nav-link">Implementing Recovery Mechanisms</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#practical-example-robust-order-processing" class="nav-link">Practical Example: Robust Order Processing</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#monitoring-and-debugging" class="nav-link">Monitoring and Debugging</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#best-practices-for-error-handling" class="nav-link">Best Practices for Error Handling</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#conclusion" class="nav-link">Conclusion</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#further-reading" class="nav-link">Further Reading</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="error-handling-and-recovery-in-ksml">Error Handling and Recovery in KSML</h1>
+<p>This tutorial explores strategies for handling errors and implementing recovery mechanisms in KSML applications, helping you build more robust and resilient stream processing pipelines.</p>
+<h2 id="introduction-to-error-handling">Introduction to Error Handling</h2>
+<p>Error handling is a critical aspect of any production-grade stream processing application. In streaming contexts, errors can occur for various reasons:</p>
+<ul>
+<li>Invalid or malformed input data</li>
+<li>External service failures</li>
+<li>Resource constraints</li>
+<li>Business rule violations</li>
+<li>Unexpected edge cases</li>
+</ul>
+<p>Without proper error handling, these issues can cause your application to:</p>
+<ul>
+<li>Crash and stop processing</li>
+<li>Skip or lose important messages</li>
+<li>Produce incorrect results</li>
+<li>Create inconsistent state</li>
+</ul>
+<p>KSML provides several mechanisms to handle errors gracefully and implement recovery strategies, allowing your applications to continue processing even when problems occur.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Before starting this tutorial, you should:</p>
+<ul>
+<li>Understand basic KSML concepts (streams, functions, pipelines)</li>
+<li>Have completed the <a href="../../getting-started/basics-tutorial/">KSML Basics Tutorial</a></li>
+<li>Be familiar with Python exception handling</li>
+</ul>
+<h2 id="error-handling-strategies-in-ksml">Error Handling Strategies in KSML</h2>
+<h3 id="1-try-except-blocks-in-python-functions">1. Try-Except Blocks in Python Functions</h3>
+<p>The most basic form of error handling in KSML is using try-except blocks in your Python functions:</p>
+<pre><code class="language-yaml">functions:
+  safe_transform:
+    type: valueTransformer
+    code: |
+      try:
+        # Potentially risky operation
+        result = process_data(value)
+        return result
+      except Exception as e:
+        # Log the error
+        log.error(&quot;Error processing data: {}&quot;, str(e))
+        # Return a default or fallback value
+        return {&quot;error&quot;: str(e), &quot;original_data&quot;: value}
+</code></pre>
+<p>This approach:
+- Prevents the function from failing completely
+- Logs the error for troubleshooting
+- Returns a fallback value that allows processing to continue</p>
+<h3 id="2-validation-and-filtering">2. Validation and Filtering</h3>
+<p>Proactively validate data and filter out problematic messages before they cause errors:</p>
+<pre><code class="language-yaml">functions:
+  validate_data:
+    type: predicate
+    code: |
+      # Check if the message has all required fields
+      if value is None:
+        log.warn(&quot;Received null value for key: {}&quot;, key)
+        return False
+
+      required_fields = [&quot;user_id&quot;, &quot;timestamp&quot;, &quot;action&quot;]
+      for field in required_fields:
+        if field not in value:
+          log.warn(&quot;Missing required field '{}' in message with key: {}&quot;, field, key)
+          return False
+
+      return True
+
+pipelines:
+  process_valid_data:
+    from: input_stream
+    filter: validate_data  # Only process messages that pass validation
+    # Continue processing with valid data...
+    to: processed_stream
+</code></pre>
+<h3 id="3-dead-letter-queues">3. Dead Letter Queues</h3>
+<p>Implement a "dead letter queue" pattern to capture and store messages that couldn't be processed:</p>
+<pre><code class="language-yaml">functions:
+  process_with_dlq:
+    type: keyValueTransformer
+    code: |
+      try:
+        # Attempt to process the message
+        processed_value = process_data(value)
+        # Return the processed message to the main output
+        return (key, processed_value)
+      except Exception as e:
+        # Create an error record
+        error_record = {
+          &quot;original_key&quot;: key,
+          &quot;original_value&quot;: value,
+          &quot;error&quot;: str(e),
+          &quot;timestamp&quot;: int(time.time() * 1000)
+        }
+        # Send to the dead letter queue
+        dlq_topic.send(key, error_record)
+        # Return None to filter this message from the main output
+        return None
+
+pipelines:
+  main_processing:
+    from: input_stream
+    transformKeyValue: process_with_dlq
+    to: processed_stream
+</code></pre>
+<h3 id="4-error-classification-and-routing">4. Error Classification and Routing</h3>
+<p>Classify errors and route messages to different handling paths based on the error type:</p>
+<pre><code class="language-yaml">functions:
+  classify_errors:
+    type: keyValueTransformer
+    code: |
+      try:
+        # Attempt normal processing
+        result = process_data(value)
+        # Tag with success status
+        result[&quot;status&quot;] = &quot;success&quot;
+        return (key, result)
+      except ValidationError as e:
+        # Handle validation errors
+        log.warn(&quot;Validation error: {}&quot;, str(e))
+        value[&quot;status&quot;] = &quot;validation_error&quot;
+        value[&quot;error_details&quot;] = str(e)
+        return (key, value)
+      except TemporaryError as e:
+        # Handle temporary errors that can be retried
+        log.warn(&quot;Temporary error, will retry: {}&quot;, str(e))
+        value[&quot;status&quot;] = &quot;retry&quot;
+        value[&quot;error_details&quot;] = str(e)
+        return (key, value)
+      except Exception as e:
+        # Handle unexpected errors
+        log.error(&quot;Unexpected error: {}&quot;, str(e))
+        value[&quot;status&quot;] = &quot;fatal_error&quot;
+        value[&quot;error_details&quot;] = str(e)
+        return (key, value)
+
+pipelines:
+  error_routing:
+    from: input_stream
+    transformKeyValue: classify_errors
+    branch:
+      - predicate: is_success
+        to: success_stream
+      - predicate: is_validation_error
+        to: validation_errors
+      - predicate: is_retry
+        to: retry_queue
+      - to: fatal_errors
+</code></pre>
+<h2 id="implementing-recovery-mechanisms">Implementing Recovery Mechanisms</h2>
+<h3 id="1-retry-logic">1. Retry Logic</h3>
+<p>Implement retry logic for transient failures, such as temporary network issues:</p>
+<pre><code class="language-yaml">functions:
+  retry_external_call:
+    type: valueTransformer
+    code: |
+      max_retries = 3
+      retry_count = 0
+
+      while retry_count &lt; max_retries:
+        try:
+          # Attempt to call external service
+          result = call_external_service(value)
+          return result
+        except TemporaryError as e:
+          # Log the retry attempt
+          retry_count += 1
+          log.warn(&quot;Retry {}/{} after error: {}&quot;, retry_count, max_retries, str(e))
+          # Add exponential backoff
+          time.sleep(0.1 * (2 ** retry_count))
+        except Exception as e:
+          # Non-retryable error
+          log.error(&quot;Non-retryable error: {}&quot;, str(e))
+          return {&quot;error&quot;: str(e), &quot;original_data&quot;: value}
+
+      # If we've exhausted retries
+      log.error(&quot;Failed after {} retries&quot;, max_retries)
+      return {&quot;error&quot;: &quot;Max retries exceeded&quot;, &quot;original_data&quot;: value}
+</code></pre>
+<h3 id="2-circuit-breakers">2. Circuit Breakers</h3>
+<p>Implement circuit breaker patterns to prevent cascading failures when external systems are down:</p>
+<pre><code class="language-yaml">functions:
+  circuit_breaker:
+    type: valueTransformer
+    globalCode: |
+      # Circuit breaker state
+      circuit_state = &quot;CLOSED&quot;  # CLOSED, OPEN, HALF_OPEN
+      failure_count = 0
+      last_failure_time = 0
+      failure_threshold = 5
+      reset_timeout = 30  # seconds
+
+    code: |
+      global circuit_state, failure_count, last_failure_time
+
+      current_time = time.time()
+
+      # Check if circuit is OPEN
+      if circuit_state == &quot;OPEN&quot;:
+        # Check if it's time to try again
+        if current_time - last_failure_time &gt; reset_timeout:
+          log.info(&quot;Circuit transitioning from OPEN to HALF_OPEN&quot;)
+          circuit_state = &quot;HALF_OPEN&quot;
+        else:
+          # Circuit is still OPEN, fail fast
+          log.warn(&quot;Circuit OPEN, skipping call&quot;)
+          return {&quot;error&quot;: &quot;Circuit breaker open&quot;, &quot;original_data&quot;: value}
+
+      try:
+        # Attempt the call
+        result = call_external_service(value)
+
+        # If successful and in HALF_OPEN, reset the circuit
+        if circuit_state == &quot;HALF_OPEN&quot;:
+          log.info(&quot;Circuit transitioning from HALF_OPEN to CLOSED&quot;)
+          circuit_state = &quot;CLOSED&quot;
+          failure_count = 0
+
+        return result
+
+      except Exception as e:
+        # Record the failure
+        failure_count += 1
+        last_failure_time = current_time
+
+        # Check if we need to open the circuit
+        if circuit_state == &quot;CLOSED&quot; and failure_count &gt;= failure_threshold:
+          log.warn(&quot;Circuit transitioning from CLOSED to OPEN after {} failures&quot;, failure_count)
+          circuit_state = &quot;OPEN&quot;
+
+        # Log and return error
+        log.error(&quot;Service call failed: {}&quot;, str(e))
+        return {&quot;error&quot;: str(e), &quot;original_data&quot;: value}
+</code></pre>
+<h3 id="3-compensating-transactions">3. Compensating Transactions</h3>
+<p>For operations that need to maintain consistency across multiple systems, implement compensating transactions:</p>
+<pre><code class="language-yaml">functions:
+  process_with_compensation:
+    type: valueTransformer
+    code: |
+      # Track operations that need to be compensated if there's a failure
+      completed_operations = []
+
+      try:
+        # First operation
+        result1 = operation1(value)
+        completed_operations.append(&quot;operation1&quot;)
+
+        # Second operation
+        result2 = operation2(result1)
+        completed_operations.append(&quot;operation2&quot;)
+
+        # Third operation
+        result3 = operation3(result2)
+        completed_operations.append(&quot;operation3&quot;)
+
+        return result3
+
+      except Exception as e:
+        log.error(&quot;Error during processing: {}&quot;, str(e))
+
+        # Perform compensating actions in reverse order
+        for operation in reversed(completed_operations):
+          try:
+            if operation == &quot;operation1&quot;:
+              compensate_operation1(value)
+            elif operation == &quot;operation2&quot;:
+              compensate_operation2(result1)
+            elif operation == &quot;operation3&quot;:
+              compensate_operation3(result2)
+          except Exception as comp_error:
+            log.error(&quot;Error during compensation for {}: {}&quot;, operation, str(comp_error))
+
+        # Return error information
+        return {&quot;error&quot;: str(e), &quot;compensated&quot;: completed_operations, &quot;original_data&quot;: value}
+</code></pre>
+<h2 id="practical-example-robust-order-processing">Practical Example: Robust Order Processing</h2>
+<p>Let's build a complete example that implements robust error handling in an order processing system:</p>
+<pre><code class="language-yaml">streams:
+  incoming_orders:
+    topic: new_orders
+    keyType: string  # Order ID
+    valueType: json  # Order details
+
+  validated_orders:
+    topic: validated_orders
+    keyType: string  # Order ID
+    valueType: json  # Validated order details
+
+  processed_orders:
+    topic: processed_orders
+    keyType: string  # Order ID
+    valueType: json  # Processed order details
+
+  invalid_orders:
+    topic: invalid_orders
+    keyType: string  # Order ID
+    valueType: json  # Order with validation errors
+
+  processing_errors:
+    topic: order_processing_errors
+    keyType: string  # Order ID
+    valueType: json  # Order with processing errors
+
+  retry_orders:
+    topic: orders_to_retry
+    keyType: string  # Order ID
+    valueType: json  # Orders to retry later
+
+functions:
+  validate_order:
+    type: keyValueTransformer
+    code: |
+      try:
+        # Check if order has all required fields
+        required_fields = [&quot;customer_id&quot;, &quot;items&quot;, &quot;shipping_address&quot;, &quot;payment_method&quot;]
+        missing_fields = [field for field in required_fields if field not in value or not value[field]]
+
+        if missing_fields:
+          # Return invalid order with details
+          value[&quot;status&quot;] = &quot;invalid&quot;
+          value[&quot;validation_errors&quot;] = {&quot;missing_fields&quot;: missing_fields}
+          value[&quot;timestamp&quot;] = int(time.time() * 1000)
+          return (key, value)
+
+        # Check if items array is not empty
+        if not value.get(&quot;items&quot;) or len(value[&quot;items&quot;]) == 0:
+          value[&quot;status&quot;] = &quot;invalid&quot;
+          value[&quot;validation_errors&quot;] = {&quot;reason&quot;: &quot;Order contains no items&quot;}
+          value[&quot;timestamp&quot;] = int(time.time() * 1000)
+          return (key, value)
+
+        # Order is valid
+        value[&quot;status&quot;] = &quot;valid&quot;
+        value[&quot;validation_timestamp&quot;] = int(time.time() * 1000)
+        return (key, value)
+
+      except Exception as e:
+        # Handle unexpected errors during validation
+        log.error(&quot;Error validating order {}: {}&quot;, key, str(e))
+        value[&quot;status&quot;] = &quot;error&quot;
+        value[&quot;error_details&quot;] = str(e)
+        value[&quot;error_timestamp&quot;] = int(time.time() * 1000)
+        return (key, value)
+
+  is_valid_order:
+    type: predicate
+    expression: value.get(&quot;status&quot;) == &quot;valid&quot;
+
+  is_invalid_order:
+    type: predicate
+    expression: value.get(&quot;status&quot;) == &quot;invalid&quot;
+
+  is_error_order:
+    type: predicate
+    expression: value.get(&quot;status&quot;) == &quot;error&quot;
+
+  process_order:
+    type: valueTransformer
+    code: |
+      if value is None or value.get(&quot;status&quot;) != &quot;valid&quot;:
+        log.warn(&quot;Received invalid order for processing: {}&quot;, key)
+        return value
+
+      try:
+        # Simulate inventory check
+        for item in value.get(&quot;items&quot;, []):
+          # Simulate temporary failure for some items
+          if &quot;retry&quot; in item.get(&quot;product_id&quot;, &quot;&quot;):
+            raise TemporaryError(f&quot;Temporary inventory issue with {item['product_id']}&quot;)
+
+          # Simulate permanent failure for some items
+          if &quot;fail&quot; in item.get(&quot;product_id&quot;, &quot;&quot;):
+            raise PermanentError(f&quot;Product {item['product_id']} is discontinued&quot;)
+
+        # Simulate payment processing
+        if value.get(&quot;payment_method&quot;) == &quot;credit_card&quot;:
+          # Add payment processing logic here
+          value[&quot;payment_status&quot;] = &quot;processed&quot;
+
+        # Order successfully processed
+        value[&quot;status&quot;] = &quot;processed&quot;
+        value[&quot;processing_timestamp&quot;] = int(time.time() * 1000)
+        return value
+
+      except TemporaryError as e:
+        # Handle temporary errors (can be retried)
+        log.warn(&quot;Temporary error processing order {}: {}&quot;, key, str(e))
+        value[&quot;status&quot;] = &quot;retry&quot;
+        value[&quot;retry_reason&quot;] = str(e)
+        value[&quot;retry_timestamp&quot;] = int(time.time() * 1000)
+        value[&quot;retry_count&quot;] = value.get(&quot;retry_count&quot;, 0) + 1
+        return value
+
+      except Exception as e:
+        # Handle permanent errors
+        log.error(&quot;Error processing order {}: {}&quot;, key, str(e))
+        value[&quot;status&quot;] = &quot;failed&quot;
+        value[&quot;error_details&quot;] = str(e)
+        value[&quot;error_timestamp&quot;] = int(time.time() * 1000)
+        return value
+
+  is_processed_order:
+    type: predicate
+    expression: value.get(&quot;status&quot;) == &quot;processed&quot;
+
+  is_retry_order:
+    type: predicate
+    expression: value.get(&quot;status&quot;) == &quot;retry&quot;
+
+  is_failed_order:
+    type: predicate
+    expression: value.get(&quot;status&quot;) == &quot;failed&quot;
+
+pipelines:
+  # Validate incoming orders
+  validate_orders:
+    from: incoming_orders
+    transformKeyValue: validate_order
+    branch:
+      - predicate: is_valid_order
+        to: validated_orders
+      - predicate: is_invalid_order
+        to: invalid_orders
+      - to: processing_errors  # Catch-all for unexpected errors
+
+  # Process validated orders
+  process_orders:
+    from: validated_orders
+    mapValues: process_order
+    branch:
+      - predicate: is_processed_order
+        to: processed_orders
+      - predicate: is_retry_order
+        to: retry_orders
+      - to: processing_errors  # Failed orders and unexpected errors
+</code></pre>
+<p>This example:
+1. Validates incoming orders and routes them based on validation results
+2. Processes valid orders with error handling for temporary and permanent failures
+3. Routes processed orders to different destinations based on processing results
+4. Implements a retry mechanism for orders with temporary issues</p>
+<h2 id="monitoring-and-debugging">Monitoring and Debugging</h2>
+<p>To effectively manage errors in your KSML applications:</p>
+<h3 id="1-implement-comprehensive-logging">1. Implement Comprehensive Logging</h3>
+<p>Use the KSML logging capabilities to track errors and their context:</p>
+<pre><code class="language-yaml">functions:
+  log_with_context:
+    type: forEach
+    code: |
+      # Log with different levels based on message status
+      status = value.get(&quot;status&quot;, &quot;unknown&quot;)
+
+      if status == &quot;error&quot; or status == &quot;failed&quot;:
+        log.error(&quot;Order {} failed: {}&quot;, key, value.get(&quot;error_details&quot;, &quot;Unknown error&quot;))
+      elif status == &quot;retry&quot;:
+        log.warn(&quot;Order {} needs retry: {}&quot;, key, value.get(&quot;retry_reason&quot;, &quot;Unknown reason&quot;))
+      elif status == &quot;invalid&quot;:
+        log.warn(&quot;Order {} is invalid: {}&quot;, key, value.get(&quot;validation_errors&quot;, &quot;Unknown validation error&quot;))
+      else:
+        log.info(&quot;Processing order {}: status={}&quot;, key, status)
+</code></pre>
+<h3 id="2-use-metrics-to-track-error-rates">2. Use Metrics to Track Error Rates</h3>
+<p>Track error metrics to monitor the health of your application:</p>
+<pre><code class="language-yaml">functions:
+  track_error_metrics:
+    type: forEach
+    code: |
+      # Get status
+      status = value.get(&quot;status&quot;, &quot;unknown&quot;)
+
+      # Update appropriate counter based on status
+      if status == &quot;valid&quot;:
+        metrics.counter(&quot;orders.valid&quot;).increment()
+      elif status == &quot;invalid&quot;:
+        metrics.counter(&quot;orders.invalid&quot;).increment()
+      elif status == &quot;processed&quot;:
+        metrics.counter(&quot;orders.processed&quot;).increment()
+      elif status == &quot;failed&quot;:
+        metrics.counter(&quot;orders.failed&quot;).increment()
+      elif status == &quot;retry&quot;:
+        metrics.counter(&quot;orders.retry&quot;).increment()
+      else:
+        metrics.counter(&quot;orders.unknown&quot;).increment()
+</code></pre>
+<h3 id="3-implement-health-checks">3. Implement Health Checks</h3>
+<p>Create health check streams that monitor error rates and alert when they exceed thresholds.</p>
+<h2 id="best-practices-for-error-handling">Best Practices for Error Handling</h2>
+<ul>
+<li><strong>Fail Fast</strong>: Validate input data early to catch issues before expensive processing</li>
+<li><strong>Be Specific</strong>: Catch specific exceptions rather than using broad exception handlers</li>
+<li><strong>Provide Context</strong>: Include relevant information in error messages and logs</li>
+<li><strong>Design for Failure</strong>: Assume that errors will occur and design your pipelines accordingly</li>
+<li><strong>Isolate Failures</strong>: Use circuit breakers to prevent cascading failures</li>
+<li><strong>Monitor and Alert</strong>: Set up monitoring and alerting for error conditions</li>
+<li><strong>Test Error Scenarios</strong>: Explicitly test error handling code with simulated failures</li>
+</ul>
+<h2 id="conclusion">Conclusion</h2>
+<p>Robust error handling is essential for building reliable stream processing applications. KSML provides flexible mechanisms for handling errors at various levels, from simple try-except blocks to sophisticated patterns like dead letter queues and circuit breakers.</p>
+<p>By implementing proper error handling and recovery mechanisms, you can build KSML applications that gracefully handle failures, maintain data integrity, and continue processing even when problems occur.</p>
+<h2 id="further-reading">Further Reading</h2>
+<ul>
+<li><a href="../../../core-concepts/operations/">Core Concepts: Operations</a></li>
+<li><a href="../../../core-concepts/functions/">Core Concepts: Functions</a></li>
+<li><a href="../../reference/error-handling-reference.md">Reference: Error Handling</a></li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../../../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../js/base.js"></script>
+        <script src="../../../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

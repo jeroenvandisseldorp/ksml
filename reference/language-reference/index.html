@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>KSML Language Reference - KSML Documentation</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../../css/brands.min.css" rel="stylesheet">
+        <link href="../../css/solid.min.css" rel="stylesheet">
+        <link href="../../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../..">KSML Documentation</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="../.." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../tutorials/getting-started/" class="nav-link">Getting Started</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../core-concepts/" class="nav-link">Core Concepts</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../tutorials/" class="nav-link">Tutorials</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../use-cases/" class="nav-link">Use Case Guides</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../" class="nav-link">Reference</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../resources/" class="nav-link">Resources</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../about/" class="nav-link">About</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#ksml-language-reference" class="nav-link">KSML Language Reference</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#ksml-file-structure" class="nav-link">KSML File Structure</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#metadata-section" class="nav-link">Metadata Section</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#streams-tables-and-globaltables-section" class="nav-link">Streams, Tables, and GlobalTables Section</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#functions-section" class="nav-link">Functions Section</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#pipelines-section" class="nav-link">Pipelines Section</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#operations" class="nav-link">Operations</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#data-types" class="nav-link">Data Types</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#expressions" class="nav-link">Expressions</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#best-practices" class="nav-link">Best Practices</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#appendix-full-example" class="nav-link">Appendix: Full Example</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="ksml-language-reference">KSML Language Reference</h1>
+<p>This document provides a comprehensive reference for the KSML (Kafka Streams Markup Language) syntax and structure. It
+covers all aspects of the KSML language specification, including file structure, data types, and configuration options.</p>
+<h2 id="ksml-file-structure">KSML File Structure</h2>
+<p>A KSML definition file is written in YAML and consists of several top-level sections:</p>
+<pre><code class="language-yaml">name: my-ksml-app
+version: 0.1.2
+description: This is what my app does
+
+streams:
+# Stream definitions
+
+tables:
+# Table definitions
+
+globalTables:
+# GlobalTable definitions
+
+stores:
+# State store definitions
+
+functions:
+# Function definitions
+
+pipelines:
+# Pipeline definitions
+
+producers:
+# Producer definitions
+</code></pre>
+<h3 id="required-and-optional-sections">Required and Optional Sections</h3>
+<ul>
+<li><strong>name</strong>: Optional. Defines the name of your application.</li>
+<li><strong>version</strong>: Optional. Defines the version of your application.</li>
+<li><strong>description</strong>: Optional. Defines the purpose of your application.</li>
+<li><strong>streams</strong>: Optional. Defines the input and output Kafka streams.</li>
+<li><strong>tables</strong>: Optional. Defines the input and output Kafka tables.</li>
+<li><strong>globalTables</strong>: Optional. Defines the input and output Kafka globalTables.</li>
+<li><strong>stores</strong>: Optional. Defines the state stores used in your functions and pipelines.</li>
+<li><strong>functions</strong>: Optional. Defines reusable functions that can be called from pipelines.</li>
+<li><strong>pipelines</strong>: Optional. Defines the processing logic of your application.</li>
+<li><strong>producers</strong>: Optional. Defines the producers that generate data for your output topics.</li>
+</ul>
+<h2 id="metadata-section">Metadata Section</h2>
+<p>The <code>name</code>, <code>version</code>, and <code>description</code> fields hold informational data for the developer of the application.</p>
+<h2 id="streams-tables-and-globaltables-section">Streams, Tables, and GlobalTables Section</h2>
+<p>The <code>streams</code>, <code>tables</code>, and <code>globalTables</code> sections defines the input and output Kafka topics and their data types.</p>
+<h3 id="definition">Definition</h3>
+<pre><code class="language-yaml">streams:
+  stream_name:
+    topic: kafka_topic_name
+    keyType: key_data_type
+    valueType: value_data_type
+    # Additional configuration options
+
+tables:
+  table_name:
+    topic: kafka_topic_name
+    keyType: key_data_type
+    valueType: value_data_type
+    # Additional configuration options
+
+globalTables:
+  global_table_name:
+    topic: kafka_topic_name
+    keyType: key_data_type
+    valueType: value_data_type
+    # Additional configuration options
+</code></pre>
+<h3 id="required-properties">Required Properties</h3>
+<ul>
+<li><code>topic</code>: (Required) The name of the Kafka topic.</li>
+<li><code>keyType</code>: (Required) The data type of the message key.</li>
+<li><code>valueType</code>: (Required) The data type of the message value.</li>
+<li><code>offsetResetPolicy</code>: (Optional) The policy to use when there is no (valid) consumer group offset in Kafka. Choice of
+  <code>earliest</code>, <code>latest</code>, <code>none</code>, or <code>by_duration:&lt;duration&gt;</code>. In the latter case, you can pass in a custom duration.</li>
+<li><code>timestampExtractor</code>: (Optional) A function that is able to extract a timestamp from a consumed message, to be used by
+  Kafka Streams as the message timestamp in all pipeline processing.</li>
+<li><code>partitioner</code>: (Optional) A stream partitioner that determines to which topic partitions an output record needs to be
+  written.</li>
+</ul>
+<h3 id="example">Example</h3>
+<pre><code class="language-yaml">streams:
+  orders:
+    topic: incoming_orders
+    keyType: string
+    valueType: json
+</code></pre>
+<h2 id="functions-section">Functions Section</h2>
+<p>The <code>functions</code> section defines reusable functions that can be called from pipelines.</p>
+<h3 id="function-definition">Function Definition</h3>
+<pre><code class="language-yaml">functions:
+  function_name:
+    type: function_type
+    parameters:
+      - name: parameter_name
+        type: parameter_type
+    code: |
+      # Python code here
+    expression: |
+      # Python expression here
+    resultType: data_type
+</code></pre>
+<h3 id="required-properties_1">Required Properties</h3>
+<ul>
+<li><strong>type</strong>: The type of function (e.g., <code>predicate</code>, <code>aggregator</code>, <code>keyValueMapper</code>).</li>
+<li><strong>parameters</strong>: List of custom parameters, which may be passed in next to the default parameters determined by the
+  function type.</li>
+<li><strong>code</strong>: Python code that implements the function.</li>
+<li><strong>expression</strong>: Python expression for the return value of the function.</li>
+<li><strong>resultType</strong>: The return value data type of the function.</li>
+</ul>
+<h3 id="parameter-definition">Parameter Definition</h3>
+<ul>
+<li><strong>name</strong>: The name of the parameter.</li>
+<li><strong>type</strong>: The data type of the parameter.</li>
+</ul>
+<h3 id="example_1">Example</h3>
+<pre><code class="language-yaml">functions:
+  calculate_total:
+    type: mapValues
+    parameters:
+      - name: order
+        type: struct
+    code: |
+      total = 0
+      for item in order.get(&quot;items&quot;, []):
+        total += item.get(&quot;price&quot;, 0) * item.get(&quot;quantity&quot;, 0)
+    expression: |
+      {&quot;order_id&quot;: order.get(&quot;id&quot;), &quot;total&quot;: total}
+    resultType: struct
+</code></pre>
+<h2 id="pipelines-section">Pipelines Section</h2>
+<p>The <code>pipelines</code> section defines the processing logic that connects streams.</p>
+<h3 id="pipeline-definition">Pipeline Definition</h3>
+<pre><code class="language-yaml">pipelines:
+  pipeline_name:
+    from: input_stream
+    via:
+      - type: operation_type
+        # Operation-specific parameters
+    to: output_stream
+</code></pre>
+<h3 id="required-properties_2">Required Properties</h3>
+<ul>
+<li><strong>from</strong>: The input stream.</li>
+<li><strong>to</strong>: The output stream.</li>
+</ul>
+<h3 id="optional-properties">Optional Properties</h3>
+<ul>
+<li><strong>via</strong>: List of operations to apply to the stream.</li>
+</ul>
+<h3 id="example_2">Example</h3>
+<pre><code class="language-yaml">pipelines:
+  order_processing:
+    from: orders
+    via:
+      - type: filter
+        if:
+          expression: value.get(&quot;total&quot;) &gt; 100
+      - type: mapValues
+        mapper:
+          code: calculate_total(value)
+    to: processed_orders
+</code></pre>
+<h2 id="operations">Operations</h2>
+<p>Operations are the building blocks of pipelines. They transform, filter, or aggregate data.</p>
+<h3 id="common-operation-types">Common Operation Types</h3>
+<h4 id="stateless-operations">Stateless Operations</h4>
+<ul>
+<li><strong>mapValues</strong>: Transforms the value of each record.</li>
+<li><strong>map</strong>: Transforms both the key and value of each record.</li>
+<li><strong>filter</strong>: Keeps only records that satisfy a condition.</li>
+<li><strong>flatMap</strong>: Transforms each record into zero or more records.</li>
+<li><strong>peek</strong>: Performs a side effect on each record without changing it.</li>
+</ul>
+<h4 id="stateful-operations">Stateful Operations</h4>
+<ul>
+<li><strong>aggregate</strong>: Aggregates records by key.</li>
+<li><strong>count</strong>: Counts records by key.</li>
+<li><strong>reduce</strong>: Combines records with the same key.</li>
+<li><strong>join</strong>: Joins two streams based on key.</li>
+<li><strong>windowedBy</strong>: Groups records into time windows.</li>
+</ul>
+<h3 id="operation-parameters">Operation Parameters</h3>
+<p>Each operation type has its own set of parameters. Common parameters include:</p>
+<ul>
+<li><strong>mapper</strong>: For map operations, specifies the transformation.</li>
+<li><strong>if</strong>: For filter operations, specifies the condition.</li>
+<li><strong>initializer</strong>: For aggregate operations, specifies the initial value.</li>
+<li><strong>aggregator</strong>: For aggregate operations, specifies how to combine values.</li>
+</ul>
+<h2 id="data-types">Data Types</h2>
+<p>KSML supports various <a href="../data-types-reference/">data types</a> for stream keys and values.</p>
+<h3 id="type-conversion">Type Conversion</h3>
+<p>KSML automatically handles type conversion between compatible types. For example, a JSON string can be converted to an
+AVRO message if the structure (schema) matches.</p>
+<h2 id="expressions">Expressions</h2>
+<p>KSML supports two types of expressions:</p>
+<h3 id="yaml-expressions">YAML Expressions</h3>
+<p>Simple expressions can be defined directly in YAML:</p>
+<pre><code class="language-yaml">expression: value.get(&quot;total&quot;) &gt; 100
+</code></pre>
+<h3 id="python-code-blocks">Python Code Blocks</h3>
+<p>More complex logic can be implemented using Python code blocks:</p>
+<pre><code class="language-yaml">code: |
+  if value.get(&quot;status&quot;) == &quot;COMPLETED&quot; and value.get(&quot;total&quot;) &gt; 100:
+    return True
+  return False
+</code></pre>
+<h2 id="best-practices">Best Practices</h2>
+<h3 id="naming-conventions">Naming Conventions</h3>
+<ul>
+<li>Use descriptive names for streams, functions, and pipelines.</li>
+<li>Use snake_case for state store, function and pipeline names.</li>
+</ul>
+<h3 id="code-organization">Code Organization</h3>
+<ul>
+<li>Keep functions small and focused on a single task.</li>
+<li>Reuse functions across pipelines when possible.</li>
+<li>Group related pipelines together.</li>
+</ul>
+<h3 id="performance-considerations">Performance Considerations</h3>
+<ul>
+<li>Use stateless operations when possible.</li>
+<li>Be mindful of window sizes in windowed operations.</li>
+<li>Consider partitioning when designing your pipelines.</li>
+</ul>
+<h2 id="appendix-full-example">Appendix: Full Example</h2>
+<pre><code class="language-yaml">streams:
+  orders:
+    topic: incoming_orders
+    keyType: string
+    valueType: json
+
+  customers:
+    topic: customer_data
+    keyType: string
+    valueType: json
+
+  enriched_orders:
+    topic: processed_orders
+    keyType: string
+    valueType: json
+
+functions:
+  calculate_total:
+    type: valueTransformer
+    parameters:
+      - name: order
+        type: struct
+    code: |
+      total = 0
+      for item in order.get(&quot;items&quot;, []):
+        total += item.get(&quot;price&quot;, 0) * item.get(&quot;quantity&quot;, 0)
+      return {**order, &quot;total&quot;: total}
+    resultType: struct
+
+  join_with_customers:
+    type: valueJoiner
+    code: |
+      return {
+        **value1,
+        &quot;customer&quot;: value2
+      }
+    resultType: struct
+
+  enrich_order:
+    type: valueTransformer
+    parameters:
+      - name: order
+        type: struct
+      - name: customer
+        type: struct
+    code: |
+      customer = value.get(&quot;customer&quot;)
+      if customer is None:
+        return order
+      return {
+        **order,
+        &quot;customer_name&quot;: customer.get(&quot;name&quot;),
+        &quot;customer_tier&quot;: customer.get(&quot;tier&quot;, &quot;standard&quot;),
+        &quot;loyalty_points&quot;: order.get(&quot;total&quot;, 0) * 0.1
+      }
+    resultType: struct
+
+pipelines:
+  order_processing:
+    from: orders
+    via:
+      - type: transformValue
+        mapper: calculate_total
+      - type: join
+        with: customers
+        valueJoiner: join_with_customers
+      - type: transformValue
+        mapper: enrich_order
+      - type: filter
+        if:
+          expression: value.get(&quot;total&quot;) &gt; 0
+    to: enriched_orders
+</code></pre>
+<p>This example demonstrates a complete KSML application that processes orders, calculates totals, enriches them with
+customer data, and filters out zero-total orders.</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js"></script>
+        <script src="../../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

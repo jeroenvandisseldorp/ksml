@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>KSML Functions Reference - KSML Documentation</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../../css/brands.min.css" rel="stylesheet">
+        <link href="../../css/solid.min.css" rel="stylesheet">
+        <link href="../../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../..">KSML Documentation</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="../.." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../tutorials/getting-started/" class="nav-link">Getting Started</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../core-concepts/" class="nav-link">Core Concepts</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../tutorials/" class="nav-link">Tutorials</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../use-cases/" class="nav-link">Use Case Guides</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../" class="nav-link">Reference</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../resources/" class="nav-link">Resources</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../about/" class="nav-link">About</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#ksml-functions-reference" class="nav-link">KSML Functions Reference</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#function-types-overview" class="nav-link">Function Types Overview</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#functions-for-stateless-operations" class="nav-link">Functions for stateless operations</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#functions-for-stateful-operations" class="nav-link">Functions for stateful operations</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#special-purpose-functions" class="nav-link">Special Purpose Functions</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#stream-related-functions" class="nav-link">Stream Related Functions</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#other-functions" class="nav-link">Other Functions</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#function-definition-formats" class="nav-link">Function Definition Formats</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#function-execution-context" class="nav-link">Function Execution Context</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#best-practices" class="nav-link">Best Practices</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#related-topics" class="nav-link">Related Topics</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="ksml-functions-reference">KSML Functions Reference</h1>
+<p>This document provides a comprehensive reference for all function types available in KSML. Each function type is
+described with its parameters, behavior, and examples.</p>
+<h2 id="function-types-overview">Function Types Overview</h2>
+<p>KSML supports various function types, each designed for specific purposes in stream processing:</p>
+<table>
+<thead>
+<tr>
+<th>Function Type</th>
+<th>Purpose</th>
+<th>Used In</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Functions for stateless operations</strong></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="#foreach">forEach</a></td>
+<td>Process each message for side effects</td>
+<td>peek</td>
+</tr>
+<tr>
+<td><a href="#keyTransformer">keyTransformer</a></td>
+<td>Convert a key to another type or value</td>
+<td>mapKey, selectKey, toStream, transformKey</td>
+</tr>
+<tr>
+<td><a href="#keyValueToKeyValueListTransformer">keyValueToKeyValueListTransformer</a></td>
+<td>Convert key and value to a list of key/values</td>
+<td>flatMap, transformKeyValueToKeyValueList</td>
+</tr>
+<tr>
+<td><a href="#keyValueToValueListTransformer">keyValueToValueListTransformer</a></td>
+<td>Convert key and value to a list of values</td>
+<td>flatMapValues, transformKeyValueToValueList</td>
+</tr>
+<tr>
+<td><a href="#keyValueTransformer">keyValueTransformer</a></td>
+<td>Convert key and value to another key and value</td>
+<td>flatMapValues, transformKeyValueToValueList</td>
+</tr>
+<tr>
+<td><a href="#predicate">predicate</a></td>
+<td>Return true/false based on message content</td>
+<td>filter, branch</td>
+</tr>
+<tr>
+<td><a href="#valueTransformer">valueTransformer</a></td>
+<td>Convert value to another type or value</td>
+<td>mapValue, mapValues, transformValue</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Functions for stateful operations</strong></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="#aggregator">aggregator</a></td>
+<td>Incrementally build aggregated results</td>
+<td>aggregate</td>
+</tr>
+<tr>
+<td><a href="#initializer">initializer</a></td>
+<td>Provide initial values for aggregations</td>
+<td>aggregate</td>
+</tr>
+<tr>
+<td><a href="#merger">merger</a></td>
+<td>Merge two aggregation results into one</td>
+<td>aggregate</td>
+</tr>
+<tr>
+<td><a href="#reducer">reducer</a></td>
+<td>Combine two values into one</td>
+<td>reduce</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Special Purpose Functions</strong></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="#foreignKeyExtractor">foreignKeyExtractor</a></td>
+<td>Extract a key from a join table's record</td>
+<td>join, leftJoin</td>
+</tr>
+<tr>
+<td><a href="#generator">generator</a></td>
+<td>Function used in producers to generate a message</td>
+<td>producer</td>
+</tr>
+<tr>
+<td><a href="#keyValueMapper">keyValueMapper</a></td>
+<td>Convert key and value into a single output value</td>
+<td>groupBy, join, leftJoin</td>
+</tr>
+<tr>
+<td><a href="#keyValuePrinter">keyValuePrinter</a></td>
+<td>Output key and value</td>
+<td>print</td>
+</tr>
+<tr>
+<td><a href="#metadataTransformer">metadataTransformer</a></td>
+<td>Convert Kafka headers and timestamps</td>
+<td>transformMetadata</td>
+</tr>
+<tr>
+<td><a href="#valueJoiner">valueJoiner</a></td>
+<td>Combine data from multiple streams</td>
+<td>join, leftJoin, outerJoin</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Stream Related Functions</strong></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="#timestampExtractor">timestampExtractor</a></td>
+<td>Extract timestamps from messages</td>
+<td>stream, table, globalTable</td>
+</tr>
+<tr>
+<td><a href="#topicNameExtractor">topicNameExtractor</a></td>
+<td>Derive a target topic name from key and value</td>
+<td>toTopicNameExtractor</td>
+</tr>
+<tr>
+<td><a href="#streamPartitioner">streamPartitioner</a></td>
+<td>Determine to which partition(s) a record is produced</td>
+<td>stream, table, globalTable</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Other Functions</strong></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><a href="#generic">generic</a></td>
+<td>Generic custom function</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="functions-for-stateless-operations">Functions for stateless operations</h2>
+<h3 id="foreach">forEach</h3>
+<p>Processes each message for side effects like logging, without changing the message.</p>
+<h4 id="parameters">Parameters</h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>key</td>
+<td>Any</td>
+<td>The key of the record being processed</td>
+</tr>
+<tr>
+<td>value</td>
+<td>Any</td>
+<td>The value of the record being processed</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value">Return Value</h4>
+<p>None (the function is called for its side effects)</p>
+<h4 id="example">Example</h4>
+<pre><code class="language-yaml">functions:
+  log_message:
+    type: forEach
+    code: |
+      log.info(&quot;Processing record with key={}, value={}&quot;, key, value)
+
+      # You can also increment metrics
+      metrics.counter(&quot;records_processed&quot;).increment()
+</code></pre>
+<h3 id="keytransformer">keyTransformer</h3>
+<p>Transforms a key/value into a new key, which then gets combined with the original value as a new message on the output
+stream.</p>
+<h4 id="parameters_1">Parameters</h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>key</td>
+<td>Any</td>
+<td>The key of the record being processed</td>
+</tr>
+<tr>
+<td>value</td>
+<td>Any</td>
+<td>The value of the record being processed</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value_1">Return Value</h4>
+<p>New key for the output message</p>
+<h4 id="example_1">Example</h4>
+<pre><code class="language-yaml">functions:
+  extract_region:
+    type: keyTransformer
+    code: |
+      # Extract region from the sale event and use it as the new key
+      return value.get(&quot;region&quot;, &quot;unknown&quot;)
+    resultType: string
+</code></pre>
+<h3 id="keyvaluetokeyvaluelisttransformer">keyValueToKeyValueListTransformer</h3>
+<p>Takes one message and converts it into a list of output messages, which then get sent to the output stream.</p>
+<h4 id="parameters_2">Parameters</h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>key</td>
+<td>Any</td>
+<td>The key of the record being processed</td>
+</tr>
+<tr>
+<td>value</td>
+<td>Any</td>
+<td>The value of the record being processed</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value_2">Return Value</h4>
+<p>A list of key-value pairs <code>[(key1, value1), (key2, value2), ...]</code></p>
+<h4 id="example_2">Example</h4>
+<pre><code class="language-yaml">functions:
+  alert_split:
+    type: keyValueToKeyValueListTransformer
+    code: |
+      newRecords = []
+      if value is not None and len(value[&quot;alerts&quot;]) &gt; 0:
+        sensordata = value[&quot;sensordata&quot;]
+        new_key = {
+          &quot;name&quot;: sensordata[&quot;name&quot;],
+          &quot;type&quot;: sensordata[&quot;type&quot;],
+          &quot;city&quot;: sensordata[&quot;city&quot;]
+        }
+        for alert in value[&quot;alerts&quot;]:
+          new_value = {
+            &quot;alert&quot;: alert,
+            &quot;sensordata&quot;: sensordata
+          }
+          newRecords.append((new_key, new_value))
+      return newRecords
+    resultType: &quot;[(struct,struct)]&quot;
+</code></pre>
+<h3 id="keyvaluetovaluelisttransformer">keyValueToValueListTransformer</h3>
+<p>Takes one message and converts it into a list of output values, which then get combined with the original key and sent
+to the output stream.</p>
+<h4 id="parameters_3">Parameters</h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>key</td>
+<td>Any</td>
+<td>The key of the record being processed</td>
+</tr>
+<tr>
+<td>value</td>
+<td>Any</td>
+<td>The value of the record being processed</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value_3">Return Value</h4>
+<p>A list of values <code>[value1, value2, ...]</code> that will be combined with the original key</p>
+<h4 id="example_3">Example</h4>
+<pre><code class="language-yaml">functions:
+  explode_items:
+    type: keyValueToValueListTransformer
+    code: |
+      # Input: key = &quot;order123&quot;, value = {&quot;items&quot;: [{&quot;id&quot;: &quot;item1&quot;}, {&quot;id&quot;: &quot;item2&quot;}]}
+      # Output: (&quot;order123&quot;, {&quot;id&quot;: &quot;item1&quot;}), (&quot;order123&quot;, {&quot;id&quot;: &quot;item2&quot;})
+
+      if value is None or &quot;items&quot; not in value:
+        return []
+
+      return value[&quot;items&quot;]
+    result: &quot;[struct]&quot;
+</code></pre>
+<h3 id="keyvaluetransformer">keyValueTransformer</h3>
+<p>Takes one message and converts it into another message, which may have different key/value types.</p>
+<h4 id="parameters_4">Parameters</h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>key</td>
+<td>Any</td>
+<td>The key of the record being processed</td>
+</tr>
+<tr>
+<td>value</td>
+<td>Any</td>
+<td>The value of the record being processed</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value_4">Return Value</h4>
+<p>A tuple of (new_key, new_value)</p>
+<h4 id="example_4">Example</h4>
+<pre><code class="language-yaml">functions:
+  transform_order:
+    type: keyValueTransformer
+    code: |
+      if value is None:
+        return (None, None)
+
+      # Create a new key based on customer ID
+      new_key = value.get(&quot;customer_id&quot;, &quot;unknown&quot;)
+
+      # Create a new value with selected fields
+      new_value = {
+        &quot;order_id&quot;: value.get(&quot;order_id&quot;),
+        &quot;total_amount&quot;: value.get(&quot;total_amount&quot;, 0),
+        &quot;item_count&quot;: len(value.get(&quot;items&quot;, [])),
+        &quot;processed_at&quot;: int(time.time() * 1000)
+      }
+
+      return (new_key, new_value)
+    resultType: &quot;(string,struct)&quot;
+</code></pre>
+<h3 id="predicate">predicate</h3>
+<p>Returns true or false based on message content. Used for filtering and branching operations.</p>
+<h4 id="parameters_5">Parameters</h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>key</td>
+<td>Any</td>
+<td>The key of the record being processed</td>
+</tr>
+<tr>
+<td>value</td>
+<td>Any</td>
+<td>The value of the record being processed</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value_5">Return Value</h4>
+<p>Boolean (true or false)</p>
+<h4 id="example_5">Example</h4>
+<pre><code class="language-yaml">functions:
+  is_adult:
+    type: predicate
+    expression: value.get(&quot;age&quot;) &gt;= 18
+
+  is_valid_transaction:
+    type: predicate
+    code: |
+      if value is None:
+        return False
+
+      amount = value.get(&quot;amount&quot;)
+      if amount is None or amount &lt;= 0:
+        return False
+
+      return True
+
+  deduplicate_events:
+    type: predicate
+    code: |
+      # Access a state store to check for duplicates
+      event_id = value.get(&quot;event_id&quot;)
+      if event_id is None:
+        return True
+
+      # Check if we've seen this event before
+      seen_before = event_store.get(event_id)
+      if seen_before:
+        # Skip duplicate event
+        return False
+
+      # Mark this event as seen
+      stateStore.put(event_id, True)
+
+      # Process the event
+      return True
+    stores:
+      - event_store
+</code></pre>
+<h3 id="valuetransformer">valueTransformer</h3>
+<p>Transforms a key/value into a new value, which is combined with the original key and sent to the output stream.</p>
+<h4 id="parameters_6">Parameters</h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>key</td>
+<td>Any</td>
+<td>The key of the record being processed</td>
+</tr>
+<tr>
+<td>value</td>
+<td>Any</td>
+<td>The value of the record being processed</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value_6">Return Value</h4>
+<p>New value for the output message</p>
+<h4 id="example_6">Example</h4>
+<pre><code class="language-yaml">functions:
+  enrich_user:
+    type: valueTransformer
+    code: |
+      return {
+        &quot;id&quot;: value.get(&quot;user_id&quot;),
+        &quot;full_name&quot;: value.get(&quot;first_name&quot;) + &quot; &quot; + value.get(&quot;last_name&quot;),
+        &quot;email&quot;: value.get(&quot;email&quot;),
+        &quot;age&quot;: value.get(&quot;age&quot;),
+        &quot;is_adult&quot;: value.get(&quot;age&quot;, 0) &gt;= 18,
+        &quot;processed_at&quot;: int(time.time() * 1000)
+      }
+    resultType: struct
+
+</code></pre>
+<h2 id="functions-for-stateful-operations">Functions for stateful operations</h2>
+<h3 id="aggregator">aggregator</h3>
+<p>Incrementally builds aggregated results from multiple messages.</p>
+<h4 id="parameters_7">Parameters</h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>key</td>
+<td>Any</td>
+<td>The key of the record being processed</td>
+</tr>
+<tr>
+<td>value</td>
+<td>Any</td>
+<td>The value of the record being processed</td>
+</tr>
+<tr>
+<td>aggregatedValue</td>
+<td>Any</td>
+<td>The current aggregated value (can be None)</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value_7">Return Value</h4>
+<p>New aggregated value</p>
+<h4 id="example_7">Example</h4>
+<pre><code class="language-yaml">functions:
+  average_calculator:
+    type: aggregator
+    code: |
+      if aggregatedValue is None:
+        return {&quot;count&quot;: 1, &quot;sum&quot;: value.get(&quot;amount&quot;, 0), &quot;average&quot;: value.get(&quot;amount&quot;, 0)}
+      else:
+        count = aggregatedValue.get(&quot;count&quot;, 0) + 1
+        sum = aggregatedValue.get(&quot;sum&quot;, 0) + value.get(&quot;amount&quot;, 0)
+        return {
+          &quot;count&quot;: count,
+          &quot;sum&quot;: sum,
+          &quot;average&quot;: sum / count
+        }
+    resultType: struct
+</code></pre>
+<h3 id="initializer">initializer</h3>
+<p>Provides initial values for aggregations.</p>
+<h4 id="parameters_8">Parameters</h4>
+<p>None</p>
+<h4 id="return-value_8">Return Value</h4>
+<p>Initial value for aggregation</p>
+<h4 id="example_8">Example</h4>
+<pre><code class="language-yaml">functions:
+  counter_initializer:
+    type: initializer
+    expression: { &quot;count&quot;: 0, &quot;sum&quot;: 0, &quot;average&quot;: 0 }
+    resultType: struct
+</code></pre>
+<h3 id="merger">merger</h3>
+<p>Merges two aggregation results into one. Used in aggregation operations to combine partial results.</p>
+<h4 id="parameters_9">Parameters</h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>key</td>
+<td>Any</td>
+<td>The key of the record being processed</td>
+</tr>
+<tr>
+<td>value1</td>
+<td>Any</td>
+<td>The value of the first aggregation</td>
+</tr>
+<tr>
+<td>value2</td>
+<td>Any</td>
+<td>The value of the second aggregation</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value_9">Return Value</h4>
+<p>The merged aggregation result</p>
+<h4 id="example_9">Example</h4>
+<pre><code class="language-yaml">functions:
+  merge_stats:
+    type: merger
+    code: |
+      # Merge two statistics objects
+      if value1 is None:
+        return value2
+      if value2 is None:
+        return value1
+
+      # Combine counts and sums
+      count = value1.get(&quot;count&quot;, 0) + value2.get(&quot;count&quot;, 0)
+      sum = value1.get(&quot;sum&quot;, 0) + value2.get(&quot;sum&quot;, 0)
+      result = {
+        &quot;count&quot;: count,
+        &quot;sum&quot;: sum,
+        &quot;average&quot;: sum/count if count&gt;0 else 0
+      }
+
+      return result
+    resultType: struct
+</code></pre>
+<h3 id="reducer">reducer</h3>
+<p>Combines two values into one.</p>
+<h4 id="parameters_10">Parameters</h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>value1</td>
+<td>Any</td>
+<td>The first value to combine</td>
+</tr>
+<tr>
+<td>value2</td>
+<td>Any</td>
+<td>The second value to combine</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value_10">Return Value</h4>
+<p>Combined value</p>
+<h4 id="example_10">Example</h4>
+<pre><code class="language-yaml">functions:
+  sum_reducer:
+    type: reducer
+    code: |
+      count = value1.get(&quot;count&quot;, 0) + value2.get(&quot;count&quot;, 0)
+      sum = value1.get(&quot;sum&quot;, 0) + value2.get(&quot;sum&quot;, 0)
+      return {
+        &quot;count&quot;: count,
+        &quot;sum&quot;: sum,
+        &quot;average&quot;: sum/count if count&gt;0 else 0
+      }
+    resultType: struct
+</code></pre>
+<h2 id="special-purpose-functions">Special Purpose Functions</h2>
+<h3 id="foreignkeyextractor">foreignKeyExtractor</h3>
+<p>Extracts a key from a join table's record. Used during join operations to determine which records to join.</p>
+<h4 id="parameters_11">Parameters</h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>value</td>
+<td>Any</td>
+<td>The value of the record to get a key from</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value_11">Return Value</h4>
+<p>The key to look up in the table being joined with</p>
+<h4 id="example_11">Example</h4>
+<pre><code class="language-yaml">functions:
+  extract_customer_id:
+    type: foreignKeyExtractor
+    code: |
+      # Extract customer ID from an order to join with customer table
+      if value is None:
+        return None
+
+      return value.get(&quot;customer_id&quot;)
+    resultType: string
+</code></pre>
+<h3 id="generator">generator</h3>
+<p>Function used in producers to generate messages. It takes no input parameters and produces key-value pairs.</p>
+<h4 id="parameters_12">Parameters</h4>
+<p>None</p>
+<h4 id="return-value_12">Return Value</h4>
+<p>A tuple of (key, value) representing the generated message</p>
+<h4 id="example_12">Example</h4>
+<pre><code class="language-yaml">functions:
+  generate_sensordata_message:
+    type: generator
+    globalCode: |
+      import time
+      import random
+      sensorCounter = 0
+    code: |
+      global sensorCounter
+
+      key = &quot;sensor&quot;+str(sensorCounter)           # Set the key to return (&quot;sensor0&quot; to &quot;sensor9&quot;)
+      sensorCounter = (sensorCounter+1) % 10      # Increase the counter for next iteration
+
+      # Generate some random sensor measurement data
+      types = { 0: { &quot;type&quot;: &quot;AREA&quot;, &quot;unit&quot;: random.choice([ &quot;m2&quot;, &quot;ft2&quot; ]), &quot;value&quot;: str(random.randrange(1000)) },
+                1: { &quot;type&quot;: &quot;HUMIDITY&quot;, &quot;unit&quot;: random.choice([ &quot;g/m3&quot;, &quot;%&quot; ]), &quot;value&quot;: str(random.randrange(100)) },
+                2: { &quot;type&quot;: &quot;LENGTH&quot;, &quot;unit&quot;: random.choice([ &quot;m&quot;, &quot;ft&quot; ]), &quot;value&quot;: str(random.randrange(1000)) },
+                3: { &quot;type&quot;: &quot;STATE&quot;, &quot;unit&quot;: &quot;state&quot;, &quot;value&quot;: random.choice([ &quot;off&quot;, &quot;on&quot; ]) },
+                4: { &quot;type&quot;: &quot;TEMPERATURE&quot;, &quot;unit&quot;: random.choice([ &quot;C&quot;, &quot;F&quot; ]), &quot;value&quot;: str(random.randrange(-100, 100)) }
+              }
+
+      # Build the result value using any of the above measurement types
+      value = { &quot;name&quot;: key, &quot;timestamp&quot;: str(round(time.time()*1000)), **random.choice(types) }
+      value[&quot;color&quot;] = random.choice([ &quot;black&quot;, &quot;blue&quot;, &quot;red&quot;, &quot;yellow&quot;, &quot;white&quot; ])
+      value[&quot;owner&quot;] = random.choice([ &quot;Alice&quot;, &quot;Bob&quot;, &quot;Charlie&quot;, &quot;Dave&quot;, &quot;Evan&quot; ])
+      value[&quot;city&quot;] = random.choice([ &quot;Amsterdam&quot;, &quot;Xanten&quot;, &quot;Utrecht&quot;, &quot;Alkmaar&quot;, &quot;Leiden&quot; ])
+
+      if random.randrange(10) == 0:
+        key = None
+      if random.randrange(10) == 0:
+        value = None
+    expression: (key, value)                      # Return a message tuple with the key and value
+    resultType: (string, struct)                  # Indicate the type of key and value
+</code></pre>
+<h3 id="keyvaluemapper">keyValueMapper</h3>
+<p>Transforms both the key and value of a record.</p>
+<h4 id="parameters_13">Parameters</h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>key</td>
+<td>Any</td>
+<td>The key of the record being processed</td>
+</tr>
+<tr>
+<td>value</td>
+<td>Any</td>
+<td>The value of the record being processed</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value_13">Return Value</h4>
+<p>Tuple of (new_key, new_value)</p>
+<h4 id="example_13">Example</h4>
+<pre><code class="language-yaml">functions:
+  repartition_by_user_id:
+    type: keyValueMapper
+    code: |
+      new_key = value.get(&quot;user_id&quot;)
+      new_value = value
+      return (new_key, new_value)
+    resultType: &quot;(string, struct)&quot;
+</code></pre>
+<h3 id="keyvalueprinter">keyValuePrinter</h3>
+<p>Converts a message to a string for output to a file or stdout.</p>
+<h4 id="parameters_14">Parameters</h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>key</td>
+<td>Any</td>
+<td>The key of the record being processed</td>
+</tr>
+<tr>
+<td>value</td>
+<td>Any</td>
+<td>The value of the record being processed</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value_14">Return Value</h4>
+<p>String to be written to file or stdout</p>
+<h4 id="example_14">Example</h4>
+<pre><code class="language-yaml">functions:
+  format_message:
+    type: keyValuePrinter
+    code: |
+      # Format the message as a JSON string with timestamp
+      import json
+      import time
+
+      timestamp = time.strftime(&quot;%Y-%m-%d %H:%M:%S&quot;, time.localtime())
+
+      if value is None:
+        return f&quot;[{timestamp}] Key: {key}, Value: null&quot;
+
+      try:
+        # Try to format value as JSON
+        value_str = json.dumps(value, indent=2)
+        return f&quot;[{timestamp}] Key: {key}\nValue:\n{value_str}&quot;
+      except:
+        # Fall back to string representation
+        return f&quot;[{timestamp}] Key: {key}, Value: {str(value)}&quot;
+</code></pre>
+<h3 id="metadatatransformer">metadataTransformer</h3>
+<p>Transforms a message's metadata (headers and timestamp).</p>
+<h4 id="parameters_15">Parameters</h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>key</td>
+<td>Any</td>
+<td>The key of the record being processed</td>
+</tr>
+<tr>
+<td>value</td>
+<td>Any</td>
+<td>The value of the record being processed</td>
+</tr>
+<tr>
+<td>metadata</td>
+<td>Object</td>
+<td>Contains the headers and timestamp of the message</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value_15">Return Value</h4>
+<p>Modified metadata for the output message</p>
+<h4 id="example_15">Example</h4>
+<pre><code class="language-yaml">functions:
+  addTime:
+    type: metadataTransformer
+    code: |
+      # Add a custom header to the message
+      metadata[&quot;headers&quot;] = metadata[&quot;headers&quot;] + [ { &quot;key&quot;: &quot;my_own_header_key&quot;, &quot;value&quot;: &quot;some_value&quot; } ]
+    expression: metadata
+</code></pre>
+<h3 id="valuejoiner">valueJoiner</h3>
+<p>Combines data from multiple streams during join operations.</p>
+<h4 id="parameters_16">Parameters</h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>value1</td>
+<td>Any</td>
+<td>The value from the first stream</td>
+</tr>
+<tr>
+<td>value2</td>
+<td>Any</td>
+<td>The value from the second stream</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value_16">Return Value</h4>
+<p>Combined value</p>
+<h4 id="example_16">Example</h4>
+<pre><code class="language-yaml">functions:
+  join_order_with_customer:
+    type: valueJoiner
+    code: |
+      order = value1
+      customer = value2
+
+      if customer is None:
+        customer_name = &quot;Unknown&quot;
+        customer_email = &quot;Unknown&quot;
+      else:
+        customer_name = customer.get(&quot;name&quot;, &quot;Unknown&quot;)
+        customer_email = customer.get(&quot;email&quot;, &quot;Unknown&quot;)
+
+      return {
+        &quot;order_id&quot;: order.get(&quot;order_id&quot;),
+        &quot;customer_id&quot;: order.get(&quot;customer_id&quot;),
+        &quot;customer_name&quot;: customer_name,
+        &quot;customer_email&quot;: customer_email,
+        &quot;items&quot;: order.get(&quot;items&quot;, []),
+        &quot;total&quot;: order.get(&quot;total&quot;, 0),
+        &quot;status&quot;: order.get(&quot;status&quot;, &quot;PENDING&quot;)
+      }
+    resultType: struct
+</code></pre>
+<h2 id="stream-related-functions">Stream Related Functions</h2>
+<h3 id="timestampextractor">timestampExtractor</h3>
+<p>Extracts timestamps from messages for time-based operations.</p>
+<h4 id="parameters_17">Parameters</h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>key</td>
+<td>Any</td>
+<td>The key of the record being processed</td>
+</tr>
+<tr>
+<td>value</td>
+<td>Any</td>
+<td>The value of the record being processed</td>
+</tr>
+<tr>
+<td>previousTimestamp</td>
+<td>Long</td>
+<td>The previous timestamp (can be used as fallback)</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value_17">Return Value</h4>
+<p>Timestamp in milliseconds (long)</p>
+<h4 id="example_17">Example</h4>
+<pre><code class="language-yaml">functions:
+  event_timestamp_extractor:
+    type: timestampExtractor
+    code: |
+      # Try to get timestamp from the event
+      if value is not None and &quot;timestamp&quot; in value:
+        return value.get(&quot;timestamp&quot;)
+
+      # Fall back to record timestamp
+      return previousTimestamp
+</code></pre>
+<h3 id="topicnameextractor">topicNameExtractor</h3>
+<p>Derives a target topic name from key and value. Used to dynamically route messages to different topics.</p>
+<h4 id="parameters_18">Parameters</h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>key</td>
+<td>Any</td>
+<td>The key of the record being processed</td>
+</tr>
+<tr>
+<td>value</td>
+<td>Any</td>
+<td>The value of the record being processed</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value_18">Return Value</h4>
+<p>String representing the topic name to send the message to</p>
+<h4 id="example_18">Example</h4>
+<pre><code class="language-yaml">functions:
+  route_by_sensor:
+    type: topicNameExtractor
+    code: |
+      if key == 'sensor1':
+        return 'sensordata_sensor1'
+      if key == 'sensor2':
+        return 'sensordata_sensor2'
+      return 'sensordata_other_sensors'
+</code></pre>
+<h3 id="streampartitioner">streamPartitioner</h3>
+<p>Determines to which partition a record is produced. Used to control the partitioning of output topics.</p>
+<h4 id="parameters_19">Parameters</h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>topic</td>
+<td>String</td>
+<td>The topic of the message</td>
+</tr>
+<tr>
+<td>key</td>
+<td>Any</td>
+<td>The key of the record being processed</td>
+</tr>
+<tr>
+<td>value</td>
+<td>Any</td>
+<td>The value of the record being processed</td>
+</tr>
+<tr>
+<td>numPartitions</td>
+<td>Integer</td>
+<td>The number of partitions in the output topic</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value_19">Return Value</h4>
+<p>Integer representing the partition number to which the message will be sent</p>
+<h4 id="example_19">Example</h4>
+<pre><code class="language-yaml">functions:
+  custom_partitioner:
+    type: streamPartitioner
+    code: |
+      # Partition by the first character of the key (if it's a string)
+      if key is None:
+        # Use default partitioning for null keys
+        return None
+
+      if isinstance(key, str) and len(key) &gt; 0:
+        # Use the first character's ASCII value modulo number of partitions
+        return ord(key[0]) % numPartitions
+
+      # For non-string keys, use a hash of the string representation
+      return hash(str(key)) % numPartitions
+</code></pre>
+<h2 id="other-functions">Other Functions</h2>
+<h3 id="generic">generic</h3>
+<p>Generic custom function that can be used for any purpose. It can accept custom parameters and return any type of value.</p>
+<h4 id="parameters_20">Parameters</h4>
+<p>User-defined parameters</p>
+<h4 id="return-value_20">Return Value</h4>
+<p>Any value, depending on the function's purpose</p>
+<h4 id="example_20">Example</h4>
+<pre><code class="language-yaml">functions:
+  calculate_discount:
+    type: generic
+    parameters:
+      - name: basePrice
+        type: double
+      - name: discountPercentage
+        type: double
+    code: |
+      # Calculate the discounted price
+      discountAmount = basePrice * (discountPercentage / 100)
+      finalPrice = basePrice - discountAmount
+
+      # Return both the final price and the discount amount
+      return {
+        &quot;finalPrice&quot;: finalPrice,
+        &quot;discountAmount&quot;: discountAmount,
+        &quot;discountPercentage&quot;: discountPercentage
+      }
+    resultType: struct
+</code></pre>
+<h2 id="function-definition-formats">Function Definition Formats</h2>
+<p>KSML supports two formats for defining functions:</p>
+<h3 id="expression-format">Expression Format</h3>
+<p>For simple, one-line functions:</p>
+<pre><code class="language-yaml">functions:
+  is_valid:
+    type: predicate
+    code: |
+      # Code is optional here
+    expression: value.get(&quot;status&quot;) == &quot;ACTIVE&quot;
+</code></pre>
+<h3 id="code-block-format">Code Block Format</h3>
+<p>For more complex functions:</p>
+<pre><code class="language-yaml">functions:
+  process_transaction:
+    type: keyValueMapper
+    code: |
+      result = {}
+
+      # Copy basic fields
+      result[&quot;transaction_id&quot;] = value.get(&quot;id&quot;)
+      result[&quot;amount&quot;] = value.get(&quot;amount&quot;, 0)
+
+      # Calculate fee
+      amount = value.get(&quot;amount&quot;, 0)
+      if amount &gt; 1000:
+        result[&quot;fee&quot;] = amount * 0.02
+      else:
+        result[&quot;fee&quot;] = amount * 0.03
+
+      # Add timestamp
+      result[&quot;processed_at&quot;] = int(time.time() * 1000)
+
+      return result
+    resultType: struct
+</code></pre>
+<h2 id="function-execution-context">Function Execution Context</h2>
+<p>When your Python functions execute, they have access to:</p>
+<h3 id="logger">Logger</h3>
+<p>For outputting information to the application logs:</p>
+<pre><code class="language-yaml"># In your function code, you can use the log object:
+# Example:
+# log.debug(&quot;Debug message&quot;)
+# log.info(&quot;Info message&quot;)
+# log.warn(&quot;Warning message&quot;)
+# log.error(&quot;Error message&quot;)
+</code></pre>
+<h3 id="metrics">Metrics</h3>
+<p>For monitoring function performance and behavior:</p>
+<pre><code class="language-yaml"># In your function code, you can use the metrics object:
+# Examples:
+# Increment a counter
+# metrics.counter(&quot;records_processed&quot;).increment()
+#
+# Record a value
+# metrics.gauge(&quot;record_size&quot;).record(len(str(value)))
+</code></pre>
+<h3 id="state-stores">State Stores</h3>
+<p>In your function code, you can use the state stores declared by the function as variables:</p>
+<pre><code class="language-yaml">  deduplicate_events:
+    type: predicate
+    code: |
+      previous_value = my_state_store.get(key)
+      if previous_value is not None:
+
+
+      # Access a state store to check for duplicates
+      event_id = value.get(&quot;event_id&quot;)
+      if event_id is None:
+        return True
+
+      # Check if we've seen this event before
+      seen_before = event_store.get(event_id)
+      if seen_before:
+        # Skip duplicate event
+        return False
+
+      # Mark this event as seen
+      stateStore.put(event_id, True)
+
+      # Process the event
+      return True
+    stores:
+      - event_store
+
+# Examples:
+# Get a value from the state store
+# previous_value = state_store.get(key)
+#
+# Put a value in the state store
+# state_store.put(key, new_value)
+#
+# Delete a value from the state store
+# state_store.delete(key)
+</code></pre>
+<h2 id="best-practices">Best Practices</h2>
+<ol>
+<li><strong>Keep functions focused</strong>: Each function should do one thing well</li>
+<li><strong>Handle errors gracefully</strong>: Use try/except blocks to prevent pipeline failures</li>
+<li><strong>Consider performance</strong>: Python functions introduce some overhead, so keep them efficient</li>
+<li><strong>Use appropriate function types</strong>: Choose the right function type for your use case</li>
+<li><strong>Leverage state stores</strong>: For complex stateful operations, use state stores rather than global variables</li>
+<li><strong>Document your functions</strong>: Add comments to explain complex logic and business rules</li>
+<li><strong>Test thoroughly</strong>: Write unit tests for your functions to ensure they behave as expected</li>
+</ol>
+<h2 id="related-topics">Related Topics</h2>
+<ul>
+<li><a href="../language-reference/">KSML Language Reference</a></li>
+<li><a href="../operations-reference/">Operations Reference</a></li>
+<li><a href="../data-types-reference/">Data Types Reference</a></li>
+<li><a href="../configuration-reference/">Configuration Reference</a></li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js"></script>
+        <script src="../../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>Custom State Stores in KSML - KSML Documentation</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../../../css/brands.min.css" rel="stylesheet">
+        <link href="../../../css/solid.min.css" rel="stylesheet">
+        <link href="../../../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../../..">KSML Documentation</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="../../.." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../getting-started/" class="nav-link">Getting Started</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../core-concepts/" class="nav-link">Core Concepts</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../" class="nav-link">Tutorials</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../use-cases/" class="nav-link">Use Case Guides</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../reference/" class="nav-link">Reference</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../resources/" class="nav-link">Resources</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../about/" class="nav-link">About</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#custom-state-stores-in-ksml" class="nav-link">Custom State Stores in KSML</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#introduction-to-state-stores" class="nav-link">Introduction to State Stores</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#prerequisites" class="nav-link">Prerequisites</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#state-store-fundamentals" class="nav-link">State Store Fundamentals</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#implementing-custom-state-stores" class="nav-link">Implementing Custom State Stores</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#optimizing-state-store-performance" class="nav-link">Optimizing State Store Performance</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#practical-example-advanced-user-behavior-tracking" class="nav-link">Practical Example: Advanced User Behavior Tracking</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#advanced-state-store-patterns" class="nav-link">Advanced State Store Patterns</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#best-practices-for-custom-state-stores" class="nav-link">Best Practices for Custom State Stores</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#conclusion" class="nav-link">Conclusion</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#further-reading" class="nav-link">Further Reading</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="custom-state-stores-in-ksml">Custom State Stores in KSML</h1>
+<p>This tutorial explores how to implement and optimize custom state stores in KSML, allowing you to maintain and manage state in your stream processing applications with greater flexibility and control.</p>
+<h2 id="introduction-to-state-stores">Introduction to State Stores</h2>
+<p>State stores are a critical component of stateful stream processing applications. They allow your application to:</p>
+<ul>
+<li>Maintain data across multiple messages and events</li>
+<li>Track historical information for context-aware processing</li>
+<li>Implement stateful operations like aggregations and joins</li>
+<li>Build sophisticated business logic that depends on previous events</li>
+</ul>
+<p>KSML provides built-in state store capabilities, but for advanced use cases, you may need to customize how state is stored, accessed, and managed.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Before starting this tutorial, you should:</p>
+<ul>
+<li>Understand intermediate KSML concepts (streams, functions, pipelines)</li>
+<li>Have completed the <a href="../../intermediate/aggregations/">Aggregations</a> and <a href="../../intermediate/joins/">Joins</a> tutorials</li>
+<li>Be familiar with <a href="../../../core-concepts/operations/#stateful-operations">Stateful Operations</a></li>
+<li>Have a basic understanding of Kafka Streams state stores</li>
+</ul>
+<h2 id="state-store-fundamentals">State Store Fundamentals</h2>
+<h3 id="types-of-state-stores-in-ksml">Types of State Stores in KSML</h3>
+<p>KSML supports several types of state stores:</p>
+<ol>
+<li><strong>Key-Value Stores</strong>: Simple stores that map keys to values</li>
+<li><strong>Window Stores</strong>: Stores that organize data by time windows</li>
+<li><strong>Session Stores</strong>: Stores that organize data by session windows</li>
+</ol>
+<p>Each type has different characteristics and is suitable for different use cases.</p>
+<h3 id="state-store-configuration">State Store Configuration</h3>
+<p>State stores in KSML are defined in the <code>stores</code> section of your KSML definition file:</p>
+<pre><code class="language-yaml">stores:
+  user_profile_store:
+    type: keyValue
+    keyType: string
+    valueType: json
+    persistent: true
+    historyRetention: 7d
+    caching: true
+    logging: false
+</code></pre>
+<p>Key configuration options include:</p>
+<ul>
+<li><strong>type</strong>: The type of store (keyValue, window, session)</li>
+<li><strong>keyType/valueType</strong>: The data types for keys and values</li>
+<li><strong>persistent</strong>: Whether the store should persist data to disk</li>
+<li><strong>historyRetention</strong>: How long to retain historical data</li>
+<li><strong>caching</strong>: Whether to enable caching for faster access</li>
+<li><strong>logging</strong>: Whether to enable change logging</li>
+</ul>
+<h2 id="implementing-custom-state-stores">Implementing Custom State Stores</h2>
+<h3 id="1-custom-serialization-and-deserialization">1. Custom Serialization and Deserialization</h3>
+<p>For complex data types or special performance requirements, you can implement custom serialization:</p>
+<pre><code class="language-yaml">stores:
+  custom_serialized_store:
+    type: keyValue
+    keyType: string
+    valueType: custom
+    persistent: true
+    serdes:
+      key: org.example.CustomKeySerializer
+      value: org.example.CustomValueSerializer
+</code></pre>
+<p>In your Python functions, you can work with the deserialized objects directly:</p>
+<pre><code class="language-yaml">functions:
+  process_with_custom_store:
+    type: valueTransformer
+    code: |
+      # Get data from custom store
+      stored_value = custom_serialized_store.get(key)
+
+      # Process with custom object
+      result = process_data(value, stored_value)
+
+      # Update store with new value
+      custom_serialized_store.put(key, result)
+
+      return result
+    stores:
+      - custom_serialized_store
+</code></pre>
+<h3 id="2-custom-state-store-implementations">2. Custom State Store Implementations</h3>
+<p>For advanced use cases, you can implement custom state store classes in Java and reference them in KSML:</p>
+<pre><code class="language-yaml">stores:
+  specialized_store:
+    type: custom
+    implementation: org.example.SpecializedStateStore
+    config:
+      customParam1: value1
+      customParam2: value2
+</code></pre>
+<p>This approach allows you to implement specialized functionality like:</p>
+<ul>
+<li>Custom indexing for faster lookups</li>
+<li>Compression strategies for large states</li>
+<li>Integration with external systems</li>
+<li>Special eviction policies</li>
+</ul>
+<h3 id="3-partitioned-state-stores">3. Partitioned State Stores</h3>
+<p>For better scalability, you can implement partitioned state stores that distribute state across multiple instances:</p>
+<pre><code class="language-yaml">stores:
+  partitioned_store:
+    type: keyValue
+    keyType: string
+    valueType: json
+    persistent: true
+    partitioned: true
+    numPartitions: 10
+</code></pre>
+<p>This approach helps manage large state sizes by distributing the load across multiple partitions.</p>
+<h2 id="optimizing-state-store-performance">Optimizing State Store Performance</h2>
+<h3 id="1-caching-strategies">1. Caching Strategies</h3>
+<p>Configure caching to balance between performance and memory usage:</p>
+<pre><code class="language-yaml">stores:
+  optimized_store:
+    type: keyValue
+    keyType: string
+    valueType: json
+    persistent: true
+    caching: true
+    cacheSizeBytes: 10485760  # 10MB cache
+</code></pre>
+<p>In your functions, organize access patterns to maximize cache hits:</p>
+<pre><code class="language-yaml">functions:
+  cache_optimized_function:
+    type: valueTransformer
+    code: |
+      # Batch similar lookups together
+      keys_to_lookup = extract_related_keys(value)
+      cached_values = {}
+
+      for k in keys_to_lookup:
+        cached_values[k] = optimized_store.get(k)
+
+      # Process with cached values
+      result = process_with_cached_data(value, cached_values)
+
+      return result
+    stores:
+      - optimized_store
+</code></pre>
+<h3 id="2-memory-management">2. Memory Management</h3>
+<p>Implement strategies to control memory usage:</p>
+<pre><code class="language-yaml">functions:
+  memory_efficient_function:
+    type: valueTransformer
+    code: |
+      # Use compact data structures
+      current_state = optimized_store.get(key)
+
+      if current_state is None:
+        current_state = {&quot;c&quot;: 0, &quot;s&quot;: 0}  # Use short keys
+
+      # Update state with minimal memory footprint
+      current_state[&quot;c&quot;] += 1  # count
+      current_state[&quot;s&quot;] += value.get(&quot;amount&quot;, 0)  # sum
+
+      # Store only what's needed
+      optimized_store.put(key, current_state)
+
+      return {&quot;count&quot;: current_state[&quot;c&quot;], &quot;sum&quot;: current_state[&quot;s&quot;]}
+    stores:
+      - optimized_store
+</code></pre>
+<h3 id="3-retention-policies">3. Retention Policies</h3>
+<p>Configure appropriate retention policies to limit state size:</p>
+<pre><code class="language-yaml">stores:
+  time_limited_store:
+    type: window
+    keyType: string
+    valueType: json
+    persistent: true
+    historyRetention: 24h  # Only keep 24 hours of history
+    retainDuplicates: false  # Don't store duplicates
+</code></pre>
+<h3 id="4-compaction-and-cleanup">4. Compaction and Cleanup</h3>
+<p>Implement periodic cleanup to manage state size:</p>
+<pre><code class="language-yaml">functions:
+  cleanup_old_data:
+    type: valueTransformer
+    code: |
+      current_time = int(time.time() * 1000)
+      stored_data = time_limited_store.get(key)
+
+      if stored_data and &quot;timestamp&quot; in stored_data:
+        # Check if data is older than 7 days
+        if current_time - stored_data[&quot;timestamp&quot;] &gt; 7 * 24 * 60 * 60 * 1000:
+          # Delete old data
+          time_limited_store.delete(key)
+          return None
+
+      return value
+    stores:
+      - time_limited_store
+</code></pre>
+<h2 id="practical-example-advanced-user-behavior-tracking">Practical Example: Advanced User Behavior Tracking</h2>
+<p>Let's build a complete example that implements sophisticated user behavior tracking with optimized state stores:</p>
+<pre><code class="language-yaml">streams:
+  user_events:
+    topic: user_activity_events
+    keyType: string  # User ID
+    valueType: json  # Event details
+
+  user_profiles:
+    topic: user_profile_updates
+    keyType: string  # User ID
+    valueType: json  # Profile details
+
+  user_insights:
+    topic: user_behavior_insights
+    keyType: string  # User ID
+    valueType: json  # Behavior insights
+
+stores:
+  # Store for recent user events (last 100 events per user)
+  recent_events_store:
+    type: keyValue
+    keyType: string
+    valueType: json
+    persistent: true
+    caching: true
+    cacheSizeBytes: 52428800  # 50MB cache
+
+  # Store for user profiles
+  user_profile_store:
+    type: keyValue
+    keyType: string
+    valueType: json
+    persistent: true
+    caching: true
+
+  # Store for behavior metrics (windowed)
+  behavior_metrics_store:
+    type: window
+    keyType: string
+    valueType: json
+    windowSize: 30d  # 30-day windows
+    persistent: true
+    historyRetention: 90d  # Keep 90 days of history
+
+functions:
+  track_user_events:
+    type: valueTransformer
+    code: |
+      user_id = key
+      event = value
+      current_time = event.get(&quot;timestamp&quot;, int(time.time() * 1000))
+
+      # Get recent events for this user
+      recent_events = recent_events_store.get(user_id)
+      if recent_events is None:
+        recent_events = {
+          &quot;events&quot;: [],
+          &quot;event_counts&quot;: {},
+          &quot;last_updated&quot;: current_time
+        }
+
+      # Add new event to the list
+      event_type = event.get(&quot;event_type&quot;, &quot;unknown&quot;)
+      recent_events[&quot;events&quot;].append({
+        &quot;timestamp&quot;: current_time,
+        &quot;type&quot;: event_type,
+        &quot;properties&quot;: event.get(&quot;properties&quot;, {})
+      })
+
+      # Update event counts
+      if event_type in recent_events[&quot;event_counts&quot;]:
+        recent_events[&quot;event_counts&quot;][event_type] += 1
+      else:
+        recent_events[&quot;event_counts&quot;][event_type] = 1
+
+      # Keep only the most recent 100 events
+      if len(recent_events[&quot;events&quot;]) &gt; 100:
+        recent_events[&quot;events&quot;] = recent_events[&quot;events&quot;][-100:]
+
+      # Update last updated timestamp
+      recent_events[&quot;last_updated&quot;] = current_time
+
+      # Store updated events
+      recent_events_store.put(user_id, recent_events)
+
+      # Don't emit anything from this function
+      return None
+    stores:
+      - recent_events_store
+
+  update_user_profile:
+    type: valueTransformer
+    code: |
+      user_id = key
+      profile_update = value
+
+      # Get existing profile
+      existing_profile = user_profile_store.get(user_id)
+      if existing_profile is None:
+        existing_profile = {
+          &quot;created_at&quot;: int(time.time() * 1000),
+          &quot;attributes&quot;: {}
+        }
+
+      # Update profile with new data
+      if &quot;attributes&quot; in profile_update:
+        for attr_key, attr_value in profile_update[&quot;attributes&quot;].items():
+          existing_profile[&quot;attributes&quot;][attr_key] = attr_value
+
+      # Add metadata
+      existing_profile[&quot;last_updated&quot;] = int(time.time() * 1000)
+
+      # Store updated profile
+      user_profile_store.put(user_id, existing_profile)
+
+      # Don't emit anything from this function
+      return None
+    stores:
+      - user_profile_store
+
+  generate_user_insights:
+    type: valueTransformer
+    code: |
+      user_id = key
+      trigger_event = value  # This could be any event that triggers insight generation
+      current_time = int(time.time() * 1000)
+
+      # Get user's recent events
+      recent_events = recent_events_store.get(user_id)
+      if recent_events is None or not recent_events.get(&quot;events&quot;):
+        return None  # No events to analyze
+
+      # Get user profile
+      user_profile = user_profile_store.get(user_id)
+      if user_profile is None:
+        user_profile = {&quot;attributes&quot;: {}}
+
+      # Get behavior metrics
+      behavior_metrics = behavior_metrics_store.get(user_id)
+      if behavior_metrics is None:
+        behavior_metrics = {
+          &quot;session_count&quot;: 0,
+          &quot;total_time_spent&quot;: 0,
+          &quot;average_session_length&quot;: 0,
+          &quot;first_seen&quot;: current_time,
+          &quot;last_seen&quot;: current_time
+        }
+
+      # Analyze events to generate insights
+      events = recent_events.get(&quot;events&quot;, [])
+      event_counts = recent_events.get(&quot;event_counts&quot;, {})
+
+      # Calculate recency (days since last activity)
+      last_activity = max(event[&quot;timestamp&quot;] for event in events) if events else current_time
+      recency_days = (current_time - last_activity) / (24 * 60 * 60 * 1000)
+
+      # Calculate frequency (number of events in last 30 days)
+      thirty_days_ago = current_time - (30 * 24 * 60 * 60 * 1000)
+      recent_event_count = sum(1 for event in events if event[&quot;timestamp&quot;] &gt; thirty_days_ago)
+
+      # Calculate engagement score
+      engagement_score = calculate_engagement_score(events, user_profile)
+
+      # Update behavior metrics
+      behavior_metrics[&quot;last_seen&quot;] = last_activity
+      behavior_metrics[&quot;event_count_30d&quot;] = recent_event_count
+      behavior_metrics[&quot;recency_days&quot;] = recency_days
+      behavior_metrics[&quot;engagement_score&quot;] = engagement_score
+
+      # Store updated metrics
+      behavior_metrics_store.put(user_id, behavior_metrics)
+
+      # Generate insights
+      insights = {
+        &quot;user_id&quot;: user_id,
+        &quot;timestamp&quot;: current_time,
+        &quot;recency_days&quot;: recency_days,
+        &quot;frequency_30d&quot;: recent_event_count,
+        &quot;engagement_score&quot;: engagement_score,
+        &quot;top_activities&quot;: get_top_activities(event_counts),
+        &quot;user_segment&quot;: determine_user_segment(recency_days, recent_event_count, engagement_score),
+        &quot;recommendations&quot;: generate_recommendations(events, user_profile)
+      }
+
+      return insights
+    stores:
+      - recent_events_store
+      - user_profile_store
+      - behavior_metrics_store
+    globalCode: |
+      def calculate_engagement_score(events, user_profile):
+          # Implementation of engagement scoring algorithm
+          if not events:
+              return 0
+
+          # Simple scoring based on recency and frequency
+          recent_events = [e for e in events if e[&quot;timestamp&quot;] &gt; (int(time.time() * 1000) - 7 * 24 * 60 * 60 * 1000)]
+          score = len(recent_events) * 10
+
+          # Bonus for high-value activities
+          for event in recent_events:
+              if event[&quot;type&quot;] in [&quot;purchase&quot;, &quot;subscription&quot;, &quot;share&quot;]:
+                  score += 20
+
+          return min(100, score)
+
+      def get_top_activities(event_counts):
+          # Return top 5 activities by count
+          sorted_activities = sorted(event_counts.items(), key=lambda x: x[1], reverse=True)
+          return dict(sorted_activities[:5])
+
+      def determine_user_segment(recency, frequency, engagement):
+          # Segment users based on RFE (Recency, Frequency, Engagement)
+          if recency &lt; 7 and frequency &gt; 10 and engagement &gt; 70:
+              return &quot;highly_engaged&quot;
+          elif recency &lt; 30 and frequency &gt; 5 and engagement &gt; 40:
+              return &quot;engaged&quot;
+          elif recency &lt; 90:
+              return &quot;casual&quot;
+          else:
+              return &quot;inactive&quot;
+
+      def generate_recommendations(events, user_profile):
+          # Simple recommendation engine based on user activity
+          recommendations = []
+
+          event_types = set(event[&quot;type&quot;] for event in events)
+
+          if &quot;view_product&quot; in event_types and &quot;add_to_cart&quot; not in event_types:
+              recommendations.append(&quot;complete_purchase&quot;)
+
+          if &quot;subscription_view&quot; in event_types and &quot;subscription&quot; not in event_types:
+              recommendations.append(&quot;subscribe&quot;)
+
+          return recommendations[:3]  # Return top 3 recommendations
+
+pipelines:
+  # Process user events
+  track_events:
+    from: user_events
+    mapValues: track_user_events
+    filter: is_not_null
+    to: tracked_events
+
+  # Process profile updates
+  update_profiles:
+    from: user_profiles
+    mapValues: update_user_profile
+    filter: is_not_null
+    to: updated_profiles
+
+  # Generate insights (triggered by specific events)
+  filter_trigger_events:
+    from: user_events
+    filter: is_insight_trigger_event
+    to: insight_trigger_events
+
+  # Process trigger events to generate insights
+  generate_insights:
+    from: insight_trigger_events
+    mapValues: generate_user_insights
+    filter: is_not_null
+    to: user_insights
+</code></pre>
+<p>This example:
+1. Tracks user events in a memory-efficient way, keeping only the 100 most recent events
+2. Maintains user profiles with attribute updates
+3. Generates behavioral insights using data from multiple state stores
+4. Implements sophisticated analytics like engagement scoring and user segmentation
+5. Uses optimized state stores with appropriate caching and retention policies</p>
+<h2 id="advanced-state-store-patterns">Advanced State Store Patterns</h2>
+<h3 id="1-tiered-storage">1. Tiered Storage</h3>
+<p>Implement tiered storage for different access patterns:</p>
+<pre><code class="language-yaml">stores:
+  hot_data_store:
+    type: keyValue
+    keyType: string
+    valueType: json
+    persistent: false  # In-memory only
+    caching: true
+
+  warm_data_store:
+    type: keyValue
+    keyType: string
+    valueType: json
+    persistent: true
+    caching: true
+
+  cold_data_store:
+    type: keyValue
+    keyType: string
+    valueType: json
+    persistent: true
+    caching: false
+</code></pre>
+<h3 id="2-read-throughwrite-through-caching">2. Read-Through/Write-Through Caching</h3>
+<p>Implement patterns to synchronize state with external systems:</p>
+<pre><code class="language-yaml">functions:
+  cache_with_external_system:
+    type: valueTransformer
+    code: |
+      # Try to get from local cache first
+      cached_value = local_cache_store.get(key)
+
+      if cached_value is None:
+        # Cache miss - fetch from external system
+        external_value = fetch_from_external_system(key)
+
+        # Update local cache
+        if external_value is not None:
+          local_cache_store.put(key, external_value)
+
+        return process_data(value, external_value)
+      else:
+        # Cache hit
+        return process_data(value, cached_value)
+    stores:
+      - local_cache_store
+</code></pre>
+<h3 id="3-composite-state-patterns">3. Composite State Patterns</h3>
+<p>Combine multiple state stores for complex use cases:</p>
+<pre><code class="language-yaml">functions:
+  use_composite_state:
+    type: valueTransformer
+    code: |
+      # Get data from multiple stores
+      recent_data = recent_store.get(key)
+      historical_data = historical_store.get(key)
+      metadata = metadata_store.get(key)
+
+      # Combine data for processing
+      combined_state = {
+        &quot;recent&quot;: recent_data,
+        &quot;historical&quot;: historical_data,
+        &quot;metadata&quot;: metadata
+      }
+
+      # Process with combined state
+      result = process_with_combined_state(value, combined_state)
+
+      # Update stores as needed
+      recent_store.put(key, result.get(&quot;recent&quot;))
+      metadata_store.put(key, result.get(&quot;metadata&quot;))
+
+      return result.get(&quot;output&quot;)
+    stores:
+      - recent_store
+      - historical_store
+      - metadata_store
+</code></pre>
+<h2 id="best-practices-for-custom-state-stores">Best Practices for Custom State Stores</h2>
+<h3 id="performance-considerations">Performance Considerations</h3>
+<ul>
+<li><strong>Memory Management</strong>: Monitor and control memory usage, especially for large state stores</li>
+<li><strong>Serialization Overhead</strong>: Be aware of serialization/deserialization costs for frequent state access</li>
+<li><strong>Caching Strategy</strong>: Configure appropriate cache sizes based on access patterns</li>
+<li><strong>Persistence Impact</strong>: Understand the performance implications of persistent vs. in-memory stores</li>
+</ul>
+<h3 id="design-patterns">Design Patterns</h3>
+<ul>
+<li><strong>State Partitioning</strong>: Partition large states to improve scalability</li>
+<li><strong>Minimal State</strong>: Store only what's necessary to reduce resource usage</li>
+<li><strong>Batched Operations</strong>: Group state operations to improve efficiency</li>
+<li><strong>Incremental Updates</strong>: Update state incrementally rather than replacing entire objects</li>
+</ul>
+<h3 id="error-handling">Error Handling</h3>
+<p>Implement robust error handling for state store operations:</p>
+<pre><code class="language-yaml">functions:
+  robust_state_access:
+    type: valueTransformer
+    code: |
+      try:
+        # Access state store
+        stored_value = my_store.get(key)
+
+        # Process with state
+        result = process_with_state(value, stored_value)
+
+        # Update state
+        my_store.put(key, updated_state)
+
+        return result
+      except Exception as e:
+        log.error(&quot;Error accessing state store: {}&quot;, str(e))
+        # Return fallback value or original input
+        return value
+    stores:
+      - my_store
+</code></pre>
+<h2 id="conclusion">Conclusion</h2>
+<p>Custom state stores in KSML provide powerful capabilities for implementing sophisticated stateful stream processing applications. By understanding how to implement, optimize, and manage state stores, you can build applications that efficiently maintain state across events and deliver complex business logic.</p>
+<p>In the next tutorial, we'll explore <a href="../performance-optimization/">Performance Optimization</a> to learn how to tune and optimize your KSML applications for maximum throughput and minimal resource usage.</p>
+<h2 id="further-reading">Further Reading</h2>
+<ul>
+<li><a href="../../../core-concepts/operations/">Core Concepts: Operations</a></li>
+<li><a href="../../../core-concepts/functions/">Core Concepts: Functions</a></li>
+<li><a href="../../intermediate/aggregations/">Intermediate Tutorial: Aggregations</a></li>
+<li><a href="../../../reference/data-types-reference/">Reference: State Stores</a></li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../../../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../js/base.js"></script>
+        <script src="../../../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>Integration with External Systems in KSML - KSML Documentation</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../../../css/brands.min.css" rel="stylesheet">
+        <link href="../../../css/solid.min.css" rel="stylesheet">
+        <link href="../../../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../../..">KSML Documentation</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="../../.." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../getting-started/" class="nav-link">Getting Started</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../core-concepts/" class="nav-link">Core Concepts</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../" class="nav-link">Tutorials</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../use-cases/" class="nav-link">Use Case Guides</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../reference/" class="nav-link">Reference</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../resources/" class="nav-link">Resources</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../about/" class="nav-link">About</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#integration-with-external-systems-in-ksml" class="nav-link">Integration with External Systems in KSML</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#introduction-to-external-integration" class="nav-link">Introduction to External Integration</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#prerequisites" class="nav-link">Prerequisites</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#integration-patterns" class="nav-link">Integration Patterns</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#practical-example-multi-system-integration" class="nav-link">Practical Example: Multi-System Integration</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#integration-with-specific-external-systems" class="nav-link">Integration with Specific External Systems</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#best-practices-for-external-integration" class="nav-link">Best Practices for External Integration</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#conclusion" class="nav-link">Conclusion</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#further-reading" class="nav-link">Further Reading</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="integration-with-external-systems-in-ksml">Integration with External Systems in KSML</h1>
+<p>This tutorial explores how to integrate KSML applications with external systems such as databases, REST APIs, message
+queues, and other services, allowing you to build comprehensive data processing solutions that connect to your entire
+technology ecosystem.</p>
+<h2 id="introduction-to-external-integration">Introduction to External Integration</h2>
+<p>While Kafka Streams and KSML excel at processing data within Kafka, real-world applications often need to interact with
+external systems to:</p>
+<ul>
+<li>Enrich streaming data with reference information from databases</li>
+<li>Persist processed results to data warehouses or databases</li>
+<li>Call external APIs to trigger actions or fetch additional data</li>
+<li>Integrate with legacy systems or third-party services</li>
+<li>Implement the Kappa architecture pattern (using Kafka as the system of record)</li>
+</ul>
+<p>This tutorial covers various approaches to integrate KSML applications with external systems while maintaining the
+reliability, scalability, and fault-tolerance of your stream processing applications.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Before starting this tutorial, you should:</p>
+<ul>
+<li>Understand intermediate KSML concepts (streams, functions, pipelines)</li>
+<li>Have completed the <a href="../custom-state-stores/">Custom State Stores</a> tutorial</li>
+<li>Be familiar with <a href="../../intermediate/error-handling/">Error Handling</a> techniques</li>
+<li>Have a basic understanding of external systems you want to integrate with</li>
+</ul>
+<h2 id="integration-patterns">Integration Patterns</h2>
+<h3 id="1-request-response-pattern">1. Request-Response Pattern</h3>
+<p>The request-response pattern involves making synchronous calls to external systems from within your KSML functions:</p>
+<pre><code class="language-yaml">functions:
+  enrich_with_api_data:
+    type: valueTransformer
+    globalCode: |
+      import requests
+      import json
+
+      # Configure API client
+      API_BASE_URL = &quot;https://api.example.com/v1&quot;
+      API_KEY = &quot;your-api-key&quot;
+
+      def get_api_data(entity_id):
+          try:
+              response = requests.get(
+                  f&quot;{API_BASE_URL}/entities/{entity_id}&quot;,
+                  headers={&quot;Authorization&quot;: f&quot;Bearer {API_KEY}&quot;},
+                  timeout=2.0  # Set a reasonable timeout
+              )
+              response.raise_for_status()  # Raise exception for HTTP errors
+              return response.json()
+          except Exception as e:
+              log.warn(&quot;API request failed: {}&quot;, str(e))
+              return None
+
+    code: |
+      # Extract entity ID from the message
+      entity_id = value.get(&quot;entity_id&quot;)
+      if not entity_id:
+          return value  # No enrichment possible
+
+      # Call the API to get additional data
+      api_data = get_api_data(entity_id)
+
+      # Enrich the message with API data
+      if api_data:
+          value[&quot;enriched_data&quot;] = api_data
+          value[&quot;enrichment_status&quot;] = &quot;success&quot;
+      else:
+          value[&quot;enrichment_status&quot;] = &quot;failed&quot;
+
+      return value
+</code></pre>
+<h4 id="best-practices-for-request-response">Best Practices for Request-Response</h4>
+<ul>
+<li><strong>Implement timeouts</strong>: Prevent blocking the processing pipeline</li>
+<li><strong>Use connection pooling</strong>: Reuse connections for better performance</li>
+<li><strong>Implement circuit breakers</strong>: Prevent cascading failures when external systems are down</li>
+<li><strong>Cache responses</strong>: Reduce the load on external systems</li>
+<li><strong>Handle errors gracefully</strong>: Implement fallback strategies when external systems fail</li>
+</ul>
+<h3 id="2-lookup-pattern">2. Lookup Pattern</h3>
+<p>The lookup pattern uses state stores to cache reference data from external systems:</p>
+<pre><code class="language-yaml">functions:
+  load_reference_data:
+    type: valueTransformer
+    globalCode: |
+      import psycopg2
+      import json
+      from datetime import datetime
+
+      # Database connection parameters
+      DB_PARAMS = {
+          &quot;host&quot;: &quot;db.example.com&quot;,
+          &quot;database&quot;: &quot;reference_data&quot;,
+          &quot;user&quot;: &quot;app_user&quot;,
+          &quot;password&quot;: &quot;app_password&quot;
+      }
+
+      def load_product_data():
+          &quot;&quot;&quot;Load product data from database into a dictionary&quot;&quot;&quot;
+          products = {}
+          try:
+              conn = psycopg2.connect(**DB_PARAMS)
+              cursor = conn.cursor()
+              cursor.execute(&quot;SELECT product_id, name, category, price FROM products&quot;)
+              for row in cursor.fetchall():
+                  product_id, name, category, price = row
+                  products[product_id] = {
+                      &quot;name&quot;: name,
+                      &quot;category&quot;: category,
+                      &quot;price&quot;: float(price),
+                      &quot;loaded_at&quot;: datetime.now().isoformat()
+                  }
+              cursor.close()
+              conn.close()
+              return products
+          except Exception as e:
+              log.error(&quot;Failed to load product data: {}&quot;, str(e))
+              return {}
+
+    code: |
+      # This function runs once when the topology is built
+      # Load reference data into the state store
+      products = load_product_data()
+      log.info(&quot;Loaded {} products into reference data store&quot;, len(products))
+
+      for product_id, product_data in products.items():
+          reference_data_store.put(product_id, product_data)
+
+      # Return the input unchanged - this function is just for initialization
+      return value
+    stores:
+      - reference_data_store
+
+  enrich_with_product_data:
+    type: valueTransformer
+    code: |
+      # Extract product ID from the message
+      product_id = value.get(&quot;product_id&quot;)
+      if not product_id:
+          return value  # No enrichment possible
+
+      # Look up product data from the state store
+      product_data = reference_data_store.get(product_id)
+
+      # Enrich the message with product data
+      if product_data:
+          value[&quot;product_name&quot;] = product_data.get(&quot;name&quot;)
+          value[&quot;product_category&quot;] = product_data.get(&quot;category&quot;)
+          value[&quot;product_price&quot;] = product_data.get(&quot;price&quot;)
+          value[&quot;enrichment_status&quot;] = &quot;success&quot;
+      else:
+          value[&quot;enrichment_status&quot;] = &quot;not_found&quot;
+
+      return value
+    stores:
+      - reference_data_store
+</code></pre>
+<h4 id="best-practices-for-lookup-pattern">Best Practices for Lookup Pattern</h4>
+<ul>
+<li><strong>Periodic refreshes</strong>: Implement a mechanism to periodically refresh the cached data</li>
+<li><strong>Incremental updates</strong>: Consider using CDC (Change Data Capture) to keep the cache up-to-date</li>
+<li><strong>Memory management</strong>: Be mindful of the size of the cached data</li>
+<li><strong>Fallback strategies</strong>: Implement fallback strategies when data is not found in the cache</li>
+</ul>
+<h3 id="3-async-integration-pattern">3. Async Integration Pattern</h3>
+<p>The async integration pattern uses separate Kafka topics for communication with external systems:</p>
+<pre><code class="language-yaml">streams:
+  input_events:
+    topic: app_events
+    keyType: string
+    valueType: json
+
+  db_write_requests:
+    topic: db_write_requests
+    keyType: string
+    valueType: json
+
+  db_write_responses:
+    topic: db_write_responses
+    keyType: string
+    valueType: json
+
+functions:
+  prepare_db_write:
+    type: keyValueTransformer
+    code: |
+      # Create a write request for the database service
+      request_id = str(uuid.uuid4())
+
+      write_request = {
+          &quot;request_id&quot;: request_id,
+          &quot;table&quot;: &quot;user_activities&quot;,
+          &quot;operation&quot;: &quot;insert&quot;,
+          &quot;timestamp&quot;: int(time.time() * 1000),
+          &quot;data&quot;: {
+              &quot;user_id&quot;: key,
+              &quot;activity_type&quot;: value.get(&quot;type&quot;),
+              &quot;activity_data&quot;: value
+          }
+      }
+
+      # Return the request with the request ID as the key
+      return (request_id, write_request)
+
+  process_db_response:
+    type: valueTransformer
+    code: |
+      # Process the database write response
+      request_id = value.get(&quot;request_id&quot;)
+      status = value.get(&quot;status&quot;)
+
+      if status == &quot;success&quot;:
+          log.info(&quot;Database write successful for request {}&quot;, request_id)
+      else:
+          log.error(&quot;Database write failed for request {}: {}&quot;, 
+                   request_id, value.get(&quot;error&quot;))
+
+      # This could update a state store with the status if needed
+      return value
+
+pipelines:
+  # Send write requests to the database service
+  send_to_database:
+    from: input_events
+    transformKeyValue: prepare_db_write
+    to: db_write_requests
+
+  # Process responses from the database service
+  process_responses:
+    from: db_write_responses
+    mapValues: process_db_response
+    to: db_write_status
+</code></pre>
+<p>This pattern requires a separate service that:</p>
+<ol>
+<li>Consumes from the <code>db_write_requests</code> topic</li>
+<li>Performs the database operations</li>
+<li>Produces results to the <code>db_write_responses</code> topic</li>
+</ol>
+<h4 id="best-practices-for-async-integration">Best Practices for Async Integration</h4>
+<ul>
+<li><strong>Correlation IDs</strong>: Use unique IDs to correlate requests and responses</li>
+<li><strong>Idempotent operations</strong>: Ensure that operations can be safely retried</li>
+<li><strong>Dead letter queues</strong>: Implement DLQs for failed operations</li>
+<li><strong>Monitoring</strong>: Monitor the request and response topics for backpressure</li>
+</ul>
+<h3 id="4-database-integration-with-jdbc">4. Database Integration with JDBC</h3>
+<p>For direct database integration, you can use JDBC within your KSML functions:</p>
+<pre><code class="language-yaml">functions:
+  persist_to_database:
+    type: forEach
+    globalCode: |
+      import java.sql.Connection
+      import java.sql.DriverManager
+      import java.sql.PreparedStatement
+      import java.sql.SQLException
+
+      # JDBC connection parameters
+      JDBC_URL = &quot;jdbc:postgresql://db.example.com:5432/app_db&quot;
+      DB_USER = &quot;app_user&quot;
+      DB_PASSWORD = &quot;app_password&quot;
+
+      # Connection pool
+      connection_pool = None
+
+      def get_connection():
+          try:
+              return DriverManager.getConnection(JDBC_URL, DB_USER, DB_PASSWORD)
+          except SQLException as e:
+              log.error(&quot;Database connection error: {}&quot;, str(e))
+              raise e
+
+      def insert_event(conn, user_id, event_type, event_data):
+          try:
+              sql = &quot;&quot;&quot;
+                  INSERT INTO user_events (user_id, event_type, event_data, created_at)
+                  VALUES (?, ?, ?, NOW())
+              &quot;&quot;&quot;
+              stmt = conn.prepareStatement(sql)
+              stmt.setString(1, user_id)
+              stmt.setString(2, event_type)
+              stmt.setString(3, json.dumps(event_data))
+              return stmt.executeUpdate()
+          except SQLException as e:
+              log.error(&quot;Database insert error: {}&quot;, str(e))
+              raise e
+
+    code: |
+      try:
+          # Get database connection
+          conn = get_connection()
+
+          # Insert the event into the database
+          user_id = key
+          event_type = value.get(&quot;type&quot;, &quot;unknown&quot;)
+
+          rows_affected = insert_event(conn, user_id, event_type, value)
+          log.info(&quot;Inserted event into database: {} rows affected&quot;, rows_affected)
+
+          # Close the connection
+          conn.close()
+
+      except Exception as e:
+          log.error(&quot;Failed to persist event to database: {}&quot;, str(e))
+          # Consider adding to a retry queue or dead letter queue
+</code></pre>
+<h4 id="best-practices-for-jdbc-integration">Best Practices for JDBC Integration</h4>
+<ul>
+<li><strong>Use connection pooling</strong>: Manage database connections efficiently</li>
+<li><strong>Batch operations</strong>: Group multiple operations for better performance</li>
+<li><strong>Prepare statements</strong>: Use prepared statements to prevent SQL injection</li>
+<li><strong>Transaction management</strong>: Use transactions for atomicity</li>
+<li><strong>Error handling</strong>: Implement proper error handling and retries</li>
+</ul>
+<h2 id="practical-example-multi-system-integration">Practical Example: Multi-System Integration</h2>
+<p>Let's build a complete example that integrates with multiple external systems:</p>
+<pre><code class="language-yaml">streams:
+  order_events:
+    topic: ecommerce_orders
+    keyType: string  # Order ID
+    valueType: json  # Order details
+
+  payment_requests:
+    topic: payment_requests
+    keyType: string  # Payment request ID
+    valueType: json  # Payment details
+
+  payment_responses:
+    topic: payment_responses
+    keyType: string  # Payment request ID
+    valueType: json  # Payment response
+
+  inventory_requests:
+    topic: inventory_requests
+    keyType: string  # Inventory request ID
+    valueType: json  # Inventory details
+
+  inventory_responses:
+    topic: inventory_responses
+    keyType: string  # Inventory request ID
+    valueType: json  # Inventory response
+
+  order_status_updates:
+    topic: order_status_updates
+    keyType: string  # Order ID
+    valueType: json  # Status update
+
+stores:
+  # Store for product data
+  product_reference_store:
+    type: keyValue
+    keyType: string  # Product ID
+    valueType: json  # Product details
+    persistent: true
+    caching: true
+
+  # Store for order status
+  order_status_store:
+    type: keyValue
+    keyType: string  # Order ID
+    valueType: json  # Order status
+    persistent: true
+    caching: true
+
+  # Store for payment requests
+  payment_request_store:
+    type: keyValue
+    keyType: string  # Order ID
+    valueType: json  # Payment request details
+    persistent: true
+    caching: true
+
+functions:
+  # Load product reference data from database
+  load_product_data:
+    type: valueTransformer
+    globalCode: |
+      import psycopg2
+      import json
+
+      # Database connection parameters
+      DB_PARAMS = {
+          &quot;host&quot;: &quot;db.example.com&quot;,
+          &quot;database&quot;: &quot;product_catalog&quot;,
+          &quot;user&quot;: &quot;app_user&quot;,
+          &quot;password&quot;: &quot;app_password&quot;
+      }
+
+      def load_products():
+          products = {}
+          try:
+              conn = psycopg2.connect(**DB_PARAMS)
+              cursor = conn.cursor()
+              cursor.execute(&quot;&quot;&quot;
+                  SELECT product_id, name, price, stock_level, category
+                  FROM products
+                  WHERE active = TRUE
+              &quot;&quot;&quot;)
+              for row in cursor.fetchall():
+                  product_id, name, price, stock_level, category = row
+                  products[product_id] = {
+                      &quot;name&quot;: name,
+                      &quot;price&quot;: float(price),
+                      &quot;stock_level&quot;: stock_level,
+                      &quot;category&quot;: category,
+                      &quot;loaded_at&quot;: int(time.time() * 1000)
+                  }
+              cursor.close()
+              conn.close()
+              return products
+          except Exception as e:
+              log.error(&quot;Failed to load product data: {}&quot;, str(e))
+              return {}
+
+    code: |
+      # Load product data into the reference store
+      products = load_products()
+      log.info(&quot;Loaded {} products into reference store&quot;, len(products))
+
+      for product_id, product_data in products.items():
+          product_reference_store.put(product_id, product_data)
+
+      # Return the input unchanged
+      return value
+    stores:
+      - product_reference_store
+
+  # Process new order
+  process_order:
+    type: keyValueTransformer
+    code: |
+      order_id = key
+      order = value
+
+      # Validate order items against product reference data
+      valid_items = []
+      invalid_items = []
+      total_amount = 0
+
+      for item in order.get(&quot;items&quot;, []):
+          product_id = item.get(&quot;product_id&quot;)
+          quantity = item.get(&quot;quantity&quot;, 0)
+
+          if not product_id or quantity &lt;= 0:
+              invalid_items.append({
+                  &quot;product_id&quot;: product_id,
+                  &quot;reason&quot;: &quot;Invalid product ID or quantity&quot;
+              })
+              continue
+
+          # Look up product details
+          product = product_reference_store.get(product_id)
+          if not product:
+              invalid_items.append({
+                  &quot;product_id&quot;: product_id,
+                  &quot;reason&quot;: &quot;Product not found&quot;
+              })
+              continue
+
+          # Calculate item price
+          item_price = product.get(&quot;price&quot;, 0) * quantity
+          total_amount += item_price
+
+          # Add to valid items
+          valid_items.append({
+              &quot;product_id&quot;: product_id,
+              &quot;product_name&quot;: product.get(&quot;name&quot;),
+              &quot;quantity&quot;: quantity,
+              &quot;unit_price&quot;: product.get(&quot;price&quot;, 0),
+              &quot;total_price&quot;: item_price
+          })
+
+      # Create validated order
+      validated_order = {
+          &quot;order_id&quot;: order_id,
+          &quot;customer_id&quot;: order.get(&quot;customer_id&quot;),
+          &quot;order_date&quot;: order.get(&quot;order_date&quot;),
+          &quot;items&quot;: valid_items,
+          &quot;invalid_items&quot;: invalid_items,
+          &quot;total_amount&quot;: total_amount,
+          &quot;status&quot;: &quot;validated&quot; if valid_items else &quot;invalid&quot;,
+          &quot;validation_timestamp&quot;: int(time.time() * 1000)
+      }
+
+      # Store order status
+      order_status_store.put(order_id, {
+          &quot;status&quot;: validated_order[&quot;status&quot;],
+          &quot;timestamp&quot;: validated_order[&quot;validation_timestamp&quot;]
+      })
+
+      return (order_id, validated_order)
+    stores:
+      - product_reference_store
+      - order_status_store
+
+  # Create payment request
+  create_payment_request:
+    type: keyValueTransformer
+    code: |
+      order_id = key
+      order = value
+
+      # Only process validated orders with valid items
+      if order.get(&quot;status&quot;) != &quot;validated&quot; or not order.get(&quot;items&quot;):
+          return None
+
+      # Create payment request
+      payment_request_id = str(uuid.uuid4())
+      payment_request = {
+          &quot;request_id&quot;: payment_request_id,
+          &quot;order_id&quot;: order_id,
+          &quot;customer_id&quot;: order.get(&quot;customer_id&quot;),
+          &quot;amount&quot;: order.get(&quot;total_amount&quot;),
+          &quot;currency&quot;: &quot;USD&quot;,
+          &quot;timestamp&quot;: int(time.time() * 1000)
+      }
+
+      # Store payment request for correlation
+      payment_request_store.put(order_id, {
+          &quot;payment_request_id&quot;: payment_request_id,
+          &quot;timestamp&quot;: payment_request[&quot;timestamp&quot;]
+      })
+
+      # Update order status
+      order_status = order_status_store.get(order_id)
+      order_status[&quot;status&quot;] = &quot;payment_pending&quot;
+      order_status[&quot;payment_request_id&quot;] = payment_request_id
+      order_status_store.put(order_id, order_status)
+
+      return (payment_request_id, payment_request)
+    stores:
+      - payment_request_store
+      - order_status_store
+
+  # Process payment response
+  process_payment_response:
+    type: keyValueTransformer
+    code: |
+      payment_request_id = key
+      payment_response = value
+
+      # Extract data from payment response
+      order_id = payment_response.get(&quot;order_id&quot;)
+      status = payment_response.get(&quot;status&quot;)
+
+      if not order_id:
+          log.error(&quot;Payment response missing order ID: {}&quot;, payment_request_id)
+          return None
+
+      # Get current order status
+      order_status = order_status_store.get(order_id)
+      if not order_status:
+          log.error(&quot;Order not found for payment response: {}&quot;, order_id)
+          return None
+
+      # Update order status based on payment result
+      if status == &quot;approved&quot;:
+          order_status[&quot;status&quot;] = &quot;paid&quot;
+          order_status[&quot;payment_timestamp&quot;] = payment_response.get(&quot;timestamp&quot;)
+          order_status[&quot;payment_reference&quot;] = payment_response.get(&quot;reference&quot;)
+      else:
+          order_status[&quot;status&quot;] = &quot;payment_failed&quot;
+          order_status[&quot;payment_error&quot;] = payment_response.get(&quot;error&quot;)
+
+      # Store updated status
+      order_status_store.put(order_id, order_status)
+
+      # Create order status update message
+      status_update = {
+          &quot;order_id&quot;: order_id,
+          &quot;status&quot;: order_status[&quot;status&quot;],
+          &quot;timestamp&quot;: int(time.time() * 1000),
+          &quot;payment_status&quot;: status,
+          &quot;payment_reference&quot;: payment_response.get(&quot;reference&quot;),
+          &quot;payment_error&quot;: payment_response.get(&quot;error&quot;)
+      }
+
+      return (order_id, status_update)
+    stores:
+      - order_status_store
+
+  # Create inventory request for paid orders
+  create_inventory_request:
+    type: keyValueTransformer
+    code: |
+      order_id = key
+      status_update = value
+
+      # Only process paid orders
+      if status_update.get(&quot;status&quot;) != &quot;paid&quot;:
+          return None
+
+      # Get the original order
+      # In a real system, you might need to fetch this from a database or state store
+      # For simplicity, we'll assume we have the order details in a state store
+      order = order_status_store.get(order_id)
+      if not order or &quot;items&quot; not in order:
+          log.error(&quot;Order details not found for inventory request: {}&quot;, order_id)
+          return None
+
+      # Create inventory request
+      inventory_request_id = str(uuid.uuid4())
+      inventory_request = {
+          &quot;request_id&quot;: inventory_request_id,
+          &quot;order_id&quot;: order_id,
+          &quot;items&quot;: order.get(&quot;items&quot;, []),
+          &quot;timestamp&quot;: int(time.time() * 1000)
+      }
+
+      # Update order status
+      order_status = order_status_store.get(order_id)
+      order_status[&quot;status&quot;] = &quot;inventory_pending&quot;
+      order_status[&quot;inventory_request_id&quot;] = inventory_request_id
+      order_status_store.put(order_id, order_status)
+
+      return (inventory_request_id, inventory_request)
+    stores:
+      - order_status_store
+
+  # Process inventory response
+  process_inventory_response:
+    type: keyValueTransformer
+    code: |
+      inventory_request_id = key
+      inventory_response = value
+
+      # Extract data from inventory response
+      order_id = inventory_response.get(&quot;order_id&quot;)
+      status = inventory_response.get(&quot;status&quot;)
+
+      if not order_id:
+          log.error(&quot;Inventory response missing order ID: {}&quot;, inventory_request_id)
+          return None
+
+      # Get current order status
+      order_status = order_status_store.get(order_id)
+      if not order_status:
+          log.error(&quot;Order not found for inventory response: {}&quot;, order_id)
+          return None
+
+      # Update order status based on inventory result
+      if status == &quot;fulfilled&quot;:
+          order_status[&quot;status&quot;] = &quot;ready_for_shipment&quot;
+          order_status[&quot;inventory_timestamp&quot;] = inventory_response.get(&quot;timestamp&quot;)
+          order_status[&quot;warehouse_id&quot;] = inventory_response.get(&quot;warehouse_id&quot;)
+      else:
+          order_status[&quot;status&quot;] = &quot;inventory_failed&quot;
+          order_status[&quot;inventory_error&quot;] = inventory_response.get(&quot;error&quot;)
+
+      # Store updated status
+      order_status_store.put(order_id, order_status)
+
+      # Create order status update message
+      status_update = {
+          &quot;order_id&quot;: order_id,
+          &quot;status&quot;: order_status[&quot;status&quot;],
+          &quot;timestamp&quot;: int(time.time() * 1000),
+          &quot;inventory_status&quot;: status,
+          &quot;warehouse_id&quot;: inventory_response.get(&quot;warehouse_id&quot;),
+          &quot;inventory_error&quot;: inventory_response.get(&quot;error&quot;)
+      }
+
+      return (order_id, status_update)
+    stores:
+      - order_status_store
+
+  # Send shipment notification via REST API
+  send_shipment_notification:
+    type: forEach
+    globalCode: |
+      import requests
+      import json
+
+      # API configuration
+      NOTIFICATION_API_URL = &quot;https://notifications.example.com/api/v1/shipment&quot;
+      API_KEY = &quot;your-api-key&quot;
+
+      def send_notification(order_id, customer_id, status):
+          try:
+              payload = {
+                  &quot;order_id&quot;: order_id,
+                  &quot;customer_id&quot;: customer_id,
+                  &quot;status&quot;: status,
+                  &quot;timestamp&quot;: int(time.time() * 1000)
+              }
+
+              response = requests.post(
+                  NOTIFICATION_API_URL,
+                  headers={
+                      &quot;Content-Type&quot;: &quot;application/json&quot;,
+                      &quot;Authorization&quot;: f&quot;Bearer {API_KEY}&quot;
+                  },
+                  data=json.dumps(payload),
+                  timeout=5.0
+              )
+
+              response.raise_for_status()
+              return True
+          except Exception as e:
+              log.error(&quot;Failed to send notification for order {}: {}&quot;, order_id, str(e))
+              return False
+
+    code: |
+      order_id = key
+      status_update = value
+
+      # Only send notifications for orders ready for shipment
+      if status_update.get(&quot;status&quot;) != &quot;ready_for_shipment&quot;:
+          return
+
+      # Send notification
+      customer_id = status_update.get(&quot;customer_id&quot;)
+      success = send_notification(order_id, customer_id, &quot;ready_for_shipment&quot;)
+
+      if success:
+          log.info(&quot;Sent shipment notification for order {}&quot;, order_id)
+      else:
+          log.warn(&quot;Failed to send shipment notification for order {}&quot;, order_id)
+
+pipelines:
+  # Initialize reference data
+  load_reference_data:
+    from: reference_data_trigger
+    mapValues: load_product_data
+    to: reference_data_loaded
+
+  # Process new orders
+  process_orders:
+    from: order_events
+    transformKeyValue: process_order
+    to: validated_orders
+
+  # Create payment requests
+  request_payments:
+    from: validated_orders
+    transformKeyValue: create_payment_request
+    filter: is_not_null
+    to: payment_requests
+
+  # Process payment responses
+  handle_payments:
+    from: payment_responses
+    transformKeyValue: process_payment_response
+    filter: is_not_null
+    to: order_status_updates
+
+  # Create inventory requests
+  request_inventory:
+    from: order_status_updates
+    transformKeyValue: create_inventory_request
+    filter: is_not_null
+    to: inventory_requests
+
+  # Process inventory responses
+  handle_inventory:
+    from: inventory_responses
+    transformKeyValue: process_inventory_response
+    filter: is_not_null
+    to: order_status_updates
+
+  # Send notifications
+  send_notifications:
+    from: order_status_updates
+    forEach: send_shipment_notification
+</code></pre>
+<p>This example:</p>
+<ol>
+<li>Loads product reference data from a database</li>
+<li>Processes incoming orders and validates them against the reference data</li>
+<li>Creates payment requests and sends them to a payment service</li>
+<li>Processes payment responses and updates order status</li>
+<li>Creates inventory requests for paid orders</li>
+<li>Processes inventory responses and updates order status</li>
+<li>Sends shipment notifications via a REST API for orders ready for shipment</li>
+</ol>
+<h2 id="integration-with-specific-external-systems">Integration with Specific External Systems</h2>
+<h3 id="1-relational-databases">1. Relational Databases</h3>
+<p>For integrating with relational databases:</p>
+<pre><code class="language-yaml">functions:
+  database_integration:
+    type: valueTransformer
+    globalCode: |
+      import psycopg2
+      from psycopg2.extras import RealDictCursor
+      import json
+      from contextlib import contextmanager
+
+      # Database connection parameters
+      DB_PARAMS = {
+          &quot;host&quot;: &quot;db.example.com&quot;,
+          &quot;database&quot;: &quot;app_db&quot;,
+          &quot;user&quot;: &quot;app_user&quot;,
+          &quot;password&quot;: &quot;app_password&quot;
+      }
+
+      @contextmanager
+      def get_db_connection():
+          &quot;&quot;&quot;Context manager for database connections&quot;&quot;&quot;
+          conn = None
+          try:
+              conn = psycopg2.connect(**DB_PARAMS)
+              yield conn
+          except Exception as e:
+              log.error(&quot;Database connection error: {}&quot;, str(e))
+              raise
+          finally:
+              if conn is not None:
+                  conn.close()
+
+      def query_user_data(user_id):
+          &quot;&quot;&quot;Query user data from the database&quot;&quot;&quot;
+          with get_db_connection() as conn:
+              with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+                  cursor.execute(&quot;&quot;&quot;
+                      SELECT user_id, name, email, account_type, created_at
+                      FROM users
+                      WHERE user_id = %s
+                  &quot;&quot;&quot;, (user_id,))
+                  result = cursor.fetchone()
+                  return dict(result) if result else None
+
+      def insert_user_activity(user_id, activity_type, activity_data):
+          &quot;&quot;&quot;Insert user activity into the database&quot;&quot;&quot;
+          with get_db_connection() as conn:
+              with conn.cursor() as cursor:
+                  cursor.execute(&quot;&quot;&quot;
+                      INSERT INTO user_activities (user_id, activity_type, activity_data, created_at)
+                      VALUES (%s, %s, %s, NOW())
+                      RETURNING id
+                  &quot;&quot;&quot;, (user_id, activity_type, json.dumps(activity_data)))
+                  activity_id = cursor.fetchone()[0]
+                  conn.commit()
+                  return activity_id
+
+    code: |
+      user_id = key
+
+      # Query user data
+      user_data = query_user_data(user_id)
+
+      if not user_data:
+          log.warn(&quot;User not found: {}&quot;, user_id)
+          return value
+
+      # Enrich message with user data
+      value[&quot;user_name&quot;] = user_data.get(&quot;name&quot;)
+      value[&quot;user_email&quot;] = user_data.get(&quot;email&quot;)
+      value[&quot;user_account_type&quot;] = user_data.get(&quot;account_type&quot;)
+
+      # Record activity in database
+      try:
+          activity_id = insert_user_activity(
+              user_id, 
+              value.get(&quot;activity_type&quot;, &quot;unknown&quot;),
+              value
+          )
+          value[&quot;activity_id&quot;] = activity_id
+      except Exception as e:
+          log.error(&quot;Failed to record activity: {}&quot;, str(e))
+
+      return value
+</code></pre>
+<h3 id="2-nosql-databases">2. NoSQL Databases</h3>
+<p>For integrating with NoSQL databases like MongoDB:</p>
+<pre><code class="language-yaml">functions:
+  mongodb_integration:
+    type: valueTransformer
+    globalCode: |
+      from pymongo import MongoClient
+      import json
+
+      # MongoDB connection parameters
+      MONGO_URI = &quot;mongodb://user:password@mongodb.example.com:27017/app_db&quot;
+
+      # Create a MongoDB client
+      client = MongoClient(MONGO_URI)
+      db = client.get_database()
+
+      def get_document(collection, query):
+          &quot;&quot;&quot;Get a document from MongoDB&quot;&quot;&quot;
+          try:
+              result = db[collection].find_one(query)
+              return result
+          except Exception as e:
+              log.error(&quot;MongoDB query error: {}&quot;, str(e))
+              return None
+
+      def insert_document(collection, document):
+          &quot;&quot;&quot;Insert a document into MongoDB&quot;&quot;&quot;
+          try:
+              result = db[collection].insert_one(document)
+              return str(result.inserted_id)
+          except Exception as e:
+              log.error(&quot;MongoDB insert error: {}&quot;, str(e))
+              return None
+
+    code: |
+      # Get product data from MongoDB
+      product_id = value.get(&quot;product_id&quot;)
+      if product_id:
+          product = get_document(&quot;products&quot;, {&quot;_id&quot;: product_id})
+
+          if product:
+              # Enrich message with product data
+              value[&quot;product_name&quot;] = product.get(&quot;name&quot;)
+              value[&quot;product_category&quot;] = product.get(&quot;category&quot;)
+              value[&quot;product_price&quot;] = product.get(&quot;price&quot;)
+
+      # Store the event in MongoDB
+      event_id = insert_document(&quot;events&quot;, {
+          &quot;user_id&quot;: key,
+          &quot;event_type&quot;: value.get(&quot;type&quot;),
+          &quot;timestamp&quot;: value.get(&quot;timestamp&quot;),
+          &quot;data&quot;: value
+      })
+
+      if event_id:
+          value[&quot;event_id&quot;] = event_id
+
+      return value
+</code></pre>
+<h3 id="3-rest-apis">3. REST APIs</h3>
+<p>For integrating with REST APIs:</p>
+<pre><code class="language-yaml">functions:
+  rest_api_integration:
+    type: valueTransformer
+    globalCode: |
+      import requests
+      import json
+      from cachetools import TTLCache
+
+      # API configuration
+      API_BASE_URL = &quot;https://api.example.com/v1&quot;
+      API_KEY = &quot;your-api-key&quot;
+
+      # Create a cache with TTL of 5 minutes
+      cache = TTLCache(maxsize=1000, ttl=300)
+
+      def get_api_data(endpoint, params=None):
+          &quot;&quot;&quot;Get data from the API with caching&quot;&quot;&quot;
+          # Create cache key
+          cache_key = f&quot;{endpoint}:{json.dumps(params or {})}&quot;
+
+          # Check cache
+          if cache_key in cache:
+              return cache[cache_key]
+
+          # Make API request
+          try:
+              response = requests.get(
+                  f&quot;{API_BASE_URL}/{endpoint}&quot;,
+                  params=params,
+                  headers={
+                      &quot;Authorization&quot;: f&quot;Bearer {API_KEY}&quot;,
+                      &quot;Accept&quot;: &quot;application/json&quot;
+                  },
+                  timeout=5.0
+              )
+
+              response.raise_for_status()
+              result = response.json()
+
+              # Cache the result
+              cache[cache_key] = result
+
+              return result
+          except Exception as e:
+              log.error(&quot;API request failed: {}&quot;, str(e))
+              return None
+
+      def post_api_data(endpoint, data):
+          &quot;&quot;&quot;Post data to the API&quot;&quot;&quot;
+          try:
+              response = requests.post(
+                  f&quot;{API_BASE_URL}/{endpoint}&quot;,
+                  json=data,
+                  headers={
+                      &quot;Authorization&quot;: f&quot;Bearer {API_KEY}&quot;,
+                      &quot;Content-Type&quot;: &quot;application/json&quot;
+                  },
+                  timeout=5.0
+              )
+
+              response.raise_for_status()
+              return response.json()
+          except Exception as e:
+              log.error(&quot;API post failed: {}&quot;, str(e))
+              return None
+
+    code: |
+      # Get weather data for the user's location
+      location = value.get(&quot;location&quot;)
+      if location:
+          weather_data = get_api_data(&quot;weather&quot;, {
+              &quot;lat&quot;: location.get(&quot;latitude&quot;),
+              &quot;lon&quot;: location.get(&quot;longitude&quot;)
+          })
+
+          if weather_data:
+              value[&quot;weather&quot;] = {
+                  &quot;temperature&quot;: weather_data.get(&quot;temperature&quot;),
+                  &quot;conditions&quot;: weather_data.get(&quot;conditions&quot;),
+                  &quot;forecast&quot;: weather_data.get(&quot;forecast&quot;)
+              }
+
+      # Send analytics event to API
+      analytics_result = post_api_data(&quot;analytics/events&quot;, {
+          &quot;user_id&quot;: key,
+          &quot;event_type&quot;: value.get(&quot;type&quot;),
+          &quot;timestamp&quot;: value.get(&quot;timestamp&quot;),
+          &quot;properties&quot;: value
+      })
+
+      if analytics_result:
+          value[&quot;analytics_id&quot;] = analytics_result.get(&quot;id&quot;)
+
+      return value
+</code></pre>
+<h3 id="4-message-queues">4. Message Queues</h3>
+<p>For integrating with message queues like RabbitMQ:</p>
+<pre><code class="language-yaml">functions:
+  rabbitmq_integration:
+    type: forEach
+    globalCode: |
+      import pika
+      import json
+
+      # RabbitMQ connection parameters
+      RABBITMQ_PARAMS = {
+          &quot;host&quot;: &quot;rabbitmq.example.com&quot;,
+          &quot;port&quot;: 5672,
+          &quot;virtual_host&quot;: &quot;/&quot;,
+          &quot;credentials&quot;: pika.PlainCredentials(&quot;user&quot;, &quot;password&quot;)
+      }
+
+      # Create a connection and channel
+      connection = None
+      channel = None
+
+      def get_channel():
+          global connection, channel
+
+          if connection is None or not connection.is_open:
+              connection = pika.BlockingConnection(
+                  pika.ConnectionParameters(**RABBITMQ_PARAMS)
+              )
+              channel = connection.channel()
+
+              # Declare queues
+              channel.queue_declare(queue=&quot;notifications&quot;, durable=True)
+              channel.queue_declare(queue=&quot;alerts&quot;, durable=True)
+
+          return channel
+
+      def send_to_queue(queue, message):
+          &quot;&quot;&quot;Send a message to a RabbitMQ queue&quot;&quot;&quot;
+          try:
+              ch = get_channel()
+              ch.basic_publish(
+                  exchange=&quot;&quot;,
+                  routing_key=queue,
+                  body=json.dumps(message),
+                  properties=pika.BasicProperties(
+                      delivery_mode=2,  # Make message persistent
+                      content_type=&quot;application/json&quot;
+                  )
+              )
+              return True
+          except Exception as e:
+              log.error(&quot;Failed to send message to RabbitMQ: {}&quot;, str(e))
+              return False
+
+    code: |
+      # Determine which queue to use based on message type
+      message_type = value.get(&quot;type&quot;, &quot;unknown&quot;)
+
+      if message_type in [&quot;alert&quot;, &quot;error&quot;, &quot;warning&quot;]:
+          queue = &quot;alerts&quot;
+      else:
+          queue = &quot;notifications&quot;
+
+      # Prepare message
+      message = {
+          &quot;user_id&quot;: key,
+          &quot;type&quot;: message_type,
+          &quot;timestamp&quot;: value.get(&quot;timestamp&quot;, int(time.time() * 1000)),
+          &quot;content&quot;: value.get(&quot;content&quot;),
+          &quot;priority&quot;: value.get(&quot;priority&quot;, &quot;normal&quot;)
+      }
+
+      # Send to RabbitMQ
+      success = send_to_queue(queue, message)
+
+      if success:
+          log.info(&quot;Sent message to RabbitMQ queue {}: {}&quot;, queue, message_type)
+      else:
+          log.error(&quot;Failed to send message to RabbitMQ queue {}: {}&quot;, queue, message_type)
+</code></pre>
+<h2 id="best-practices-for-external-integration">Best Practices for External Integration</h2>
+<h3 id="performance-and-reliability">Performance and Reliability</h3>
+<ul>
+<li><strong>Connection pooling</strong>: Reuse connections to external systems</li>
+<li><strong>Timeouts</strong>: Implement appropriate timeouts for external calls</li>
+<li><strong>Circuit breakers</strong>: Prevent cascading failures when external systems are down</li>
+<li><strong>Retries with backoff</strong>: Implement retries with exponential backoff for transient failures</li>
+<li><strong>Idempotent operations</strong>: Ensure that operations can be safely retried</li>
+</ul>
+<h3 id="data-consistency">Data Consistency</h3>
+<ul>
+<li><strong>Transactions</strong>: Use transactions when appropriate to ensure data consistency</li>
+<li><strong>Correlation IDs</strong>: Use correlation IDs to track operations across systems</li>
+<li><strong>Idempotency keys</strong>: Use idempotency keys to prevent duplicate processing</li>
+<li><strong>Compensating transactions</strong>: Implement compensating transactions for rollbacks</li>
+</ul>
+<h3 id="security">Security</h3>
+<ul>
+<li><strong>Secure credentials</strong>: Store credentials securely and rotate them regularly</li>
+<li><strong>TLS/SSL</strong>: Use secure connections for all external communication</li>
+<li><strong>Authentication</strong>: Implement proper authentication for all external systems</li>
+<li><strong>Authorization</strong>: Ensure proper authorization for all operations</li>
+<li><strong>Data encryption</strong>: Encrypt sensitive data in transit and at rest</li>
+</ul>
+<h3 id="monitoring-and-observability">Monitoring and Observability</h3>
+<ul>
+<li><strong>Logging</strong>: Log all external interactions with appropriate context</li>
+<li><strong>Metrics</strong>: Track performance metrics for external calls</li>
+<li><strong>Tracing</strong>: Implement distributed tracing for end-to-end visibility</li>
+<li><strong>Alerting</strong>: Set up alerts for abnormal patterns or failures</li>
+</ul>
+<h2 id="conclusion">Conclusion</h2>
+<p>Integrating KSML applications with external systems allows you to build comprehensive data processing solutions that
+connect to your entire technology ecosystem. By using the patterns and techniques covered in this tutorial, you can
+implement reliable, scalable, and maintainable integrations with databases, APIs, message queues, and other external
+systems.</p>
+<p>In the next tutorial, we'll explore <a href="advanced-error-handling.md">Advanced Error Handling</a> to learn sophisticated
+techniques for handling errors and implementing recovery mechanisms in complex KSML applications.</p>
+<h2 id="further-reading">Further Reading</h2>
+<ul>
+<li><a href="../../../core-concepts/operations/">Core Concepts: Operations</a></li>
+<li><a href="../../../core-concepts/functions/">Core Concepts: Functions</a></li>
+<li><a href="../../intermediate/error-handling/">Intermediate Tutorial: Error Handling</a></li>
+<li><a href="../../../reference/configuration-reference/">Reference: Configuration Options</a></li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../../../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../js/base.js"></script>
+        <script src="../../../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

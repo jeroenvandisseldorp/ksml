@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>Performance Optimization in KSML - KSML Documentation</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../../../css/brands.min.css" rel="stylesheet">
+        <link href="../../../css/solid.min.css" rel="stylesheet">
+        <link href="../../../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../../..">KSML Documentation</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="../../.." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../getting-started/" class="nav-link">Getting Started</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../core-concepts/" class="nav-link">Core Concepts</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../" class="nav-link">Tutorials</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../use-cases/" class="nav-link">Use Case Guides</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../reference/" class="nav-link">Reference</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../resources/" class="nav-link">Resources</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../about/" class="nav-link">About</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#performance-optimization-in-ksml" class="nav-link">Performance Optimization in KSML</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#introduction-to-performance-optimization" class="nav-link">Introduction to Performance Optimization</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#prerequisites" class="nav-link">Prerequisites</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#identifying-performance-bottlenecks" class="nav-link">Identifying Performance Bottlenecks</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#configuration-optimization" class="nav-link">Configuration Optimization</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#data-serialization-optimization" class="nav-link">Data Serialization Optimization</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#state-store-optimization" class="nav-link">State Store Optimization</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#python-function-optimization" class="nav-link">Python Function Optimization</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#pipeline-design-optimization" class="nav-link">Pipeline Design Optimization</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#practical-example-optimized-real-time-analytics" class="nav-link">Practical Example: Optimized Real-time Analytics</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#advanced-optimization-techniques" class="nav-link">Advanced Optimization Techniques</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#monitoring-and-continuous-optimization" class="nav-link">Monitoring and Continuous Optimization</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#best-practices-for-performance-optimization" class="nav-link">Best Practices for Performance Optimization</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#conclusion" class="nav-link">Conclusion</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#further-reading" class="nav-link">Further Reading</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="performance-optimization-in-ksml">Performance Optimization in KSML</h1>
+<p>This tutorial explores strategies and techniques for optimizing the performance of your KSML applications, helping you
+build efficient, scalable, and resource-friendly stream processing solutions.</p>
+<h2 id="introduction-to-performance-optimization">Introduction to Performance Optimization</h2>
+<p>Performance optimization is crucial for stream processing applications that need to handle high volumes of data with low
+latency. Optimizing your KSML applications can help you:</p>
+<ul>
+<li>Process more data with the same resources</li>
+<li>Reduce processing latency</li>
+<li>Lower infrastructure costs</li>
+<li>Handle spikes in data volume</li>
+<li>Ensure consistent performance under load</li>
+</ul>
+<p>This tutorial covers various aspects of performance optimization, from configuration tuning to code-level optimizations.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Before starting this tutorial, you should:</p>
+<ul>
+<li>Understand intermediate KSML concepts (streams, functions, pipelines)</li>
+<li>Have completed the <a href="../custom-state-stores/">Custom State Stores</a> tutorial</li>
+<li>Be familiar with Kafka Streams concepts</li>
+<li>Have a basic understanding of JVM performance characteristics</li>
+</ul>
+<h2 id="identifying-performance-bottlenecks">Identifying Performance Bottlenecks</h2>
+<p>Before optimizing, it's important to identify where performance bottlenecks exist in your application:</p>
+<h3 id="1-monitoring-metrics">1. Monitoring Metrics</h3>
+<p>KSML exposes various metrics that can help identify bottlenecks:</p>
+<pre><code class="language-yaml">functions:
+  monitor_performance:
+    type: forEach
+    code: |
+      # Record processing time
+      start_time = time.time()
+
+      # Process message
+      process_message(key, value)
+
+      # Calculate and record processing time
+      processing_time_ms = (time.time() - start_time) * 1000
+      metrics.timer(&quot;message.processing.time&quot;).updateMillis(processing_time_ms)
+
+      # Record message size
+      if value is not None:
+        message_size = len(str(value))
+        metrics.meter(&quot;message.size&quot;).mark(message_size)
+</code></pre>
+<p>Key metrics to monitor include:</p>
+<ul>
+<li><strong>Processing time</strong>: How long it takes to process each message</li>
+<li><strong>Throughput</strong>: Messages processed per second</li>
+<li><strong>State store size</strong>: How much data is stored in state stores</li>
+<li><strong>Memory usage</strong>: JVM heap and non-heap memory</li>
+<li><strong>GC activity</strong>: Frequency and duration of garbage collection pauses</li>
+</ul>
+<h3 id="2-profiling">2. Profiling</h3>
+<p>For more detailed analysis, use profiling tools to identify hotspots in your code:</p>
+<ul>
+<li><strong>JVM profilers</strong>: Tools like VisualVM, JProfiler, or YourKit</li>
+<li><strong>Flame graphs</strong>: For visualizing call stacks and identifying bottlenecks</li>
+<li><strong>Distributed tracing</strong>: For tracking performance across multiple services</li>
+</ul>
+<h2 id="configuration-optimization">Configuration Optimization</h2>
+<h3 id="1-kafka-streams-configuration">1. Kafka Streams Configuration</h3>
+<p>Optimize Kafka Streams configuration for your workload:</p>
+<pre><code class="language-yaml">runner:
+  type: streams
+  config:
+    application.id: optimized-ksml-app
+    bootstrap.servers: kafka:9092
+
+    # Performance-related settings
+    num.stream.threads: 8
+    cache.max.bytes.buffering: 104857600  # 100MB
+    commit.interval.ms: 30000
+    rocksdb.config.setter: org.example.OptimizedRocksDBConfig
+
+    # Producer settings
+    producer.linger.ms: 100
+    producer.batch.size: 16384
+    producer.buffer.memory: 33554432
+
+    # Consumer settings
+    consumer.fetch.max.bytes: 52428800
+    consumer.max.poll.records: 500
+</code></pre>
+<p>Key configuration parameters to tune:</p>
+<ul>
+<li><strong>num.stream.threads</strong>: Number of threads for parallel processing</li>
+<li><strong>cache.max.bytes.buffering</strong>: Size of the record cache</li>
+<li><strong>commit.interval.ms</strong>: How often to commit offsets</li>
+<li><strong>rocksdb.config.setter</strong>: Custom RocksDB configuration for state stores</li>
+<li><strong>producer/consumer settings</strong>: Tune for throughput or latency as needed</li>
+</ul>
+<h3 id="2-jvm-configuration">2. JVM Configuration</h3>
+<p>Optimize JVM settings for stream processing:</p>
+<pre><code>-Xms4g -Xmx4g -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35
+</code></pre>
+<p>Key JVM parameters to consider:</p>
+<ul>
+<li><strong>Heap size</strong>: Set initial and maximum heap size appropriately</li>
+<li><strong>Garbage collector</strong>: G1GC is generally recommended for stream processing</li>
+<li><strong>GC tuning</strong>: Minimize pause times for consistent performance</li>
+</ul>
+<h2 id="data-serialization-optimization">Data Serialization Optimization</h2>
+<h3 id="1-choose-efficient-serialization-formats">1. Choose Efficient Serialization Formats</h3>
+<p>Select serialization formats based on your needs:</p>
+<pre><code class="language-yaml">streams:
+  optimized_input:
+    topic: input_data
+    keyType: string
+    valueType: avro:OptimizedRecord  # Using Avro for efficient serialization
+    schemaRegistry: http://schema-registry:8081
+</code></pre>
+<p>Comparison of formats:</p>
+<ul>
+<li><strong>Avro</strong>: Good balance of size and processing speed, schema evolution</li>
+<li><strong>Protobuf</strong>: Compact binary format, efficient serialization/deserialization</li>
+<li><strong>JSON</strong>: Human-readable but less efficient</li>
+<li><strong>Binary</strong>: Most compact but lacks schema evolution</li>
+</ul>
+<h3 id="2-minimize-serializationdeserialization">2. Minimize Serialization/Deserialization</h3>
+<p>Reduce the number of serialization/deserialization operations:</p>
+<pre><code class="language-yaml">functions:
+  efficient_processing:
+    type: valueTransformer
+    code: |
+      # Process the entire message at once instead of extracting and 
+      # reconstructing individual fields
+      if &quot;status&quot; in value and value[&quot;status&quot;] == &quot;active&quot;:
+        value[&quot;processed&quot;] = True
+        value[&quot;score&quot;] = calculate_score(value)
+        return value
+      else:
+        return None
+</code></pre>
+<h3 id="3-use-schema-evolution-carefully">3. Use Schema Evolution Carefully</h3>
+<p>When evolving schemas, consider performance implications:</p>
+<pre><code class="language-yaml">streams:
+  evolving_data:
+    topic: evolving_records
+    keyType: string
+    valueType: avro:Record
+    schemaRegistry: http://schema-registry:8081
+    schemaRegistryConfig:
+      # Use specific compatibility setting for better performance
+      value.compatibility: FORWARD
+</code></pre>
+<h2 id="state-store-optimization">State Store Optimization</h2>
+<h3 id="1-optimize-state-store-configuration">1. Optimize State Store Configuration</h3>
+<p>Configure state stores for your specific workload:</p>
+<pre><code class="language-yaml">stores:
+  optimized_store:
+    type: keyValue
+    keyType: string
+    valueType: avro:CompactRecord
+    persistent: true
+    caching: true
+    cacheSizeBytes: 104857600  # 100MB
+    logConfig:
+      segment.bytes: 104857600  # 100MB
+      cleanup.policy: compact
+</code></pre>
+<h3 id="2-use-caching-effectively">2. Use Caching Effectively</h3>
+<p>Configure and use caching to reduce disk I/O:</p>
+<pre><code class="language-yaml">stores:
+  hot_data_store:
+    type: keyValue
+    keyType: string
+    valueType: json
+    persistent: true
+    caching: true
+    cacheSizeBytes: 268435456  # 256MB
+</code></pre>
+<h3 id="3-implement-data-expiration">3. Implement Data Expiration</h3>
+<p>Implement strategies to expire old data:</p>
+<pre><code class="language-yaml">functions:
+  expire_old_data:
+    type: valueTransformer
+    code: |
+      current_time = int(time.time() * 1000)
+      stored_data = data_store.get(key)
+
+      if stored_data and &quot;timestamp&quot; in stored_data:
+        # Keep data for 30 days
+        if current_time - stored_data[&quot;timestamp&quot;] &gt; 30 * 24 * 60 * 60 * 1000:
+          data_store.delete(key)
+          return None
+
+      return value
+    stores:
+      - data_store
+</code></pre>
+<h2 id="python-function-optimization">Python Function Optimization</h2>
+<h3 id="1-optimize-python-code">1. Optimize Python Code</h3>
+<p>Write efficient Python code in your functions:</p>
+<pre><code class="language-yaml">functions:
+  optimized_function:
+    type: valueTransformer
+    code: |
+      # Use efficient data structures
+      result = {}
+
+      # Pre-compute values when possible
+      multiplier = 10 if value.get(&quot;priority&quot;) == &quot;high&quot; else 1
+
+      # Use list comprehensions for better performance
+      filtered_items = [item for item in value.get(&quot;items&quot;, []) if item[&quot;quantity&quot;] &gt; 0]
+
+      # Avoid unnecessary string operations
+      for item in filtered_items:
+        item_id = item[&quot;id&quot;]  # Use the ID directly instead of string manipulation
+        result[item_id] = item[&quot;price&quot;] * item[&quot;quantity&quot;] * multiplier
+
+      return {&quot;total&quot;: sum(result.values()), &quot;items&quot;: result}
+</code></pre>
+<p>Key Python optimization techniques:</p>
+<ul>
+<li><strong>Use appropriate data structures</strong>: Choose the right data structure for your use case</li>
+<li><strong>Minimize object creation</strong>: Reuse objects when possible</li>
+<li><strong>Use built-in functions</strong>: They're typically faster than custom implementations</li>
+<li><strong>Avoid unnecessary computations</strong>: Compute values only when needed</li>
+</ul>
+<h3 id="2-minimize-external-dependencies">2. Minimize External Dependencies</h3>
+<p>Reduce the use of external libraries in Python functions:</p>
+<pre><code class="language-yaml">functions:
+  lightweight_function:
+    type: valueTransformer
+    globalCode: |
+      # Import only what's needed
+      from math import sqrt
+
+      # Implement simple functions directly instead of importing libraries
+      def calculate_mean(values):
+          return sum(values) / len(values) if values else 0
+
+      def calculate_stddev(values):
+          mean = calculate_mean(values)
+          variance = sum((x - mean) ** 2 for x in values) / len(values) if values else 0
+          return sqrt(variance)
+
+    code: |
+      # Use the lightweight implementations
+      values = [item[&quot;value&quot;] for item in value.get(&quot;items&quot;, [])]
+      return {
+        &quot;mean&quot;: calculate_mean(values),
+        &quot;stddev&quot;: calculate_stddev(values)
+      }
+</code></pre>
+<h3 id="3-use-batch-processing">3. Use Batch Processing</h3>
+<p>Process data in batches when possible:</p>
+<pre><code class="language-yaml">functions:
+  batch_processor:
+    type: valueTransformer
+    code: |
+      # Get batch of items
+      items = value.get(&quot;items&quot;, [])
+
+      # Process in a single pass
+      results = []
+      total = 0
+      count = 0
+
+      for item in items:
+        # Process each item
+        processed = process_item(item)
+        results.append(processed)
+
+        # Update aggregates in the same pass
+        total += processed[&quot;value&quot;]
+        count += 1
+
+      # Return batch results
+      return {
+        &quot;results&quot;: results,
+        &quot;average&quot;: total / count if count &gt; 0 else 0,
+        &quot;count&quot;: count
+      }
+</code></pre>
+<h2 id="pipeline-design-optimization">Pipeline Design Optimization</h2>
+<h3 id="1-optimize-pipeline-structure">1. Optimize Pipeline Structure</h3>
+<p>Design pipelines for optimal performance:</p>
+<pre><code class="language-yaml">pipelines:
+  # Split processing into stages
+  filter_and_enrich:
+    from: input_stream
+    filter: is_valid_record  # Filter early to reduce downstream processing
+    mapValues: enrich_with_minimal_data  # Add only essential data
+    to: filtered_enriched_stream
+
+  # Process filtered and enriched data
+  process_data:
+    from: filtered_enriched_stream
+    mapValues: compute_intensive_processing  # Heavy processing on reduced dataset
+    to: processed_stream
+</code></pre>
+<p>Key pipeline design principles:</p>
+<ul>
+<li><strong>Filter early</strong>: Reduce the volume of data flowing through the pipeline</li>
+<li><strong>Process in stages</strong>: Break complex processing into simpler stages</li>
+<li><strong>Parallelize when possible</strong>: Use multiple pipelines for parallel processing</li>
+<li><strong>Minimize state size</strong>: Keep state stores as small as possible</li>
+</ul>
+<h3 id="2-use-repartitioning-strategically">2. Use Repartitioning Strategically</h3>
+<p>Repartition data only when necessary:</p>
+<pre><code class="language-yaml">pipelines:
+  optimize_partitioning:
+    from: input_stream
+    # Repartition once to optimize downstream joins and aggregations
+    selectKey: extract_optimal_key
+    to: repartitioned_stream
+
+  process_repartitioned:
+    from: repartitioned_stream
+    groupByKey:  # Now working with optimally partitioned data
+    aggregate:
+      initializer: initialize_aggregation
+      aggregator: update_aggregation
+    to: aggregated_results
+</code></pre>
+<h3 id="3-optimize-joins">3. Optimize Joins</h3>
+<p>Implement joins efficiently:</p>
+<pre><code class="language-yaml">streams:
+  small_reference_data:
+    topic: reference_data
+    keyType: string
+    valueType: json
+    materializedAs: globalTable  # Use GlobalKTable for small reference data
+
+  large_stream:
+    topic: transaction_stream
+    keyType: string
+    valueType: json
+
+pipelines:
+  efficient_join:
+    from: large_stream
+    join:
+      globalTable: small_reference_data  # Join with GlobalKTable for better performance
+      valueJoiner: combine_data
+    to: enriched_stream
+</code></pre>
+<h2 id="practical-example-optimized-real-time-analytics">Practical Example: Optimized Real-time Analytics</h2>
+<p>Let's build a complete example that implements an optimized real-time analytics system:</p>
+<pre><code class="language-yaml">streams:
+  user_events:
+    topic: user_activity
+    keyType: string  # User ID
+    valueType: avro:UserEvent  # Using Avro for efficient serialization
+    schemaRegistry: http://schema-registry:8081
+
+  product_catalog:
+    topic: product_data
+    keyType: string  # Product ID
+    valueType: avro:Product
+    materializedAs: globalTable  # Use GlobalKTable for reference data
+    schemaRegistry: http://schema-registry:8081
+
+  user_metrics:
+    topic: user_analytics
+    keyType: string  # User ID
+    valueType: avro:UserMetrics
+    schemaRegistry: http://schema-registry:8081
+
+stores:
+  # Store for recent user activity
+  user_activity_store:
+    type: window
+    keyType: string
+    valueType: avro:ActivitySummary
+    windowSize: 1h
+    retainDuplicates: false
+    caching: true
+    cacheSizeBytes: 104857600  # 100MB
+
+  # Store for user profiles
+  user_profile_store:
+    type: keyValue
+    keyType: string
+    valueType: avro:UserProfile
+    persistent: true
+    caching: true
+
+functions:
+  # Filter and categorize events
+  categorize_events:
+    type: keyValueTransformer
+    code: |
+      # Early filtering - skip events we don't care about
+      event_type = value.get(&quot;event_type&quot;)
+      if event_type not in [&quot;view&quot;, &quot;click&quot;, &quot;purchase&quot;, &quot;search&quot;]:
+        return None
+
+      # Categorize and extract minimal data for downstream processing
+      category = &quot;engagement&quot; if event_type in [&quot;view&quot;, &quot;click&quot;] else &quot;conversion&quot;
+
+      # Create a minimal record with only needed fields
+      minimal_record = {
+        &quot;event_id&quot;: value.get(&quot;event_id&quot;),
+        &quot;timestamp&quot;: value.get(&quot;timestamp&quot;),
+        &quot;event_type&quot;: event_type,
+        &quot;category&quot;: category,
+        &quot;product_id&quot;: value.get(&quot;product_id&quot;),
+        &quot;value&quot;: value.get(&quot;value&quot;, 0)
+      }
+
+      return (key, minimal_record)
+
+  # Update user activity metrics
+  update_user_metrics:
+    type: valueTransformer
+    code: |
+      # Get current window data
+      window_data = user_activity_store.get(key)
+      if window_data is None:
+        window_data = {
+          &quot;event_count&quot;: 0,
+          &quot;view_count&quot;: 0,
+          &quot;click_count&quot;: 0,
+          &quot;purchase_count&quot;: 0,
+          &quot;search_count&quot;: 0,
+          &quot;total_value&quot;: 0,
+          &quot;product_ids&quot;: set(),  # Using set for efficient uniqueness check
+          &quot;last_updated&quot;: 0
+        }
+
+      # Update metrics efficiently
+      event_type = value.get(&quot;event_type&quot;)
+      window_data[&quot;event_count&quot;] += 1
+      window_data[f&quot;{event_type}_count&quot;] = window_data.get(f&quot;{event_type}_count&quot;, 0) + 1
+
+      if &quot;value&quot; in value:
+        window_data[&quot;total_value&quot;] += value[&quot;value&quot;]
+
+      if &quot;product_id&quot; in value and value[&quot;product_id&quot;]:
+        window_data[&quot;product_ids&quot;].add(value[&quot;product_id&quot;])
+
+      window_data[&quot;last_updated&quot;] = max(window_data.get(&quot;last_updated&quot;, 0), value.get(&quot;timestamp&quot;, 0))
+
+      # Store updated data
+      user_activity_store.put(key, window_data)
+
+      # For downstream processing, convert set to list
+      result = dict(window_data)
+      result[&quot;product_ids&quot;] = list(window_data[&quot;product_ids&quot;])
+      result[&quot;unique_products&quot;] = len(result[&quot;product_ids&quot;])
+
+      return result
+    stores:
+      - user_activity_store
+
+  # Enrich with product data
+  enrich_with_products:
+    type: valueTransformer
+    code: |
+      # Skip if no product IDs or no metrics
+      if not value or &quot;product_ids&quot; not in value or not value[&quot;product_ids&quot;]:
+        return value
+
+      # Get product categories (efficiently)
+      product_categories = {}
+      for product_id in value[&quot;product_ids&quot;][:5]:  # Limit to top 5 products for efficiency
+        product = product_catalog.get(product_id)
+        if product:
+          category = product.get(&quot;category&quot;, &quot;unknown&quot;)
+          product_categories[category] = product_categories.get(category, 0) + 1
+
+      # Add product category distribution
+      value[&quot;top_categories&quot;] = sorted(
+        product_categories.items(), 
+        key=lambda x: x[1], 
+        reverse=True
+      )[:3]  # Keep only top 3 categories
+
+      return value
+    stores:
+      - product_catalog
+
+  # Generate final user metrics
+  generate_user_metrics:
+    type: valueTransformer
+    code: |
+      # Get user profile for context
+      user_profile = user_profile_store.get(key)
+
+      # Create optimized metrics record
+      metrics = {
+        &quot;user_id&quot;: key,
+        &quot;timestamp&quot;: int(time.time() * 1000),
+        &quot;window_metrics&quot;: {
+          &quot;event_count&quot;: value.get(&quot;event_count&quot;, 0),
+          &quot;view_count&quot;: value.get(&quot;view_count&quot;, 0),
+          &quot;click_count&quot;: value.get(&quot;click_count&quot;, 0),
+          &quot;purchase_count&quot;: value.get(&quot;purchase_count&quot;, 0),
+          &quot;search_count&quot;: value.get(&quot;search_count&quot;, 0),
+          &quot;total_value&quot;: value.get(&quot;total_value&quot;, 0),
+          &quot;unique_products&quot;: value.get(&quot;unique_products&quot;, 0)
+        }
+      }
+
+      # Add user segment if profile exists
+      if user_profile:
+        metrics[&quot;user_segment&quot;] = user_profile.get(&quot;segment&quot;, &quot;unknown&quot;)
+        metrics[&quot;account_age_days&quot;] = user_profile.get(&quot;account_age_days&quot;, 0)
+
+      # Add product category insights if available
+      if &quot;top_categories&quot; in value:
+        metrics[&quot;top_categories&quot;] = value[&quot;top_categories&quot;]
+
+      # Calculate derived metrics efficiently
+      if metrics[&quot;window_metrics&quot;][&quot;view_count&quot;] &gt; 0:
+        metrics[&quot;window_metrics&quot;][&quot;click_through_rate&quot;] = (
+          metrics[&quot;window_metrics&quot;][&quot;click_count&quot;] / 
+          metrics[&quot;window_metrics&quot;][&quot;view_count&quot;]
+        )
+
+      if metrics[&quot;window_metrics&quot;][&quot;click_count&quot;] &gt; 0:
+        metrics[&quot;window_metrics&quot;][&quot;conversion_rate&quot;] = (
+          metrics[&quot;window_metrics&quot;][&quot;purchase_count&quot;] / 
+          metrics[&quot;window_metrics&quot;][&quot;click_count&quot;]
+        )
+
+      return metrics
+    stores:
+      - user_profile_store
+
+pipelines:
+  # Stage 1: Filter and categorize events
+  filter_events:
+    from: user_events
+    transformKeyValue: categorize_events
+    filter: is_not_null
+    to: categorized_events
+
+  # Stage 2: Update user metrics
+  update_metrics:
+    from: categorized_events
+    mapValues: update_user_metrics
+    to: user_activity_metrics
+
+  # Stage 3: Enrich with product data
+  enrich_metrics:
+    from: user_activity_metrics
+    mapValues: enrich_with_products
+    to: enriched_metrics
+
+  # Stage 4: Generate final user metrics
+  finalize_metrics:
+    from: enriched_metrics
+    mapValues: generate_user_metrics
+    to: user_metrics
+
+runner:
+  type: streams
+  config:
+    application.id: optimized-analytics
+    bootstrap.servers: kafka:9092
+
+    # Performance configuration
+    num.stream.threads: 8
+    cache.max.bytes.buffering: 104857600  # 100MB
+    commit.interval.ms: 30000
+
+    # Producer settings
+    producer.linger.ms: 100
+    producer.batch.size: 16384
+
+    # Consumer settings
+    consumer.fetch.max.bytes: 52428800
+    consumer.max.poll.records: 500
+</code></pre>
+<p>This example:</p>
+<ol>
+<li>Uses Avro for efficient serialization</li>
+<li>Implements early filtering to reduce data volume</li>
+<li>Processes data in stages for better parallelism</li>
+<li>Uses optimized state stores with appropriate caching</li>
+<li>Minimizes data copying and transformation</li>
+<li>Uses efficient data structures (sets for uniqueness checks)</li>
+<li>Limits processing of large collections (top 5 products, top 3 categories)</li>
+<li>Includes optimized Kafka Streams configuration</li>
+</ol>
+<h2 id="advanced-optimization-techniques">Advanced Optimization Techniques</h2>
+<h3 id="1-custom-serializersdeserializers">1. Custom Serializers/Deserializers</h3>
+<p>Implement custom serializers for specialized data types:</p>
+<pre><code class="language-yaml">streams:
+  specialized_data:
+    topic: specialized_events
+    keyType: string
+    valueType: custom
+    serdes:
+      value: org.example.HighPerformanceSerializer
+</code></pre>
+<h3 id="2-memory-mapped-files">2. Memory-Mapped Files</h3>
+<p>For very large state stores, consider memory-mapped files:</p>
+<pre><code class="language-yaml">stores:
+  large_state_store:
+    type: custom
+    implementation: org.example.MMapStateStore
+    config:
+      file.path: /data/large-state
+      max.size.bytes: 10737418240  # 10GB
+</code></pre>
+<h3 id="3-off-heap-memory">3. Off-Heap Memory</h3>
+<p>Use off-heap memory for large state stores:</p>
+<pre><code class="language-yaml">runner:
+  type: streams
+  config:
+    application.id: offheap-optimized-app
+    bootstrap.servers: kafka:9092
+
+    # RocksDB configuration for off-heap memory
+    rocksdb.config.setter: org.example.OffHeapRocksDBConfig
+
+    # JVM settings (would be set in the JVM arguments)
+    # -XX:MaxDirectMemorySize=10G
+</code></pre>
+<h2 id="monitoring-and-continuous-optimization">Monitoring and Continuous Optimization</h2>
+<h3 id="1-implement-comprehensive-metrics">1. Implement Comprehensive Metrics</h3>
+<p>Track detailed performance metrics:</p>
+<pre><code class="language-yaml">functions:
+  performance_metrics:
+    type: forEach
+    code: |
+      # Record message processing metrics
+      start_time = time.time()
+
+      # Process message
+      process_message(key, value)
+
+      # Record metrics
+      processing_time_ms = (time.time() - start_time) * 1000
+      metrics.timer(&quot;processing.time&quot;).updateMillis(processing_time_ms)
+
+      # Record message size
+      message_size = len(str(value)) if value else 0
+      metrics.meter(&quot;message.size&quot;).mark(message_size)
+
+      # Record message counts by type
+      event_type = value.get(&quot;event_type&quot;, &quot;unknown&quot;)
+      metrics.counter(f&quot;messages.{event_type}&quot;).increment()
+</code></pre>
+<h3 id="2-implement-health-checks">2. Implement Health Checks</h3>
+<p>Add health checks to monitor application health:</p>
+<pre><code class="language-yaml">functions:
+  health_check:
+    type: forEach
+    globalCode: |
+      last_processed_time = int(time.time() * 1000)
+      processed_count = 0
+
+    code: |
+      global last_processed_time, processed_count
+
+      # Update processing metrics
+      current_time = int(time.time() * 1000)
+      last_processed_time = current_time
+      processed_count += 1
+
+      # Expose health metrics
+      metrics.gauge(&quot;health.last_processed_time&quot;).set(last_processed_time)
+      metrics.gauge(&quot;health.processed_count&quot;).set(processed_count)
+      metrics.gauge(&quot;health.lag_ms&quot;).set(current_time - value.get(&quot;timestamp&quot;, current_time))
+</code></pre>
+<h3 id="3-implement-adaptive-optimization">3. Implement Adaptive Optimization</h3>
+<p>Implement adaptive optimization based on runtime conditions:</p>
+<pre><code class="language-yaml">functions:
+  adaptive_processing:
+    type: valueTransformer
+    globalCode: |
+      import threading
+
+      # Monitor system load
+      system_load = 0.0
+
+      def update_system_load():
+          global system_load
+          while True:
+              # Get CPU load (simplified example)
+              system_load = get_cpu_load()
+              time.sleep(5)
+
+      # Start monitoring thread
+      monitor_thread = threading.Thread(target=update_system_load)
+      monitor_thread.daemon = True
+      monitor_thread.start()
+
+    code: |
+      global system_load
+
+      # Adapt processing based on system load
+      if system_load &gt; 0.8:  # High load
+          # Use simplified processing
+          return simple_processing(value)
+      else:
+          # Use full processing
+          return full_processing(value)
+</code></pre>
+<h2 id="best-practices-for-performance-optimization">Best Practices for Performance Optimization</h2>
+<ul>
+<li><strong>Measure before optimizing</strong>: Establish baselines and identify bottlenecks</li>
+<li><strong>Optimize incrementally</strong>: Make one change at a time and measure the impact</li>
+<li><strong>Focus on hot spots</strong>: Optimize the most frequently executed code paths</li>
+<li><strong>Consider trade-offs</strong>: Balance throughput, latency, and resource usage</li>
+<li><strong>Test with realistic data</strong>: Use production-like data volumes and patterns</li>
+<li><strong>Monitor continuously</strong>: Track performance metrics over time</li>
+<li><strong>Scale horizontally</strong>: Add more instances for linear scaling</li>
+<li><strong>Optimize data flow</strong>: Minimize data movement and transformation</li>
+</ul>
+<h2 id="conclusion">Conclusion</h2>
+<p>Performance optimization in KSML involves a combination of configuration tuning, code optimization, and architectural
+design. By applying the techniques covered in this tutorial, you can build KSML applications that efficiently process
+high volumes of data with low latency.</p>
+<p>In the next tutorial, we'll explore <a href="../external-integration/">Integration with External Systems</a> to learn how to connect
+your KSML applications with databases, APIs, and other external systems.</p>
+<h2 id="further-reading">Further Reading</h2>
+<ul>
+<li><a href="../../../core-concepts/operations/">Core Concepts: Operations</a></li>
+<li><a href="../../../core-concepts/functions/">Core Concepts: Functions</a></li>
+<li><a href="../custom-state-stores/">Advanced Tutorial: Custom State Stores</a></li>
+<li><a href="../../../reference/configuration-reference/">Reference: Configuration Options</a></li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../../../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../js/base.js"></script>
+        <script src="../../../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

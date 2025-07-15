@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>Complex Event Processing in KSML - KSML Documentation</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../../../css/brands.min.css" rel="stylesheet">
+        <link href="../../../css/solid.min.css" rel="stylesheet">
+        <link href="../../../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../../..">KSML Documentation</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="../../.." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../getting-started/" class="nav-link">Getting Started</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../core-concepts/" class="nav-link">Core Concepts</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../" class="nav-link">Tutorials</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../use-cases/" class="nav-link">Use Case Guides</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../reference/" class="nav-link">Reference</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../resources/" class="nav-link">Resources</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../about/" class="nav-link">About</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#complex-event-processing-in-ksml" class="nav-link">Complex Event Processing in KSML</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#introduction-to-complex-event-processing" class="nav-link">Introduction to Complex Event Processing</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#prerequisites" class="nav-link">Prerequisites</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#key-cep-patterns-in-ksml" class="nav-link">Key CEP Patterns in KSML</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#practical-example-fraud-detection-system" class="nav-link">Practical Example: Fraud Detection System</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#advanced-cep-techniques" class="nav-link">Advanced CEP Techniques</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#best-practices-for-complex-event-processing" class="nav-link">Best Practices for Complex Event Processing</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#conclusion" class="nav-link">Conclusion</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#further-reading" class="nav-link">Further Reading</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="complex-event-processing-in-ksml">Complex Event Processing in KSML</h1>
+<p>This tutorial explores how to implement complex event processing (CEP) patterns in KSML, allowing you to detect meaningful patterns across multiple events and streams in real-time.</p>
+<h2 id="introduction-to-complex-event-processing">Introduction to Complex Event Processing</h2>
+<p>Complex Event Processing (CEP) is a method of tracking and analyzing streams of data about things that happen (events), and deriving conclusions from them. In streaming contexts, CEP allows you to:</p>
+<ul>
+<li>Detect patterns across multiple events</li>
+<li>Identify sequences of events that occur over time</li>
+<li>Correlate events from different sources</li>
+<li>Derive higher-level insights from lower-level events</li>
+</ul>
+<p>KSML provides powerful capabilities for implementing CEP patterns through its combination of stateful processing, windowing operations, and Python functions.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Before starting this tutorial, you should:</p>
+<ul>
+<li>Understand intermediate KSML concepts (streams, functions, pipelines)</li>
+<li>Have completed the <a href="../../intermediate/windowed-operations/">Windowed Operations</a> tutorial</li>
+<li>Be familiar with <a href="../../intermediate/joins/">Joins</a> and <a href="../../intermediate/aggregations/">Aggregations</a></li>
+<li>Have a basic understanding of state management in stream processing</li>
+</ul>
+<h2 id="key-cep-patterns-in-ksml">Key CEP Patterns in KSML</h2>
+<h3 id="1-pattern-detection">1. Pattern Detection</h3>
+<p>Pattern detection involves identifying specific sequences or combinations of events within a stream:</p>
+<pre><code class="language-yaml">functions:
+  detect_pattern:
+    type: valueTransformer
+    code: |
+      # Check if this event completes a pattern
+      if value.get(&quot;event_type&quot;) == &quot;C&quot; and state_store.get(key + &quot;_has_A&quot;) and state_store.get(key + &quot;_has_B&quot;):
+        # Pattern A -&gt; B -&gt; C detected
+        result = {
+          &quot;pattern_detected&quot;: &quot;A_B_C&quot;,
+          &quot;completion_time&quot;: value.get(&quot;timestamp&quot;),
+          &quot;key&quot;: key
+        }
+        # Reset pattern tracking
+        state_store.delete(key + &quot;_has_A&quot;)
+        state_store.delete(key + &quot;_has_B&quot;)
+        return result
+
+      # Track events that are part of the pattern
+      if value.get(&quot;event_type&quot;) == &quot;A&quot;:
+        state_store.put(key + &quot;_has_A&quot;, True)
+      elif value.get(&quot;event_type&quot;) == &quot;B&quot;:
+        state_store.put(key + &quot;_has_B&quot;, True)
+
+      # Don't emit anything for partial patterns
+      return None
+    stores:
+      - pattern_state_store
+
+pipelines:
+  detect_abc_pattern:
+    from: input_events
+    mapValues: detect_pattern
+    filter: is_not_null  # Only pass through completed patterns
+    to: detected_patterns
+</code></pre>
+<h3 id="2-temporal-pattern-matching">2. Temporal Pattern Matching</h3>
+<p>Temporal pattern matching adds time constraints to pattern detection:</p>
+<pre><code class="language-yaml">functions:
+  detect_temporal_pattern:
+    type: valueTransformer
+    code: |
+      current_time = value.get(&quot;timestamp&quot;, int(time.time() * 1000))
+
+      if value.get(&quot;event_type&quot;) == &quot;A&quot;:
+        # Start tracking a new potential pattern
+        state_store.put(key + &quot;_pattern_start&quot;, current_time)
+        state_store.put(key + &quot;_has_A&quot;, True)
+        return None
+
+      if value.get(&quot;event_type&quot;) == &quot;B&quot; and state_store.get(key + &quot;_has_A&quot;):
+        # Check if B occurred within 5 minutes of A
+        pattern_start = state_store.get(key + &quot;_pattern_start&quot;)
+        if pattern_start and (current_time - pattern_start) &lt;= 5 * 60 * 1000:
+          state_store.put(key + &quot;_has_B&quot;, True)
+          state_store.put(key + &quot;_B_time&quot;, current_time)
+        return None
+
+      if value.get(&quot;event_type&quot;) == &quot;C&quot; and state_store.get(key + &quot;_has_B&quot;):
+        # Check if C occurred within 2 minutes of B
+        b_time = state_store.get(key + &quot;_B_time&quot;)
+        if b_time and (current_time - b_time) &lt;= 2 * 60 * 1000:
+          # Pattern A -&gt; B -&gt; C detected within time constraints
+          pattern_start = state_store.get(key + &quot;_pattern_start&quot;)
+          result = {
+            &quot;pattern_detected&quot;: &quot;A_B_C&quot;,
+            &quot;start_time&quot;: pattern_start,
+            &quot;end_time&quot;: current_time,
+            &quot;duration_ms&quot;: current_time - pattern_start,
+            &quot;key&quot;: key
+          }
+          # Reset pattern tracking
+          state_store.delete(key + &quot;_has_A&quot;)
+          state_store.delete(key + &quot;_has_B&quot;)
+          state_store.delete(key + &quot;_pattern_start&quot;)
+          state_store.delete(key + &quot;_B_time&quot;)
+          return result
+
+      return None
+    stores:
+      - temporal_pattern_store
+</code></pre>
+<h3 id="3-event-correlation-and-enrichment">3. Event Correlation and Enrichment</h3>
+<p>Event correlation involves combining related events from different streams:</p>
+<pre><code class="language-yaml">streams:
+  user_logins:
+    topic: user_login_events
+    keyType: string  # User ID
+    valueType: json  # Login details
+
+  user_actions:
+    topic: user_action_events
+    keyType: string  # User ID
+    valueType: json  # Action details
+
+  user_logouts:
+    topic: user_logout_events
+    keyType: string  # User ID
+    valueType: json  # Logout details
+
+  user_sessions:
+    topic: user_session_events
+    keyType: string  # User ID
+    valueType: json  # Complete session information
+
+functions:
+  correlate_session_events:
+    type: valueTransformer
+    code: |
+      event_type = value.get(&quot;event_type&quot;)
+
+      # Get current session state
+      session = state_store.get(key + &quot;_session&quot;)
+      if session is None:
+        session = {&quot;events&quot;: []}
+
+      # Add this event to the session
+      event_copy = value.copy()
+      event_copy[&quot;processed_time&quot;] = int(time.time() * 1000)
+      session[&quot;events&quot;].append(event_copy)
+
+      # Update session based on event type
+      if event_type == &quot;login&quot;:
+        session[&quot;login_time&quot;] = value.get(&quot;timestamp&quot;)
+        session[&quot;device&quot;] = value.get(&quot;device&quot;)
+        session[&quot;ip_address&quot;] = value.get(&quot;ip_address&quot;)
+        session[&quot;status&quot;] = &quot;active&quot;
+      elif event_type == &quot;action&quot;:
+        session[&quot;last_activity_time&quot;] = value.get(&quot;timestamp&quot;)
+        session[&quot;last_action&quot;] = value.get(&quot;action_type&quot;)
+      elif event_type == &quot;logout&quot;:
+        session[&quot;logout_time&quot;] = value.get(&quot;timestamp&quot;)
+        session[&quot;status&quot;] = &quot;completed&quot;
+        session[&quot;duration_ms&quot;] = session[&quot;logout_time&quot;] - session.get(&quot;login_time&quot;, 0)
+
+        # Return the complete session and clear state
+        result = session.copy()
+        state_store.delete(key + &quot;_session&quot;)
+        return result
+
+      # Update session state and don't emit for incomplete sessions
+      state_store.put(key + &quot;_session&quot;, session)
+      return None
+    stores:
+      - session_state_store
+
+pipelines:
+  process_login_events:
+    from: user_logins
+    mapValues: correlate_session_events
+    filter: is_not_null
+    to: user_sessions
+
+  process_action_events:
+    from: user_actions
+    mapValues: correlate_session_events
+    filter: is_not_null
+    to: user_sessions
+
+  process_logout_events:
+    from: user_logouts
+    mapValues: correlate_session_events
+    filter: is_not_null
+    to: user_sessions
+</code></pre>
+<h3 id="4-anomaly-detection">4. Anomaly Detection</h3>
+<p>Anomaly detection identifies unusual patterns or deviations from normal behavior:</p>
+<pre><code class="language-yaml">functions:
+  detect_anomalies:
+    type: valueTransformer
+    code: |
+      # Get historical values for this key
+      history = state_store.get(key + &quot;_history&quot;)
+      if history is None:
+        history = {&quot;values&quot;: [], &quot;sum&quot;: 0, &quot;count&quot;: 0}
+
+      # Extract the value to monitor
+      metric_value = value.get(&quot;metric_value&quot;, 0)
+
+      # Update history
+      history[&quot;values&quot;].append(metric_value)
+      history[&quot;sum&quot;] += metric_value
+      history[&quot;count&quot;] += 1
+
+      # Keep only the last 10 values
+      if len(history[&quot;values&quot;]) &gt; 10:
+        removed_value = history[&quot;values&quot;].pop(0)
+        history[&quot;sum&quot;] -= removed_value
+        history[&quot;count&quot;] -= 1
+
+      # Calculate statistics
+      avg = history[&quot;sum&quot;] / history[&quot;count&quot;] if history[&quot;count&quot;] &gt; 0 else 0
+
+      # Calculate standard deviation
+      variance_sum = sum((x - avg) ** 2 for x in history[&quot;values&quot;])
+      std_dev = (variance_sum / history[&quot;count&quot;]) ** 0.5 if history[&quot;count&quot;] &gt; 0 else 0
+
+      # Check for anomaly (value more than 3 standard deviations from mean)
+      is_anomaly = False
+      if std_dev &gt; 0 and abs(metric_value - avg) &gt; 3 * std_dev:
+        is_anomaly = True
+
+      # Update state
+      state_store.put(key + &quot;_history&quot;, history)
+
+      # Return anomaly information if detected
+      if is_anomaly:
+        return {
+          &quot;key&quot;: key,
+          &quot;timestamp&quot;: value.get(&quot;timestamp&quot;),
+          &quot;metric_value&quot;: metric_value,
+          &quot;average&quot;: avg,
+          &quot;std_dev&quot;: std_dev,
+          &quot;deviation&quot;: abs(metric_value - avg) / std_dev if std_dev &gt; 0 else 0,
+          &quot;original_event&quot;: value
+        }
+
+      return None
+    stores:
+      - anomaly_detection_store
+</code></pre>
+<h2 id="practical-example-fraud-detection-system">Practical Example: Fraud Detection System</h2>
+<p>Let's build a complete example that implements a real-time fraud detection system using CEP patterns:</p>
+<pre><code class="language-yaml">streams:
+  credit_card_transactions:
+    topic: cc_transactions
+    keyType: string  # Card number
+    valueType: json  # Transaction details
+
+  location_changes:
+    topic: location_events
+    keyType: string  # User ID
+    valueType: json  # Location information
+
+  authentication_events:
+    topic: auth_events
+    keyType: string  # User ID
+    valueType: json  # Authentication details
+
+  fraud_alerts:
+    topic: fraud_alerts
+    keyType: string  # Alert ID
+    valueType: json  # Alert details
+
+stores:
+  transaction_history_store:
+    type: keyValue
+    keyType: string
+    valueType: json
+    persistent: true
+
+  user_profile_store:
+    type: keyValue
+    keyType: string
+    valueType: json
+    persistent: true
+
+  alert_state_store:
+    type: keyValue
+    keyType: string
+    valueType: json
+    persistent: false
+
+functions:
+  detect_transaction_anomalies:
+    type: keyValueTransformer
+    code: |
+      card_number = key
+      transaction = value
+      current_time = transaction.get(&quot;timestamp&quot;, int(time.time() * 1000))
+
+      # Get transaction history
+      history = transaction_history_store.get(card_number + &quot;_history&quot;)
+      if history is None:
+        history = {
+          &quot;transactions&quot;: [],
+          &quot;avg_amount&quot;: 0,
+          &quot;max_amount&quot;: 0,
+          &quot;locations&quot;: set(),
+          &quot;merchants&quot;: set(),
+          &quot;last_transaction_time&quot;: 0
+        }
+
+      # Calculate time since last transaction
+      time_since_last = current_time - history.get(&quot;last_transaction_time&quot;, 0)
+
+      # Extract transaction details
+      amount = transaction.get(&quot;amount&quot;, 0)
+      location = transaction.get(&quot;location&quot;, &quot;unknown&quot;)
+      merchant = transaction.get(&quot;merchant&quot;, &quot;unknown&quot;)
+      merchant_category = transaction.get(&quot;merchant_category&quot;, &quot;unknown&quot;)
+
+      # Check for anomalies
+      anomalies = []
+
+      # 1. Unusual amount
+      if amount &gt; 3 * history.get(&quot;avg_amount&quot;, 0) and amount &gt; 100:
+        anomalies.append(&quot;unusual_amount&quot;)
+
+      # 2. New location
+      if location not in history.get(&quot;locations&quot;, set()) and len(history.get(&quot;locations&quot;, set())) &gt; 0:
+        anomalies.append(&quot;new_location&quot;)
+
+      # 3. Rapid succession (multiple transactions in short time)
+      if time_since_last &lt; 5 * 60 * 1000 and time_since_last &gt; 0:  # Less than 5 minutes
+        anomalies.append(&quot;rapid_succession&quot;)
+
+      # 4. High-risk merchant category
+      if merchant_category in [&quot;gambling&quot;, &quot;cryptocurrency&quot;, &quot;money_transfer&quot;]:
+        anomalies.append(&quot;high_risk_category&quot;)
+
+      # Update history
+      history[&quot;transactions&quot;].append({
+        &quot;timestamp&quot;: current_time,
+        &quot;amount&quot;: amount,
+        &quot;location&quot;: location,
+        &quot;merchant&quot;: merchant
+      })
+
+      # Keep only last 20 transactions
+      if len(history[&quot;transactions&quot;]) &gt; 20:
+        history[&quot;transactions&quot;] = history[&quot;transactions&quot;][-20:]
+
+      # Update statistics
+      history[&quot;avg_amount&quot;] = sum(t.get(&quot;amount&quot;, 0) for t in history[&quot;transactions&quot;]) / len(history[&quot;transactions&quot;])
+      history[&quot;max_amount&quot;] = max(history[&quot;max_amount&quot;], amount)
+      history[&quot;locations&quot;].add(location)
+      history[&quot;merchants&quot;].add(merchant)
+      history[&quot;last_transaction_time&quot;] = current_time
+
+      # Store updated history
+      transaction_history_store.put(card_number + &quot;_history&quot;, history)
+
+      # Generate alert if anomalies detected
+      if anomalies:
+        alert_id = str(uuid.uuid4())
+        alert = {
+          &quot;alert_id&quot;: alert_id,
+          &quot;card_number&quot;: card_number,
+          &quot;timestamp&quot;: current_time,
+          &quot;transaction&quot;: transaction,
+          &quot;anomalies&quot;: anomalies,
+          &quot;risk_score&quot;: len(anomalies) * 25,  # Simple scoring: 25 points per anomaly
+          &quot;status&quot;: &quot;new&quot;
+        }
+        return (alert_id, alert)
+
+      return None
+    stores:
+      - transaction_history_store
+
+  correlate_with_location:
+    type: valueTransformer
+    code: |
+      if value is None:
+        return None
+
+      alert = value
+      card_number = alert.get(&quot;card_number&quot;)
+      transaction = alert.get(&quot;transaction&quot;, {})
+
+      # Get user profile
+      user_id = transaction.get(&quot;user_id&quot;)
+      if user_id:
+        user_profile = user_profile_store.get(user_id)
+        if user_profile:
+          # Check for impossible travel
+          last_known_location = user_profile.get(&quot;last_known_location&quot;)
+          current_location = transaction.get(&quot;location&quot;)
+
+          if last_known_location and current_location and last_known_location != current_location:
+            last_location_time = user_profile.get(&quot;last_location_time&quot;, 0)
+            current_time = transaction.get(&quot;timestamp&quot;, 0)
+
+            # Simple check: if locations changed too quickly, flag as impossible travel
+            if current_time - last_location_time &lt; 3 * 60 * 60 * 1000:  # Less than 3 hours
+              alert[&quot;anomalies&quot;].append(&quot;impossible_travel&quot;)
+              alert[&quot;risk_score&quot;] += 50  # Higher score for impossible travel
+
+              # Add location context
+              alert[&quot;location_context&quot;] = {
+                &quot;previous_location&quot;: last_known_location,
+                &quot;previous_location_time&quot;: last_location_time,
+                &quot;current_location&quot;: current_location,
+                &quot;travel_time_ms&quot;: current_time - last_location_time
+              }
+
+      return alert
+    stores:
+      - user_profile_store
+
+  enrich_with_user_data:
+    type: valueTransformer
+    code: |
+      if value is None:
+        return None
+
+      alert = value
+      transaction = alert.get(&quot;transaction&quot;, {})
+      user_id = transaction.get(&quot;user_id&quot;)
+
+      if user_id:
+        user_profile = user_profile_store.get(user_id)
+        if user_profile:
+          # Add user context to alert
+          alert[&quot;user_context&quot;] = {
+            &quot;user_id&quot;: user_id,
+            &quot;account_age_days&quot;: user_profile.get(&quot;account_age_days&quot;),
+            &quot;previous_fraud_alerts&quot;: user_profile.get(&quot;fraud_alert_count&quot;, 0)
+          }
+
+          # Adjust risk score based on user history
+          if user_profile.get(&quot;fraud_alert_count&quot;, 0) &gt; 0:
+            alert[&quot;risk_score&quot;] += 25  # Increase risk for users with previous alerts
+
+          if user_profile.get(&quot;account_age_days&quot;, 0) &lt; 30:
+            alert[&quot;risk_score&quot;] += 15  # Increase risk for new accounts
+
+      # Categorize risk level
+      if alert[&quot;risk_score&quot;] &gt;= 90:
+        alert[&quot;risk_level&quot;] = &quot;high&quot;
+      elif alert[&quot;risk_score&quot;] &gt;= 60:
+        alert[&quot;risk_level&quot;] = &quot;medium&quot;
+      else:
+        alert[&quot;risk_level&quot;] = &quot;low&quot;
+
+      return alert
+    stores:
+      - user_profile_store
+
+pipelines:
+  # Process credit card transactions - first stage
+  detect_transaction_anomalies:
+    from: credit_card_transactions
+    transformKeyValue: detect_transaction_anomalies
+    filter: is_not_null
+    to: potential_fraud_alerts
+
+  # Process credit card transactions - second stage
+  correlate_location_data:
+    from: potential_fraud_alerts
+    mapValues: correlate_with_location
+    to: location_correlated_alerts
+
+  # Process credit card transactions - final stage
+  enrich_and_score_alerts:
+    from: location_correlated_alerts
+    mapValues: enrich_with_user_data
+    to: fraud_alerts
+
+  # Update user profiles with location data
+  track_locations:
+    from: location_changes
+    mapValues: update_user_location
+    to: updated_user_profiles
+</code></pre>
+<p>This example:
+1. Processes credit card transactions in real-time
+2. Detects anomalies based on transaction amount, location, frequency, and merchant category
+3. Correlates transactions with user location data to detect impossible travel patterns
+4. Enriches alerts with user context and history
+5. Calculates a risk score and categorizes alerts by risk level</p>
+<h2 id="advanced-cep-techniques">Advanced CEP Techniques</h2>
+<h3 id="state-management-for-long-running-patterns">State Management for Long-Running Patterns</h3>
+<p>For patterns that span long periods, consider using persistent state stores:</p>
+<pre><code class="language-yaml">stores:
+  long_term_pattern_store:
+    type: keyValue
+    keyType: string
+    valueType: json
+    persistent: true
+    historyRetention: 7d  # Keep state for 7 days
+</code></pre>
+<h3 id="handling-out-of-order-events">Handling Out-of-Order Events</h3>
+<p>Use windowing with grace periods to handle events that arrive out of order:</p>
+<pre><code class="language-yaml">pipelines:
+  handle_out_of_order:
+    from: input_stream
+    groupByKey:
+    windowByTime:
+      size: 1h
+      advanceBy: 1h
+      grace: 15m  # Allow events up to 15 minutes late
+    aggregate:
+      initializer: initialize_pattern_state
+      aggregator: update_pattern_state
+    to: detected_patterns
+</code></pre>
+<h3 id="hierarchical-pattern-detection">Hierarchical Pattern Detection</h3>
+<p>Implement hierarchical patterns by building higher-level patterns from lower-level ones:</p>
+<pre><code class="language-yaml">pipelines:
+  # Detect basic patterns
+  detect_basic_patterns:
+    from: raw_events
+    mapValues: detect_basic_pattern
+    to: basic_patterns
+
+  # Detect composite patterns from basic patterns
+  detect_composite_patterns:
+    from: basic_patterns
+    mapValues: detect_composite_pattern
+    to: composite_patterns
+</code></pre>
+<h2 id="best-practices-for-complex-event-processing">Best Practices for Complex Event Processing</h2>
+<h3 id="performance-considerations">Performance Considerations</h3>
+<ul>
+<li><strong>State Size</strong>: CEP often requires maintaining state. Monitor state store sizes and use windowing to limit state growth.</li>
+<li><strong>Computation Complexity</strong>: Complex pattern detection can be CPU-intensive. Keep pattern matching logic efficient.</li>
+<li><strong>Event Volume</strong>: High-volume streams may require pre-filtering to focus on relevant events.</li>
+</ul>
+<h3 id="design-patterns">Design Patterns</h3>
+<ul>
+<li><strong>Pattern Decomposition</strong>: Break complex patterns into simpler sub-patterns that can be detected independently.</li>
+<li><strong>Incremental Processing</strong>: Update pattern state incrementally as events arrive rather than reprocessing all events.</li>
+<li><strong>Hierarchical Patterns</strong>: Build complex patterns by combining simpler patterns.</li>
+</ul>
+<h3 id="error-handling">Error Handling</h3>
+<p>Implement robust error handling to prevent pattern detection failures:</p>
+<pre><code class="language-yaml">functions:
+  robust_pattern_detection:
+    type: valueTransformer
+    code: |
+      try:
+        # Pattern detection logic
+        return detected_pattern
+      except Exception as e:
+        log.error(&quot;Error in pattern detection: {}&quot;, str(e))
+        # Return None to avoid emitting erroneous patterns
+        return None
+</code></pre>
+<h2 id="conclusion">Conclusion</h2>
+<p>Complex Event Processing in KSML allows you to detect sophisticated patterns across multiple events and streams. By combining stateful processing, windowing operations, and custom Python functions, you can implement powerful CEP applications that derive meaningful insights from streaming data.</p>
+<p>In the next tutorial, we'll explore <a href="../custom-state-stores/">Custom State Stores</a> to learn how to implement and optimize state management for advanced stream processing applications.</p>
+<h2 id="further-reading">Further Reading</h2>
+<ul>
+<li><a href="../../../core-concepts/operations/">Core Concepts: Operations</a></li>
+<li><a href="../../../core-concepts/functions/">Core Concepts: Functions</a></li>
+<li><a href="../../intermediate/windowed-operations/">Intermediate Tutorial: Windowed Operations</a></li>
+<li><a href="../../../reference/data-types-reference/">Reference: State Stores</a></li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../../../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../js/base.js"></script>
+        <script src="../../../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

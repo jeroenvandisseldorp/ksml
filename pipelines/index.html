@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>Pipeline - KSML Documentation</title>
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../css/brands.min.css" rel="stylesheet">
+        <link href="../css/solid.min.css" rel="stylesheet">
+        <link href="../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="..">KSML Documentation</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href=".." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../tutorials/getting-started/" class="nav-link">Getting Started</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../core-concepts/" class="nav-link">Core Concepts</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../tutorials/" class="nav-link">Tutorials</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../use-cases/" class="nav-link">Use Case Guides</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../reference/" class="nav-link">Reference</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../resources/" class="nav-link">Resources</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../about/" class="nav-link">About</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#pipeline" class="nav-link">Pipeline</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#introduction" class="nav-link">Introduction</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#definition" class="nav-link">Definition</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#elements" class="nav-link">Elements</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#duration" class="nav-link">Duration</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="pipeline">Pipeline</h1>
+<h3 id="table-of-contents">Table of Contents</h3>
+<ol>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#definition">Definition</a></li>
+<li><a href="#elements">Elements</a><ul>
+<li><a href="#source">Source</a></li>
+<li><a href="#operations">Operations</a></li>
+<li><a href="#sinks">Sink</a></li>
+</ul>
+</li>
+</ol>
+<h2 id="introduction">Introduction</h2>
+<p>Pipelines form the heart of KSML streams logic. They take one or more input streams and apply processing logic to them.
+Output is passed on from operation to operation.</p>
+<h2 id="definition">Definition</h2>
+<p>Pipelines are contained in the <code>pipelines</code> section. Each pipeline has a name, which is the name of the YAML tag.</p>
+<p>As an example, the following defines a pipeline called <code>copy_pipeline</code>, which consumes messages from <code>some_input_stream</code>
+and outputs the same messages to <code>some_output_stream</code>.</p>
+<pre><code class="language-yaml">pipelines:
+  copy_pipeline:
+    from: some_input_stream
+    to: some_output_stream
+</code></pre>
+<h2 id="elements">Elements</h2>
+<p>All pipelines contain three elements:</p>
+<h3 id="source">Source</h3>
+<p>The source of a pipeline is marked with the <code>from</code> keyword. The value of the YAML node is the name of a
+defined <code>Stream</code>, <code>Table</code> or <code>GlobalTable</code>.
+See <a href="../streams/">Streams</a> for more information.</p>
+<h3 id="operations">Operations</h3>
+<p>Once a source was selected, a list of operations can be applied to the input. The list is started through the
+keyword <code>via</code>, below which a list of operations is defined.</p>
+<p>Example:</p>
+<pre><code class="language-yaml">pipelines:
+  copy_pipeline:
+    from: some_input_stream
+    via:
+      - type: peek
+        forEach: my_peek_function
+      - type: transformKeyValue
+        mapper: my_transform_function
+    to: some_output_stream
+</code></pre>
+<p>Each operation must have a <code>type</code> field, which indicates the type of operations applied to the input.
+See <a href="../operations/">Operations</a> for a full list of operations that can be applied.</p>
+<h3 id="sinks">Sinks</h3>
+<p>After all transformation operations are applied, a pipeline can define a sink to which all messages are sent. There are
+four sink types in KSML:</p>
+<table>
+<thead>
+<tr>
+<th>Sink type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>as</code></td>
+<td>Allows the pipeline result to be saved under an internal name, which can later be referenced. Pipelines defined after this point may refer to this name in their <code>from</code> statement.</td>
+</tr>
+<tr>
+<td><code>branch</code></td>
+<td>This statement allows the pipeline to be split up in several branches. Each branch filters messages with an <code>if</code> statement. Messages will be processed only by the first branch of which the <code>if</code> statement is true.</td>
+</tr>
+<tr>
+<td><code>forEach</code></td>
+<td>Sends every message to a function, without expecting any return type. Because there is no return type, the pipeline always stops after this statement.</td>
+</tr>
+<tr>
+<td><code>print</code></td>
+<td>Prints out every message according to a given output specification.</td>
+</tr>
+<tr>
+<td><code>to</code></td>
+<td>Sends all output messages to a specific target. This target can be a pre-defined <code>stream</code>, <code>table</code> or <code>globalTable</code>, or an inline-defined topic.</td>
+</tr>
+<tr>
+<td><code>toTopicNameExtractor</code></td>
+<td>Messages are passed onto a user function, which returns the name of the topic that message needs to be sent to.</td>
+</tr>
+</tbody>
+</table>
+<p>For more information, see the respective documentation on pipeline definitions in
+the <a href="ksml-language-spec.html#definitions/PipelineDefinition">definitions section of the KSML language spec</a>.</p>
+<h2 id="duration">Duration</h2>
+<p>Some pipeline operations require specifying durations. Durations can be expressed
+as strings with the following syntax:</p>
+<pre><code>###x
+</code></pre>
+<p>where <code>#</code> is a positive number between 0 and 999999 and <code>x</code> is an optional letter from the following table:</p>
+<table>
+<thead>
+<tr>
+<th>Letter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>none</em></td>
+<td>Duration in milliseconds</td>
+</tr>
+<tr>
+<td>s</td>
+<td>Duration in seconds</td>
+</tr>
+<tr>
+<td>m</td>
+<td>Duration in minutes</td>
+</tr>
+<tr>
+<td>h</td>
+<td>Duration in hours</td>
+</tr>
+<tr>
+<td>d</td>
+<td>Duration in days</td>
+</tr>
+<tr>
+<td>w</td>
+<td>Duration in weeks</td>
+</tr>
+</tbody>
+</table>
+<p>Examples:</p>
+<pre><code>100 ==&gt; hundred milliseconds
+30s ==&gt; thirty seconds
+8h ==&gt; eight hours
+2w ==&gt; two weeks
+</code></pre>
+<p>Note that durations are <em>not</em> a data type that can used as key or value on a Kafka
+topic.</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../js/base.js"></script>
+        <script src="../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

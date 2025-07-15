@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Pipelines - KSML Documentation</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../../css/brands.min.css" rel="stylesheet">
+        <link href="../../css/solid.min.css" rel="stylesheet">
+        <link href="../../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../..">KSML Documentation</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="../.." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../tutorials/getting-started/" class="nav-link">Getting Started</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../" class="nav-link">Core Concepts</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../tutorials/" class="nav-link">Tutorials</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../use-cases/" class="nav-link">Use Case Guides</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../reference/" class="nav-link">Reference</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../resources/" class="nav-link">Resources</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../about/" class="nav-link">About</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#pipelines" class="nav-link">Pipelines</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#what-is-a-pipeline" class="nav-link">What is a Pipeline?</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#pipeline-structure" class="nav-link">Pipeline Structure</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#pipeline-patterns-and-techniques" class="nav-link">Pipeline Patterns and Techniques</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#input-and-output-configurations" class="nav-link">Input and Output Configurations</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#best-practices-for-pipeline-design" class="nav-link">Best Practices for Pipeline Design</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#duration-specification" class="nav-link">Duration Specification</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#examples" class="nav-link">Examples</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#conclusion" class="nav-link">Conclusion</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="pipelines">Pipelines</h1>
+<p>This page explains the concept of pipelines in KSML, how they work, and best practices for designing effective data processing flows.</p>
+<h2 id="what-is-a-pipeline">What is a Pipeline?</h2>
+<p>In KSML, pipelines form the heart of stream processing logic. A pipeline defines how data flows from one or more input streams through a series of operations and finally to one or more output destinations.</p>
+<p>Pipelines connect the dots between:
+- <strong>Sources</strong>: Where data comes from (Kafka topics via streams, tables, or global tables)
+- <strong>Operations</strong>: What happens to the data (transformations, filters, aggregations, etc.)
+- <strong>Sinks</strong>: Where the processed data goes (output topics, other pipelines, functions, etc.)</p>
+<p>Think of a pipeline as a recipe that describes exactly how data should be processed from start to finish.</p>
+<h2 id="pipeline-structure">Pipeline Structure</h2>
+<h3 id="basic-structure">Basic Structure</h3>
+<p>Every KSML pipeline has a consistent structure with three main components:</p>
+<pre><code class="language-yaml">pipelines:
+  my_pipeline_name:
+    from: input_stream_name    # Source
+    via:                       # Operations (optional)
+      - type: operation1
+        # operation parameters
+      - type: operation2
+        # operation parameters
+    to: output_stream_name     # Sink
+</code></pre>
+<p>This structure makes pipelines easy to read and understand, with a clear flow from source to operations to sink.</p>
+<h3 id="sources-where-data-comes-from">Sources: Where Data Comes From</h3>
+<p>The source of a pipeline is specified with the <code>from</code> keyword. It defines where the pipeline gets its data from:</p>
+<pre><code class="language-yaml">from: user_clicks_stream
+</code></pre>
+<p>A source can be:
+- A <strong>stream</strong> (KStream): For event-based processing
+- A <strong>table</strong> (KTable): For state-based processing
+- A <strong>globalTable</strong> (GlobalKTable): For reference data
+- Another <strong>pipeline</strong>: For chaining pipelines together</p>
+<p>Sources must be defined elsewhere in your KSML file (in the <code>streams</code>, <code>tables</code>, or <code>globalTables</code> sections) or be the result of a previous pipeline.</p>
+<h3 id="operations-transforming-the-data">Operations: Transforming the Data</h3>
+<p>Operations are defined in the <code>via</code> section as a list of transformations to apply to the data:</p>
+<pre><code class="language-yaml">via:
+  - type: filter
+    if:
+      expression: value.get('amount') &gt; 100
+  - type: mapValues
+    mapper:
+      expression: {&quot;user&quot;: key, &quot;amount&quot;: value.get('amount'), &quot;currency&quot;: &quot;USD&quot;}
+</code></pre>
+<p>Each operation:
+- Has a <code>type</code> that defines what it does
+- Takes parameters specific to that operation type
+- Receives data from the previous operation (or the source)
+- Passes its output to the next operation (or the sink)</p>
+<p>Operations are applied in sequence, creating a processing pipeline where data flows from one operation to the next.</p>
+<h3 id="sinks-where-data-goes">Sinks: Where Data Goes</h3>
+<p>The sink defines where the processed data should be sent. KSML supports several sink types:</p>
+<pre><code class="language-yaml">to: processed_orders_stream  # Send to a predefined stream
+</code></pre>
+<p>Or more complex sinks:</p>
+<pre><code class="language-yaml">branch:  # Split the pipeline based on conditions
+  - if:
+      expression: value.get('type') == 'purchase'
+    to: purchases_stream
+  - if:
+      expression: value.get('type') == 'refund'
+    to: refunds_stream
+  - to: other_events_stream  # Default branch
+</code></pre>
+<p>Common sink types include:
+- <code>to</code>: Send to a predefined stream, table, or topic
+- <code>as</code>: Save the result under a name for use in later pipelines
+- <code>branch</code>: Split the pipeline based on conditions
+- <code>forEach</code>: Process each message with a function (terminal operation)
+- <code>print</code>: Output messages for debugging
+- <code>toTopicNameExtractor</code>: Dynamically determine the output topic</p>
+<h2 id="pipeline-patterns-and-techniques">Pipeline Patterns and Techniques</h2>
+<h3 id="connecting-pipelines">Connecting Pipelines</h3>
+<p>KSML allows you to connect pipelines together, creating more complex processing flows:</p>
+<pre><code class="language-yaml">pipelines:
+  filter_high_value_orders:
+    from: orders_stream
+    via:
+      - type: filter
+        if:
+          expression: value.get('total') &gt; 1000
+    as: high_value_orders  # Save the result for use in another pipeline
+
+  process_high_value_orders:
+    from: high_value_orders  # Use the result from the previous pipeline
+    via:
+      - type: mapValues
+        mapper:
+          expression: {&quot;orderId&quot;: value.get('id'), &quot;amount&quot;: value.get('total'), &quot;priority&quot;: &quot;high&quot;}
+    to: priority_orders_stream
+</code></pre>
+<p>This approach allows you to:
+- Break complex logic into smaller, more manageable pieces
+- Reuse intermediate results in multiple downstream pipelines
+- Create cleaner, more maintainable code</p>
+<h3 id="branching-pipelines">Branching Pipelines</h3>
+<p>The <code>branch</code> sink allows you to split a pipeline based on conditions:</p>
+<pre><code class="language-yaml">pipelines:
+  route_messages_by_type:
+    from: events_stream
+    branch:
+      - if:
+          expression: value.get('type') == 'click'
+        to: clicks_stream
+      - if:
+          expression: value.get('type') == 'purchase'
+        to: purchases_stream
+      - if:
+          expression: value.get('type') == 'login'
+        to: logins_stream
+      - to: other_events_stream  # Default branch for anything else
+</code></pre>
+<p>This is useful for:
+- Routing different types of events to different destinations
+- Implementing content-based routing patterns
+- Creating specialized processing flows for different data types</p>
+<h3 id="dynamic-output-topics">Dynamic Output Topics</h3>
+<p>The <code>toTopicNameExtractor</code> sink allows you to dynamically determine the output topic:</p>
+<pre><code class="language-yaml">pipelines:
+  route_to_dynamic_topics:
+    from: events_stream
+    toTopicNameExtractor:
+      expression: &quot;events-&quot; + value.get('category').lower()
+</code></pre>
+<p>This is useful for:
+- Partitioning data across multiple topics
+- Creating topic hierarchies
+- Implementing multi-tenant architectures</p>
+<h2 id="input-and-output-configurations">Input and Output Configurations</h2>
+<h3 id="configuring-input-streams">Configuring Input Streams</h3>
+<p>When defining input streams, you can configure various properties:</p>
+<pre><code class="language-yaml">streams:
+  orders_stream:
+    topic: orders
+    keyType: string
+    valueType: json
+    offsetResetPolicy: earliest  # Start from the beginning of the topic
+    timestampExtractor: order_timestamp_extractor  # Custom timestamp extraction
+</code></pre>
+<p>Important configuration options include:
+- <code>offsetResetPolicy</code>: Determines where to start consuming from when no offset is stored
+- <code>timestampExtractor</code>: Defines how to extract event timestamps from messages
+- <code>keyType</code> and <code>valueType</code>: Define the data types and formats</p>
+<h3 id="configuring-output-streams">Configuring Output Streams</h3>
+<p>Similarly, output streams can be configured:</p>
+<pre><code class="language-yaml">streams:
+  processed_orders_stream:
+    topic: processed-orders
+    keyType: string
+    valueType: avro:ProcessedOrder
+</code></pre>
+<p>For inline topic definitions in sinks:</p>
+<pre><code class="language-yaml">to:
+  topic: dynamic-output-topic
+  keyType: string
+  valueType: json
+</code></pre>
+<h2 id="best-practices-for-pipeline-design">Best Practices for Pipeline Design</h2>
+<h3 id="1-keep-pipelines-focused">1. Keep Pipelines Focused</h3>
+<p>Each pipeline should have a clear, single responsibility:</p>
+<pre><code class="language-yaml"># Good: Focused pipeline
+pipelines:
+  enrich_user_events:
+    from: raw_user_events
+    via:
+      - type: join
+        with: user_profiles
+        valueJoiner:
+          expression: {&quot;event&quot;: value1, &quot;user&quot;: value2}
+    to: enriched_user_events
+</code></pre>
+<pre><code class="language-yaml"># Avoid: Pipeline doing too many things
+pipelines:
+  do_everything:
+    from: raw_events
+    via:
+      - type: filter
+        # Filter logic
+      - type: join
+        # Join logic
+      - type: aggregate
+        # Aggregation logic
+      - type: mapValues
+        # Transformation logic
+    to: final_output
+</code></pre>
+<h3 id="2-use-meaningful-names">2. Use Meaningful Names</h3>
+<p>Choose descriptive names for pipelines and intermediate results:</p>
+<pre><code class="language-yaml"># Good: Clear naming
+pipelines:
+  filter_active_users:
+    from: user_events
+    via:
+      - type: filter
+        if:
+          expression: value.get('status') == 'active'
+    as: active_user_events
+</code></pre>
+<pre><code class="language-yaml"># Avoid: Vague naming
+pipelines:
+  pipeline1:
+    from: stream1
+    via:
+      - type: filter
+        if:
+          expression: value.get('x') == 'y'
+    as: filtered_data
+</code></pre>
+<h3 id="3-chain-pipelines-for-complex-logic">3. Chain Pipelines for Complex Logic</h3>
+<p>Break complex processing into multiple pipelines:</p>
+<pre><code class="language-yaml">pipelines:
+  # Step 1: Filter and enrich
+  prepare_data:
+    from: raw_data
+    via:
+      - type: filter
+        # Filter logic
+      - type: join
+        # Enrichment logic
+    as: prepared_data
+
+  # Step 2: Transform
+  transform_data:
+    from: prepared_data
+    via:
+      - type: mapValues
+        # Transformation logic
+    as: transformed_data
+
+  # Step 3: Aggregate
+  aggregate_data:
+    from: transformed_data
+    via:
+      - type: groupByKey
+      - type: aggregate
+        # Aggregation logic
+    to: aggregated_results
+</code></pre>
+<h3 id="4-use-comments-for-complex-logic">4. Use Comments for Complex Logic</h3>
+<p>Add comments to explain complex operations:</p>
+<pre><code class="language-yaml">pipelines:
+  process_transactions:
+    from: transactions
+    via:
+      # Filter out test transactions
+      - type: filter
+        if:
+          expression: not value.get('isTest', False)
+
+      # Convert amounts to standard currency
+      - type: mapValues
+        mapper:
+          functionRef: convert_to_usd
+
+      # Group by user for aggregation
+      - type: groupBy
+        keySelector:
+          expression: value.get('userId')
+    to: processed_transactions
+</code></pre>
+<h3 id="5-consider-performance-implications">5. Consider Performance Implications</h3>
+<p>Be mindful of operations that can impact performance:</p>
+<pre><code class="language-yaml"># Potentially expensive: Joining large streams without proper keying
+pipelines:
+  expensive_join:
+    from: large_stream_1
+    via:
+      - type: join
+        with: large_stream_2
+        # Missing proper key selection
+    to: joined_output
+
+# Better: Ensure proper keying for efficient joins
+pipelines:
+  efficient_join:
+    from: large_stream_1
+    via:
+      - type: selectKey
+        keySelector:
+          expression: value.get('joinKey')
+      - type: join
+        with: large_stream_2
+        # Now the streams are properly keyed
+    to: joined_output
+</code></pre>
+<h2 id="duration-specification">Duration Specification</h2>
+<p>Some pipeline operations require specifying time durations. In KSML, durations are expressed using a simple format:</p>
+<pre><code>###x
+</code></pre>
+<p>Where:
+- <code>###</code> is a positive number
+- <code>x</code> is an optional time unit:
+  - (none): milliseconds
+  - <code>s</code>: seconds
+  - <code>m</code>: minutes
+  - <code>h</code>: hours
+  - <code>d</code>: days
+  - <code>w</code>: weeks</p>
+<p>Examples:</p>
+<pre><code>100   # 100 milliseconds
+30s   # 30 seconds
+5m    # 5 minutes
+2h    # 2 hours
+1d    # 1 day
+4w    # 4 weeks
+</code></pre>
+<p>Durations are commonly used in windowing operations:</p>
+<pre><code class="language-yaml">- type: windowedBy
+  timeWindows:
+    size: 5m        # 5-minute windows
+    advanceBy: 1m   # Advancing every minute (sliding window)
+</code></pre>
+<h2 id="examples">Examples</h2>
+<h3 id="example-1-simple-filtering-and-transformation">Example 1: Simple Filtering and Transformation</h3>
+<pre><code class="language-yaml">pipelines:
+  process_sensor_readings:
+    from: raw_sensor_readings
+    via:
+      # Filter out readings with errors
+      - type: filter
+        if:
+          expression: value.get('error') is None
+
+      # Convert temperature from Celsius to Fahrenheit
+      - type: mapValues
+        mapper:
+          expression: {
+            &quot;sensorId&quot;: value.get('sensorId'),
+            &quot;timestamp&quot;: value.get('timestamp'),
+            &quot;tempF&quot;: value.get('tempC') * 9/5 + 32,
+            &quot;humidity&quot;: value.get('humidity')
+          }
+
+      # Add a timestamp for when we processed the reading
+      - type: mapValues
+        mapper:
+          expression: dict(list(value.items()) + [(&quot;processedAt&quot;, time.time())])
+    to: processed_sensor_readings
+</code></pre>
+<h3 id="example-2-joining-streams">Example 2: Joining Streams</h3>
+<pre><code class="language-yaml">pipelines:
+  enrich_orders:
+    from: orders
+    via:
+      # Join with customer information
+      - type: join
+        with: customers
+        valueJoiner:
+          expression: {
+            &quot;orderId&quot;: value1.get('orderId'),
+            &quot;products&quot;: value1.get('products'),
+            &quot;total&quot;: value1.get('total'),
+            &quot;customer&quot;: {
+              &quot;id&quot;: key,
+              &quot;name&quot;: value2.get('name'),
+              &quot;email&quot;: value2.get('email')
+            }
+          }
+
+      # Join with shipping information
+      - type: join
+        with: shipping_info
+        valueJoiner:
+          expression: dict(list(value1.items()) + [(&quot;shipping&quot;, value2)])
+    to: enriched_orders
+</code></pre>
+<h3 id="example-3-aggregation">Example 3: Aggregation</h3>
+<pre><code class="language-yaml">pipelines:
+  calculate_sales_by_category:
+    from: sales
+    via:
+      # Group by product category
+      - type: groupBy
+        keySelector:
+          expression: value.get('category')
+
+      # Sum the sales amounts
+      - type: aggregate
+        initializer:
+          expression: {&quot;count&quot;: 0, &quot;total&quot;: 0.0}
+        aggregator:
+          expression: {
+            &quot;count&quot;: aggregate.get('count') + 1,
+            &quot;total&quot;: aggregate.get('total') + value.get('amount')
+          }
+
+      # Format the output
+      - type: mapValues
+        mapper:
+          expression: {
+            &quot;category&quot;: key,
+            &quot;count&quot;: value.get('count'),
+            &quot;total&quot;: value.get('total'),
+            &quot;average&quot;: value.get('total') / value.get('count') if value.get('count') &gt; 0 else 0
+          }
+    to: sales_by_category
+</code></pre>
+<h2 id="conclusion">Conclusion</h2>
+<p>Pipelines are the core building blocks of KSML applications. By understanding how to design and connect pipelines effectively, you can create powerful stream processing applications that are both maintainable and efficient.</p>
+<p>For more detailed information about specific operations that can be used in pipelines, see the <a href="/docs/core-concepts/operations.md">Operations</a> page. To learn about functions that can be used within pipeline operations, see the <a href="/docs/core-concepts/functions.md">Functions</a> page.</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js"></script>
+        <script src="../../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

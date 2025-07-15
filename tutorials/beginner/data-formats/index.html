@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>Working with Different Data Formats - KSML Documentation</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../../../css/brands.min.css" rel="stylesheet">
+        <link href="../../../css/solid.min.css" rel="stylesheet">
+        <link href="../../../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../../..">KSML Documentation</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="../../.." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../getting-started/" class="nav-link">Getting Started</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../core-concepts/" class="nav-link">Core Concepts</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../" class="nav-link">Tutorials</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../use-cases/" class="nav-link">Use Case Guides</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../reference/" class="nav-link">Reference</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../resources/" class="nav-link">Resources</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../about/" class="nav-link">About</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#working-with-different-data-formats" class="nav-link">Working with Different Data Formats</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#prerequisites" class="nav-link">Prerequisites</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#what-youll-learn" class="nav-link">What You'll Learn</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#data-formats-in-ksml" class="nav-link">Data Formats in KSML</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#specifying-data-formats" class="nav-link">Specifying Data Formats</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#working-with-json-data" class="nav-link">Working with JSON Data</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#working-with-avro-data" class="nav-link">Working with Avro Data</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#working-with-csv-data" class="nav-link">Working with CSV Data</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#converting-between-data-formats" class="nav-link">Converting Between Data Formats</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#advanced-working-with-multiple-formats-in-a-single-pipeline" class="nav-link">Advanced: Working with Multiple Formats in a Single Pipeline</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#conclusion" class="nav-link">Conclusion</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#next-steps" class="nav-link">Next Steps</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="working-with-different-data-formats">Working with Different Data Formats</h1>
+<p>This tutorial guides you through working with various data formats in KSML. You'll learn how to process data in different formats, convert between formats, and leverage schema-based formats for data validation and compatibility.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li>Basic understanding of Kafka concepts (topics, messages)</li>
+<li>Completed the <a href="../simple-pipeline/">Building a Simple Data Pipeline</a> tutorial</li>
+<li>Familiarity with basic KSML concepts (streams, functions, pipelines)</li>
+</ul>
+<h2 id="what-youll-learn">What You'll Learn</h2>
+<p>In this tutorial, you'll learn:
+1. How to specify data formats for streams
+2. Working with JSON data
+3. Using Avro schemas for data validation
+4. Processing CSV data
+5. Converting between different data formats</p>
+<h2 id="data-formats-in-ksml">Data Formats in KSML</h2>
+<p>KSML supports a variety of data formats for both keys and values in Kafka messages:</p>
+<ul>
+<li><strong>String</strong>: Plain text data</li>
+<li><strong>JSON</strong>: JavaScript Object Notation for structured data</li>
+<li><strong>Avro</strong>: Schema-based binary format with strong typing</li>
+<li><strong>CSV</strong>: Comma-separated values for tabular data</li>
+<li><strong>XML</strong>: Extensible Markup Language for hierarchical data</li>
+<li><strong>Protobuf</strong>: Google's Protocol Buffers, a compact binary format</li>
+<li><strong>Binary</strong>: Raw binary data</li>
+</ul>
+<p>Each format has its own strengths and use cases, which we'll explore in this tutorial.</p>
+<h2 id="specifying-data-formats">Specifying Data Formats</h2>
+<p>When defining streams in KSML, you specify the data format using the <code>keyType</code> and <code>valueType</code> properties:</p>
+<pre><code class="language-yaml">streams:
+  json_stream:
+    topic: example_json_topic
+    keyType: string
+    valueType: json
+
+  avro_stream:
+    topic: example_avro_topic
+    keyType: string
+    valueType: avro:SensorData
+</code></pre>
+<p>For schema-based formats like Avro, XML, and Protobuf, you specify the schema name after the format type (e.g., <code>avro:SensorData</code>).</p>
+<h2 id="working-with-json-data">Working with JSON Data</h2>
+<p>JSON is one of the most common data formats used with Kafka. It's human-readable, flexible, and widely supported.</p>
+<h3 id="reading-and-writing-json-data">Reading and Writing JSON Data</h3>
+<p>Here's an example of a pipeline that reads and writes JSON data:</p>
+<pre><code class="language-yaml">streams:
+  input_stream:
+    topic: input_topic
+    keyType: string
+    valueType: json
+  output_stream:
+    topic: output_topic
+    keyType: string
+    valueType: json
+
+functions:
+  transform_json:
+    type: valueMapper
+    code: |
+      # Access JSON fields directly
+      temperature = value.get('temperature', 0)
+      humidity = value.get('humidity', 0)
+
+      # Create a new JSON structure
+      return {
+        'device_id': key,
+        'readings': {
+          'temperature': temperature,
+          'humidity': humidity
+        },
+        'status': 'normal' if temperature &lt; 30 else 'warning',
+        'timestamp': value.get('timestamp')
+      }
+
+pipelines:
+  json_pipeline:
+    from: input_stream
+    via:
+      - type: mapValues
+        using: transform_json
+    to: output_stream
+</code></pre>
+<h3 id="json-data-handling-tips">JSON Data Handling Tips</h3>
+<ul>
+<li>Use Python's dictionary methods like <code>get()</code> to safely access fields that might not exist</li>
+<li>Remember that numeric values in JSON are preserved as numbers in KSML</li>
+<li>Nested structures can be accessed using dot notation or nested <code>get()</code> calls</li>
+</ul>
+<h2 id="working-with-avro-data">Working with Avro Data</h2>
+<p>Avro is a schema-based binary format that provides strong typing, schema evolution, and compact serialization.</p>
+<h3 id="defining-an-avro-schema">Defining an Avro Schema</h3>
+<p>Avro schemas are defined in JSON format. Here's a simple example for sensor data:</p>
+<pre><code class="language-json">{
+  &quot;type&quot;: &quot;record&quot;,
+  &quot;name&quot;: &quot;SensorData&quot;,
+  &quot;namespace&quot;: &quot;com.example&quot;,
+  &quot;fields&quot;: [
+    {&quot;name&quot;: &quot;name&quot;, &quot;type&quot;: [&quot;null&quot;, &quot;string&quot;], &quot;default&quot;: null},
+    {&quot;name&quot;: &quot;timestamp&quot;, &quot;type&quot;: [&quot;null&quot;, &quot;string&quot;], &quot;default&quot;: null},
+    {&quot;name&quot;: &quot;type&quot;, &quot;type&quot;: [&quot;null&quot;, &quot;string&quot;], &quot;default&quot;: null},
+    {&quot;name&quot;: &quot;unit&quot;, &quot;type&quot;: [&quot;null&quot;, &quot;string&quot;], &quot;default&quot;: null},
+    {&quot;name&quot;: &quot;value&quot;, &quot;type&quot;: [&quot;null&quot;, &quot;string&quot;], &quot;default&quot;: null},
+    {&quot;name&quot;: &quot;color&quot;, &quot;type&quot;: [&quot;null&quot;, &quot;string&quot;], &quot;default&quot;: null},
+    {&quot;name&quot;: &quot;owner&quot;, &quot;type&quot;: [&quot;null&quot;, &quot;string&quot;], &quot;default&quot;: null},
+    {&quot;name&quot;: &quot;city&quot;, &quot;type&quot;: [&quot;null&quot;, &quot;string&quot;], &quot;default&quot;: null}
+  ]
+}
+</code></pre>
+<p>Save this schema in a file with a <code>.avsc</code> extension (e.g., <code>SensorData.avsc</code>).</p>
+<h3 id="reading-and-writing-avro-data">Reading and Writing Avro Data</h3>
+<p>Here's how to work with Avro data in KSML:</p>
+<pre><code class="language-yaml">streams:
+  avro_input:
+    topic: sensor_data_avro
+    keyType: string
+    valueType: avro:SensorData
+  json_output:
+    topic: sensor_data_json
+    keyType: string
+    valueType: json
+
+pipelines:
+  avro_to_json:
+    from: avro_input
+    via:
+      - type: peek
+        forEach:
+          code: |
+            log.info(&quot;Processing Avro record: {}&quot;, value)
+      - type: convertValue
+        into: json
+    to: json_output
+</code></pre>
+<h3 id="benefits-of-using-avro">Benefits of Using Avro</h3>
+<ul>
+<li><strong>Schema Validation</strong>: Data is validated against the schema during serialization</li>
+<li><strong>Compact Format</strong>: Binary encoding is more efficient than text-based formats</li>
+<li><strong>Schema Evolution</strong>: Avro supports adding, removing, or changing fields while maintaining compatibility</li>
+<li><strong>Language Interoperability</strong>: Avro schemas can be used with multiple programming languages</li>
+</ul>
+<h2 id="working-with-csv-data">Working with CSV Data</h2>
+<p>CSV (Comma-Separated Values) is a simple format for representing tabular data.</p>
+<h3 id="reading-and-writing-csv-data">Reading and Writing CSV Data</h3>
+<p>Here's how to work with CSV data in KSML:</p>
+<pre><code class="language-yaml">streams:
+  csv_input:
+    topic: sensor_data_csv
+    keyType: string
+    valueType: csv
+  json_output:
+    topic: sensor_data_json
+    keyType: string
+    valueType: json
+
+functions:
+  csv_to_json:
+    type: valueMapper
+    code: |
+      # Assuming CSV columns are: name,timestamp,type,unit,value
+      if len(value) &gt;= 5:
+        return {
+          'name': value[0],
+          'timestamp': value[1],
+          'type': value[2],
+          'unit': value[3],
+          'value': value[4]
+        }
+      else:
+        log.warn(&quot;Invalid CSV record: {}&quot;, value)
+        return {}
+
+pipelines:
+  process_csv:
+    from: csv_input
+    via:
+      - type: mapValues
+        using: csv_to_json
+    to: json_output
+</code></pre>
+<h3 id="csv-data-handling-tips">CSV Data Handling Tips</h3>
+<ul>
+<li>CSV data is represented as a list of values in KSML</li>
+<li>You need to know the column order to correctly interpret the data</li>
+<li>Consider adding header validation if your CSV data includes headers</li>
+</ul>
+<h2 id="converting-between-data-formats">Converting Between Data Formats</h2>
+<p>KSML makes it easy to convert between different data formats using the <code>convertValue</code> operation.</p>
+<h3 id="example-converting-between-multiple-formats">Example: Converting Between Multiple Formats</h3>
+<p>Here's an example that demonstrates converting between several formats:</p>
+<pre><code class="language-yaml">streams:
+  avro_input:
+    topic: sensor_data_avro
+    keyType: string
+    valueType: avro:SensorData
+  xml_output:
+    topic: sensor_data_xml
+    keyType: string
+    valueType: xml:SensorData
+
+pipelines:
+  format_conversion:
+    from: avro_input
+    via:
+      # Convert from Avro to JSON
+      - type: convertValue
+        into: json
+      - type: peek
+        forEach:
+          code: |
+            log.info(&quot;As JSON: {}&quot;, value)
+
+      # Convert from JSON to XML
+      - type: convertValue
+        into: xml:SensorData
+      - type: peek
+        forEach:
+          code: |
+            log.info(&quot;As XML object: {}&quot;, value)
+
+      # Convert to string to see the XML representation
+      - type: convertValue
+        into: string
+      - type: peek
+        forEach:
+          code: |
+            log.info(&quot;As XML string: {}&quot;, value)
+
+      # Convert back to XML object for output
+      - type: convertValue
+        into: xml:SensorData
+    to: xml_output
+</code></pre>
+<h3 id="implicit-conversion">Implicit Conversion</h3>
+<p>KSML can also perform implicit conversion when writing to a topic with a different format than the current message format:</p>
+<pre><code class="language-yaml">pipelines:
+  implicit_conversion:
+    from: avro_input  # Stream with Avro format
+    to: xml_output    # Stream with XML format
+    # The conversion happens automatically
+</code></pre>
+<h2 id="advanced-working-with-multiple-formats-in-a-single-pipeline">Advanced: Working with Multiple Formats in a Single Pipeline</h2>
+<p>In real-world scenarios, you might need to process data from multiple sources with different formats. Here's an example that combines JSON and Avro data:</p>
+<pre><code class="language-yaml">streams:
+  json_stream:
+    topic: device_config
+    keyType: string
+    valueType: json
+  avro_stream:
+    topic: sensor_readings
+    keyType: string
+    valueType: avro:SensorData
+  enriched_output:
+    topic: enriched_sensor_data
+    keyType: string
+    valueType: json
+
+tables:
+  config_table:
+    stream: json_stream
+    keyType: string
+    valueType: json
+
+functions:
+  enrich_sensor_data:
+    type: valueMapper
+    code: |
+      # Get device configuration from the table
+      device_config = tables.config_table.get(key)
+
+      # Convert Avro to a dictionary if needed
+      sensor_data = value
+
+      # Combine the data
+      if device_config is not None:
+        return {
+          'device_id': key,
+          'reading': {
+            'type': sensor_data.get('type'),
+            'unit': sensor_data.get('unit'),
+            'value': sensor_data.get('value')
+          },
+          'config': {
+            'threshold': device_config.get('threshold'),
+            'alert_level': device_config.get('alert_level')
+          },
+          'timestamp': sensor_data.get('timestamp')
+        }
+      else:
+        return sensor_data
+
+pipelines:
+  enrichment_pipeline:
+    from: avro_stream
+    via:
+      - type: mapValues
+        using: enrich_sensor_data
+    to: enriched_output
+</code></pre>
+<h2 id="conclusion">Conclusion</h2>
+<p>In this tutorial, you've learned how to work with different data formats in KSML, including:</p>
+<ul>
+<li>Specifying data formats for streams</li>
+<li>Working with JSON data</li>
+<li>Using Avro schemas for data validation</li>
+<li>Processing CSV data</li>
+<li>Converting between different formats</li>
+</ul>
+<p>These skills will help you build flexible and interoperable data pipelines that can work with a variety of data sources and destinations.</p>
+<h2 id="next-steps">Next Steps</h2>
+<ul>
+<li>Explore the <a href="../logging-monitoring/">Logging and Monitoring</a> tutorial to learn how to add effective logging to your pipelines</li>
+<li>Check out the <a href="../../intermediate/">Intermediate Tutorials</a> for more advanced KSML features</li>
+<li>Review the <a href="../../../resources/examples-library/">KSML Examples</a> for more examples of working with different data formats</li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../../../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../js/base.js"></script>
+        <script src="../../../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>KSML Examples Library - KSML Documentation</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../../css/brands.min.css" rel="stylesheet">
+        <link href="../../css/solid.min.css" rel="stylesheet">
+        <link href="../../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../..">KSML Documentation</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="../.." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../tutorials/getting-started/" class="nav-link">Getting Started</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../core-concepts/" class="nav-link">Core Concepts</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../tutorials/" class="nav-link">Tutorials</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../use-cases/" class="nav-link">Use Case Guides</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../reference/" class="nav-link">Reference</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../" class="nav-link">Resources</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../about/" class="nav-link">About</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#ksml-examples-library" class="nav-link">KSML Examples Library</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#basic-examples" class="nav-link">Basic Examples</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#intermediate-examples" class="nav-link">Intermediate Examples</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#advanced-examples" class="nav-link">Advanced Examples</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#domain-specific-examples" class="nav-link">Domain-Specific Examples</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#best-practices" class="nav-link">Best Practices</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#contributing-examples" class="nav-link">Contributing Examples</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="ksml-examples-library">KSML Examples Library</h1>
+<p>This document provides a collection of ready-to-use KSML examples for common stream processing patterns and use cases. Each example includes a description, the complete KSML code, and explanations of key concepts.</p>
+<h2 id="basic-examples">Basic Examples</h2>
+<h3 id="hello-world">Hello World</h3>
+<p>A simple pipeline that reads messages from one topic and logs them to stdout.</p>
+<pre><code class="language-yaml">streams:
+  input:
+    topic: input-topic
+    keyType: string
+    valueType: string
+
+  output:
+    topic: output-topic
+    keyType: string
+    valueType: string
+
+pipelines:
+  hello_world:
+    from: input
+    via:
+      - type: peek
+        forEach:
+          code: |
+            log.info(&quot;Processing message: key={}, value={}&quot;, key, value)
+    to: output
+</code></pre>
+<h3 id="simple-transformation">Simple Transformation</h3>
+<p>Transforms JSON messages by extracting and restructuring fields and writes the results to a target topic.</p>
+<pre><code class="language-yaml">streams:
+  input:
+    topic: input-topic
+    keyType: string
+    valueType: json
+
+  output:
+    topic: output-topic
+    keyType: string
+    valueType: json
+
+pipelines:
+  transform:
+    from: input
+    via:
+      - type: mapValues
+        mapper:
+          code: |
+            return {
+              &quot;id&quot;: value.get(&quot;user_id&quot;),
+              &quot;name&quot;: value.get(&quot;first_name&quot;) + &quot; &quot; + value.get(&quot;last_name&quot;),
+              &quot;email&quot;: value.get(&quot;email&quot;),
+              &quot;created_at&quot;: value.get(&quot;signup_date&quot;)
+            }
+    to: output
+</code></pre>
+<h3 id="filtering">Filtering</h3>
+<p>Filters messages based on a condition.</p>
+<pre><code class="language-yaml">streams:
+  input:
+    topic: input-topic
+    keyType: string
+    valueType: json
+
+  output:
+    topic: output-topic
+    keyType: string
+    valueType: json
+
+pipelines:
+  filter:
+    from: input
+    via:
+      - type: filter
+        if:
+          expression: value.get(&quot;age&quot;) &gt;= 18
+    to: output
+</code></pre>
+<h2 id="intermediate-examples">Intermediate Examples</h2>
+<h3 id="aggregation">Aggregation</h3>
+<p>Counts the number of events by category.</p>
+<pre><code class="language-yaml">streams:
+  input:
+    topic: input-topic
+    keyType: string
+    valueType: json
+
+  output:
+    topic: output-topic
+    keyType: json
+    valueType: json
+
+pipelines:
+  count_by_category:
+    from: input
+    via:
+      - type: selectKey
+        mapper:
+          expression: value.get(&quot;category&quot;)
+      - type: groupByKey
+      - type: count
+        store:
+          name: category_count
+          type: window
+          windowSize: 10m
+          retention: 1h
+          caching: false
+      - type: toStream
+    to: output
+</code></pre>
+<h3 id="windowed-aggregation">Windowed Aggregation</h3>
+<p>Calculates the average value over a time window.</p>
+<pre><code class="language-yaml">streams:
+  input:
+    topic: input-topic
+    keyType: string
+    valueType: json
+
+  output:
+    topic: output-topic
+    keyType: string
+    valueType: json
+
+pipelines:
+  average_by_window:
+    from: input
+    via:
+      - type: selectKey
+        mapper:
+          expression: value.get(&quot;category&quot;)
+      - type: groupByKey
+      - type: windowByTime
+        windowType: tumbling
+        duration: 1h
+        grace: 10s
+      - type: aggregate
+        initializer:
+          expression: {&quot;sum&quot;: 0, &quot;count&quot;: 0}
+          resultType: struct
+        aggregator:
+          code: |
+            count = aggregate.get(&quot;count&quot;, 0) + 1
+            sum = aggregate.get(&quot;sum&quot;, 0) + value.get(&quot;amount&quot;, 0)
+            return {
+              &quot;count&quot;: count,
+              &quot;sum&quot;: sum,
+              &quot;average&quot;: sum / count
+            }
+          resultType: struct
+      - type: toStream
+    to: output
+</code></pre>
+<h3 id="join-example">Join Example</h3>
+<p>Joins a stream of orders with a table of products.</p>
+<pre><code class="language-yaml">streams:
+  orders:
+    topic: orders-topic
+    keyType: string
+    valueType: json
+
+  products:
+    topic: products-topic
+    keyType: string
+    valueType: json
+
+  enriched_orders:
+    topic: enriched-orders-topic
+    keyType: string
+    valueType: json
+
+functions:
+  enrich_order:
+    type: mapValues
+    code: |
+      order = value1
+      product = value2
+
+      if product is None:
+        return order
+
+      return {
+        &quot;order_id&quot;: order.get(&quot;order_id&quot;),
+        &quot;product_id&quot;: order.get(&quot;product_id&quot;),
+        &quot;product_name&quot;: product.get(&quot;name&quot;, &quot;Unknown&quot;),
+        &quot;product_category&quot;: product.get(&quot;category&quot;, &quot;Unknown&quot;),
+        &quot;quantity&quot;: order.get(&quot;quantity&quot;, 0),
+        &quot;unit_price&quot;: product.get(&quot;price&quot;, 0),
+        &quot;total_price&quot;: order.get(&quot;quantity&quot;, 0) * product.get(&quot;price&quot;, 0),
+        &quot;customer_id&quot;: order.get(&quot;customer_id&quot;),
+        &quot;order_date&quot;: order.get(&quot;order_date&quot;)
+      }
+
+pipelines:
+  enrich_orders:
+    from: orders
+    via:
+      - type: selectKey
+        mapper:
+          expression: value.get(&quot;product_id&quot;)
+      - type: join
+        with: products
+        valueJoiner: enrich_order
+    to: enriched_orders
+</code></pre>
+<h2 id="advanced-examples">Advanced Examples</h2>
+<h3 id="complex-event-processing">Complex Event Processing</h3>
+<p>Detects patterns in a stream of events.</p>
+<pre><code class="language-yaml">streams:
+  events:
+    topic: events-topic
+    keyType: string
+    valueType: json
+
+  alerts:
+    topic: alerts-topic
+    keyType: string
+    valueType: json
+
+functions:
+  detect_pattern:
+    type: valueTransformer
+    code: |
+      events = value
+
+      # Check for a specific pattern: 3 failed login attempts within 1 minute
+      if len(events) &lt; 3:
+        return None
+
+      # Sort events by timestamp
+      sorted_events = sorted(events, key=lambda e: e.get(&quot;timestamp&quot;, 0))
+
+      # Check if all events are login failures
+      all_failures = all(e.get(&quot;event_type&quot;) == &quot;LOGIN_FAILURE&quot; for e in sorted_events)
+
+      # Check if events occurred within 1 minute
+      first_timestamp = sorted_events[0].get(&quot;timestamp&quot;, 0)
+      last_timestamp = sorted_events[-1].get(&quot;timestamp&quot;, 0)
+      within_timeframe = (last_timestamp - first_timestamp) &lt;= 60000  # 1 minute in ms
+
+      if all_failures and within_timeframe:
+        return {
+          &quot;alert_type&quot;: &quot;POTENTIAL_BREACH&quot;,
+          &quot;user_id&quot;: sorted_events[0].get(&quot;user_id&quot;),
+          &quot;attempt_count&quot;: len(sorted_events),
+          &quot;first_attempt&quot;: first_timestamp,
+          &quot;last_attempt&quot;: last_timestamp,
+          &quot;ip_addresses&quot;: list(set(e.get(&quot;ip_address&quot;) for e in sorted_events))
+        }
+
+      return None
+
+pipelines:
+  security_monitoring:
+    from: events
+    via:
+      - type: filter
+        if:
+          expression: value.get(&quot;event_type&quot;) == &quot;LOGIN_FAILURE&quot;
+      - type: selectKey
+        mapper:
+          expression: value.get(&quot;user_id&quot;)
+      - type: groupByKey
+      - type: windowBySession
+        inactivityGap: 5m  # 5 minute session
+        grace: 10s
+      - type: aggregate
+        initializer:
+          expression: []
+        aggregator:
+          expression: aggregatedValue + [value]
+      - type: transformValue
+        mapper: detect_pattern
+      - type: filter
+        if:
+          expression: value is not None
+    to: alerts
+</code></pre>
+<h3 id="multi-stream-processing">Multi-Stream Processing</h3>
+<p>Processes data from multiple input streams and produces multiple output streams.</p>
+<pre><code class="language-yaml">streams:
+  clicks:
+    topic: user-clicks
+    keyType: string
+    valueType: json
+
+  purchases:
+    topic: user-purchases
+    keyType: string
+    valueType: json
+
+  user_profiles:
+    topic: user-profiles
+    keyType: string
+    valueType: json
+
+  click_stats:
+    topic: click-statistics
+    keyType: string
+    valueType: json
+
+  purchase_stats:
+    topic: purchase-statistics
+    keyType: string
+    valueType: json
+
+  user_activity:
+    topic: user-activity
+    keyType: string
+    valueType: json
+
+pipelines:
+  # Process clicks
+  process_clicks:
+    from: clicks
+    via:
+      - type: selectKey
+        mapper:
+          expression: value.get(&quot;user_id&quot;)
+      - type: groupByKey
+      - type: windowByTime
+        windowType: tumbling
+        timeDifference: 1h
+      - type: count
+      - type: toStream
+      - type: transformValue
+        mapper:
+          expression: |
+            {
+              &quot;user_id&quot;: key.get(&quot;key&quot;),
+              &quot;click_count&quot;: value,
+              &quot;datetime&quot;: key.get(&quot;startTime&quot;)
+            }
+    to: click_stats
+
+  # Process purchases
+  process_purchases:
+    from: purchases
+    via:
+      - type: selectKey
+        mapper:
+          expression: value.get(&quot;user_id&quot;)
+      - type: groupByKey
+      - type: aggregate
+        initializer:
+          expression: |
+            {&quot;count&quot;: 0, &quot;total&quot;: 0}
+        aggregator:
+          code: |
+            count = aggregatedValue.get(&quot;count&quot;, 0) + 1
+            total = aggregatedValue.get(&quot;total&quot;, 0) + value.get(&quot;amount&quot;, 0)
+            return {
+              &quot;count&quot;: count,
+              &quot;total&quot;: total
+            }
+      - type: toStream
+      - type: transformValue
+        mapper:
+          code: |
+            return {
+              &quot;user_id&quot;: key.get(&quot;key&quot;),
+              &quot;purchase_count&quot;: value.get(&quot;count&quot;),
+              &quot;total_spent&quot;: value.get(&quot;total&quot;),
+              &quot;average_order&quot;: value.get(&quot;total&quot;) / value.get(&quot;count&quot;)
+            }
+    to: purchase_stats
+
+  # Combine user activity
+  combine_activity:
+    from: clicks
+    via:
+      - type: selectKey
+        mapper:
+          expression: value.get(&quot;user_id&quot;)
+      - type: leftJoin
+        with: purchases
+        valueJoiner: 
+      - type: leftJoin
+        with: user_profiles
+        valueJoiner:
+      - type: mapValues
+        mapper:
+          code: |
+            clicks = value if value else {}
+            purchases = foreignValue if foreignValue else {}
+            profile = foreignValue2 if foreignValue2 else {}
+
+            return {
+              &quot;user_id&quot;: key,
+              &quot;name&quot;: profile.get(&quot;name&quot;, &quot;Unknown&quot;),
+              &quot;email&quot;: profile.get(&quot;email&quot;, &quot;Unknown&quot;),
+              &quot;last_click&quot;: clicks.get(&quot;timestamp&quot;),
+              &quot;last_purchase&quot;: purchases.get(&quot;timestamp&quot;),
+              &quot;lifetime_value&quot;: purchases.get(&quot;amount&quot;, 0),
+              &quot;user_segment&quot;: profile.get(&quot;segment&quot;, &quot;Unknown&quot;)
+            }
+    to: user_activity
+</code></pre>
+<h3 id="error-handling">Error Handling</h3>
+<p>Demonstrates error handling patterns in KSML.</p>
+<pre><code class="language-yaml">streams:
+  input:
+    topic: input-topic
+    keyType: string
+    valueType: json
+
+  output:
+    topic: output-topic
+    keyType: string
+    valueType: json
+
+  error_stream:
+    topic: error-topic
+    keyType: string
+    valueType: json
+
+functions:
+  process_data:
+    type: mapValues
+    parameters:
+      - name: data
+        type: object
+    code: |
+      # This function might throw exceptions
+      if &quot;required_field&quot; not in data:
+        raise ValueError(&quot;Missing required field&quot;)
+
+      result = {
+        &quot;id&quot;: data.get(&quot;id&quot;),
+        &quot;processed_value&quot;: data.get(&quot;value&quot;) * 2,
+        &quot;timestamp&quot;: int(time.time() * 1000)
+      }
+
+      return result
+
+pipelines:
+  robust_processing:
+    from: input
+    via:
+      - type: try
+        operations:
+          - type: mapValues
+            mapper:
+              code: process_data(value)
+        catch:
+          - type: peek
+            forEach:
+              code: |
+                log.error(&quot;Error processing record: {}&quot;, exception)
+          - type: mapValues
+            mapper:
+              code: |
+                return {
+                  &quot;original_data&quot;: value,
+                  &quot;error&quot;: str(exception),
+                  &quot;timestamp&quot;: int(time.time() * 1000)
+                }
+          - type: to
+            stream: error_stream
+    to: output
+</code></pre>
+<h2 id="domain-specific-examples">Domain-Specific Examples</h2>
+<h3 id="e-commerce">E-commerce</h3>
+<p>Processes order data for an e-commerce application.</p>
+<pre><code class="language-yaml">streams:
+  orders:
+    topic: orders
+    keyType: string
+    valueType: json
+
+  inventory:
+    topic: inventory
+    keyType: string
+    valueType: json
+
+  shipments:
+    topic: shipments
+    keyType: string
+    valueType: json
+
+  order_updates:
+    topic: order-updates
+    keyType: string
+    valueType: json
+
+pipelines:
+  process_orders:
+    from: orders
+    via:
+      - type: peek
+        forEach:
+          code: |
+            log.info(&quot;Processing order: {}&quot;, value.get(&quot;order_id&quot;))
+      - type: flatMap
+        mapper:
+          code: |
+            # Create a record for each item in the order
+            result = []
+            for item in value.get(&quot;items&quot;, []):
+              result.append((
+                item.get(&quot;product_id&quot;),
+                {
+                  &quot;order_id&quot;: value.get(&quot;order_id&quot;),
+                  &quot;product_id&quot;: item.get(&quot;product_id&quot;),
+                  &quot;quantity&quot;: item.get(&quot;quantity&quot;),
+                  &quot;customer_id&quot;: value.get(&quot;customer_id&quot;),
+                  &quot;order_date&quot;: value.get(&quot;order_date&quot;)
+                }
+              ))
+            return result
+      - type: join
+        with: inventory
+      - type: mapValues
+        mapper:
+          code: |
+            order_item = value
+            inventory_item = foreignValue
+
+            # Check if item is in stock
+            in_stock = inventory_item.get(&quot;quantity&quot;, 0) &gt;= order_item.get(&quot;quantity&quot;, 0)
+
+            return {
+              &quot;order_id&quot;: order_item.get(&quot;order_id&quot;),
+              &quot;product_id&quot;: order_item.get(&quot;product_id&quot;),
+              &quot;product_name&quot;: inventory_item.get(&quot;name&quot;, &quot;Unknown&quot;),
+              &quot;quantity&quot;: order_item.get(&quot;quantity&quot;),
+              &quot;in_stock&quot;: in_stock,
+              &quot;estimated_ship_date&quot;: inventory_item.get(&quot;next_restock_date&quot;) if not in_stock else order_item.get(&quot;order_date&quot;)
+            }
+    to: order_updates
+</code></pre>
+<h3 id="iot-sensor-processing">IoT Sensor Processing</h3>
+<p>Processes sensor data from IoT devices.</p>
+<pre><code class="language-yaml">streams:
+  sensor_data:
+    topic: sensor-readings
+    keyType: string
+    valueType: json
+
+  device_metadata:
+    topic: device-metadata
+    keyType: string
+    valueType: json
+
+  alerts:
+    topic: sensor-alerts
+    keyType: string
+    valueType: json
+
+  aggregated_readings:
+    topic: aggregated-readings
+    keyType: string
+    valueType: json
+
+pipelines:
+  # Process raw sensor data
+  process_readings:
+    from: sensor_data
+    via:
+      - type: join
+        with: device_metadata
+      - type: mapValues
+        mapper:
+          code: |
+            reading = value
+            metadata = foreignValue
+
+            # Enrich with device metadata
+            return {
+              &quot;device_id&quot;: reading.get(&quot;device_id&quot;),
+              &quot;sensor_type&quot;: metadata.get(&quot;sensor_type&quot;),
+              &quot;location&quot;: metadata.get(&quot;location&quot;),
+              &quot;reading&quot;: reading.get(&quot;value&quot;),
+              &quot;unit&quot;: metadata.get(&quot;unit&quot;),
+              &quot;timestamp&quot;: reading.get(&quot;timestamp&quot;),
+              &quot;battery_level&quot;: reading.get(&quot;battery_level&quot;)
+            }
+      - type: branch
+        predicates:
+          - code: |
+              # Check for anomalous readings
+              min_threshold = foreignValue.get(&quot;min_threshold&quot;)
+              max_threshold = foreignValue.get(&quot;max_threshold&quot;)
+              reading_value = value.get(&quot;reading&quot;)
+
+              return (reading_value &lt; min_threshold or reading_value &gt; max_threshold)
+          - expression: true  # All readings
+    to:
+      - alerts
+      - aggregated_readings
+</code></pre>
+<h2 id="best-practices">Best Practices</h2>
+<p>When using these examples, consider the following best practices:</p>
+<ol>
+<li><strong>Adapt to your specific use case</strong>: These examples provide a starting point. Modify them to fit your specific requirements.</li>
+<li><strong>Test thoroughly</strong>: Always test your KSML applications with representative data before deploying to production.</li>
+<li><strong>Monitor performance</strong>: Keep an eye on throughput, latency, and resource usage, especially for stateful operations.</li>
+<li><strong>Handle errors gracefully</strong>: Implement proper error handling to prevent pipeline failures.</li>
+<li><strong>Document your code</strong>: Add comments to explain complex logic and business rules.</li>
+</ol>
+<h2 id="contributing-examples">Contributing Examples</h2>
+<p>We welcome contributions to this examples library! If you have a useful KSML pattern or solution to share:</p>
+<ol>
+<li>Document your example with clear explanations</li>
+<li>Include the complete KSML code</li>
+<li>Explain the key concepts and patterns used</li>
+<li>Submit a pull request to the KSML repository</li>
+</ol>
+<p>Your examples will help the community learn and apply KSML more effectively.</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js"></script>
+        <script src="../../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

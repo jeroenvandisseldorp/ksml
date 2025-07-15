@@ -1,0 +1,2288 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>Operations - KSML Documentation</title>
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../css/brands.min.css" rel="stylesheet">
+        <link href="../css/solid.min.css" rel="stylesheet">
+        <link href="../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="..">KSML Documentation</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href=".." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../tutorials/getting-started/" class="nav-link">Getting Started</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../core-concepts/" class="nav-link">Core Concepts</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../tutorials/" class="nav-link">Tutorials</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../use-cases/" class="nav-link">Use Case Guides</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../reference/" class="nav-link">Reference</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../resources/" class="nav-link">Resources</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../about/" class="nav-link">About</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#operations" class="nav-link">Operations</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#introduction" class="nav-link">Introduction</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#transform-operations" class="nav-link">Transform Operations</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#sink-operations" class="nav-link">Sink Operations</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="operations">Operations</h1>
+<h3 id="table-of-contents">Table of Contents</h3>
+<ol>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#transform-operations">Operations</a><ul>
+<li><a href="#aggregate">aggregate</a></li>
+<li><a href="#cogroup">cogroup</a></li>
+<li><a href="#convertkey">convertKey</a></li>
+<li><a href="#convertkeyvalue">convertKeyValue</a></li>
+<li><a href="#convertvalue">convertValue</a></li>
+<li><a href="#count">count</a></li>
+<li><a href="#filter">filter</a></li>
+<li><a href="#filternot">filterNot</a></li>
+<li><a href="#flatmap">flatMap</a></li>
+<li><a href="#flatmapvalues">flatMapValues</a></li>
+<li><a href="#groupby">groupBy</a></li>
+<li><a href="#groupbykey">groupByKey</a></li>
+<li><a href="#join">join</a></li>
+<li><a href="#leftjoin">leftJoin</a></li>
+<li><a href="#map">map</a></li>
+<li><a href="#mapkey">mapKey</a></li>
+<li><a href="#mapvalue">mapValue</a></li>
+<li><a href="#mapvalues">mapValues</a></li>
+<li><a href="#merge">merge</a></li>
+<li><a href="#outerjoin">outerJoin</a></li>
+<li><a href="#peek">peek</a></li>
+<li><a href="#reduce">reduce</a></li>
+<li><a href="#repartition">repartition</a></li>
+<li><a href="#selectkey">selectKey</a></li>
+<li><a href="#suppress">suppress</a></li>
+<li><a href="#tostream">toStream</a></li>
+<li><a href="#transformkey">transformKey</a></li>
+<li><a href="#transformkeyvalue">transformKeyValue</a></li>
+<li><a href="#transformkeyvaluetokeyvaluelist">transformKeyValueToKeyValueList</a></li>
+<li><a href="#transformkeyvaluetovaluelist">transformKeyValueToValueList</a></li>
+<li><a href="#transformvalue">transformValue</a></li>
+<li><a href="#windowbysession">windowBySession</a></li>
+<li><a href="#windowbytime">windowByTime</a></li>
+</ul>
+</li>
+<li><a href="#sink-operations">Sink Operations</a><ul>
+<li><a href="#as">as</a></li>
+<li><a href="#branch">branch</a></li>
+<li><a href="#foreach">forEach</a></li>
+<li><a href="#print">print</a></li>
+<li><a href="#to">to</a></li>
+<li><a href="#totopicnameextractor">toTopicNameExtractor</a></li>
+</ul>
+</li>
+</ol>
+<h2 id="introduction">Introduction</h2>
+<p>Pipelines in KSML have a beginning, a middle and (optionally) an end. Operations form the middle part of pipelines. They
+are modeled as separate YAML entities, where each operation takes input from the previous operation and applies its own
+logic. The returned stream then serves as input for the next operation.</p>
+<h2 id="transform-operations">Transform Operations</h2>
+<p>Transformations are operations that take an input stream and convert it to an output stream. This section lists all
+supported transformations. Each one states the type of stream it returns.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Value Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>name</code></td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">The name of the operation.</td>
+</tr>
+</tbody>
+</table>
+<p>Note that not all combinations of output/input streams are supported by Kafka Streams. The user that writes the KSML
+definition needs to make sure that streams that result from one operation can actually serve as input to the next. KSML
+does type checking and will exit with an error when operations that can not be chained together are listed after another
+in the KSML definition.</p>
+<h3 id="aggregate">aggregate</h3>
+<p>This operation aggregates multiple values into a single one by repeatedly calling an aggregator function. It can
+operate on a range of stream types.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Stream Type</th>
+<th style="text-align: left;">Returns</th>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Value Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KGroupedStream.html">KGroupedStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KTable.html">KTable</a><code>&lt;K,VR&gt;</code></td>
+<td style="text-align: left;"><code>store</code></td>
+<td style="text-align: left;">Store configuration</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">An optional <a href="../stores/">Store</a> configuration, should be of type <code>keyValue</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>initializer</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">An <a href="../functions/#function-types">Initializer</a> function, which takes no arguments and returns a value of type <code>VR</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>aggregator</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">An <a href="../functions/#function-types">Aggregator</a> function, which takes a <code>key</code> of type <code>K</code>, a <code>value</code> of type <code>V</code> and <code>aggregatedValue</code> of type <code>VR</code>. It should add the key/value to the previously calculated <code>aggregateValue</code> and return a new aggregate value of type <code>VR</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KGroupedTable.html">KGroupedTable</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KTable.html">KTable</a><code>&lt;K,VR&gt;</code></td>
+<td style="text-align: left;"><code>store</code></td>
+<td style="text-align: left;">Store configuration</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">An optional <a href="../stores/">Store</a> configuration, should be of type <code>keyValue</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>initializer</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">An <a href="../functions/#function-types">Initializer</a> function, which takes no arguments and returns a value of type <code>VR</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>adder</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">An <a href="../functions/#function-types">Aggregator</a> function, which takes a <code>key</code> of type <code>K</code>, a <code>value</code> of type <code>V</code> and <code>aggregatedValue</code> of type <code>VR</code>. It should add the key/value to the previously calculated <code>aggregateValue</code> and return a new aggregate value of type <code>VR</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>subtractor</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">An <a href="../functions/#function-types">Aggregator</a> function, which takes a <code>key</code> of type <code>K</code>, a <code>value</code> of type <code>V</code> and <code>aggregatedValue</code> of type <code>VR</code>. It should remove the key/value from the previously calculated <code>aggregateValue</code> and return a new aggregate value of type <code>VR</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/SessionWindowedKStream.html">SessionWindowedKStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KTable.html">KTable</a><code>&lt;Windowed&lt;K&gt;,VR&gt;</code></td>
+<td style="text-align: left;"><code>store</code></td>
+<td style="text-align: left;">Store configuration</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">An optional <a href="../stores/">Store</a> configuration, should be of type <code>session</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>initializer</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">An <a href="../functions/#function-types">Initializer</a> function, which takes no arguments and returns a value of type <code>VR</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>aggregator</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">An <a href="../functions/#function-types">Aggregator</a> function, which takes a <code>key</code> of type <code>K</code>, a <code>value</code> of type <code>V</code> and <code>aggregatedValue</code> of type <code>VR</code>. It should add the key/value to the previously calculated <code>aggregateValue</code> and return a new aggregate value of type <code>VR</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>merger</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">A <a href="../functions/#function-types">Merger</a> function, which takes a <code>key</code> of type <code>K</code>, and two values <code>value1</code> and <code>value2</code> of type <code>V</code>. The return value is the merged result, also of type <code>V</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;">[TimeWindowedKStreamObject]<code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KTable.html">KTable</a><code>&lt;Windowed&lt;K&gt;,VR&gt;</code></td>
+<td style="text-align: left;"><code>store</code></td>
+<td style="text-align: left;">Store configuration</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">An optional <a href="../stores/">Store</a> configuration, should be of type <code>window</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>initializer</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">An <a href="../functions/#function-types">Initializer</a> function, which takes no arguments and returns a value of type <code>VR</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>aggregator</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">An <a href="../functions/#function-types">Aggregator</a> function, which takes a <code>key</code> of type <code>K</code>, a <code>value</code> of type <code>V</code> and <code>aggregatedValue</code> of type <code>VR</code>. It should add the key/value to the previously calculated <code>aggregateValue</code> and return a new aggregate value of type <code>VR</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;">[CogroupedKStream]<code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KTable.html">KTable</a><code>&lt;K,VR&gt;</code></td>
+<td style="text-align: left;"><code>store</code></td>
+<td style="text-align: left;">Store configuration</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">An optional <a href="../stores/">Store</a> configuration, should be of type <code>keyValue</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>initializer</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">An <a href="../functions/#function-types">Initializer</a> function, which takes no arguments and returns a value of type <code>VR</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/SessionWindowedCogroupedKStream.html">SessionWindowedCogroupedKStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KTable.html">KTable</a><code>&lt;Windowed&lt;K&gt;,VR&gt;</code></td>
+<td style="text-align: left;"><code>store</code></td>
+<td style="text-align: left;">Store configuration</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">An optional <a href="../stores/">Store</a> configuration, should be of type <code>session</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>initializer</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">An <a href="../functions/#function-types">Initializer</a> function, which takes no arguments and returns a value of type <code>VR</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>merger</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">A <a href="../functions/#function-types">Merger</a> function, which takes a <code>key</code> of type <code>K</code>, and two values <code>value1</code> and <code>value2</code> of type <code>V</code>. The return value is the merged result, also of type <code>V</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/TimeWindowedCogroupedKStream.html">TimeWindowedCogroupedKStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KTable.html">KTable</a><code>&lt;Windowed&lt;K&gt;,VR&gt;</code></td>
+<td style="text-align: left;"><code>store</code></td>
+<td style="text-align: left;">Store configuration</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">An optional <a href="../stores/">Store</a> configuration, should be of type <code>window</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>initializer</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">An <a href="../functions/#function-types">Initializer</a> function, which takes no arguments and returns a value of type <code>VR</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<pre><code class="language-yaml">from: input_stream
+via:
+  - type: groupBy
+    mapper: my_mapper_function
+  - type: aggregate
+    initializer:
+      expression: 0
+    aggregator:
+      expression: aggregatedValue + value
+  - type: toStream
+to: output_stream
+</code></pre>
+<h3 id="cogroup">cogroup</h3>
+<p>This operation cogroups multiple values into a single one by repeatedly calling an aggregator function. It can
+operate on a range of stream types.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Stream Type</th>
+<th style="text-align: left;">Returns</th>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Value Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KGroupedStream.html">KGroupedStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;">[CogroupedKStream]<code>&lt;K,VR&gt;</code></td>
+<td style="text-align: left;"><code>aggregator</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">An <a href="../functions/#function-types">Aggregator</a> function, which takes a <code>key</code> of type <code>K</code>, a <code>value</code> of type <code>V</code> and <code>aggregatedValue</code> of type <code>VR</code>. It should add the key/value to the previously calculated <code>aggregateValue</code> and return a new aggregate value of type <code>VR</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;">[CogroupedKStream]<code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;">n/a</td>
+<td style="text-align: left;">n/a</td>
+<td style="text-align: left;">n/a</td>
+<td style="text-align: left;">n/a</td>
+<td style="text-align: left;">This method is currently not supported in KSML.</td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<pre><code class="language-yaml">from: input_stream
+via:
+  - type: groupBy
+    mapper: my_mapper_function
+  - type: cogroup
+    aggregator:
+      expression: aggregatedValue + value
+  - type: toStream
+to: output_stream
+</code></pre>
+<p><em>Note: this operation was added to KSML for completion purposes, but is not considered ready or fully functional. Feel
+free to experiment, but don't rely on this in production. Syntax changes may occur in future KSML releases.</em></p>
+<h3 id="convertkey">convertKey</h3>
+<p>This built-in operation takes a message and converts the key into a given type.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Stream Type</th>
+<th style="text-align: left;">Returns</th>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Value Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;KR,V&gt;</code></td>
+<td style="text-align: left;"><code>into</code></td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">The type to convert the key into. Conversion to <code>KR</code> is done by KSML.</td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<pre><code class="language-yaml">from:
+  topic: input_stream
+  keyType: string
+  valueType: string
+via:
+  - type: convertKey
+    into: json
+to: output_stream
+</code></pre>
+<h3 id="convertkeyvalue">convertKeyValue</h3>
+<p>This built-in operation takes a message and converts the key and value into a given type.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Stream Type</th>
+<th style="text-align: left;">Returns</th>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Value Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;KR,VR&gt;</code></td>
+<td style="text-align: left;"><code>into</code></td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">The type to convert the key and value into. Conversion of key into <code>KR</code> and value into <code>VR</code> is done by KSML.</td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<pre><code class="language-yaml">from:
+  topic: input_stream
+  keyType: string
+  valueType: string
+via:
+  - type: convertKeyValue
+    into: (json,xml)
+to: output_stream
+</code></pre>
+<h3 id="convertvalue">convertValue</h3>
+<p>This built-in operation takes a message and converts the value into a given type.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Stream Type</th>
+<th style="text-align: left;">Returns</th>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Value Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,VR&gt;</code></td>
+<td style="text-align: left;"><code>into</code></td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">The type to convert the value into. Conversion of value into <code>VR</code> is done by KSML.</td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<pre><code class="language-yaml">from:
+  topic: input_stream
+  keyType: string
+  valueType: string
+via:
+  - type: convertValue
+    into: xml
+to: output_stream
+</code></pre>
+<h3 id="count">count</h3>
+<p>This operation counts the number of messages and returns a table multiple values into a single one by repeatedly
+calling an aggregator function. It can operate on a range of stream types.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Stream Type</th>
+<th style="text-align: left;">Returns</th>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Value Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KGroupedStream.html">KGroupedStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KTable.html">KTable</a><code>&lt;K,Long&gt;</code></td>
+<td style="text-align: left;"><code>store</code></td>
+<td style="text-align: left;">Store configuration</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">An optional <a href="../stores/">Store</a> configuration, should be of type <code>keyValue</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KGroupedTable.html">KGroupedTable</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KTable.html">KTable</a><code>&lt;K,Long&gt;</code></td>
+<td style="text-align: left;"><code>store</code></td>
+<td style="text-align: left;">Store configuration</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">An optional <a href="../stores/">Store</a> configuration, should be of type <code>keyValue</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/SessionWindowedKStream.html">SessionWindowedKStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KTable.html">KTable</a><code>&lt;Windowed&lt;K&gt;,Long&gt;</code></td>
+<td style="text-align: left;"><code>store</code></td>
+<td style="text-align: left;">Store configuration</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">An optional <a href="../stores/">Store</a> configuration, should be of type <code>session</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;">[TimeWindowedKStreamObject]<code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KTable.html">KTable</a><code>&lt;Windowed&lt;K&gt;,Long&gt;</code></td>
+<td style="text-align: left;"><code>store</code></td>
+<td style="text-align: left;">Store configuration</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">An optional <a href="../stores/">Store</a> configuration, should be of type <code>window</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<pre><code class="language-yaml">from: input_stream
+via:
+  - type: groupBy
+    mapper: my_mapper_function
+  - type: count
+  - type: toStream
+to: output_stream
+</code></pre>
+<h3 id="filter">filter</h3>
+<p>Filter all incoming messages according to some predicate. The predicate function is called for every message. Only when
+the predicate returns <code>true</code>, then the message will be sent to the output stream.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Stream Type</th>
+<th style="text-align: left;">Returns</th>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Value Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><code>if</code></td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">A <a href="../functions/#function-types">Predicate</a> function, which returns <code>True</code> if the message can pass the filter, <code>False</code> otherwise.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KTable.html">KTable</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KTable.html">KTable</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><code>store</code></td>
+<td style="text-align: left;">Store configuration</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">An optional <a href="../stores/">Store</a> configuration, should be of type <code>keyValue</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>if</code></td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">A <a href="../functions/#function-types">Predicate</a> function, which returns <code>True</code> if the message can pass the filter, <code>False</code> otherwise.</td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<pre><code class="language-yaml">from: input_stream
+via:
+  - type: filter
+    if:
+      expression: key.startswith('a')
+to: output_stream
+</code></pre>
+<h3 id="filternot">filterNot</h3>
+<p>This operation works exactly like <a href="#filter">filter</a>, but negates all predicates before applying them. That means
+messages for which the predicate returns <code>False</code> are accepted, while those that the predicate returns <code>True</code> for are
+filtered out.
+See <a href="#filter">filter</a> for details on how to implement.</p>
+<h3 id="flatmap">flatMap</h3>
+<p>This operation takes a message and transforms it into zero, one or more new messages, which may have different key and
+value types than the source.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Stream Type</th>
+<th style="text-align: left;">Returns</th>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Value Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;KR,VR&gt;</code></td>
+<td style="text-align: left;"><code>mapper</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">A <a href="../functions/#function-types">KeyValueMapper</a> function, which takes a <code>key</code> of type <code>K</code> and a <code>value</code> of type <code>V</code>. The return type should be a list of type <code>[(KR,VR)]</code> containing a list of transformed <code>key</code> and <code>value</code> pairs.</td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<pre><code class="language-yaml">from: input_stream
+via:
+  - type: flatMap
+    mapper:
+      expression: [ (key,value), (key,value) ]   # duplicate all incoming messages
+to: output_stream
+</code></pre>
+<h3 id="flatmapvalues">flatMapValues</h3>
+<p>This operation takes a message and transforms it into zero, one or more new values, which may have different value types
+than the source. Every entry in the result list is combined with the source key and produced on the output stream.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Stream Type</th>
+<th style="text-align: left;">Returns</th>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Value Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,VR&gt;</code></td>
+<td style="text-align: left;"><code>mapper</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">A <a href="../functions/#function-types">KeyValueMapper</a> function, which takes a <code>key</code> of type <code>K</code> and a <code>value</code> of type <code>V</code>. The return type should be a list of type <code>[VR]</code> containing a list of transformed <code>value</code>s.</td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<pre><code class="language-yaml">from: input_stream
+via:
+  - type: flatMapValues
+    mapper:
+      expression: [ value+1, value+2, value+3 ]   # creates 3 new messages [key,VR] for every input message
+to: output_stream
+</code></pre>
+<h3 id="groupby">groupBy</h3>
+<p>Group the records of a stream by value resulting from a KeyValueMapper.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Stream Type</th>
+<th style="text-align: left;">Returns</th>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Value Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KGroupedStream.html">KGroupedStream</a><code>&lt;KR,V&gt;</code></td>
+<td style="text-align: left;"><code>store</code></td>
+<td style="text-align: left;">Store configuration</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">An optional <a href="../stores/">Store</a> configuration, should be of type <code>keyValue</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>mapper</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">A <a href="../functions/#function-types">KeyValueMapper</a> function, which takes a <code>key</code> of type <code>K</code> and a <code>value</code> of type <code>V</code> and returns a value of type <code>KR</code> to group the stream by.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KTable.html">KTable</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KGroupedTable.html">KGroupedTable</a><code>&lt;KR,V&gt;</code></td>
+<td style="text-align: left;"><code>store</code></td>
+<td style="text-align: left;">Store configuration</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">An optional <a href="../stores/">Store</a> configuration, should be of type <code>keyValue</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>mapper</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">A <a href="../functions/#function-types">KeyValueMapper</a> function, which takes a <code>key</code> of type <code>K</code> and a <code>value</code> of type <code>V</code> and returns a value of type <code>KR</code> to group the stream by.</td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<pre><code class="language-yaml">from: input_stream
+via:
+  - type: groupBy
+    mapper:
+      expression: value[&quot;some_field&quot;]
+      resultType: string
+  - type: aggregate
+    initializer:
+      expression: 0
+    aggregator:
+      expression: value1+value2
+  - type: toStream
+to: output_stream
+</code></pre>
+<h3 id="groupbykey">groupByKey</h3>
+<p>Group the records of a stream by the stream's key.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Stream Type</th>
+<th style="text-align: left;">Returns</th>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Value Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KGroupedStream.html">KGroupedStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><code>store</code></td>
+<td style="text-align: left;">Store configuration</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">An optional <a href="../stores/">Store</a> configuration, should be of type <code>keyValue</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<pre><code class="language-yaml">from: input_stream
+via:
+  - type: groupByKey
+  - type: aggregate
+    initializer:
+      expression: 0
+    aggregator:
+      expression: value1+value2
+  - type: toStream
+to: output_stream
+</code></pre>
+<h3 id="join">join</h3>
+<p>Join records of this stream with another stream's records using inner join. The join is computed on the
+records' key with join predicate <code>thisStream.key == otherStream.key</code>. If both streams are not tables, then
+their timestamps need to be close enough as defined by timeDifference.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Stream Type</th>
+<th style="text-align: left;">Returns</th>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Value Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,VR&gt;</code></td>
+<td style="text-align: left;"><code>store</code></td>
+<td style="text-align: left;">Store configuration</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">An optional <a href="../stores/">Store</a> configuration, should be of type <code>window</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>stream</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">The name of the stream to join with. The stream should be of key type <code>K</code> and value type <code>VR</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>valueJoiner</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">A [ValueJoiner] function, which takes a <code>key</code> of type <code>K</code>, and two values <code>value1</code> and <code>value2</code> of type <code>V</code>. The return value is the joined value of type <code>VR</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>timeDifference</code></td>
+<td style="text-align: left;"><code>duration</code></td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">The maximum allowed between two joined records.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>grace</code></td>
+<td style="text-align: left;"><code>duration</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">A grace period during with out-of-order to-be-joined records may still arrive.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,VR&gt;</code></td>
+<td style="text-align: left;"><code>table</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">The name of the table to join with. The table should be of key type <code>K</code> and value type <code>VO</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>valueJoiner</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">A [ValueJoiner] function, which takes a <code>value1</code> of type <code>V</code> from the source table and a <code>value2</code> of type <code>VO</code> from the join table. The return value is the joined value of type <code>VR</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>grace</code></td>
+<td style="text-align: left;"><code>duration</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">A grace period during with out-of-order to-be-joined records may still arrive.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,VR&gt;</code></td>
+<td style="text-align: left;"><code>globalTable</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">The name of the global table to join with. The global table should be of key type <code>GK</code> and value type <code>GV</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>mapper</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">A <a href="../functions/#function-types">KeyValueMapper</a> function, which takes a <code>key</code> of type <code>K</code> and a <code>value</code> of type <code>V</code>. The return value is the key of type <code>GK</code> of the records from the GlobalTable to join with.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>valueJoiner</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">A [ValueJoiner] function, which takes a <code>key</code> of type <code>K</code>, and two values <code>value1</code> and <code>value2</code> of type <code>V</code>. The return value is the joined value of type <code>VR</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KTable.html">KTable</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KTable.html">KTable</a><code>&lt;K,VR&gt;</code></td>
+<td style="text-align: left;"><code>store</code></td>
+<td style="text-align: left;">Store configuration</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">The <a href="../stores/">Store</a> configuration, should be of type <code>keyValue</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>table</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">The name of the table to join with. The table should be of key type <code>K</code> and value type <code>VO</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>foreignKeyExtractor</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">A [ForeignKeyExtractor] function, which takes a <code>value</code> of type <code>V</code>, which needs to be converted into the key type <code>KO</code> of the table to join with.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>valueJoiner</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">A [ValueJoiner] function, which takes a <code>value1</code> of type <code>V</code> from the source table and a <code>value2</code> of type <code>VO</code> from the join table. The return value is the joined value of type <code>VR</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>partitioner</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">A [Partitioner] function, which partitions the records on the primary stream.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>otherPartitioner</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">A [Partitioner] function, which partitions the records on the join table.</td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<pre><code class="language-yaml">from: input_stream
+via:
+  - type: join
+    stream: second_stream
+    valueJoiner: my_key_value_mapper
+    timeDifference: 1m
+to: output_stream
+</code></pre>
+<h3 id="leftjoin">leftJoin</h3>
+<p>Join records of this stream with another stream's records using left join. The join is computed on the
+records' key with join predicate <code>thisStream.key == otherStream.key</code>. If both streams are not tables, then
+their timestamps need to be close enough as defined by timeDifference.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Stream Type</th>
+<th style="text-align: left;">Returns</th>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Value Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,VR&gt;</code></td>
+<td style="text-align: left;"><code>store</code></td>
+<td style="text-align: left;">Store configuration</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">An optional <a href="../stores/">Store</a> configuration, should be of type <code>window</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>stream</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">The name of the stream to join with. The stream should be of key type <code>K</code> and value type <code>VR</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>valueJoiner</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">A [ValueJoiner] function, which takes a <code>key</code> of type <code>K</code>, and two values <code>value1</code> and <code>value2</code> of type <code>V</code>. The return value is the joined value of type <code>VR</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>timeDifference</code></td>
+<td style="text-align: left;"><code>duration</code></td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">The maximum allowed between two joined records.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>grace</code></td>
+<td style="text-align: left;"><code>duration</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">A grace period during with out-of-order to-be-joined records may still arrive.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,VR&gt;</code></td>
+<td style="text-align: left;"><code>table</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">The name of the table to join with. The table should be of key type <code>K</code> and value type <code>VO</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>valueJoiner</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">A [ValueJoiner] function, which takes a <code>value1</code> of type <code>V</code> from the source table and a <code>value2</code> of type <code>VO</code> from the join table. The return value is the joined value of type <code>VR</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>grace</code></td>
+<td style="text-align: left;"><code>duration</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">A grace period during with out-of-order to-be-joined records may still arrive.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,VR&gt;</code></td>
+<td style="text-align: left;"><code>globalTable</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">The name of the global table to join with. The global table should be of key type <code>GK</code> and value type <code>GV</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>mapper</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">A <a href="../functions/#function-types">KeyValueMapper</a> function, which takes a <code>key</code> of type <code>K</code> and a <code>value</code> of type <code>V</code>. The return value is the key of type <code>GK</code> of the records from the GlobalTable to join with.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>valueJoiner</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">A [ValueJoiner] function, which takes a <code>key</code> of type <code>K</code>, and two values <code>value1</code> and <code>value2</code> of type <code>V</code>. The return value is the joined value of type <code>VR</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KTable.html">KTable</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KTable.html">KTable</a><code>&lt;K,VR&gt;</code></td>
+<td style="text-align: left;"><code>store</code></td>
+<td style="text-align: left;">Store configuration</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">The <a href="../stores/">Store</a> configuration, should be of type <code>keyValue</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>table</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">The name of the table to join with. The table should be of key type <code>K</code> and value type <code>VO</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>foreignKeyExtractor</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">A [ForeignKeyExtractor] function, which takes a <code>value</code> of type <code>V</code>, which needs to be converted into the key type <code>KO</code> of the table to join with.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>valueJoiner</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">A [ValueJoiner] function, which takes a <code>value1</code> of type <code>V</code> from the source table and a <code>value2</code> of type <code>VO</code> from the join table. The return value is the joined value of type <code>VR</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>partitioner</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">A [Partitioner] function, which partitions the records on the primary stream.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>otherPartitioner</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">A [Partitioner] function, which partitions the records on the join table.</td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<pre><code class="language-yaml">from: input_stream
+via:
+  - type: leftJoin
+    stream: second_stream
+    valueJoiner: my_key_value_mapper
+    timeDifference: 1m
+to: output_stream
+</code></pre>
+<h3 id="map">map</h3>
+<p>This operation takes a message and transforms the key and value into a new key and value, which can each have a
+different type than the source message key and value.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Stream Type</th>
+<th style="text-align: left;">Returns</th>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Value Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;KR,VR&gt;</code></td>
+<td style="text-align: left;"><code>mapper</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">A <a href="../functions/#function-types">KeyValueMapper</a> function, which takes a <code>key</code> of type <code>K</code> and a <code>value</code> of type <code>V</code>. The return type should be a tuple of type <code>(KR,VR)</code> containing the transformed <code>key</code> and <code>value</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<pre><code class="language-yaml">from: input_stream
+via:
+  - type: map
+    mapper:
+      expression: (str(key), str(value))   # convert key and value from source type to string
+to: output_stream
+</code></pre>
+<h3 id="mapkey">mapKey</h3>
+<p>This is an alias for <a href="#selectkey">selectKey</a>.</p>
+<p>Example:</p>
+<pre><code class="language-yaml">from: input_stream
+via:
+  - type: mapKey
+    mapper:
+      expression: str(key)   # convert key from source type to string
+to: output_stream
+</code></pre>
+<h3 id="mapvalue">mapValue</h3>
+<p>This is an alias for <a href="#mapvalues">mapValues</a>.</p>
+<p>Example:</p>
+<pre><code class="language-yaml">from: input_stream
+via:
+  - type: mapValue
+    mapper:
+      expression: str(value)   # convert value from source type to String
+to: output_stream
+</code></pre>
+<h3 id="mapvalues">mapValues</h3>
+<p>This operation takes a message and transforms its value to a new value, which may have different value type
+than the source.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Stream Type</th>
+<th style="text-align: left;">Returns</th>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Value Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,VR&gt;</code></td>
+<td style="text-align: left;"><code>mapper</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">A <a href="../functions/#function-types">KeyValueMapper</a> function, which takes a <code>key</code> of type <code>K</code> and a <code>value</code> of type <code>V</code>. The return type should be a value of type <code>VR</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<pre><code class="language-yaml">from: input_stream
+via:
+  - type: mapValues
+    mapper:
+      expression: str(value)   # convert value from source type to String
+to: output_stream
+</code></pre>
+<h3 id="merge">merge</h3>
+<p>Merge this stream and the given stream into one larger stream. There is no ordering guarantee between records from this
+stream and records from the provided stream in the merged stream. Relative order is preserved within each input stream
+though (ie, records within one input stream are processed in order).</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Stream Type</th>
+<th style="text-align: left;">Returns</th>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Value Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><code>stream</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">The name of the stream to merge with.</td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<pre><code class="language-yaml">from: input_stream
+via:
+  - type: merge
+    stream: second_stream
+to: output_stream
+</code></pre>
+<h3 id="outerjoin">outerJoin</h3>
+<p>Join records of this stream with another stream's records using outer join. The join is computed on the
+records' key with join predicate <code>thisStream.key == otherStream.key</code>. If both streams are not tables, then
+their timestamps need to be close enough as defined by timeDifference.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Stream Type</th>
+<th style="text-align: left;">Returns</th>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Value Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,VR&gt;</code></td>
+<td style="text-align: left;"><code>store</code></td>
+<td style="text-align: left;">Store configuration</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">An optional <a href="../stores/">Store</a> configuration, should be of type <code>window</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>stream</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">The name of the stream to join with. The stream should be of key type <code>K</code> and value type <code>VR</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>valueJoiner</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">A [ValueJoiner] function, which takes a <code>key</code> of type <code>K</code>, and two values <code>value1</code> and <code>value2</code> of type <code>V</code>. The return value is the joined value of type <code>VR</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>timeDifference</code></td>
+<td style="text-align: left;"><code>duration</code></td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">The maximum allowed between two joined records.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>grace</code></td>
+<td style="text-align: left;"><code>duration</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">A grace period during with out-of-order to-be-joined records may still arrive.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KTable.html">KTable</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,VR&gt;</code></td>
+<td style="text-align: left;"><code>store</code></td>
+<td style="text-align: left;">Store configuration</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">An optional <a href="../stores/">Store</a> configuration, should be of type <code>keyValue</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>table</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">The name of the table to join with. The table should be of key type <code>K</code> and value type <code>VO</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>valueJoiner</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">A [ValueJoiner] function, which takes a <code>value1</code> of type <code>V</code> from the source table and a <code>value2</code> of type <code>VO</code> from the join table. The return value is the joined value of type <code>VR</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<pre><code class="language-yaml">from: input_stream
+via:
+  - type: outerJoin
+    stream: second_stream
+    valueJoiner: my_key_value_mapper
+    timeDifference: 1m
+to: output_stream
+</code></pre>
+<h3 id="peek">peek</h3>
+<p>Perform an action on each record of a stream. This is a stateless record-by-record operation. Peek is a non-terminal
+operation that triggers a side effect (such as logging or statistics collection) and returns an unchanged stream.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Stream Type</th>
+<th style="text-align: left;">Returns</th>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Value Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><code>forEach</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">The [ForEach] function that will be called for every message, receiving arguments <code>key</code> of type <code>K</code> and <code>value</code> of type <code>V</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<pre><code class="language-yaml">from: input_stream
+via:
+  - type: peek
+    forEach: print_key_and_value
+to: output_stream
+</code></pre>
+<h3 id="reduce">reduce</h3>
+<p>Combine the values of records in this stream by the grouped key. Records with null key or value are ignored. Combining
+implies that the type of the aggregate result is the same as the type of the input value, similar
+to <a href="#aggregate">aggregate(Initializer, Aggregator)</a>.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Stream Type</th>
+<th style="text-align: left;">Returns</th>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Value Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KGroupedStream.html">KGroupedStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KTable.html">KTable</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><code>store</code></td>
+<td style="text-align: left;">Store configuration</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">An optional <a href="../stores/">Store</a> configuration, should be of type <code>keyValue</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>reducer</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">A <a href="../functions/#function-types">Reducer</a> function, which takes a <code>key</code> of type <code>K</code>, a <code>value</code> of type <code>V</code> and <code>aggregatedValue</code> of type <code>V</code>. It should add the key/value to the previously calculated <code>aggregateValue</code> and return a new aggregate value of type <code>V</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KGroupedTable.html">KGroupedTable</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KTable.html">KTable</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><code>store</code></td>
+<td style="text-align: left;">Store configuration</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">An optional <a href="../stores/">Store</a> configuration, should be of type <code>keyValue</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>adder</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">A <a href="../functions/#function-types">Reducer</a> function, which takes a <code>key</code> of type <code>K</code>, a <code>value</code> of type <code>V</code> and <code>aggregatedValue</code> of type <code>V</code>. It should add the key/value to the previously calculated <code>aggregateValue</code> and return a new aggregate value of type <code>V</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>subtractor</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">A <a href="../functions/#function-types">Reducer</a> function, which takes a <code>key</code> of type <code>K</code>, a <code>value</code> of type <code>V</code> and <code>aggregatedValue</code> of type <code>V</code>. It should remove the key/value from the previously calculated <code>aggregateValue</code> and return a new aggregate value of type <code>V</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/SessionWindowedKStream.html">SessionWindowedKStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KTable.html">KTable</a><code>&lt;Windowed&lt;K&gt;,V&gt;</code></td>
+<td style="text-align: left;"><code>store</code></td>
+<td style="text-align: left;">Store configuration</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">An optional <a href="../stores/">Store</a> configuration, should be of type <code>session</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>reducer</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">A <a href="../functions/#function-types">Reducer</a> function, which takes a <code>key</code> of type <code>K</code>, a <code>value</code> of type <code>V</code> and <code>aggregatedValue</code> of type <code>V</code>. It should add the key/value to the previously calculated <code>aggregateValue</code> and return a new aggregate value of type <code>V</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;">[TimeWindowedKStreamObject]<code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KTable.html">KTable</a><code>&lt;Windowed&lt;K&gt;,V&gt;</code></td>
+<td style="text-align: left;"><code>store</code></td>
+<td style="text-align: left;">Store configuration</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">An optional <a href="../stores/">Store</a> configuration, should be of type <code>window</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>reducer</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">A <a href="../functions/#function-types">Reducer</a> function, which takes a <code>key</code> of type <code>K</code>, a <code>value</code> of type <code>V</code> and <code>aggregatedValue</code> of type <code>V</code>. It should add the key/value to the previously calculated <code>aggregateValue</code> and return a new aggregate value of type <code>V</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<pre><code class="language-yaml">from: input_stream
+via:
+  - type: groupBy
+    mapper: my_mapper_function
+  - type: aggregate
+    initializer:
+      expression: 0
+    aggregator:
+      expression: aggregatedValue + value
+  - type: toStream
+to: output_stream
+</code></pre>
+<p>Example:</p>
+<pre><code class="language-yaml">[ yaml ]
+  ----
+from: input_stream
+via:
+  - type: groupBy
+    mapper: my_mapper_function
+  - type: reduce
+    reducer:
+      expression: value1+value2
+  - type: toStream
+to: output_stream
+</code></pre>
+<h3 id="repartition">repartition</h3>
+<p>Materialize this stream to an auto-generated repartition topic with a given number of partitions, using a custom
+partitioner. Similar to auto-repartitioning, the topic will be created with infinite retention time and data will be
+automatically purged. The topic will be named as "${applicationId}-<name>-repartition".</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Stream Type</th>
+<th style="text-align: left;">Returns</th>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Value Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><code>numberOfPartitions</code></td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">The number of partitions of the repartitioned topic.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>partitioner</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">A custom [Partitioner] function to partition records.</td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<pre><code class="language-yaml">from: input_stream
+via:
+  - type: repartition
+    name: my_partitioner
+    numberOfPartitions: 3
+    partitioner: my_own_partitioner
+  - type: peek
+    forEach: print_key_and_value
+  - type: toStream
+to: output_stream
+</code></pre>
+<h3 id="selectkey">selectKey</h3>
+<p>This operation takes a message and transforms the key into a new key, which may have a different type.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Stream Type</th>
+<th style="text-align: left;">Returns</th>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Value Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;KR,V&gt;</code></td>
+<td style="text-align: left;"><code>mapper</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">A <a href="../functions/#function-types">KeyValueMapper</a> function, which takes a <code>key</code> of type <code>K</code> and a <code>value</code> of type <code>V</code>. The return value is the key of resulting stream, which is of type <code>KR</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<pre><code class="language-yaml">from: input_stream
+via:
+  - type: selectKey
+    mapper:
+      expression: str(key)   # convert key from source type to string
+to: output_stream
+</code></pre>
+<h3 id="suppress">suppress</h3>
+<p>Suppress some updates from this changelog stream, determined by the supplied Suppressed configuration. When
+<em>windowCloses</em> is selected and no further restrictions are provided, then this is interpreted as
+<em>Suppressed.untilWindowCloses(unbounded())</em>.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Stream Type</th>
+<th style="text-align: left;">Returns</th>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Value Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KTable.html">KTable</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KTable.html">KTable</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><code>until</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">This value can either be <code>timeLimit</code> or <code>windowCloses</code>. Note that <em>timeLimit</em> suppression works on any stream, while <em>windowCloses</em> suppression works only on <em>Windowed</em> streams. For the latter, see [windowByTime] or [windowBySession].</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>duration</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">The <a href="../types/#duration">Duration</a> to suppress updates (only when <code>until</code>==<code>timeLimit</code>)</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>maxBytes</code></td>
+<td style="text-align: left;"><code>int</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">The maximum number of bytes to suppress updates</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>maxRecords</code></td>
+<td style="text-align: left;"><code>int</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">The maximum number of records to suppress updates</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>bufferFullStrategy</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">Can be one of <code>emitEarlyWhenFull</code>, <code>shutdownWhenFull</code></td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<pre><code class="language-yaml">from: input_table
+via:
+  - type: suppress
+    until: timeLimit
+    duration: 30s
+    maxBytes: 128000
+    maxRecords: 10000
+    bufferFullStrategy: emitEarlyWhenFull
+  - type: peek
+    forEach: print_key_and_value
+  - type: toStream
+to: output_stream
+</code></pre>
+<h3 id="tostream">toStream</h3>
+<p>Convert a KTable into a KStream object.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Stream Type</th>
+<th style="text-align: left;">Returns</th>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Value Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KTable.html">KTable</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;KR,V&gt;</code></td>
+<td style="text-align: left;"><code>mapper</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">A <a href="../functions/#function-types">KeyValueMapper</a> function, which takes a <code>key</code> of type <code>K</code> and a <code>value</code> of type <code>V</code>. The return value is the key of resulting stream, which is of type <code>KR</code>. If no mapper is provided, then keys remain unchanged.</td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<pre><code class="language-yaml">from: input_table
+via:
+  - type: toStream
+to: output_stream
+</code></pre>
+<h3 id="transformkey">transformKey</h3>
+<p>This is an alias for <a href="#selectkey">selectKey</a>.</p>
+<p>Example:</p>
+<pre><code class="language-yaml">from: input_stream
+via:
+  - type: transformKey
+    mapper:
+      expression: str(key)   # convert key from source type to string
+to: output_stream
+</code></pre>
+<h3 id="transformkeyvalue">transformKeyValue</h3>
+<p>This is an alias for <a href="#map">map</a>.</p>
+<p>Example:</p>
+<pre><code class="language-yaml">from: input_stream
+via:
+  - type: transformKeyValue
+    mapper:
+      expression: (str(key), str(value))   # convert key and value from source type to string
+to: output_stream
+</code></pre>
+<h3 id="transformkeyvaluetokeyvaluelist">transformKeyValueToKeyValueList</h3>
+<p>This is an alias for <a href="#flatmap">flatMap</a>.</p>
+<p>Example:</p>
+<pre><code class="language-yaml">from: input_stream
+via:
+  - type: transformKeyValueToKeyValueList
+    mapper:
+      expression: [ (key,value), (key,value) ]   # duplicate all incoming messages
+to: output_stream
+</code></pre>
+<h3 id="transformkeyvaluetovaluelist">transformKeyValueToValueList</h3>
+<p>This is an alias for <a href="#flatmapvalues">flapMapValues</a>.</p>
+<p>Example:</p>
+<pre><code class="language-yaml">from: input_stream
+via:
+  - type: transformKeyValueToValueList
+    mapper:
+      expression: [ value+1, value+2, value+3 ]   # creates 3 new messages [key,VR] for every input message
+to: output_stream
+</code></pre>
+<h3 id="transformmetadata">transformMetadata</h3>
+<p>This operation takes a message and transforms its value to a new value, which may have different value type
+than the source.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Stream Type</th>
+<th style="text-align: left;">Returns</th>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Value Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,VR&gt;</code></td>
+<td style="text-align: left;"><code>mapper</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">A [MetadataTransformer] function that converts the metadata (Kafka headers, timestamp) of every record in the stream. It gets a metadata object as input and should return the same type, but potentially with modified fields.</td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<pre><code class="language-yaml">from: input_stream
+via:
+  - type: transformValue
+    mapper:
+      expression: str(value)   # convert value from source type to String
+to: output_stream
+</code></pre>
+<h3 id="transformvalue">transformValue</h3>
+<p>This is an alias for <a href="#mapvalues">mapValues</a>.</p>
+<p>Example:</p>
+<pre><code class="language-yaml">from: input_stream
+via:
+  - type: transformValue
+    mapper:
+      expression: str(value)   # convert value from source type to String
+to: output_stream
+</code></pre>
+<h3 id="windowbysession">windowBySession</h3>
+<p>Create a new windowed KStream instance that can be used to perform windowed aggregations. For more details on the
+different types of windows, please refer to [WindowTypes]|[this page].</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Stream Type</th>
+<th style="text-align: left;">Returns</th>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Value Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KGroupedStream.html">KGroupedStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/SessionWindowedKStream.html">SessionWindowedKStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;">inactivityGap</td>
+<td style="text-align: left;"><a href="../types/#duration">Duration</a></td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">The maximum inactivity gap with which keys are grouped.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">grace</td>
+<td style="text-align: left;"><a href="../types/#duration">Duration</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">The grace duration allowing for out-of-order messages to still be associated with the right session.</td>
+</tr>
+<tr>
+<td style="text-align: left;">[CogroupedKStream]<code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/SessionWindowedCogroupedKStream.html">SessionWindowedCogroupedKStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;">inactivityGap</td>
+<td style="text-align: left;"><a href="../types/#duration">Duration</a></td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">The maximum inactivity gap with which keys are grouped.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">grace</td>
+<td style="text-align: left;"><a href="../types/#duration">Duration</a></td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">The grace duration allowing for out-of-order messages to still be associated with the right session.</td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<pre><code class="language-yaml">from: input_stream
+via:
+  - type: groupBy
+    mapper: my_mapper_function
+  - type: windowedBySession
+    inactivityGap: 1h
+    grace: 5m
+  - type: reduce
+    reducer: my_reducer_function
+  - type: toStream
+to: output_stream
+</code></pre>
+<h3 id="windowbytime">windowByTime</h3>
+<p>Create a new windowed KStream instance that can be used to perform windowed aggregations. For more details on the
+different types of windows, please refer to [WindowTypes]|[this page].</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Stream Type</th>
+<th style="text-align: left;">Returns</th>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Value Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KGroupedStream.html">KGroupedStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/TimeWindowedKStream.html">TimeWindowedKStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><code>windowType</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Fixed value <code>sliding</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">timeDifference</td>
+<td style="text-align: left;"><a href="../types/#duration">Duration</a></td>
+<td style="text-align: left;">The time difference parameter for the [SlidingWindows] object.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">grace</td>
+<td style="text-align: left;"><a href="../types/#duration">Duration</a></td>
+<td style="text-align: left;">(Optional) The grace parameter for the [SlidingWindows] object.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KGroupedStream.html">KGroupedStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/TimeWindowedKStream.html">TimeWindowedKStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><code>windowType</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Fixed value <code>hopping</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">advanceBy</td>
+<td style="text-align: left;"><a href="../types/#duration">Duration</a></td>
+<td style="text-align: left;">The amount by which each window is advanced. If this value is not specified, then it will be equal to <em>duration</em>, which gives tumbling windows. If you make this value smaller than <em>duration</em> you will get hopping windows.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">grace</td>
+<td style="text-align: left;"><a href="../types/#duration">Duration</a></td>
+<td style="text-align: left;">(Optional) The grace parameter for the [TimeWindows] object.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KGroupedStream.html">KGroupedStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/TimeWindowedKStream.html">TimeWindowedKStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><code>windowType</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Fixed value <code>tumbling</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">duration</td>
+<td style="text-align: left;"><a href="../types/#duration">Duration</a></td>
+<td style="text-align: left;">The duration parameter for the [TimeWindows] object.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">grace</td>
+<td style="text-align: left;"><a href="../types/#duration">Duration</a></td>
+<td style="text-align: left;">(Optional) The grace parameter for the [TimeWindows] object.</td>
+</tr>
+<tr>
+<td style="text-align: left;">[CogroupedKStream]<code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/TimeWindowedCogroupedKStream.html">TimeWindowedCogroupedKStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><code>windowType</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Fixed value <code>sliding</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">timeDifference</td>
+<td style="text-align: left;"><a href="../types/#duration">Duration</a></td>
+<td style="text-align: left;">The time difference parameter for the [SlidingWindows] object.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">grace</td>
+<td style="text-align: left;"><a href="../types/#duration">Duration</a></td>
+<td style="text-align: left;">(Optional) The grace parameter for the [SlidingWindows] object.</td>
+</tr>
+<tr>
+<td style="text-align: left;">[CogroupedKStream]<code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/TimeWindowedCogroupedKStream.html">TimeWindowedCogroupedKStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><code>windowType</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Fixed value <code>hopping</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">advanceBy</td>
+<td style="text-align: left;"><a href="../types/#duration">Duration</a></td>
+<td style="text-align: left;">The amount by which each window is advanced. If this value is not specified, then it will be equal to <em>duration</em>, which gives tumbling windows. If you make this value smaller than <em>duration</em> you will get hopping windows.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">grace</td>
+<td style="text-align: left;"><a href="../types/#duration">Duration</a></td>
+<td style="text-align: left;">(Optional) The grace parameter for the [TimeWindows] object.</td>
+</tr>
+<tr>
+<td style="text-align: left;">[CogroupedKStream]<code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/TimeWindowedCogroupedKStream.html">TimeWindowedCogroupedKStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;"><code>windowType</code></td>
+<td style="text-align: left;"><code>string</code></td>
+<td style="text-align: left;">Fixed value <code>tumbling</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">duration</td>
+<td style="text-align: left;"><a href="../types/#duration">Duration</a></td>
+<td style="text-align: left;">The duration parameter for the [TimeWindows] object.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">grace</td>
+<td style="text-align: left;"><a href="../types/#duration">Duration</a></td>
+<td style="text-align: left;">(Optional) The grace parameter for the [TimeWindows] object.</td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<pre><code class="language-yaml">from: input_stream
+via:
+  - type: groupBy
+    mapper: my_mapper_function
+  - type: windowedBy
+    windowType: time
+    duration: 1h
+    advanceBy: 15m
+    grace: 5m
+  - type: reduce
+    reducer: my_reducer_function
+  - type: toStream
+to: output_stream
+</code></pre>
+<h2 id="sink-operations">Sink Operations</h2>
+<h3 id="as">as</h3>
+<p>Pipelines closed of with <code>as</code> can be referred by other pipelines as their starting reference. This allows for a common
+part of processing logic to be placed in its own pipeline in KSML, serving as an intermediate result.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Applies to</th>
+<th style="text-align: left;">Value Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Any pipeline<code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">The name under which the pipeline result can be referenced by other pipelines.</td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<pre><code class="language-yaml">pipelines:
+  first:
+    from: some_source_topic
+    via:
+      - type: ...
+    as: first_pipeline
+
+  second:
+    from: first_pipeline
+    via:
+      - type: ...
+    to: ...
+</code></pre>
+<p>Here, the first pipeline ends by sending its output to a stream internally called <code>first_pipeline</code>. This stream is used
+as input for the <code>second</code> pipeline.</p>
+<h3 id="branch">branch</h3>
+<p>Branches out messages from the input stream into several branches based on predicates. Each branch is defined as a list
+item below the branch operation. Branch predicates are defined using the <code>if</code> keyword. Messages are only processed by
+one of the branches, namely the first one for which the predicate returns <code>true</code>.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Applies to</th>
+<th style="text-align: left;">Value Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;">List of branch definitions</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">See for description of branch definitions below.</td>
+</tr>
+</tbody>
+</table>
+<p>Branches in KSML are nested pipelines, which are parsed without the requirement of a source attribute. Each branch
+accepts the following parameters:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Branch element</th>
+<th style="text-align: left;">Value Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>if</code></td>
+<td style="text-align: left;">Inline <a href="../functions/#function-types">Predicate</a> or reference</td>
+<td style="text-align: left;">No</td>
+<td style="text-align: left;">The <a href="../functions/#function-types">Predicate</a> function that determines if the message is sent down this branch, or is passed on to the next branch in line.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><em>Inline</em></td>
+<td style="text-align: left;">All pipeline parameters, see [Pipeline]</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">The inlined pipeline describes the topology of the specific branch.</td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<pre><code class="language-yaml">from: some_source_topic
+branch:
+  - if:
+      expression: value['color'] == 'blue'
+    to: ksml_sensordata_blue
+  - if:
+      expression: value['color'] == 'red'
+    to: ksml_sensordata_red
+  - forEach:
+      code: |
+        print('Unknown color sensor: '+value[&quot;color&quot;])
+</code></pre>
+<p>In this example, the first two branches are entered if the respective predicate matches (the color attribute of value
+matches a certain color).
+If the predicate returns <code>false</code>, then the next predicate/branch is tried. Only the last branch in the list can be a
+sink operation.</p>
+<h3 id="foreach">forEach</h3>
+<p>This sends each message to a custom defined function. This function is expected to handle each message as its final
+step. The function does not (need to) return anything.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Applies to</th>
+<th style="text-align: left;">Value Type</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">The [ForEach] function that is called for every record on the source stream. Its arguments are <code>key</code> of type <code>K</code> and <code>value</code> of type <code>V</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Examples:</p>
+<pre><code class="language-yaml">forEach: my_foreach_function
+</code></pre>
+<pre><code class="language-yaml">forEach:
+  code: print(value)
+</code></pre>
+<h3 id="print">print</h3>
+<p>This sends each message to a custom defined print function. This function is expected to handle each message as the
+final in the pipeline. The function does not (need to) return anything.</p>
+<p>As target, you can specify a filename. If none is specified, then all messages are printed to stdout.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Applies to</th>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Value Type</th>
+<th style="text-align: left;">Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;">filename</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td>The filename to output records to. If nothing is specified, then messages will be printed on stdout.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">label</td>
+<td style="text-align: left;">string</td>
+<td style="text-align: left;">No</td>
+<td>A label to attach to every output record.</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>mapper</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td>A <a href="../functions/#function-types">KeyValueMapper</a> function, which takes a <code>key</code> of type <code>K</code> and a <code>value</code> of type <code>V</code>. The return value should be of type <code>string</code> and is sent to the specified file or stdout.</td>
+</tr>
+</tbody>
+</table>
+<p>Examples:</p>
+<pre><code class="language-yaml">from: source
+via:
+  - type: ...
+print:
+  filename: file.txt
+  mapper:
+    expression: &quot;record value: &quot; + str(value)
+</code></pre>
+<h3 id="to">to</h3>
+<p>Messages are sent directly to a named <code>Stream</code>.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Applies to</th>
+<th style="text-align: left;">Value Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;">Inline [Topic] or reference to a stream, table or global table</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">The name of a defined <a href="../streams/">stream</a>.</td>
+</tr>
+</tbody>
+</table>
+<p>Examples:</p>
+<pre><code class="language-yaml">to: my_target_topic
+</code></pre>
+<pre><code class="language-yaml">from: source
+via:
+  - type: ...
+to:
+  topic: my_target_topic
+  keyType: someType
+  valueType: someOtherType
+  partitioner:
+    expression: hash_of(key)
+</code></pre>
+<h3 id="totopicnameextractor">toTopicNameExtractor</h3>
+<p>Messages are passed onto a user function, which returns the name of the topic that message needs to be sent to. This
+operation acts as a Sink and is always the last operation in a <a href="../pipelines/">pipeline</a>.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Applies to</th>
+<th style="text-align: left;">Value Type</th>
+<th style="text-align: left;">Required</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="https://kafka.apache.org/37/javadoc/org/apache/kafka/streams/kstream/KStream.html">KStream</a><code>&lt;K,V&gt;</code></td>
+<td style="text-align: left;">Inline or reference</td>
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;">The [TopicNameExtractor] function that is called for every message and returns the topic name to which the message shall be written.</td>
+</tr>
+</tbody>
+</table>
+<p>Examples:</p>
+<pre><code class="language-yaml">toTopicNameExtractor: my_extractor_function
+</code></pre>
+<pre><code class="language-yaml">toTopicNameExtractor:
+  code: |
+    if key == 'sensor1':
+      return 'ksml_sensordata_sensor1'
+    elif key == 'sensor2':
+      return 'ksml_sensordata_sensor2'
+    else:
+      return 'ksml_sensordata_sensor0'
+</code></pre></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../js/base.js"></script>
+        <script src="../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

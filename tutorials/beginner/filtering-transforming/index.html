@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>Filtering and Transforming Data in KSML - KSML Documentation</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../../../css/brands.min.css" rel="stylesheet">
+        <link href="../../../css/solid.min.css" rel="stylesheet">
+        <link href="../../../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../../..">KSML Documentation</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="../../.." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../getting-started/" class="nav-link">Getting Started</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../core-concepts/" class="nav-link">Core Concepts</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../" class="nav-link">Tutorials</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../use-cases/" class="nav-link">Use Case Guides</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../reference/" class="nav-link">Reference</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../resources/" class="nav-link">Resources</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../../about/" class="nav-link">About</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#filtering-and-transforming-data-in-ksml" class="nav-link">Filtering and Transforming Data in KSML</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#what-youll-build" class="nav-link">What You'll Build</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#prerequisites" class="nav-link">Prerequisites</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#complex-filtering-techniques" class="nav-link">Complex Filtering Techniques</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#advanced-transformation-techniques" class="nav-link">Advanced Transformation Techniques</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#combining-filtering-and-transformation" class="nav-link">Combining Filtering and Transformation</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#conclusion" class="nav-link">Conclusion</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#next-steps" class="nav-link">Next Steps</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="filtering-and-transforming-data-in-ksml">Filtering and Transforming Data in KSML</h1>
+<p>This tutorial builds on the <a href="../../getting-started/basics-tutorial/">KSML Basics Tutorial</a> and explores more advanced filtering and transformation techniques in KSML. You'll learn how to work with complex filter conditions, apply multiple transformations, handle nested data structures, and implement error handling in your transformations.</p>
+<h2 id="what-youll-build">What You'll Build</h2>
+<p>In this tutorial, you'll build a data pipeline that:</p>
+<ol>
+<li>Reads sensor data from a Kafka topic</li>
+<li>Applies complex filtering based on multiple conditions</li>
+<li>Transforms the data using various techniques</li>
+<li>Handles potential errors in the transformation process</li>
+<li>Writes the processed data to another Kafka topic</li>
+</ol>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Before you begin, make sure you have:</p>
+<ul>
+<li>Completed the <a href="../../getting-started/basics-tutorial/">KSML Basics Tutorial</a></li>
+<li>A running KSML environment with Kafka</li>
+<li>Basic understanding of YAML and Python syntax</li>
+</ul>
+<h2 id="complex-filtering-techniques">Complex Filtering Techniques</h2>
+<h3 id="using-multiple-conditions">Using Multiple Conditions</h3>
+<p>Let's start by creating a filter that combines multiple conditions:</p>
+<pre><code class="language-yaml">streams:
+  input_stream:
+    topic: tutorial_input
+    keyType: string
+    valueType: json
+  output_stream:
+    topic: filtered_data
+    keyType: string
+    valueType: json
+
+pipelines:
+  filtering_pipeline:
+    from: input_stream
+    via:
+      - type: filter
+        if:
+          expression: value.get('temperature', 0) &gt; 70 and value.get('humidity', 99) &lt; 50 and value.get('location', '') == 'warehouse'
+    to: output_stream
+</code></pre>
+<p>This filter only passes messages where:
+- The temperature is greater than 70°F
+- The humidity is less than 50%
+- The location is 'warehouse'</p>
+<h3 id="using-custom-filter-functions">Using Custom Filter Functions</h3>
+<p>For more complex filtering logic, you can create a custom filter function:</p>
+<pre><code class="language-yaml">streams:
+  input_stream:
+    topic: tutorial_input
+    keyType: string
+    valueType: json
+  alerts_stream:
+    topic: alerts_stream
+    keyType: string
+    valueType: json
+
+functions:
+  is_critical_sensor:
+    type: predicate
+    code: |
+      # Check if this is a critical sensor based on multiple criteria
+      if value.get('type') != 'temperature':
+        return False
+
+      # Check location
+      if value.get('location') not in ['server_room', 'data_center']:
+        return False
+
+      # Check temperature threshold based on location
+      if value.get('location') == 'server_room' and value.get('temperature') &gt; 80:
+        return True
+      if value.get('location') == 'data_center' and value.get('temperature') &gt; 75:
+        return True
+
+      return False
+
+pipelines:
+  critical_alerts:
+    from: input_stream
+    via:
+      - type: filter
+        if: is_critical_sensor
+    to: alerts_stream
+</code></pre>
+<p>This function implements complex business logic to determine if a sensor reading indicates a critical situation that requires an alert.</p>
+<h3 id="filtering-with-error-handling">Filtering with Error Handling</h3>
+<p>Sometimes your filter conditions might encounter malformed data. Here's how to handle that:</p>
+<pre><code class="language-yaml">functions:
+  safe_filter:
+    type: predicate
+    code: |
+      try:
+        # Attempt to apply our filter logic
+        if 'temperature' not in value or 'humidity' not in value:
+          log.warn(&quot;Missing required fields in message: {}&quot;, value)
+          return False
+
+        return value['temperature'] &gt; 70 and value['humidity'] &lt; 50
+      except Exception as e:
+        # Log the error and filter out the message
+        log.error(&quot;Error in filter: {} - Message: {}&quot;, str(e), value)
+        return False
+
+pipelines:
+  robust_filtering:
+    from: input_stream
+    via:
+      - type: filter
+        if: safe_filter
+    to: output_stream
+</code></pre>
+<p>This approach ensures that malformed messages are logged and filtered out rather than causing the pipeline to fail.</p>
+<h2 id="advanced-transformation-techniques">Advanced Transformation Techniques</h2>
+<h3 id="transforming-nested-data-structures">Transforming Nested Data Structures</h3>
+<p>Let's look at how to transform data with nested structures:</p>
+<pre><code class="language-yaml">functions:
+  transform_nested_data:
+    type: valueMapper
+    code: |
+      # Create a new structure with flattened and transformed data
+      result = {
+        &quot;device_id&quot;: key,
+        &quot;timestamp&quot;: value.get('metadata', {}).get('timestamp'),
+        &quot;readings&quot;: {}
+      }
+
+      # Extract and transform sensor readings
+      sensors = value.get('sensors', {})
+      for sensor_type, reading in sensors.items():
+        # Convert temperature from F to C if needed
+        if sensor_type == 'temperature' and reading.get('unit') == 'F':
+          celsius = (reading.get('value') - 32) * 5/9
+          result['readings'][sensor_type] = {
+            'value': celsius,
+            'unit': 'C',
+            'original_value': reading.get('value'),
+            'original_unit': 'F'
+          }
+        else:
+          result['readings'][sensor_type] = reading
+
+      return result
+
+pipelines:
+  transform_pipeline:
+    from: input_stream
+    via:
+      - type: mapValues
+        mapper: transform_nested_data
+    to: output_stream
+</code></pre>
+<p>This transformation function handles a complex nested JSON structure, extracting and transforming specific fields while preserving others.</p>
+<h3 id="applying-multiple-transformations">Applying Multiple Transformations</h3>
+<p>You can chain multiple transformations to break down complex logic into manageable steps:</p>
+<pre><code class="language-yaml">pipelines:
+  multi_transform_pipeline:
+    from: input_stream
+    via:
+      # Step 1: Extract relevant fields
+      - type: mapValues
+        mapper:
+          expression: {
+            &quot;device_id&quot;: key,
+            &quot;temperature&quot;: value.get('sensors', {}).get('temperature', {}).get('value'),
+            &quot;humidity&quot;: value.get('sensors', {}).get('humidity', {}).get('value'),
+            &quot;timestamp&quot;: value.get('metadata', {}).get('timestamp')
+          }
+
+      # Step 2: Convert temperature from F to C
+      - type: mapValues
+        mapper:
+          expression: {
+            &quot;device_id&quot;: value.get('device_id'),
+            &quot;temperature_c&quot;: (value.get('temperature') - 32) * 5/9,
+            &quot;humidity&quot;: value.get('humidity'),
+            &quot;timestamp&quot;: value.get('timestamp')
+          }
+
+      # Step 3: Add calculated fields
+      - type: mapValues
+        mapper:
+          expression: {
+            &quot;device_id&quot;: value.get('device_id'),
+            &quot;temperature_c&quot;: value.get('temperature_c'),
+            &quot;humidity&quot;: value.get('humidity'),
+            &quot;heat_index&quot;: value.get('temperature_c') * 1.8 + 32 - 0.55 * (1 - value.get('humidity') / 100),
+            &quot;timestamp&quot;: value.get('timestamp')
+          }
+    to: output_stream
+</code></pre>
+<p>Breaking transformations into steps makes your pipeline easier to understand and maintain.</p>
+<h3 id="error-handling-in-transformations">Error Handling in Transformations</h3>
+<p>Here's how to implement robust error handling in transformations:</p>
+<pre><code class="language-yaml">functions:
+  safe_transform:
+    type: valueMapper
+    code: |
+      try:
+        # Attempt the transformation
+        if 'temperature' not in value:
+          log.warn(&quot;Missing temperature field in message: {}&quot;, value)
+          return {&quot;error&quot;: &quot;Missing temperature field&quot;, &quot;original&quot;: value}
+
+        celsius = (value['temperature'] - 32) * 5/9
+        return {
+          &quot;device_id&quot;: key,
+          &quot;temperature_f&quot;: value['temperature'],
+          &quot;temperature_c&quot;: celsius,
+          &quot;status&quot;: &quot;processed&quot;
+        }
+      except Exception as e:
+        # Log the error and return a special error message
+        log.error(&quot;Error in transformation: {} - Message: {}&quot;, str(e), value)
+        return {
+          &quot;error&quot;: str(e),
+          &quot;original&quot;: value,
+          &quot;status&quot;: &quot;error&quot;
+        }
+
+pipelines:
+  robust_transformation:
+    from: input_stream
+    via:
+      - type: mapValues
+        mapper: safe_transform
+      # You could add a branch here to handle error messages differently
+    to: output_stream
+</code></pre>
+<p>This approach ensures that transformation errors are caught, logged, and handled gracefully without crashing the pipeline.</p>
+<h2 id="combining-filtering-and-transformation">Combining Filtering and Transformation</h2>
+<p>Let's put everything together in a complete example:</p>
+<pre><code class="language-yaml">streams:
+  sensor_data:
+    topic: raw_sensor_data
+    keyType: string
+    valueType: json
+  processed_data:
+    topic: processed_sensor_data
+    keyType: string
+    valueType: json
+  error_data:
+    topic: error_sensor_data
+    keyType: string
+    valueType: json
+
+functions:
+  validate_sensor_data:
+    type: predicate
+    code: |
+      try:
+        # Check if all required fields are present
+        required_fields = ['temperature', 'humidity', 'location', 'timestamp']
+        for field in required_fields:
+          if field not in value:
+            log.warn(&quot;Missing required field '{}' in message: {}&quot;, field, value)
+            return False
+
+        # Validate data types and ranges
+        if not isinstance(value['temperature'], (int, float)) or value['temperature'] &lt; -100 or value['temperature'] &gt; 200:
+          log.warn(&quot;Invalid temperature value: {}&quot;, value['temperature'])
+          return False
+
+        if not isinstance(value['humidity'], (int, float)) or value['humidity'] &lt; 0 or value['humidity'] &gt; 100:
+          log.warn(&quot;Invalid humidity value: {}&quot;, value['humidity'])
+          return False
+
+        return True
+      except Exception as e:
+        log.error(&quot;Error validating sensor data: {} - Message: {}&quot;, str(e), value)
+        return False
+
+  transform_sensor_data:
+    type: valueMapper
+    code: |
+      try:
+        # Convert temperature from F to C
+        temp_c = (value['temperature'] - 32) * 5/9
+
+        # Calculate heat index
+        heat_index = temp_c * 1.8 + 32 - 0.55 * (1 - value['humidity'] / 100)
+
+        # Format timestamp
+        timestamp = value['timestamp']
+        if isinstance(timestamp, (int, float)):
+          # Assume it's a Unix timestamp
+          from datetime import datetime
+          formatted_time = datetime.fromtimestamp(timestamp / 1000).isoformat()
+        else:
+          # Pass through as is
+          formatted_time = timestamp
+
+        return {
+          &quot;sensor_id&quot;: key,
+          &quot;location&quot;: value['location'],
+          &quot;readings&quot;: {
+            &quot;temperature&quot;: {
+              &quot;celsius&quot;: round(temp_c, 2),
+              &quot;fahrenheit&quot;: value['temperature']
+            },
+            &quot;humidity&quot;: value['humidity'],
+            &quot;heat_index&quot;: round(heat_index, 2)
+          },
+          &quot;timestamp&quot;: formatted_time,
+          &quot;processed_at&quot;: int(time.time() * 1000)
+        }
+      except Exception as e:
+        log.error(&quot;Error transforming sensor data: {} - Message: {}&quot;, str(e), value)
+        return {
+          &quot;error&quot;: str(e),
+          &quot;original&quot;: value,
+          &quot;sensor_id&quot;: key,
+          &quot;timestamp&quot;: int(time.time() * 1000)
+        }
+
+pipelines:
+  process_sensor_data:
+    from: sensor_data
+    via:
+      - type: filter
+        if: validate_sensor_data
+      - type: mapValues
+        mapper: transform_sensor_data
+      - type: peek
+        forEach:
+          code: |
+            log.info(&quot;Processed sensor data for {}: temp={}°C, humidity={}%&quot;, 
+                     value.get('sensor_id'), 
+                     value.get('readings', {}).get('temperature', {}).get('celsius'), 
+                     value.get('readings', {}).get('humidity'))
+    branch:
+      - if:
+          expression: 'error' in value
+        to: error_data
+      - to: processed_data
+</code></pre>
+<p>This complete example:</p>
+<ol>
+<li>Validates incoming sensor data, filtering out invalid messages</li>
+<li>Transforms valid data, converting temperatures and calculating derived values</li>
+<li>Logs information about processed messages</li>
+<li>Routes messages with errors to an error topic and valid messages to a processed data topic</li>
+</ol>
+<h2 id="conclusion">Conclusion</h2>
+<p>In this tutorial, you've learned how to:</p>
+<ul>
+<li>Create complex filters with multiple conditions</li>
+<li>Implement custom filter functions with business logic</li>
+<li>Handle errors in filtering and transformation</li>
+<li>Transform nested data structures</li>
+<li>Apply multiple transformations in sequence</li>
+<li>Combine filtering and transformation in a robust pipeline</li>
+</ul>
+<p>These techniques will help you build more sophisticated and reliable KSML applications that can handle real-world data processing challenges.</p>
+<h2 id="next-steps">Next Steps</h2>
+<ul>
+<li>Learn about <a href="../data-formats/">working with different data formats</a> in KSML</li>
+<li>Explore <a href="../logging-monitoring/">logging and monitoring</a> to better understand your pipelines</li>
+<li>Move on to <a href="../../intermediate/">intermediate tutorials</a> to learn about stateful operations and joins</li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../../../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../js/base.js"></script>
+        <script src="../../../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

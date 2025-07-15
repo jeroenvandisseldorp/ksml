@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>Sample Tutorial: Building Your First KSML Data Pipeline - KSML Documentation</title>
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../css/brands.min.css" rel="stylesheet">
+        <link href="../css/solid.min.css" rel="stylesheet">
+        <link href="../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="..">KSML Documentation</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href=".." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../tutorials/getting-started/" class="nav-link">Getting Started</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../core-concepts/" class="nav-link">Core Concepts</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../tutorials/" class="nav-link">Tutorials</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../use-cases/" class="nav-link">Use Case Guides</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../reference/" class="nav-link">Reference</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../resources/" class="nav-link">Resources</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../about/" class="nav-link">About</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#sample-tutorial-building-your-first-ksml-data-pipeline" class="nav-link">Sample Tutorial: Building Your First KSML Data Pipeline</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#tutorial-overview" class="nav-link">Tutorial Overview</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#prerequisites" class="nav-link">Prerequisites</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#tutorial-structure" class="nav-link">Tutorial Structure</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#teaching-approach" class="nav-link">Teaching Approach</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#sample-code-snippets-with-explanations" class="nav-link">Sample Code Snippets with Explanations</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#conclusion" class="nav-link">Conclusion</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="sample-tutorial-building-your-first-ksml-data-pipeline">Sample Tutorial: Building Your First KSML Data Pipeline</h1>
+<p>This document provides an outline for a sample tutorial that demonstrates the proposed documentation structure. This tutorial would be part of the "Beginner Tutorials" section in the new documentation structure.</p>
+<h2 id="tutorial-overview">Tutorial Overview</h2>
+<p>This tutorial guides new users through building their first KSML data pipeline, from setup to execution. By the end, users will understand the basic components of KSML and how to create a simple but functional data processing application.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li>Basic understanding of Kafka concepts (topics, messages)</li>
+<li>Docker installed for running the example environment</li>
+<li>No prior Kafka Streams or KSML experience required</li>
+</ul>
+<h2 id="tutorial-structure">Tutorial Structure</h2>
+<h3 id="1-introduction-what-youll-build">1. Introduction (What You'll Build)</h3>
+<ul>
+<li>Brief explanation of what the tutorial will cover</li>
+<li>Visual diagram of the pipeline we'll build:</li>
+<li>Source topic → Filter → Transform → Destination topic</li>
+<li>Expected outcomes and skills learned</li>
+</ul>
+<h3 id="2-setting-up-your-environment">2. Setting Up Your Environment</h3>
+<ul>
+<li>Using Docker Compose to start a local Kafka cluster</li>
+<li>Verifying the environment is running correctly</li>
+<li>Understanding the example data we'll be working with</li>
+</ul>
+<h3 id="3-understanding-ksml-basics">3. Understanding KSML Basics</h3>
+<ul>
+<li>What is a KSML definition file?</li>
+<li>Key components: streams, functions, pipelines</li>
+<li>How KSML translates to Kafka Streams topologies</li>
+</ul>
+<h3 id="4-creating-your-first-ksml-pipeline">4. Creating Your First KSML Pipeline</h3>
+<h4 id="step-1-define-your-streams">Step 1: Define Your Streams</h4>
+<pre><code class="language-yaml">streams:
+  input_stream:
+    topic: tutorial_input
+    keyType: string
+    valueType: json
+  output_stream:
+    topic: tutorial_output
+    keyType: string
+    valueType: json
+</code></pre>
+<ul>
+<li>Explanation of stream definitions</li>
+<li>Understanding key and value types</li>
+<li>How KSML handles serialization/deserialization</li>
+</ul>
+<h4 id="step-2-create-a-simple-function">Step 2: Create a Simple Function</h4>
+<pre><code class="language-yaml">functions:
+  log_message:
+    type: forEach
+    parameters:
+      - name: message_type
+        type: string
+    code: log.info(&quot;{} message - key={}, value={}&quot;, message_type, key, value)
+</code></pre>
+<ul>
+<li>How functions work in KSML</li>
+<li>Python code integration</li>
+<li>Parameter passing and types</li>
+</ul>
+<h4 id="step-3-build-your-pipeline">Step 3: Build Your Pipeline</h4>
+<pre><code class="language-yaml">pipelines:
+  tutorial_pipeline:
+    from: input_stream
+    via:
+      - type: filter
+        if:
+          expression: value.get('temperature') &gt; 70
+      - type: mapValues
+        mapper:
+          expression: {&quot;sensor&quot;: key, &quot;temp_fahrenheit&quot;: value.get('temperature'), &quot;temp_celsius&quot;: (value.get('temperature') - 32) * 5/9}
+      - type: peek
+        forEach:
+          code: log_message(key, value, message_type=&quot;Processed&quot;)
+    to: output_stream
+</code></pre>
+<ul>
+<li>Breaking down each operation</li>
+<li>Understanding the data flow</li>
+<li>How operations are chained together</li>
+</ul>
+<h3 id="5-running-your-pipeline">5. Running Your Pipeline</h3>
+<ul>
+<li>Starting the KSML runner</li>
+<li>Producing test messages to the input topic</li>
+<li>Observing the filtered and transformed output</li>
+</ul>
+<h3 id="6-exploring-and-modifying">6. Exploring and Modifying</h3>
+<ul>
+<li>Suggestions for modifications to try</li>
+<li>Adding more operations to the pipeline</li>
+<li>Troubleshooting common issues</li>
+</ul>
+<h3 id="7-next-steps">7. Next Steps</h3>
+<ul>
+<li>Links to more advanced tutorials</li>
+<li>Related concepts to explore</li>
+<li>Reference documentation for operations used</li>
+</ul>
+<h2 id="teaching-approach">Teaching Approach</h2>
+<p>This tutorial uses a hands-on, step-by-step approach with explanations at each stage:</p>
+<ol>
+<li><strong>What</strong>: Clear description of what we're doing</li>
+<li><strong>Why</strong>: Explanation of why this approach is useful</li>
+<li><strong>How</strong>: Detailed instructions with code examples</li>
+<li><strong>Result</strong>: What to expect when the code runs</li>
+<li><strong>Understanding</strong>: Deeper explanation of what's happening behind the scenes</li>
+</ol>
+<h2 id="sample-code-snippets-with-explanations">Sample Code Snippets with Explanations</h2>
+<h3 id="example-explaining-the-filter-operation">Example: Explaining the Filter Operation</h3>
+<pre><code class="language-yaml">- type: filter
+  if:
+    expression: value.get('temperature') &gt; 70
+</code></pre>
+<p><strong>What's happening here:</strong>
+- The <code>filter</code> operation examines each message and decides whether to keep it or discard it
+- The <code>if</code> parameter takes a Python expression that evaluates to a boolean (True/False)
+- In this case, we're only keeping messages where the temperature value is greater than 70°F
+- Messages that don't meet this condition are dropped from the pipeline
+- This is a stateless operation - it doesn't remember anything about previous messages</p>
+<p><strong>When to use filters:</strong>
+- To reduce the volume of data flowing through your pipeline
+- To focus on specific conditions or events of interest
+- As an early step to eliminate irrelevant data before more expensive operations</p>
+<p><strong>Common patterns:</strong>
+- Filtering by field values
+- Filtering based on message keys
+- Combining multiple conditions with logical operators (and, or, not)</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>This sample tutorial outline demonstrates how the new documentation structure would provide a more educational and intuitive approach for beginners. It combines practical, hands-on examples with conceptual explanations and context, helping users not just learn the syntax but understand the underlying concepts and best practices.</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../js/base.js"></script>
+        <script src="../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

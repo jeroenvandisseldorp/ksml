@@ -114,11 +114,15 @@
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-bs-level="2"><a href="#expressions" class="nav-link">Expressions</a>
+            <li class="nav-item" data-bs-level="2"><a href="#returning-a-value-from-a-function" class="nav-link">Returning a value from a function</a>
               <ul class="nav flex-column">
               </ul>
             </li>
             <li class="nav-item" data-bs-level="2"><a href="#best-practices" class="nav-link">Best Practices</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#resources" class="nav-link">Resources</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -294,8 +298,7 @@ globalTables:
         if:
           expression: value.get(&quot;total&quot;) &gt; 100
       - type: mapValues
-        mapper:
-          code: calculate_total(value)
+        mapper: calculate_total
     to: processed_orders
 </code></pre>
 <h2 id="operations">Operations</h2>
@@ -315,7 +318,8 @@ globalTables:
 <li><strong>count</strong>: Counts records by key.</li>
 <li><strong>reduce</strong>: Combines records with the same key.</li>
 <li><strong>join</strong>: Joins two streams based on key.</li>
-<li><strong>windowedBy</strong>: Groups records into time windows.</li>
+<li><strong>windowBySession</strong>: Groups records into time windows.</li>
+<li><strong>windowByTime</strong>: Groups records into time windows.</li>
 </ul>
 <h3 id="operation-parameters">Operation Parameters</h3>
 <p>Each operation type has its own set of parameters. Common parameters include:</p>
@@ -330,18 +334,24 @@ globalTables:
 <h3 id="type-conversion">Type Conversion</h3>
 <p>KSML automatically handles type conversion between compatible types. For example, a JSON string can be converted to an
 AVRO message if the structure (schema) matches.</p>
-<h2 id="expressions">Expressions</h2>
-<p>KSML supports two types of expressions:</p>
-<h3 id="yaml-expressions">YAML Expressions</h3>
+<h2 id="returning-a-value-from-a-function">Returning a value from a function</h2>
+<p>KSML supports two methods to return a value from a function:</p>
+<h3 id="python-expressions">Python Expressions</h3>
 <p>Simple expressions can be defined directly in YAML:</p>
-<pre><code class="language-yaml">expression: value.get(&quot;total&quot;) &gt; 100
+<pre><code class="language-yaml">functions:
+  my_function:
+    type: predicate
+    expression: value.get(&quot;total&quot;) &gt; 100
 </code></pre>
 <h3 id="python-code-blocks">Python Code Blocks</h3>
 <p>More complex logic can be implemented using Python code blocks:</p>
-<pre><code class="language-yaml">code: |
-  if value.get(&quot;status&quot;) == &quot;COMPLETED&quot; and value.get(&quot;total&quot;) &gt; 100:
-    return True
-  return False
+<pre><code class="language-yaml">functions:
+  my_function:
+    type: predicate
+    code: |
+      if value.get(&quot;status&quot;) == &quot;COMPLETED&quot; and value.get(&quot;total&quot;) &gt; 100:
+        return True
+      return False
 </code></pre>
 <h2 id="best-practices">Best Practices</h2>
 <h3 id="naming-conventions">Naming Conventions</h3>
@@ -361,6 +371,7 @@ AVRO message if the structure (schema) matches.</p>
 <li>Be mindful of window sizes in windowed operations.</li>
 <li>Consider partitioning when designing your pipelines.</li>
 </ul>
+<h2 id="resources">Resources</h2>
 <h2 id="appendix-full-example">Appendix: Full Example</h2>
 <pre><code class="language-yaml">streams:
   orders:
@@ -381,14 +392,11 @@ AVRO message if the structure (schema) matches.</p>
 functions:
   calculate_total:
     type: valueTransformer
-    parameters:
-      - name: order
-        type: struct
     code: |
       total = 0
-      for item in order.get(&quot;items&quot;, []):
+      for item in value.get(&quot;items&quot;, []):
         total += item.get(&quot;price&quot;, 0) * item.get(&quot;quantity&quot;, 0)
-      return {**order, &quot;total&quot;: total}
+      return {**value, &quot;total&quot;: total}
     resultType: struct
 
   join_with_customers:
@@ -402,20 +410,15 @@ functions:
 
   enrich_order:
     type: valueTransformer
-    parameters:
-      - name: order
-        type: struct
-      - name: customer
-        type: struct
     code: |
       customer = value.get(&quot;customer&quot;)
       if customer is None:
-        return order
+        return value
       return {
-        **order,
+        **value,
         &quot;customer_name&quot;: customer.get(&quot;name&quot;),
         &quot;customer_tier&quot;: customer.get(&quot;tier&quot;, &quot;standard&quot;),
-        &quot;loyalty_points&quot;: order.get(&quot;total&quot;, 0) * 0.1
+        &quot;loyalty_points&quot;: value.get(&quot;total&quot;, 0) * 0.1
       }
     resultType: struct
 

@@ -233,9 +233,8 @@ docker-compose exec kafka kafka-topics --create --topic tutorial-output --bootst
           expression: {&quot;sensor&quot;: key, &quot;temp_fahrenheit&quot;: value.get('temperature'), &quot;temp_celsius&quot;: (value.get('temperature') - 32) * 5/9}
       - type: peek
         forEach:
-          functionRef: log_message
-          args:
-            message_type: &quot;Processed&quot;
+          code: |
+            log.info(&quot;Processed message: key={}, value={}&quot;, key, value)
     to: output_stream
 </code></pre>
 <p>This pipeline:

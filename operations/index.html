@@ -368,17 +368,19 @@ operate on a range of stream types.</p>
 </tbody>
 </table>
 <p>Example:</p>
-<pre><code class="language-yaml">from: input_stream
-via:
-  - type: groupBy
-    mapper: my_mapper_function
-  - type: aggregate
-    initializer:
-      expression: 0
-    aggregator:
-      expression: aggregatedValue + value
-  - type: toStream
-to: output_stream
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_stream
+    via:
+      - type: groupBy
+        mapper: my_mapper_function
+      - type: aggregate
+        initializer:
+          expression: 0
+        aggregator:
+          expression: aggregatedValue + value
+      - type: toStream
+    to: output_stream
 </code></pre>
 <h3 id="cogroup">cogroup</h3>
 <p>This operation cogroups multiple values into a single one by repeatedly calling an aggregator function. It can
@@ -414,15 +416,17 @@ operate on a range of stream types.</p>
 </tbody>
 </table>
 <p>Example:</p>
-<pre><code class="language-yaml">from: input_stream
-via:
-  - type: groupBy
-    mapper: my_mapper_function
-  - type: cogroup
-    aggregator:
-      expression: aggregatedValue + value
-  - type: toStream
-to: output_stream
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_stream
+    via:
+      - type: groupBy
+        mapper: my_mapper_function
+      - type: cogroup
+        aggregator:
+          expression: aggregatedValue + value
+      - type: toStream
+    to: output_stream
 </code></pre>
 <p><em>Note: this operation was added to KSML for completion purposes, but is not considered ready or fully functional. Feel
 free to experiment, but don't rely on this in production. Syntax changes may occur in future KSML releases.</em></p>
@@ -449,14 +453,16 @@ free to experiment, but don't rely on this in production. Syntax changes may occ
 </tbody>
 </table>
 <p>Example:</p>
-<pre><code class="language-yaml">from:
-  topic: input_stream
-  keyType: string
-  valueType: string
-via:
-  - type: convertKey
-    into: json
-to: output_stream
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from:
+      topic: input_stream
+      keyType: string
+      valueType: string
+    via:
+      - type: convertKey
+        into: json
+    to: output_stream
 </code></pre>
 <h3 id="convertkeyvalue">convertKeyValue</h3>
 <p>This built-in operation takes a message and converts the key and value into a given type.</p>
@@ -481,14 +487,16 @@ to: output_stream
 </tbody>
 </table>
 <p>Example:</p>
-<pre><code class="language-yaml">from:
-  topic: input_stream
-  keyType: string
-  valueType: string
-via:
-  - type: convertKeyValue
-    into: (json,xml)
-to: output_stream
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from:
+      topic: input_stream
+      keyType: string
+      valueType: string
+    via:
+      - type: convertKeyValue
+        into: (json,xml)
+    to: output_stream
 </code></pre>
 <h3 id="convertvalue">convertValue</h3>
 <p>This built-in operation takes a message and converts the value into a given type.</p>
@@ -513,14 +521,16 @@ to: output_stream
 </tbody>
 </table>
 <p>Example:</p>
-<pre><code class="language-yaml">from:
-  topic: input_stream
-  keyType: string
-  valueType: string
-via:
-  - type: convertValue
-    into: xml
-to: output_stream
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from:
+      topic: input_stream
+      keyType: string
+      valueType: string
+    via:
+      - type: convertValue
+        into: xml
+    to: output_stream
 </code></pre>
 <h3 id="count">count</h3>
 <p>This operation counts the number of messages and returns a table multiple values into a single one by repeatedly
@@ -572,13 +582,15 @@ calling an aggregator function. It can operate on a range of stream types.</p>
 </tbody>
 </table>
 <p>Example:</p>
-<pre><code class="language-yaml">from: input_stream
-via:
-  - type: groupBy
-    mapper: my_mapper_function
-  - type: count
-  - type: toStream
-to: output_stream
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_stream
+    via:
+      - type: groupBy
+        mapper: my_mapper_function
+      - type: count
+      - type: toStream
+    to: output_stream
 </code></pre>
 <h3 id="filter">filter</h3>
 <p>Filter all incoming messages according to some predicate. The predicate function is called for every message. Only when
@@ -630,12 +642,14 @@ the predicate returns <code>true</code>, then the message will be sent to the ou
 </tbody>
 </table>
 <p>Example:</p>
-<pre><code class="language-yaml">from: input_stream
-via:
-  - type: filter
-    if:
-      expression: key.startswith('a')
-to: output_stream
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_stream
+    via:
+      - type: filter
+        if:
+          expression: key.startswith('a')
+    to: output_stream
 </code></pre>
 <h3 id="filternot">filterNot</h3>
 <p>This operation works exactly like <a href="#filter">filter</a>, but negates all predicates before applying them. That means
@@ -668,12 +682,14 @@ value types than the source.</p>
 </tbody>
 </table>
 <p>Example:</p>
-<pre><code class="language-yaml">from: input_stream
-via:
-  - type: flatMap
-    mapper:
-      expression: [ (key,value), (key,value) ]   # duplicate all incoming messages
-to: output_stream
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_stream
+    via:
+      - type: flatMap
+        mapper:
+          expression: [ (key,value), (key,value) ]   # duplicate all incoming messages
+    to: output_stream
 </code></pre>
 <h3 id="flatmapvalues">flatMapValues</h3>
 <p>This operation takes a message and transforms it into zero, one or more new values, which may have different value types
@@ -699,12 +715,14 @@ than the source. Every entry in the result list is combined with the source key 
 </tbody>
 </table>
 <p>Example:</p>
-<pre><code class="language-yaml">from: input_stream
-via:
-  - type: flatMapValues
-    mapper:
-      expression: [ value+1, value+2, value+3 ]   # creates 3 new messages [key,VR] for every input message
-to: output_stream
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_stream
+    via:
+      - type: flatMapValues
+        mapper:
+          expression: [ value+1, value+2, value+3 ]   # creates 3 new messages [key,VR] for every input message
+    to: output_stream
 </code></pre>
 <h3 id="groupby">groupBy</h3>
 <p>Group the records of a stream by value resulting from a KeyValueMapper.</p>
@@ -755,19 +773,21 @@ to: output_stream
 </tbody>
 </table>
 <p>Example:</p>
-<pre><code class="language-yaml">from: input_stream
-via:
-  - type: groupBy
-    mapper:
-      expression: value[&quot;some_field&quot;]
-      resultType: string
-  - type: aggregate
-    initializer:
-      expression: 0
-    aggregator:
-      expression: value1+value2
-  - type: toStream
-to: output_stream
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_stream
+    via:
+      - type: groupBy
+        mapper:
+          expression: value[&quot;some_field&quot;]
+          resultType: string
+      - type: aggregate
+        initializer:
+          expression: 0
+        aggregator:
+          expression: value1+value2
+      - type: toStream
+    to: output_stream
 </code></pre>
 <h3 id="groupbykey">groupByKey</h3>
 <p>Group the records of a stream by the stream's key.</p>
@@ -794,16 +814,18 @@ to: output_stream
 </tbody>
 </table>
 <p>Example:</p>
-<pre><code class="language-yaml">from: input_stream
-via:
-  - type: groupByKey
-  - type: aggregate
-    initializer:
-      expression: 0
-    aggregator:
-      expression: value1+value2
-  - type: toStream
-to: output_stream
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_stream
+    via:
+      - type: groupByKey
+      - type: aggregate
+        initializer:
+          expression: 0
+        aggregator:
+          expression: value1+value2
+      - type: toStream
+    to: output_stream
 </code></pre>
 <h3 id="join">join</h3>
 <p>Join records of this stream with another stream's records using inner join. The join is computed on the
@@ -960,13 +982,15 @@ their timestamps need to be close enough as defined by timeDifference.</p>
 </tbody>
 </table>
 <p>Example:</p>
-<pre><code class="language-yaml">from: input_stream
-via:
-  - type: join
-    stream: second_stream
-    valueJoiner: my_key_value_mapper
-    timeDifference: 1m
-to: output_stream
+<pre><code class="language-yaml">pipelines:
+   example_pipeline:
+    from: input_stream
+    via:
+      - type: join
+        stream: second_stream
+        valueJoiner: my_key_value_mapper
+        timeDifference: 1m
+    to: output_stream
 </code></pre>
 <h3 id="leftjoin">leftJoin</h3>
 <p>Join records of this stream with another stream's records using left join. The join is computed on the
@@ -1123,13 +1147,15 @@ their timestamps need to be close enough as defined by timeDifference.</p>
 </tbody>
 </table>
 <p>Example:</p>
-<pre><code class="language-yaml">from: input_stream
-via:
-  - type: leftJoin
-    stream: second_stream
-    valueJoiner: my_key_value_mapper
-    timeDifference: 1m
-to: output_stream
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_stream
+    via:
+      - type: leftJoin
+        stream: second_stream
+        valueJoiner: my_key_value_mapper
+        timeDifference: 1m
+    to: output_stream
 </code></pre>
 <h3 id="map">map</h3>
 <p>This operation takes a message and transforms the key and value into a new key and value, which can each have a
@@ -1157,32 +1183,38 @@ different type than the source message key and value.</p>
 </tbody>
 </table>
 <p>Example:</p>
-<pre><code class="language-yaml">from: input_stream
-via:
-  - type: map
-    mapper:
-      expression: (str(key), str(value))   # convert key and value from source type to string
-to: output_stream
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_stream
+    via:
+      - type: map
+        mapper:
+          expression: (str(key), str(value))   # convert key and value from source type to string
+    to: output_stream
 </code></pre>
 <h3 id="mapkey">mapKey</h3>
 <p>This is an alias for <a href="#selectkey">selectKey</a>.</p>
 <p>Example:</p>
-<pre><code class="language-yaml">from: input_stream
-via:
-  - type: mapKey
-    mapper:
-      expression: str(key)   # convert key from source type to string
-to: output_stream
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_stream
+    via:
+      - type: mapKey
+        mapper:
+          expression: str(key)   # convert key from source type to string
+    to: output_stream
 </code></pre>
 <h3 id="mapvalue">mapValue</h3>
 <p>This is an alias for <a href="#mapvalues">mapValues</a>.</p>
 <p>Example:</p>
-<pre><code class="language-yaml">from: input_stream
-via:
-  - type: mapValue
-    mapper:
-      expression: str(value)   # convert value from source type to String
-to: output_stream
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_stream
+    via:
+      - type: mapValue
+        mapper:
+          expression: str(value)   # convert value from source type to String
+    to: output_stream
 </code></pre>
 <h3 id="mapvalues">mapValues</h3>
 <p>This operation takes a message and transforms its value to a new value, which may have different value type
@@ -1210,12 +1242,14 @@ than the source.</p>
 </tbody>
 </table>
 <p>Example:</p>
-<pre><code class="language-yaml">from: input_stream
-via:
-  - type: mapValues
-    mapper:
-      expression: str(value)   # convert value from source type to String
-to: output_stream
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_stream
+    via:
+      - type: mapValues
+        mapper:
+          expression: str(value)   # convert value from source type to String
+    to: output_stream
 </code></pre>
 <h3 id="merge">merge</h3>
 <p>Merge this stream and the given stream into one larger stream. There is no ordering guarantee between records from this
@@ -1242,11 +1276,13 @@ though (ie, records within one input stream are processed in order).</p>
 </tbody>
 </table>
 <p>Example:</p>
-<pre><code class="language-yaml">from: input_stream
-via:
-  - type: merge
-    stream: second_stream
-to: output_stream
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_stream
+    via:
+      - type: merge
+        stream: second_stream
+    to: output_stream
 </code></pre>
 <h3 id="outerjoin">outerJoin</h3>
 <p>Join records of this stream with another stream's records using outer join. The join is computed on the
@@ -1331,13 +1367,15 @@ their timestamps need to be close enough as defined by timeDifference.</p>
 </tbody>
 </table>
 <p>Example:</p>
-<pre><code class="language-yaml">from: input_stream
-via:
-  - type: outerJoin
-    stream: second_stream
-    valueJoiner: my_key_value_mapper
-    timeDifference: 1m
-to: output_stream
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_stream
+    via:
+      - type: outerJoin
+        stream: second_stream
+        valueJoiner: my_key_value_mapper
+        timeDifference: 1m
+    to: output_stream
 </code></pre>
 <h3 id="peek">peek</h3>
 <p>Perform an action on each record of a stream. This is a stateless record-by-record operation. Peek is a non-terminal
@@ -1363,11 +1401,13 @@ operation that triggers a side effect (such as logging or statistics collection)
 </tbody>
 </table>
 <p>Example:</p>
-<pre><code class="language-yaml">from: input_stream
-via:
-  - type: peek
-    forEach: print_key_and_value
-to: output_stream
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_stream
+    via:
+      - type: peek
+        forEach: print_key_and_value
+    to: output_stream
 </code></pre>
 <h3 id="reduce">reduce</h3>
 <p>Combine the values of records in this stream by the grouped key. Records with null key or value are ignored. Combining
@@ -1460,30 +1500,32 @@ to <a href="#aggregate">aggregate(Initializer, Aggregator)</a>.</p>
 </tbody>
 </table>
 <p>Example:</p>
-<pre><code class="language-yaml">from: input_stream
-via:
-  - type: groupBy
-    mapper: my_mapper_function
-  - type: aggregate
-    initializer:
-      expression: 0
-    aggregator:
-      expression: aggregatedValue + value
-  - type: toStream
-to: output_stream
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_stream
+    via:
+      - type: groupBy
+        mapper: my_mapper_function
+      - type: aggregate
+        initializer:
+          expression: 0
+        aggregator:
+          expression: aggregatedValue + value
+      - type: toStream
+    to: output_stream
 </code></pre>
 <p>Example:</p>
-<pre><code class="language-yaml">[ yaml ]
-  ----
-from: input_stream
-via:
-  - type: groupBy
-    mapper: my_mapper_function
-  - type: reduce
-    reducer:
-      expression: value1+value2
-  - type: toStream
-to: output_stream
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_stream
+    via:
+      - type: groupBy
+        mapper: my_mapper_function
+      - type: reduce
+        reducer:
+          expression: value1+value2
+      - type: toStream
+    to: output_stream
 </code></pre>
 <h3 id="repartition">repartition</h3>
 <p>Materialize this stream to an auto-generated repartition topic with a given number of partitions, using a custom
@@ -1520,16 +1562,18 @@ automatically purged. The topic will be named as "${applicationId}-<name>-repart
 </tbody>
 </table>
 <p>Example:</p>
-<pre><code class="language-yaml">from: input_stream
-via:
-  - type: repartition
-    name: my_partitioner
-    numberOfPartitions: 3
-    partitioner: my_own_partitioner
-  - type: peek
-    forEach: print_key_and_value
-  - type: toStream
-to: output_stream
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_stream
+    via:
+      - type: repartition
+        name: my_partitioner
+        numberOfPartitions: 3
+        partitioner: my_own_partitioner
+      - type: peek
+        forEach: print_key_and_value
+      - type: toStream
+    to: output_stream
 </code></pre>
 <h3 id="selectkey">selectKey</h3>
 <p>This operation takes a message and transforms the key into a new key, which may have a different type.</p>
@@ -1556,12 +1600,14 @@ to: output_stream
 </tbody>
 </table>
 <p>Example:</p>
-<pre><code class="language-yaml">from: input_stream
-via:
-  - type: selectKey
-    mapper:
-      expression: str(key)   # convert key from source type to string
-to: output_stream
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_stream
+    via:
+      - type: selectKey
+        mapper:
+          expression: str(key)   # convert key from source type to string
+    to: output_stream
 </code></pre>
 <h3 id="suppress">suppress</h3>
 <p>Suppress some updates from this changelog stream, determined by the supplied Suppressed configuration. When
@@ -1622,18 +1668,20 @@ to: output_stream
 </tbody>
 </table>
 <p>Example:</p>
-<pre><code class="language-yaml">from: input_table
-via:
-  - type: suppress
-    until: timeLimit
-    duration: 30s
-    maxBytes: 128000
-    maxRecords: 10000
-    bufferFullStrategy: emitEarlyWhenFull
-  - type: peek
-    forEach: print_key_and_value
-  - type: toStream
-to: output_stream
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_table
+    via:
+      - type: suppress
+        until: timeLimit
+        duration: 30s
+        maxBytes: 128000
+        maxRecords: 10000
+        bufferFullStrategy: emitEarlyWhenFull
+      - type: peek
+        forEach: print_key_and_value
+      - type: toStream
+    to: output_stream
 </code></pre>
 <h3 id="tostream">toStream</h3>
 <p>Convert a KTable into a KStream object.</p>
@@ -1660,50 +1708,60 @@ to: output_stream
 </tbody>
 </table>
 <p>Example:</p>
-<pre><code class="language-yaml">from: input_table
-via:
-  - type: toStream
-to: output_stream
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_table
+    via:
+      - type: toStream
+    to: output_stream
 </code></pre>
 <h3 id="transformkey">transformKey</h3>
 <p>This is an alias for <a href="#selectkey">selectKey</a>.</p>
 <p>Example:</p>
-<pre><code class="language-yaml">from: input_stream
-via:
-  - type: transformKey
-    mapper:
-      expression: str(key)   # convert key from source type to string
-to: output_stream
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_stream
+    via:
+      - type: transformKey
+        mapper:
+          expression: str(key)   # convert key from source type to string
+    to: output_stream
 </code></pre>
 <h3 id="transformkeyvalue">transformKeyValue</h3>
 <p>This is an alias for <a href="#map">map</a>.</p>
 <p>Example:</p>
-<pre><code class="language-yaml">from: input_stream
-via:
-  - type: transformKeyValue
-    mapper:
-      expression: (str(key), str(value))   # convert key and value from source type to string
-to: output_stream
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_stream
+    via:
+      - type: transformKeyValue
+        mapper:
+          expression: (str(key), str(value))   # convert key and value from source type to string
+    to: output_stream
 </code></pre>
 <h3 id="transformkeyvaluetokeyvaluelist">transformKeyValueToKeyValueList</h3>
 <p>This is an alias for <a href="#flatmap">flatMap</a>.</p>
 <p>Example:</p>
-<pre><code class="language-yaml">from: input_stream
-via:
-  - type: transformKeyValueToKeyValueList
-    mapper:
-      expression: [ (key,value), (key,value) ]   # duplicate all incoming messages
-to: output_stream
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_stream
+    via:
+      - type: transformKeyValueToKeyValueList
+        mapper:
+          expression: [ (key,value), (key,value) ]   # duplicate all incoming messages
+    to: output_stream
 </code></pre>
 <h3 id="transformkeyvaluetovaluelist">transformKeyValueToValueList</h3>
 <p>This is an alias for <a href="#flatmapvalues">flapMapValues</a>.</p>
 <p>Example:</p>
-<pre><code class="language-yaml">from: input_stream
-via:
-  - type: transformKeyValueToValueList
-    mapper:
-      expression: [ value+1, value+2, value+3 ]   # creates 3 new messages [key,VR] for every input message
-to: output_stream
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_stream
+    via:
+      - type: transformKeyValueToValueList
+        mapper:
+          expression: [ value+1, value+2, value+3 ]   # creates 3 new messages [key,VR] for every input message
+    to: output_stream
 </code></pre>
 <h3 id="transformmetadata">transformMetadata</h3>
 <p>This operation takes a message and transforms its value to a new value, which may have different value type
@@ -1731,22 +1789,26 @@ than the source.</p>
 </tbody>
 </table>
 <p>Example:</p>
-<pre><code class="language-yaml">from: input_stream
-via:
-  - type: transformValue
-    mapper:
-      expression: str(value)   # convert value from source type to String
-to: output_stream
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_stream
+    via:
+      - type: transformValue
+        mapper:
+          expression: str(value)   # convert value from source type to String
+    to: output_stream
 </code></pre>
 <h3 id="transformvalue">transformValue</h3>
 <p>This is an alias for <a href="#mapvalues">mapValues</a>.</p>
 <p>Example:</p>
-<pre><code class="language-yaml">from: input_stream
-via:
-  - type: transformValue
-    mapper:
-      expression: str(value)   # convert value from source type to String
-to: output_stream
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_stream
+    via:
+      - type: transformValue
+        mapper:
+          expression: str(value)   # convert value from source type to String
+    to: output_stream
 </code></pre>
 <h3 id="windowbysession">windowBySession</h3>
 <p>Create a new windowed KStream instance that can be used to perform windowed aggregations. For more details on the
@@ -1798,17 +1860,19 @@ different types of windows, please refer to [WindowTypes]|[this page].</p>
 </tbody>
 </table>
 <p>Example:</p>
-<pre><code class="language-yaml">from: input_stream
-via:
-  - type: groupBy
-    mapper: my_mapper_function
-  - type: windowedBySession
-    inactivityGap: 1h
-    grace: 5m
-  - type: reduce
-    reducer: my_reducer_function
-  - type: toStream
-to: output_stream
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_stream
+    via:
+      - type: groupBy
+        mapper: my_mapper_function
+      - type: windowBySession
+        inactivityGap: 1h
+        grace: 5m
+      - type: reduce
+        reducer: my_reducer_function
+      - type: toStream
+    to: output_stream
 </code></pre>
 <h3 id="windowbytime">windowByTime</h3>
 <p>Create a new windowed KStream instance that can be used to perform windowed aggregations. For more details on the
@@ -1953,19 +2017,21 @@ different types of windows, please refer to [WindowTypes]|[this page].</p>
 </tbody>
 </table>
 <p>Example:</p>
-<pre><code class="language-yaml">from: input_stream
-via:
-  - type: groupBy
-    mapper: my_mapper_function
-  - type: windowedBy
-    windowType: time
-    duration: 1h
-    advanceBy: 15m
-    grace: 5m
-  - type: reduce
-    reducer: my_reducer_function
-  - type: toStream
-to: output_stream
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_stream
+    via:
+      - type: groupBy
+        mapper: my_mapper_function
+      - type: windowedByTime
+        windowType: tumbling
+        duration: 1h
+        advanceBy: 15m
+        grace: 5m
+      - type: reduce
+        reducer: my_reducer_function
+      - type: toStream
+    to: output_stream
 </code></pre>
 <h2 id="sink-operations">Sink Operations</h2>
 <h3 id="as">as</h3>
@@ -2054,17 +2120,19 @@ accepts the following parameters:</p>
 </tbody>
 </table>
 <p>Example:</p>
-<pre><code class="language-yaml">from: some_source_topic
-branch:
-  - if:
-      expression: value['color'] == 'blue'
-    to: ksml_sensordata_blue
-  - if:
-      expression: value['color'] == 'red'
-    to: ksml_sensordata_red
-  - forEach:
-      code: |
-        print('Unknown color sensor: '+value[&quot;color&quot;])
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: some_source_topic
+    branch:
+      - if:
+          expression: value['color'] == 'blue'
+        to: ksml_sensordata_blue
+      - if:
+          expression: value['color'] == 'red'
+        to: ksml_sensordata_red
+      - forEach:
+          code: |
+            log.warn('Unknown color sensor: {}', value[&quot;color&quot;])
 </code></pre>
 <p>In this example, the first two branches are entered if the respective predicate matches (the color attribute of value
 matches a certain color).
@@ -2090,10 +2158,16 @@ step. The function does not (need to) return anything.</p>
 </tbody>
 </table>
 <p>Examples:</p>
-<pre><code class="language-yaml">forEach: my_foreach_function
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_stream
+    forEach: my_foreach_function
 </code></pre>
-<pre><code class="language-yaml">forEach:
-  code: print(value)
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    forEach:
+      code: |
+        log.info(&quot;Processing message: key={}, value={}&quot;, key, value)
 </code></pre>
 <h3 id="print">print</h3>
 <p>This sends each message to a custom defined print function. This function is expected to handle each message as the
@@ -2134,13 +2208,15 @@ final in the pipeline. The function does not (need to) return anything.</p>
 </tbody>
 </table>
 <p>Examples:</p>
-<pre><code class="language-yaml">from: source
-via:
-  - type: ...
-print:
-  filename: file.txt
-  mapper:
-    expression: &quot;record value: &quot; + str(value)
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_stream
+    via:
+      - type: ...
+    print:
+      filename: file.txt
+      mapper:
+        expression: &quot;record value: &quot; + str(value)
 </code></pre>
 <h3 id="to">to</h3>
 <p>Messages are sent directly to a named <code>Stream</code>.</p>
@@ -2163,17 +2239,22 @@ print:
 </tbody>
 </table>
 <p>Examples:</p>
-<pre><code class="language-yaml">to: my_target_topic
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_stream
+    to: my_target_stream
 </code></pre>
-<pre><code class="language-yaml">from: source
-via:
-  - type: ...
-to:
-  topic: my_target_topic
-  keyType: someType
-  valueType: someOtherType
-  partitioner:
-    expression: hash_of(key)
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_stream
+    via:
+      - type: ...
+    to:
+      topic: my_target_topic
+      keyType: someType
+      valueType: someOtherType
+      partitioner:
+        expression: hash_of(key)
 </code></pre>
 <h3 id="totopicnameextractor">toTopicNameExtractor</h3>
 <p>Messages are passed onto a user function, which returns the name of the topic that message needs to be sent to. This
@@ -2197,16 +2278,22 @@ operation acts as a Sink and is always the last operation in a <a href="../pipel
 </tbody>
 </table>
 <p>Examples:</p>
-<pre><code class="language-yaml">toTopicNameExtractor: my_extractor_function
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_stream
+    toTopicNameExtractor: my_extractor_function
 </code></pre>
-<pre><code class="language-yaml">toTopicNameExtractor:
-  code: |
-    if key == 'sensor1':
-      return 'ksml_sensordata_sensor1'
-    elif key == 'sensor2':
-      return 'ksml_sensordata_sensor2'
-    else:
-      return 'ksml_sensordata_sensor0'
+<pre><code class="language-yaml">pipelines:
+  example_pipeline:
+    from: input_stream
+    toTopicNameExtractor:
+      code: |
+        if key == 'sensor1':
+          return 'ksml_sensordata_sensor1'
+        elif key == 'sensor2':
+          return 'ksml_sensordata_sensor2'
+        else:
+          return 'ksml_sensordata_sensor0'
 </code></pre></div>
             </div>
         </div>

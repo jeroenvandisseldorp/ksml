@@ -122,6 +122,24 @@ Since Kafka Streams joins operate on keys, we need to:
     ```
 
 
+## Foreign Key Join with GlobalTable
+
+Join orders with product catalog using a foreign key to enrich orders with product details.
+
+GlobalTables are replicated across all instances, making them ideal for reference data that needs to be joined frequently. The `mapper` function extracts the join key from the stream record.
+
+??? info "Producer: Orders and Products (click to expand)"
+
+    ```yaml
+    {% include "../../definitions/intermediate-tutorial/joins/producer-orders-products.yaml" %}
+    ```
+
+??? info "Processor: Foreign Key Join (click to expand)"
+
+    ```yaml
+    {% include "../../definitions/intermediate-tutorial/joins/processor-foreign-key-join.yaml" %}
+    ```
+
 ## Key Configuration Details
 
 ### Stream-Table Join Rekeying
@@ -139,6 +157,14 @@ When joining streams with tables on different keys:
 - **Window Stores**: Both streams need window stores with `retainDuplicates: true`
 - **Window Size**: Must equal `2 * timeDifference`
 - **Retention**: Must equal `2 * timeDifference + grace`
+
+### GlobalTable Join Mapper
+
+For GlobalTable joins, use a `keyValueMapper` function to extract the foreign key:
+
+- **Input**: Receives the stream's key and value
+- **Output**: Returns the key to lookup in the GlobalTable
+- **Example**: Extract `product_id` from order to join with product catalog
 
 ### ValueJoiner Functions
 

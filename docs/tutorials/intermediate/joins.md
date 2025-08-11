@@ -122,7 +122,7 @@ Since Kafka Streams joins operate on keys, we need to:
     ```
 
 
-## Foreign Key Join with GlobalTable
+## Stream-GlobalTable Join
 
 Join orders with product catalog using a foreign key to enrich orders with product details.
 

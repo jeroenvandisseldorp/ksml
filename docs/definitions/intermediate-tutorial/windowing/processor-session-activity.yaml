@@ -1,0 +1,83 @@
+streams:
+  user_clicks:
+    topic: user_clicks
+    keyType: string
+    valueType: json
+    
+  user_sessions:
+    topic: user_session_summary
+    keyType: json:windowed(string)  
+    valueType: json
+
+functions:
+  initialize_session:
+    type: initializer
+    expression: {"clicks": 0, "pages": [], "first_click": None, "last_click": None}
+    resultType: json
+
+  update_session:
+    type: aggregator
+    code: |
+      # Track click count
+      aggregatedValue["clicks"] += 1
+      
+      # Track unique pages visited
+      page = value.get("page", "unknown")
+      if page not in aggregatedValue["pages"]:
+        aggregatedValue["pages"].append(page)
+      
+      # Track first and last click timestamps
+      timestamp = value.get("timestamp", 0)
+      if aggregatedValue["first_click"] is None:
+        aggregatedValue["first_click"] = timestamp
+      aggregatedValue["last_click"] = timestamp
+      
+      new_value = aggregatedValue
+    expression: new_value
+    resultType: json
+    
+  finalize_session:
+    type: valueTransformer
+    code: |
+      if value is None:
+        return None
+      
+      # Calculate session duration
+      duration_ms = value.get("last_click", 0) - value.get("first_click", 0)
+      
+      result = {
+        "total_clicks": value["clicks"],
+        "unique_pages": len(value["pages"]),
+        "pages_visited": value["pages"],
+        "session_duration_seconds": round(duration_ms / 1000.0, 1),
+        "first_click_time": value["first_click"],
+        "last_click_time": value["last_click"]
+      }
+    expression: result
+    resultType: json
+
+pipelines:
+  user_session_analysis:
+    from: user_clicks
+    via:
+      - type: groupByKey
+      - type: windowBySession
+        inactivityGap: 2m  # Close session after 2 minutes of inactivity
+        grace: 30s
+      - type: aggregate
+        store:
+          name: user_sessions
+          type: session
+          retention: 1h
+          caching: false
+        initializer: initialize_session
+        aggregator: update_session
+      - type: toStream
+      - type: convertKey
+        into: json:windowed(string)
+      - type: mapValues
+        mapper: finalize_session
+      - type: peek
+        forEach:
+          code: log.info("USER SESSION - user={}, clicks={}, duration={}s", key, value.get("total_clicks") if value else 0, value.get("session_duration_seconds") if value else 0)
+    to: user_sessions

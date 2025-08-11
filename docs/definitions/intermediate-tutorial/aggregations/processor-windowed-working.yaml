@@ -1,0 +1,36 @@
+streams:
+  sensor_readings:
+    topic: sensor_readings
+    keyType: string  # sensor_id
+    valueType: json  # reading with temperature field
+
+  hourly_sensor_statistics:
+    topic: hourly_sensor_statistics
+    keyType: json  # windowed key converted to json
+    valueType: long
+
+functions:
+
+pipelines:
+  hourly_statistics:
+    from: sensor_readings
+    via:
+      - type: groupByKey
+      - type: windowByTime
+        windowType: tumbling
+        duration: 30s
+        grace: 10s
+      - type: count
+        store:
+          name: sensor_count
+          type: window
+          windowSize: 30s
+          retention: 1h
+          caching: false
+      - type: toStream
+      - type: convertKey
+        into: json:windowed(string)
+      - type: peek
+        forEach:
+          code: log.info("Sensor windowed count: key={}, value={}", key, value)
+    to: hourly_sensor_statistics

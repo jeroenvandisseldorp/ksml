@@ -1,0 +1,34 @@
+streams:
+  payment_stream:
+    topic: payment_stream
+    keyType: string  # customer_id
+    valueType: json  # payment details with amount field
+    
+  payment_statistics:
+    topic: payment_statistics
+    keyType: string
+    valueType: long
+
+functions:
+
+pipelines:
+  calculate_statistics:
+    from: payment_stream
+    via:
+      - type: groupByKey
+      - type: aggregate
+        store:
+          type: keyValue
+          retention: 1h
+          caching: false
+        initializer:
+          expression: 0
+          resultType: long
+        aggregator:
+          expression: aggregatedValue + value.get("amount", 0)
+      - type: toStream
+      - type: peek
+        forEach:
+          code: |
+            log.info("Customer {} total amount: ${}", key, value)
+    to: payment_statistics

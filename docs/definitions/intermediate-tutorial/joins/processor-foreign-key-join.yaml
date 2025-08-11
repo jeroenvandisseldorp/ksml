@@ -1,0 +1,50 @@
+streams:
+  orders:
+    topic: new_orders
+    keyType: string  # Order ID (not product ID)
+    valueType: json  # Order details including product_id
+
+  orders_with_product_details:
+    topic: orders_with_product_details
+    keyType: string  # Order ID
+    valueType: json  # Order + product details
+
+globalTables:
+  products:
+    topic: product_catalog
+    keyType: string  # Product ID
+    valueType: json  # Product details
+
+functions:
+  extract_product_id:
+    type: foreignKeyExtractor
+    expression: value.get("product_id")
+
+  join_order_with_product:
+    type: valueJoiner
+    code: |
+      # Combine order and product information
+      result = {}
+
+      # Add order details
+      if value1 is not None:
+        result.update(value1)
+
+      # Add product details
+      if value2 is not None:
+        result["product"] = value2
+
+      return result
+
+pipelines:
+  enrich_orders_with_products:
+    from: orders
+    join:
+      globalTable: products
+      foreignKeyExtractor: extract_product_id
+      valueJoiner: join_order_with_product
+    via:
+      - type: peek
+        forEach:
+          code: log.info("PRODUCT ENRICHED - order_id={}, product={}, price=${}", value.get("order_id"), value.get("product", {}).get("name"), value.get("product", {}).get("price"))
+    to: orders_with_product_details

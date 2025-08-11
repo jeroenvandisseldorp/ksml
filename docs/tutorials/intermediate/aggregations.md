@@ -1,248 +1,144 @@
 # Working with Aggregations in KSML
 
-This tutorial explores how to implement aggregation operations in KSML, allowing you to combine multiple messages into meaningful summaries and statistics.
-
-## Introduction to Aggregations
-
-Aggregations are stateful operations that combine multiple messages to produce a single result. They're essential for:
-
-- Computing statistics (sums, averages, counts)
-- Building summaries of streaming data
-- Reducing data volume by consolidating related messages
-- Creating time-based analytics
-
-In KSML, aggregations are implemented using the Kafka Streams stateful operations, but with the added flexibility of Python functions.
+Learn how to compute statistics, summaries, and time-based analytics from streaming data using KSML's aggregation operations.
 
 ## Prerequisites
 
-Before starting this tutorial, you should:
+- Completed the [KSML Basics Tutorial](../../getting-started/basics-tutorial.md)
+- Understanding of basic KSML concepts (streams, functions, pipelines)
+- Docker Compose environment running
 
-- Understand basic KSML concepts (streams, functions, pipelines)
-- Have completed the [KSML Basics Tutorial](../../getting-started/basics-tutorial.md)
-- Be familiar with [Stateful Operations](../../core-concepts/operations.md#stateful-operations)
+## Aggregation Types
 
-## Types of Aggregations in KSML
+- **Count**: Count messages per key
+- **Reduce**: Combine values using a reducer function  
+- **Aggregate**: Build complex statistics with initializer + aggregator functions
 
-KSML supports several types of aggregation operations:
+## Count Example
 
-### Count
+??? info "User actions producer (click to expand)"
 
-The simplest aggregation is `count`, which counts the number of messages with the same key:
+    ```yaml
+    {%
+      include "../../definitions/intermediate-tutorial/aggregations/producer-user-actions.yaml"
+    %}
+    ```
 
-```yaml
-pipelines:
-  count_by_user:
-    from: user_actions
-    via:
-      - type: groupByKey
-      - type: count
-      - type: toStream
-    to: user_action_counts
-```
+??? info "Count user actions processor (click to expand)"
 
-### Reduce
+    ```yaml
+    {%
+      include "../../definitions/intermediate-tutorial/aggregations/processor-count.yaml"
+    %}
+    ```
 
-The `reduce` operation combines messages with the same key using a reducer function:
+Counts messages with the same key using `groupByKey` then `count`.
 
-```yaml
-functions:
-  sum_amounts:
-    type: reducer
-    expression: value1 + value2
+## Reduce Example
 
-pipelines:
-  sum_transactions:
-    from: financial_transactions
-    via:
-      - type: groupByKey
-      - type: reduce
-        reducer: sum_amounts
-    to: transaction_sums
-```
+??? info "Financial transactions producer (click to expand)"
 
-### Aggregate
+    ```yaml
+    {%
+      include "../../definitions/intermediate-tutorial/aggregations/producer-transactions.yaml"
+    %}
+    ```
 
-The most flexible aggregation is `aggregate`, which uses an initializer function to create the initial aggregation value and an aggregator function to update it:
+??? info "Sum transaction amounts processor (click to expand)"
 
-```yaml
-functions:
-  init_stats:
-    type: initializer
-    expression: {"count": 0, "sum": 0, "min": None, "max": None}
-    
-  update_stats:
-    type: aggregator
-    code: |
-      if aggregatedValue is None:
-        aggregatedValue = {"count": 0, "sum": 0, "min": None, "max": None}
-      
-      amount = value.get("amount", 0)
-      
-      # Update count and sum
-      aggregatedValue["count"] += 1
-      aggregatedValue["sum"] += amount
-      
-      # Update min and max
-      if aggregatedValue["min"] is None or amount < aggregatedValue["min"]:
-        aggregatedValue["min"] = amount
-      if aggregatedValue["max"] is None or amount > aggregatedValue["max"]:
-        aggregatedValue["max"] = amount
-        
-      return aggregatedValue
+    ```yaml
+    {%
+      include "../../definitions/intermediate-tutorial/aggregations/processor-reduce.yaml"
+    %}
+    ```
 
-pipelines:
-  calculate_statistics:
-    from: payment_stream
-    via:
-      - type: groupByKey
-      - type: aggregate
-        initializer: init_stats
-        aggregator: update_stats
-    to: payment_statistics
-```
+Combines transaction amounts using a simple `reducer` function.
 
-## Working with Windows
+## Aggregate Example
 
-Aggregations become even more powerful when combined with windowing operations, which group messages into time-based windows:
+??? info "Payment events producer (click to expand)"
 
-```yaml
-pipelines:
-  hourly_statistics:
-    from: sensor_readings
-    via:
-      - type: groupByKey
-      - type: windowByTime
-        windowType: tumbling
-        duration: 1h
-        advanceBy: 1h
-        grace: 10m
-      - type: aggregate
-        initializer: init_stats
-        aggregator: update_stats
-    to: hourly_sensor_statistics
-```
+    ```yaml
+    {%
+      include "../../definitions/intermediate-tutorial/aggregations/producer-payments.yaml"
+    %}
+    ```
 
-This creates hourly statistics for each sensor (assuming the sensor ID is the key).
+??? info "Calculate payment statistics processor (click to expand)"
 
-## Practical Example: Sales Analytics
+    ```yaml
+    {%
+      include "../../definitions/intermediate-tutorial/aggregations/processor-aggregate-stats.yaml"
+    %}
+    ```
 
-Let's build a complete example that calculates sales analytics by region and product:
+Builds complex statistics using `initializer` to create empty state and `aggregator` to update it.
 
-```yaml
-streams:
-  sales_events:
-    topic: retail_sales
-    keyType: string  # Product ID
-    valueType: json  # Sale details including region, amount, quantity
+## Windowed Aggregations
 
-  sales_by_region:
-    topic: sales_by_region
-    keyType: string  # Region
-    valueType: json  # Aggregated sales statistics
+??? info "Sensor readings producer (click to expand)"
 
-functions:
-  extract_region:
-    type: keyTransformer
-    code: |
-      # Extract region from the sale event and use it as the new key
-      return value.get("region", "unknown")
-  
-  initialize_sales_stats:
-    type: initializer
-    expression: {"total_sales": 0, "total_quantity": 0, "transaction_count": 0, "products": {}}
-  
-  aggregate_sales:
-    type: aggregator
-    code: |
-      # Initialize if needed
-      if aggregatedValue is None:
-        aggregatedValue = {"total_sales": 0, "total_quantity": 0, "transaction_count": 0, "products": {}}
-      
-      # Extract data from the sale
-      product_id = key
-      amount = value.get("amount", 0)
-      quantity = value.get("quantity", 0)
-      
-      # Update aggregated values
-      aggregatedValue["total_sales"] += amount
-      aggregatedValue["total_quantity"] += quantity
-      aggregatedValue["transaction_count"] += 1
-      
-      # Track per-product statistics
-      if product_id not in aggregatedValue["products"]:
-        aggregatedValue["products"][product_id] = {"sales": 0, "quantity": 0}
-      
-      aggregatedValue["products"][product_id]["sales"] += amount
-      aggregatedValue["products"][product_id]["quantity"] += quantity
-      
-      return aggregatedValue
+    ```yaml
+    {%
+      include "../../definitions/intermediate-tutorial/aggregations/producer-sensors.yaml"
+    %}
+    ```
 
-pipelines:
-  regional_sales_analytics:
-    from: sales_events
-    via:
-      # Group by region instead of product ID
-      - type: groupBy
-      # Use tumbling window of 1 day
-      - type: windowByTime
-        windowType: tumbling
-        duration: 1d
-        advanceBy: 1d
-      # Aggregate sales data
-      - type: aggregate
-        initializer: initialize_sales_stats
-        aggregator: aggregate_sales
-    # Output to region-specific topic
-    to: sales_by_region
-```
+??? info "Hourly sensor statistics processor (click to expand)"
+
+    ```yaml
+    {%
+      include "../../definitions/intermediate-tutorial/aggregations/processor-windowed.yaml"
+    %}
+    ```
+
+Groups data into time windows using `windowByTime` before aggregating. Window types:
+- **Tumbling**: Non-overlapping, fixed-size windows
+- **Hopping**: Overlapping, fixed-size windows  
+- **Session**: Dynamic windows based on activity gaps
+
+## Complex Example: Sales Analytics
+
+??? info "Sales events producer (click to expand)"
+
+    ```yaml
+    {%
+      include "../../definitions/intermediate-tutorial/aggregations/producer-sales.yaml"
+    %}
+    ```
+
+??? info "Regional sales analytics processor (click to expand)"
+
+    ```yaml
+    {%
+      include "../../definitions/intermediate-tutorial/aggregations/processor-sales-analytics.yaml"
+    %}
+    ```
 
 This pipeline:
-1. Takes sales events with product IDs as keys
-2. Regroups them by region
-3. Creates daily windows
-4. Aggregates sales statistics including per-product breakdowns
-5. Outputs the results to a new topic
+1. Rekeys sales events by region using `keyValueMapper`
+2. Creates daily windows with `windowByTime`
+3. Aggregates sales statistics per region
+4. Tracks per-product breakdowns within each region
 
-## Best Practices for Aggregations
+## Running the Examples
 
-### Performance Considerations
+Start the Docker environment and run producers:
 
-- **Memory Usage**: Aggregations store state, which consumes memory. Be mindful of the volume of unique keys.
-- **Window Size**: Larger windows require more state storage. Choose appropriate window sizes.
-- **Serialization**: Complex aggregated objects can be expensive to serialize/deserialize.
+```bash
+# Start Docker
+docker compose up -d
 
-### Design Patterns
+# Run transaction producer
+java -cp ksml-runner.jar io.axual.ksml.runner.KSMLRunner docs/definitions/intermediate-tutorial/aggregations/producer-transactions.yaml
 
-- **Two-Phase Aggregation**: For high-cardinality data, consider aggregating in two phases (local then global).
-- **Pre-Filtering**: Filter unnecessary data before aggregation to reduce state size.
-- **Downsampling**: For time series data, consider downsampling before aggregation.
-
-### Error Handling
-
-Always handle potential errors in your aggregator functions:
-
-```yaml
-functions:
-  safe_aggregator:
-    type: aggregator
-    code: |
-      try:
-        # Your aggregation logic here
-        return result
-      except Exception as e:
-        log.error("Error in aggregation: {}", str(e))
-        # Return previous state to avoid losing data
-        return aggregatedValue
+# In another terminal, run processor
+java -cp ksml-runner.jar io.axual.ksml.runner.KSMLRunner docs/definitions/intermediate-tutorial/aggregations/processor-reduce.yaml
 ```
 
-## Conclusion
+## Best Practices
 
-Aggregations are powerful tools for deriving insights from streaming data. By combining KSML's aggregation operations with Python functions, you can implement sophisticated analytics that would be complex to build with traditional Kafka Streams applications.
-
-In the next tutorial, we'll explore how to [implement joins](joins.md) to combine data from multiple streams.
-
-## Further Reading
-
-- [Core Concepts: Operations](../../core-concepts/operations.md)
-- [Core Concepts: Functions](../../core-concepts/functions.md)
-- [Reference: Aggregation Operations](../../reference/operation-reference.md)
+- **Memory**: Monitor state store size - each unique key consumes memory
+- **Windows**: Choose appropriate window sizes to balance accuracy vs. resource usage
+- **Error Handling**: Always handle exceptions in aggregator functions to avoid data loss
+- **Pre-filtering**: Filter data before aggregation to reduce state size

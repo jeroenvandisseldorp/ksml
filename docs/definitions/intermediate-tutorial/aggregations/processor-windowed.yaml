@@ -1,0 +1,60 @@
+streams:
+  sensor_readings:
+    topic: sensor_readings
+    keyType: string  # sensor_id
+    valueType: json  # reading with temperature field
+
+  hourly_sensor_statistics:
+    topic: hourly_sensor_statistics
+    keyType: string  # windowed key
+    valueType: json
+
+functions:
+  init_sensor_stats:
+    type: initializer
+    expression: {"count": 0, "sum": 0, "min": null, "max": null}
+    resultType: json
+
+  update_sensor_stats:
+    type: aggregator
+    code: |
+      # Get the temperature reading
+      temp = value.get("temperature", 0)
+      
+      # Update statistics
+      aggregatedValue["count"] += 1
+      aggregatedValue["sum"] += temp
+      
+      if aggregatedValue["min"] is None or temp < aggregatedValue["min"]:
+        aggregatedValue["min"] = temp
+      if aggregatedValue["max"] is None or temp > aggregatedValue["max"]:
+        aggregatedValue["max"] = temp
+      
+      aggregatedValue["avg"] = round(aggregatedValue["sum"] / aggregatedValue["count"], 2)
+        
+      return aggregatedValue
+    resultType: json
+
+pipelines:
+  hourly_statistics:
+    from: sensor_readings
+    via:
+      - type: groupByKey
+      - type: windowByTime
+        windowType: tumbling
+        duration: 1h
+        grace: 10m
+      - type: aggregate
+        store:
+          type: window
+          windowSize: 1h
+          retention: 24h
+        initializer: init_sensor_stats
+        aggregator: update_sensor_stats
+      - type: toStream
+      - type: peek
+        forEach:
+          code: |
+            log.info("Sensor {} hourly stats: {} readings, avg: {}C", 
+                     key, value["count"], value["avg"])
+    to: hourly_sensor_statistics

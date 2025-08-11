@@ -1,0 +1,41 @@
+streams:
+  payment_stream:
+    topic: payment_stream
+    keyType: string
+    valueType: json
+    
+  payment_statistics:
+    topic: payment_statistics
+    keyType: json:windowed(string)
+    valueType: double
+
+functions:
+
+pipelines:
+  main:
+    from: payment_stream
+    via:
+      - type: groupByKey
+      - type: windowByTime
+        windowType: tumbling
+        duration: 1m
+        grace: 10s
+      - type: aggregate
+        store:
+          name: payment_totals
+          type: window
+          windowSize: 1m
+          retention: 1h
+          caching: false
+        initializer:
+          expression: 0.0
+          resultType: double
+        aggregator:
+          expression: aggregatedValue + value.get("amount", 0.0)
+      - type: toStream
+      - type: convertKey
+        into: json:windowed(string)
+      - type: peek
+        forEach:
+          code: log.info("AGGREGATE SUM - customer={}, total=${}", key, value)
+    to: payment_statistics

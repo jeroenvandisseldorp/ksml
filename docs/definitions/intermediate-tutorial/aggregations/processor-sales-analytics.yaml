@@ -26,6 +26,10 @@ functions:
   aggregate_sales:
     type: aggregator
     code: |
+      # Initialize aggregatedValue if None (first aggregation)
+      if aggregatedValue is None:
+        aggregatedValue = {"total_sales": 0.0, "total_quantity": 0, "transaction_count": 0, "products": {}}
+      
       # Extract data from the sale
       product_id = value.get("product_id", "unknown")
       amount = value.get("amount", 0)
@@ -48,6 +52,27 @@ functions:
       
       return aggregatedValue
     resultType: json
+  
+  transform_window_key:
+    type: keyValueMapper
+    code: |
+      # Extract window information from the WindowedString key
+      region = key["key"]
+      window_start = key["startTime"]
+      window_end = key["endTime"]
+      
+      # Create a new string key with window info
+      new_key = f"{region}_{window_start}_{window_end}"
+      
+      # Add window metadata to the value
+      new_value = {
+        "region": region,
+        "window_start": window_start,
+        "window_end": window_end,
+        "stats": value
+      }
+    expression: (new_key, new_value)
+    resultType: (string, json)
 
 pipelines:
   regional_sales_analytics:
@@ -57,23 +82,28 @@ pipelines:
       - type: map
         mapper: extract_region
       - type: groupByKey
-      # Use tumbling window of 1 day
+      # Use tumbling window of 1 minute for demo
       - type: windowByTime
         windowType: tumbling
-        duration: 24h
+        duration: 1m
+        grace: 10s
       # Aggregate sales data
       - type: aggregate
         store:
           type: window
-          windowSize: 24h
-          retention: 7d
+          windowSize: 1m
+          retention: 10m
         initializer: initialize_sales_stats
         aggregator: aggregate_sales
       - type: toStream
+      - type: map
+        mapper: transform_window_key
       - type: peek
         forEach:
           code: |
-            log.info("Region {} daily sales: ${} from {} transactions", 
-                     key, value["total_sales"], value["transaction_count"])
+            region = value["region"]
+            stats = value["stats"]
+            log.info("Region {} sales (1-min window): ${} from {} transactions", 
+                     region, stats["total_sales"], stats["transaction_count"])
     # Output to region-specific topic
     to: sales_by_region

@@ -23,6 +23,10 @@ functions:
   aggregate_order:
     type: aggregator
     code: |
+      # Initialize if first time
+      if aggregatedValue is None:
+        aggregatedValue = {}
+      
       # Add order amount to total
       if value is not None:
         aggregatedValue["total_orders"] = aggregatedValue.get("total_orders", 0) + value.get("amount", 0)
@@ -34,7 +38,11 @@ functions:
   aggregate_refund:
     type: aggregator
     code: |
-      # Subtract refund amount from total
+      # Initialize if first time
+      if aggregatedValue is None:
+        aggregatedValue = {}
+      
+      # Add refund amount to total (refunds are subtracted later)
       if value is not None:
         aggregatedValue["total_refunds"] = aggregatedValue.get("total_refunds", 0) + value.get("amount", 0)
         aggregatedValue["refund_count"] = aggregatedValue.get("refund_count", 0) + 1
@@ -45,6 +53,10 @@ functions:
   aggregate_bonus:
     type: aggregator
     code: |
+      # Initialize if first time
+      if aggregatedValue is None:
+        aggregatedValue = {}
+      
       # Add bonus points to total
       if value is not None:
         aggregatedValue["total_bonus_points"] = aggregatedValue.get("total_bonus_points", 0) + value.get("points", 0)

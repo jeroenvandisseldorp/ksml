@@ -1,70 +1,133 @@
 streams:
-  sensor_temperatures:
-    topic: sensor_temperatures
+  orders:
+    topic: customer_orders
     keyType: string
-    valueType: double
+    valueType: json
+
+  refunds:
+    topic: customer_refunds
+    keyType: string
+    valueType: json
+
+  bonuses:
+    topic: customer_bonuses
+    keyType: string
+    valueType: json
+
+  customer_totals:
+    topic: customer_totals
+    keyType: string
+    valueType: json
 
 functions:
-  init_stats:
-    type: initializer
-    code: |
-      stats = {
-        "count": 0,
-        "sum": 0.0,
-        "min": None,
-        "max": None
-      }
-    expression: stats
-    resultType: json
-
-  update_stats:
+  aggregate_order:
     type: aggregator
     code: |
-      # Update count and sum
-      aggregatedValue["count"] += 1
-      aggregatedValue["sum"] += value
-      
-      # Update min/max
-      if aggregatedValue["min"] is None or value < aggregatedValue["min"]:
-        aggregatedValue["min"] = value
-      if aggregatedValue["max"] is None or value > aggregatedValue["max"]:
-        aggregatedValue["max"] = value
-      
-      # Calculate average
-      aggregatedValue["avg"] = round(aggregatedValue["sum"] / aggregatedValue["count"], 2)
-      
+      # Initialize if first time
+      if aggregatedValue is None:
+        aggregatedValue = {}
+
+      # Add order amount to total
+      if value is not None:
+        aggregatedValue["total_orders"] = aggregatedValue.get("total_orders", 0) + value.get("amount", 0)
+        aggregatedValue["order_count"] = aggregatedValue.get("order_count", 0) + 1
       result = aggregatedValue
     expression: result
     resultType: json
 
-  log_window_stats:
-    type: forEach
+  aggregate_refund:
+    type: aggregator
     code: |
-      # Extract window information from the key
-      window_start = key["startTime"]
-      window_end = key["endTime"]
-      sensor_id = key["key"]
-      
-      log.info("Sensor {} | Window [{} - {}] | Stats: {} readings, avg: {}C, min: {}C, max: {}C", 
-               sensor_id, window_start, window_end, 
-               value["count"], value["avg"], value["min"], value["max"])
+      # Initialize if first time
+      if aggregatedValue is None:
+        aggregatedValue = {}
+
+      # Add refund amount to total (refunds are subtracted later)
+      if value is not None:
+        aggregatedValue["total_refunds"] = aggregatedValue.get("total_refunds", 0) + value.get("amount", 0)
+        aggregatedValue["refund_count"] = aggregatedValue.get("refund_count", 0) + 1
+      result = aggregatedValue
+    expression: result
+    resultType: json
+
+  aggregate_bonus:
+    type: aggregator
+    code: |
+      # Initialize if first time
+      if aggregatedValue is None:
+        aggregatedValue = {}
+
+      # Add bonus points to total
+      if value is not None:
+        aggregatedValue["total_bonus_points"] = aggregatedValue.get("total_bonus_points", 0) + value.get("points", 0)
+        aggregatedValue["bonus_count"] = aggregatedValue.get("bonus_count", 0) + 1
+      result = aggregatedValue
+    expression: result
+    resultType: json
+
+  compute_net_value:
+    type: aggregator
+    code: |
+      # Compute net value (orders - refunds + bonus points as dollars)
+      orders = aggregatedValue.get("total_orders", 0)
+      refunds = aggregatedValue.get("total_refunds", 0)
+      bonus_dollars = aggregatedValue.get("total_bonus_points", 0) * 0.1  # 1 point = $0.10
+
+      aggregatedValue["net_value"] = round(orders - refunds + bonus_dollars, 2)
+      aggregatedValue["customer"] = key
+
+      result = aggregatedValue
+    expression: result
+    resultType: json
 
 pipelines:
-  windowed_temperature_stats:
-    from: sensor_temperatures
+  # First stream: group orders
+  grouped_orders:
+    from: orders
     via:
       - type: groupByKey
-      - type: windowByTime
-        windowType: tumbling
-        duration: 30s
-        grace: 5s
+      - type: cogroup
+        aggregator: aggregate_order
+    as: orders_grouped
+
+  # Second stream: group refunds and cogroup with orders
+  grouped_refunds:
+    from: refunds
+    via:
+      - type: groupByKey
+      - type: cogroup
+        with: orders_grouped
+        aggregator: aggregate_refund
+    as: refunds_grouped
+
+  # Third stream: group bonuses and cogroup with previous
+  customer_aggregates:
+    from: bonuses
+    via:
+      - type: groupByKey
+      - type: cogroup
+        with: refunds_grouped
+        aggregator: aggregate_bonus
+      # Final aggregation to compute net value
       - type: aggregate
+        initializer:
+          expression: {}
+          resultType: json
+        aggregator: compute_net_value
         store:
-          type: window
-          windowSize: 30s
-          retention: 2m
-          caching: false
-        initializer: init_stats
-        aggregator: update_stats
+          name: customer_totals_store
+          type: keyValue
+          caching: true
       - type: toStream
-    forEach: log_window_stats
+      - type: peek
+        forEach:
+          code: |
+            log.info("CUSTOMER TOTALS - Customer: {}, Orders: ${} ({}), Refunds: ${} ({}), Bonus Points: {}, Net Value: ${}", 
+                     key,
+                     value.get("total_orders", 0),
+                     value.get("order_count", 0),
+                     value.get("total_refunds", 0),
+                     value.get("refund_count", 0),
+                     value.get("total_bonus_points", 0),
+                     value.get("net_value", 0))
+    to: customer_totals

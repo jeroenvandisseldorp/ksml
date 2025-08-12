@@ -1,6 +1,5 @@
 networks:
   ksml:
-    name: ksml_example
     driver: bridge
 
 services:
@@ -54,6 +53,7 @@ services:
 
   kafka-ui:
     image: quay.io/cloudhut/kowl:master
+    platform: linux/amd64
     container_name: kowl
     restart: always
     ports:
@@ -122,4 +122,6 @@ services:
                            kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic customer_totals && \
                            kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic payment_amounts && \
                            kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic payment_totals && \
-                           kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic sensor_temperatures'"
+                           kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic sensor_temperatures && \
+                           kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic sensor_window_stats && \
+                           kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic io.ksml.example.producer-processor_step2-repartition'"

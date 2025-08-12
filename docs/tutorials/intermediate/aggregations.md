@@ -41,13 +41,38 @@ All aggregations require data to be grouped by key first:
 
 Aggregations maintain state in local stores that are fault-tolerant through changelog topics. A changelog is a compacted Kafka topic that records every state change, allowing the state to be rebuilt if an instance fails or restarts. This provides exactly-once processing guarantees and enables automatic state recovery.
 
+#### Key-Value Stores
+
+Used for regular (non-windowed) aggregations:
+
 ```yaml
 store:
   name: my_aggregate_store
-  type: keyValue        # or 'window' for windowed aggregations
-  caching: true         # Enable caching for performance
-  loggingDisabled: false  # Keep changelog for fault tolerance
+  type: keyValue
+  caching: true           # Enable caching to reduce downstream updates
+  loggingDisabled: false  # Keep changelog for fault tolerance (default: false)
+  persistent: true        # Use RocksDB for persistence (default: true)
 ```
+
+#### Window Stores
+
+Required for windowed aggregations to store time-based state:
+
+```yaml
+store:
+  name: my_window_store
+  type: window
+  windowSize: 1h          # Must match the window duration
+  retention: 24h          # How long to keep expired windows (>= windowSize + grace)
+  retainDuplicates: false # Keep only latest value per window (default: false)
+  caching: true           # Enable caching for better performance
+```
+
+**Important considerations:**
+- `windowSize` must match your `windowByTime` duration
+- `retention` should be at least `windowSize + grace period` to handle late-arriving data
+- Longer retention uses more disk space but allows querying historical windows
+- Caching reduces the number of downstream updates and improves performance
 
 ### Function Types in Aggregations
 
@@ -398,13 +423,15 @@ This example demonstrates windowed aggregation by calculating temperature statis
 1. **Groups by sensor**: Each sensor's readings are processed separately
 2. **Windows by time**: Creates 30-second tumbling windows for aggregation
 3. **Calculates statistics**: Tracks count, sum, average, min, and max temperature
-4. **Logs results**: Outputs window statistics without writing to a topic (avoiding WindowedString serialization issues)
+4. **Transforms window key**: Converts WindowedString to a regular string key for output
+5. **Writes to topic**: Outputs windowed statistics to `sensor_window_stats` topic
 
 **Key KSML concepts demonstrated:**
 
 - `windowByTime` with tumbling windows for time-based aggregation
 - Window stores with configurable retention
 - Accessing window metadata (start/end times) from the WindowedString key
+- Transforming WindowedString keys using `map` with `keyValueMapper`
 - Complex aggregation state using JSON
 
 ??? info "Temperature sensor producer (click to expand)"
@@ -433,19 +460,55 @@ When using windowed aggregations, the key becomes a `WindowedString` object cont
 
 This allows you to know exactly which time window each aggregation result belongs to.
 
-> **Note:** Writing windowed aggregations to output topics requires careful handling of the WindowedString key type. For simplicity, this example uses `forEach` to log results instead of writing to a topic.
+**Output format:**
 
-### Window Store Configuration
+The output topic contains messages with:
 
-For windowed aggregations, use window stores:
+- **Key**: `{sensor_id}_{window_start}_{window_end}` (e.g., `temp001_2025-08-12T18:58:00Z_2025-08-12T18:58:30Z`)
+- **Value**: JSON object containing:
+      - `sensor_id`: The sensor identifier
+      - `window_start`/`window_end`: Window boundaries in UTC
+      - `stats`: Aggregated statistics (count, avg, min, max)
 
-```yaml
-store:
-  name: windowed_store
-  type: window
-  windowSize: 1h      # Must match window duration
-  retention: 25h      # How long to keep old windows
-  retainDuplicates: false  # Usually false for aggregations
+Example output message:
+```json
+{
+  "sensor_id": "temp001",
+  "window_start": "2025-08-12T18:58:00Z",
+  "window_end": "2025-08-12T18:58:30Z",
+  "stats": {
+    "count": 3,
+    "avg": 24.5,
+    "min": 19.6,
+    "max": 28.7,
+    "sum": 73.5
+  }
+}
+```
+
+**Verifying the input data:**
+
+To check the raw sensor temperature readings (binary double values), use:
+
+```bash
+docker exec broker kafka-console-consumer.sh \
+  --bootstrap-server broker:9093 \
+  --topic sensor_temperatures \
+  --from-beginning \
+  --max-messages 10 \
+  --property print.key=true \
+  --property key.separator=" | " \
+  --key-deserializer org.apache.kafka.common.serialization.StringDeserializer \
+  --value-deserializer org.apache.kafka.common.serialization.DoubleDeserializer
+```
+
+Example input messages:
+```
+temp001 | 24.5
+temp002 | 31.2
+temp003 | 18.7
+temp001 | 26.3
+temp002 | 29.8
 ```
 
 ## Advanced: Cogroup Operation
@@ -479,9 +542,25 @@ The cogroup operation:
 
 > **Note:** Cogroup is an advanced feature that requires careful coordination between multiple streams. Ensure all streams are properly grouped and that aggregator functions handle null values appropriately.
 
-## Complex Example: Sales Analytics
+## Complex Example: Regional Sales Analytics
 
-Multi-level aggregation with rekeying and windowing:
+This example demonstrates rekeying (changing the grouping key) and windowed aggregation to calculate regional sales statistics:
+
+**What it does:**
+
+1. **Receives sales events** keyed by product ID with region, amount, and quantity data
+2. **Rekeys by region** - changes the grouping from product to geographical region
+3. **Windows by time** - creates 1-minute tumbling windows for aggregation
+4. **Aggregates metrics** - tracks total sales, quantities, transaction counts, and per-product breakdowns
+5. **Outputs regional statistics** - writes windowed regional summaries to output topic
+
+**Key KSML concepts demonstrated:**
+
+- `map` with `keyValueMapper` to change the message key (rekeying)
+- `groupByKey` after rekeying to group by the new key
+- `windowByTime` for time-based regional analytics
+- Complex aggregation state with nested data structures
+- Tracking multiple metrics in a single aggregation
 
 ??? info "Sales events producer (click to expand)"
 
@@ -499,12 +578,14 @@ Multi-level aggregation with rekeying and windowing:
     %}
     ```
 
-This pipeline demonstrates:
+**Pipeline flow:**
 
-1. **Rekeying** by region using `keyValueMapper`
-2. **Windowing** with daily tumbling windows
-3. **Complex aggregation** tracking multiple metrics
-4. **Nested data structures** for per-product breakdowns
+1. **Input**: Sales events with product_id as key
+2. **Rekey**: Map operation changes key to region
+3. **Group**: Group by the new region key
+4. **Window**: Apply 1-minute tumbling windows
+5. **Aggregate**: Calculate regional statistics per window
+6. **Output**: Windowed regional sales summaries
 
 ## Performance Considerations
 

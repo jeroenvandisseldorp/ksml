@@ -4,9 +4,7 @@ Learn how to compute statistics, summaries, and time-based analytics from stream
 
 ## Prerequisites
 
-- Completed the [KSML Basics Tutorial](../../getting-started/basics-tutorial.md)
-- Understanding of basic KSML concepts (streams, functions, pipelines)
-- Docker Compose environment running
+- Make sure there is a running Docker Compose KSML environment as described in the [Basics Tutorial](../../getting-started/basics-tutorial.md#choose-your-setup-method).
 
 ## Aggregation Types
 
@@ -93,6 +91,7 @@ Builds complex statistics using `initializer` to create empty state and `aggrega
     ```
 
 Groups data into time windows using `windowByTime` before aggregating. Window types:
+
 - **Tumbling**: Non-overlapping, fixed-size windows
 - **Hopping**: Overlapping, fixed-size windows  
 - **Session**: Dynamic windows based on activity gaps
@@ -116,25 +115,11 @@ Groups data into time windows using `windowByTime` before aggregating. Window ty
     ```
 
 This pipeline:
+
 1. Rekeys sales events by region using `keyValueMapper`
 2. Creates daily windows with `windowByTime`
 3. Aggregates sales statistics per region
 4. Tracks per-product breakdowns within each region
-
-## Running the Examples
-
-Start the Docker environment and run producers:
-
-```bash
-# Start Docker
-docker compose up -d
-
-# Run transaction producer
-java -cp ksml-runner.jar io.axual.ksml.runner.KSMLRunner docs/definitions/intermediate-tutorial/aggregations/producer-transactions.yaml
-
-# In another terminal, run processor
-java -cp ksml-runner.jar io.axual.ksml.runner.KSMLRunner docs/definitions/intermediate-tutorial/aggregations/processor-reduce.yaml
-```
 
 ## Best Practices
 

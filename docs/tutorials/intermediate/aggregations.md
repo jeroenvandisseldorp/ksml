@@ -39,7 +39,7 @@ All aggregations require data to be grouped by key first:
 
 ### State Stores
 
-Aggregations maintain state in local stores that are fault-tolerant through changelog topics:
+Aggregations maintain state in local stores that are fault-tolerant through changelog topics. A changelog is a compacted Kafka topic that records every state change, allowing the state to be rebuilt if an instance fails or restarts. This provides exactly-once processing guarantees and enables automatic state recovery.
 
 ```yaml
 store:
@@ -52,6 +52,7 @@ store:
 ### Function Types in Aggregations
 
 **Initializer Function**
+Creates the initial state value when a key is seen for the first time.
 ```yaml
 initializer:
   expression: {"count": 0, "sum": 0}  # Initial state
@@ -59,6 +60,7 @@ initializer:
 ```
 
 **Aggregator Function**
+Updates the aggregate state by combining the current aggregate with a new incoming value.
 ```yaml
 aggregator:
   code: |
@@ -73,6 +75,7 @@ aggregator:
 ```
 
 **Reducer Function** (for reduce operations)
+Combines two values of the same type into a single value, used when no initialization is needed.
 ```yaml
 reducer:
   code: |
@@ -294,36 +297,34 @@ store:
 
 ## Advanced: Cogroup Operation
 
-Combining multiple streams into one aggregate:
+Cogroup allows combining multiple grouped streams into a single aggregation. This is useful when you need to aggregate data from different sources into one unified result.
 
-```yaml
-pipelines:
-  # First grouped stream
-  stream1:
-    from: orders
-    via:
-      - type: groupByKey
-      - type: cogroup
-        aggregator:
-          expression: aggregatedValue + value["amount"]
-    as: grouped1
+??? info "Orders, Refunds, and Bonuses Producer (click to expand)"
 
-  # Second grouped stream  
-  stream2:
-    from: refunds
-    via:
-      - type: groupByKey
-      - type: cogroup
-        with: grouped1
-        aggregator:
-          expression: aggregatedValue - value["amount"]
-      - type: aggregate
-        initializer:
-          expression: 0
-          resultType: long
-        store:
-          name: net_revenue
-```
+    ```yaml
+    {%
+      include "../../definitions/intermediate-tutorial/aggregations/producer-cogroup.yaml"
+    %}
+    ```
+
+??? info "Cogroup Processor (click to expand)"
+
+    ```yaml
+    {%
+      include "../../definitions/intermediate-tutorial/aggregations/processor-cogroup.yaml"
+    %}
+    ```
+
+### How Cogroup Works
+
+The cogroup operation:
+
+1. Groups each stream independently by key
+2. Combines the grouped streams using cogroup operations
+3. Each stream contributes to the aggregate with its own aggregator function
+4. Final aggregate operation computes the combined result
+
+> **Note:** Cogroup is an advanced feature that requires careful coordination between multiple streams. Ensure all streams are properly grouped and that aggregator functions handle null values appropriately.
 
 ## Complex Example: Sales Analytics
 
@@ -379,6 +380,15 @@ This pipeline demonstrates:
 2. **Tune Commit Intervals**
        - Longer intervals = better throughput, higher latency
        - Shorter intervals = lower latency, more overhead
+   
+       To configure commit intervals, change your Kafka broker settings:
+       ```yaml
+       # In your ksml-runner.yaml or application config
+       kafka:
+         commit.interval.ms: 30000  # 30 seconds for better throughput
+         # or
+         commit.interval.ms: 100    # 100ms for lower latency
+       ```
 
 3. **Pre-filter Data**
        - Filter before grouping to reduce state size

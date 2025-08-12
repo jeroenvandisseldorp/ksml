@@ -1,65 +1,30 @@
 streams:
-  orders:
-    topic: new_orders
-    keyType: string  # Order ID
-    valueType: json  # Order details including product_id
+  financial_transactions:
+    topic: financial_transactions
+    keyType: string  # account_id
+    valueType: long  # transaction amount
 
-  orders_with_product_details:
-    topic: orders_with_product_details
-    keyType: string  # Order ID
-    valueType: json  # Order enriched with product information
-
-globalTables:
-  products:
-    topic: product_catalog
-    keyType: string  # Product ID
-    valueType: json  # Product details
+  transaction_sums:
+    topic: transaction_sums
+    keyType: string
+    valueType: long
 
 functions:
-  extract_product_id:
-    type: keyValueMapper
-    code: |
-      # Extract product_id from order value to join with products table
-      product_id = value.get("product_id") if value else None
-    expression: product_id
-    resultType: string
-
-  join_order_with_product:
-    type: valueJoiner
-    code: |
-      # Combine order and product information
-      result = {}
-
-      # Add order details
-      if value1 is not None:
-        result.update(value1)
-
-      # Add product details
-      if value2 is not None:
-        result["product_details"] = value2
-        # Calculate total price
-        quantity = value1.get("quantity", 0) if value1 else 0
-        price = value2.get("price", 0) if value2 else 0
-        result["total_price"] = quantity * price
-
-      new_value = result
-    expression: new_value
-    resultType: json
+  sum_amounts:
+    type: reducer
+    expression: value1 + value2
+    resultType: long
 
 pipelines:
-  enrich_orders_with_products:
-    from: orders
+  sum_transactions:
+    from: financial_transactions
     via:
-      - type: join
-        globalTable: products
-        mapper: extract_product_id
-        valueJoiner: join_order_with_product
+      - type: groupByKey
+      - type: reduce
+        reducer: sum_amounts
+      - type: toStream
       - type: peek
         forEach:
           code: |
-            log.info("ENRICHED ORDER - key={}, order_id={}, product={}, total_price={}", 
-                     key, 
-                     value.get("order_id"), 
-                     value.get("product_details", {}).get("name"),
-                     value.get("total_price"))
-    to: orders_with_product_details
+            log.info("Account {} total: ${}", key, value)
+    to: transaction_sums

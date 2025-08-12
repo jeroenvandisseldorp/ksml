@@ -1,78 +1,31 @@
 functions:
-  generate_order:
+  generate_transaction:
     type: generator
     globalCode: |
       import random
-      import time
-      order_counter = 0
-      customers = ["CUST001", "CUST002", "CUST003", "CUST004", "CUST005"]
-      products = ["PROD001", "PROD002", "PROD003", "PROD004", "PROD005"]
+      account_counter = 0
+      accounts = ["ACC001", "ACC002", "ACC003", "ACC004", "ACC005"]
     code: |
-      global order_counter, customers, products
-      
-      order_counter += 1
-      order_id = f"ORD{order_counter:04d}"
-      customer_id = random.choice(customers)
-      product_id = random.choice(products)
-      
-      # Generate order with product_id for foreign key join
-      value = {
-        "order_id": order_id,
-        "customer_id": customer_id,
-        "product_id": product_id,
-        "quantity": random.randint(1, 5),
-        "timestamp": int(time.time() * 1000)
-      }
-      
-      # Use order_id as key (natural key for orders)
-      key = order_id
-    expression: (key, value)
-    resultType: (string, json)
+      global account_counter, accounts
 
-  generate_product:
-    type: generator
-    globalCode: |
-      import random
-      products_data = [
-        {"id": "PROD001", "name": "Laptop", "category": "Electronics", "price": 999.99},
-        {"id": "PROD002", "name": "Headphones", "category": "Electronics", "price": 149.99},
-        {"id": "PROD003", "name": "Coffee Maker", "category": "Appliances", "price": 79.99},
-        {"id": "PROD004", "name": "Backpack", "category": "Accessories", "price": 49.99},
-        {"id": "PROD005", "name": "Desk Lamp", "category": "Furniture", "price": 39.99}
-      ]
-      product_index = 0
-    code: |
-      global products_data, product_index
-      
-      # Cycle through products to populate the global table
-      product = products_data[product_index % len(products_data)]
-      product_index += 1
-      
-      value = {
-        "name": product["name"],
-        "category": product["category"],
-        "price": product["price"],
-        "in_stock": True
-      }
-      
-      # Product ID as key for the global table
-      key = product["id"]
+      # Cycle through accounts
+      account = accounts[account_counter % len(accounts)]
+      account_counter += 1
+
+      # Generate transaction amount (in cents to avoid float issues)
+      amount = random.randint(100, 50000)
+
+      # Use account_id as key, amount as value
+      key = account
+      value = amount
     expression: (key, value)
-    resultType: (string, json)
+    resultType: (string, long)
 
 producers:
-  order_producer:
-    generator: generate_order
-    interval: 2s
+  transaction_producer:
+    generator: generate_transaction
+    interval: 1s
     to:
-      topic: new_orders
+      topic: financial_transactions
       keyType: string
-      valueType: json
-
-  product_producer:
-    generator: generate_product
-    interval: 10s
-    to:
-      topic: product_catalog
-      keyType: string
-      valueType: json
+      valueType: long

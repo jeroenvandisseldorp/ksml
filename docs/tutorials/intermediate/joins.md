@@ -2,55 +2,74 @@
 
 This tutorial explores how to implement join operations in KSML, allowing you to combine data from multiple streams or tables to create enriched datasets.
 
-## Introduction to Joins
+## Introduction
 
-Joins are powerful operations that allow you to combine data from different sources based on a common key. In stream processing, joins enable you to:
-
-- Enrich streaming data with reference information
-- Correlate events from different systems
-- Build comprehensive views of entities from fragmented data
-- Implement complex business logic that depends on multiple data sources
-
-KSML supports various types of joins, each with different semantics and use cases.
+Joins are fundamental operations in stream processing that combine data from multiple sources based on common keys. KSML provides three main types of joins, each serving different use cases in real-time data processing.
 
 ## Prerequisites
 
-Before starting this tutorial, you should:
+Before starting this tutorial, you should understand:
 
-- Understand basic KSML concepts (streams, functions, pipelines)
-- Have completed the [KSML Basics Tutorial](../../getting-started/basics-tutorial.md)
-- Be familiar with [Stateful Operations](../../core-concepts/operations.md#stateful-operations)
-- Understand the difference between [streams and tables](../../reference/stream-type-reference.md)
+- [Stream types (KStream, KTable, GlobalKTable)](../../reference/stream-type-reference.md)
+- Basic KSML concepts from the [Basics Tutorial](../../getting-started/basics-tutorial.md)
+- [Stateful Operations](../../core-concepts/operations.md#stateful-operations)
 
 ## Types of Joins in KSML
 
-KSML supports several types of joins, each with different semantics:
+KSML supports three main categories of joins, each with specific characteristics and use cases:
 
-### Stream-Stream Joins
+### 1. Stream-Stream Joins
+Join two event streams within a time window to correlate related events.
 
-Join two streams based on a common key within a specified time window:
+**When to use:**
 
-- **Inner Join (`join`)**: Outputs a result only when both streams have matching keys within the time window
-- **Left Join (`leftJoin`)**: Always outputs a result for messages from the left stream, joining with the right stream if available
-- **Outer Join (`outerJoin`)**: Outputs a result whenever either stream has a message, joining them when both are available
+- Correlating events from different systems
+- Tracking user behavior across multiple actions
+- Detecting patterns that span multiple event types
 
-### Stream-Table Joins
+**Key characteristics:**
 
-Join a stream with a table (materialized view) based on the key:
+- Requires time windows for correlation
+- Both streams must be co-partitioned (same number of partitions, same key)
+- Results are emitted when matching events occur within the window
 
-- **Inner Join (`join`)**: Outputs a result only when the stream key exists in the table
-- **Left Join (`leftJoin`)**: Always outputs a result for stream messages, joining with the table value if available
+### 2. Stream-Table Joins
+Enrich a stream of events with the latest state from a changelog table.
 
-### Stream-GlobalTable Joins
+**When to use:**
 
-Join a stream with a global table, with the ability to use a foreign key:
+- Enriching events with reference data
+- Adding current state information to events
+- Looking up the latest value for a key
 
-- **Inner Join (`join`)**: Outputs a result only when the stream's foreign key exists in the global table
-- **Left Join (`leftJoin`)**: Always outputs a result for stream messages, joining with the global table value if available
+**Key characteristics:**
+
+- Stream events are enriched with the latest table value
+- Table provides point-in-time lookups
+- Requires co-partitioning between stream and table
+
+### 3. Stream-GlobalTable Joins
+Enrich events using replicated reference data available on all instances.
+
+**When to use:**
+
+- Joining with reference data (product catalogs, configuration)
+- Foreign key joins where keys don't match directly
+- Avoiding co-partitioning requirements
+
+**Key characteristics:**
+
+- GlobalTable is replicated to all application instances
+- Supports foreign key extraction via mapper functions
+- No co-partitioning required
 
 ## Stream-Stream Join
 
-This example correlates user clicks and purchases within a 30-minute time window to track user activity patterns.
+Stream-stream joins correlate events from two streams within a specified time window. This is essential for detecting patterns and relationships between different event types.
+
+### Use Case: User Behavior Analysis
+
+Track user shopping behavior by correlating clicks and purchases within a 30-minute window to understand the customer journey.
 
 ??? info "Producer: Clicks and Purchases (click to expand)"
 
@@ -64,44 +83,31 @@ This example correlates user clicks and purchases within a 30-minute time window
     {% include "../../definitions/intermediate-tutorial/joins/processor-stream-stream-join-working.yaml" %}
     ```
 
-### How This Example Works
+### Key Configuration Points
 
-This example demonstrates stream-stream joins with time windows by tracking user shopping behavior:
-
-- **Joins on**: User ID - correlates all activities by the same user
-- **Time Window**: 30 minutes - captures clicks and purchases that occur within 30 minutes of each other
-- **Business Value**: Understand the user's journey - what products they browsed before making ANY purchase
-
-For example, a user might:
-
-1. Click on shoes at 2:00 PM
-2. Click on a shirt at 2:05 PM
-3. Click on a jacket at 2:10 PM
-4. Purchase the shirt at 2:15 PM
-
-This join captures that browsing pattern, showing that viewing multiple products led to a purchase, even if the purchased item wasn't the first one clicked.
-
-### Time Window Configuration
-
-Stream-stream joins require careful window configuration:
+The aim here is to show how time windows must be used to correlate events from different streams. The configuration demonstrates:
 
 - **timeDifference**: 30m - Maximum time gap between correlated events
-- **windowSize**: 60m - Must be 2 × timeDifference to buffer events from both streams
-- **retention**: 65m - Must be (2 × timeDifference) + grace period for state cleanup
-- **grace**: 5m - Allows late-arriving events to still be processed
+- **Window Stores**: Both streams need stores with `retainDuplicates: true`
+- **Window Size**: Must be `2 × timeDifference` (60m) to buffer events from both streams
+- **Retention**: Must be `2 × timeDifference + grace` (65m) for proper state cleanup
+- **Grace Period**: 5m allowance for late-arriving events
 
-The window ensures we only correlate recent activities while managing memory efficiently.
-
+This configuration ensures events are only correlated within a reasonable time frame while managing memory efficiently.
 
 ## Stream-Table Join
 
-Join a stream of orders with a table of customer data to enrich orders with customer information.
+Stream-table joins enrich streaming events with the latest state from a changelog table. This pattern is common for adding reference data to events.
 
-Since Kafka Streams joins operate on keys, we need to:
+### Use Case: Order Enrichment
 
-1. **Rekey orders to customer_id** - Orders arrive keyed by order_id, but we need customer_id to join
-2. **Join with customers table** - Enriches each order with customer details
-3. **Rekey back to order_id** - Restore the natural key for downstream processing
+Enrich order events with customer information by joining the orders stream with a customers table.
+
+**Implementation Challenge:** Orders naturally use order_id as the key, but joining requires customer_id. The solution uses a three-step pattern:
+
+1. **Rekey** orders from order_id to customer_id
+2. **Join** with the customers table
+3. **Rekey** back to order_id for downstream processing
 
 ??? info "Producer: Orders (click to expand)"
 
@@ -121,12 +127,21 @@ Since Kafka Streams joins operate on keys, we need to:
     {% include "../../definitions/intermediate-tutorial/joins/processor-stream-table-join.yaml" %}
     ```
 
+### Rekeying Pattern
+
+The rekeying pattern is essential when join keys don't match naturally:
+
+- Use `transformKey` to extract the join key from the stream
+- Perform the join operation
+- Optionally restore the original key for downstream consistency
 
 ## Stream-GlobalTable Join
 
-Join orders with product catalog using a foreign key to enrich orders with product details.
+GlobalTable joins enable enrichment with reference data that's replicated across all instances, supporting foreign key relationships.
 
-GlobalTables are replicated across all instances, making them ideal for reference data that needs to be joined frequently. The `mapper` function extracts the join key from the stream record.
+### Use Case: Product Catalog Enrichment
+
+Enrich orders with product details using a foreign key join with a global product catalog.
 
 ??? info "Producer: Orders and Products (click to expand)"
 
@@ -140,52 +155,73 @@ GlobalTables are replicated across all instances, making them ideal for referenc
     {% include "../../definitions/intermediate-tutorial/joins/processor-foreign-key-join.yaml" %}
     ```
 
-## Key Configuration Details
+### Foreign Key Extraction
 
-### Stream-Table Join Rekeying
+The `mapper` function extracts the foreign key from stream records:
 
-When joining streams with tables on different keys:
+- **Function Type**: `keyValueMapper` (not `foreignKeyExtractor`)
+- **Input**: Stream's key and value
+- **Output**: Key to lookup in the GlobalTable
+- **Example**: Extract product_id from order to join with product catalog
 
-- Use `transformKey` to rekey the stream to match the table's key
-- Perform the join operation
-- Optionally rekey back to the original key for downstream processing
-
-### Stream-Stream Join Requirements
-
-- **timeDifference**: Maximum time difference between matched events
-- **grace**: Grace period for late-arriving data  
-- **Window Stores**: Both streams need window stores with `retainDuplicates: true`
-- **Window Size**: Must equal `2 * timeDifference`
-- **Retention**: Must equal `2 * timeDifference + grace`
-
-### GlobalTable Join Mapper
-
-For GlobalTable joins, use a `keyValueMapper` function to extract the foreign key:
-
-- **Input**: Receives the stream's key and value
-- **Output**: Returns the key to lookup in the GlobalTable
-- **Example**: Extract `product_id` from order to join with product catalog
+## Advanced Configuration
 
 ### ValueJoiner Functions
 
-ValueJoiner functions receive two parameters:
+All join types require a valueJoiner to combine data:
 
-- **value1**: Value from the left stream/table
-- **value2**: Value from the right stream/table
+```yaml
+valueJoiner:
+  type: valueJoiner
+  code: |
+    # value1: left stream/table
+    # value2: right stream/table
+    result = {...}
+  expression: result
+  resultType: json
+```
+
+Key requirements:
+
 - Must include `expression` and `resultType` fields
+- Handle null values gracefully
+- Return appropriate data structure
 
-## Best Practices
+### Window Store Configuration
 
-- **State Size**: Joins maintain state - monitor memory usage with window sizes
-- **Join Order**: Join with smaller datasets first when possible  
-- **Error Handling**: Handle null values in valueJoiner functions
-- **Windowing**: Choose appropriate window sizes balancing accuracy vs. performance
+For stream-stream joins, configure window stores carefully:
+
+```yaml
+thisStore:
+  name: stream1_store
+  type: window
+  windowSize: 60m         # 2 × timeDifference
+  retention: 65m          # 2 × timeDifference + grace
+  retainDuplicates: true  # Required for joins
+```
+
+### Co-partitioning Requirements
+
+Stream-stream and stream-table joins require co-partitioning:
+
+- Same number of partitions in both topics
+- Same partitioning strategy
+- Same key type and serialization
+
+GlobalTable joins don't require co-partitioning since data is replicated.
 
 ## Conclusion
 
-Joins enable powerful data enrichment by combining streams with tables or correlating events across streams. Use stream-table joins for real-time enrichment and stream-stream joins for event correlation within time windows.
+KSML's join operations enable powerful data enrichment patterns:
+
+- **Stream-stream joins** correlate events within time windows
+- **Stream-table joins** enrich events with current state
+- **Stream-GlobalTable joins** provide foreign key lookups without co-partitioning
+
+Choose the appropriate join type based on your data characteristics and business requirements.
 
 ## Further Reading
 
 - [Core Concepts: Operations](../../core-concepts/operations.md)
 - [Reference: Join Operations](../../reference/operation-reference.md)
+- [Stream Type Reference](../../reference/stream-type-reference.md)

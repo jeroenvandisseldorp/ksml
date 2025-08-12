@@ -164,9 +164,67 @@ The count operation:
 
 ## Reduce Example
 
-Combining values without initialization:
+The `reduce` operation combines values without initialization, making it perfect for operations like summing, finding minimums/maximums, or concatenating strings. This section shows two approaches: a simple binary format for efficiency, and a JSON format for human readability.
 
-??? info "Financial transactions producer (click to expand)"
+### Simple Reduce (Binary Format)
+
+This example demonstrates the core reduce concept with minimal complexity, using binary long values for efficiency.
+
+**What it does:**
+
+1. **Generates transactions**: Creates random transaction amounts as long values (cents)
+2. **Groups by account**: Groups transactions by account_id (the message key)  
+3. **Reduces values**: Sums all transaction amounts using a simple reducer
+4. **Outputs totals**: Writes aggregated totals as long values
+
+**Key KSML concepts demonstrated:**
+
+- `groupByKey` for partitioning data by key
+- `reduce` operation for stateful aggregation
+- Binary data types for processing efficiency
+
+??? info "Simple producer (binary long values) - click to expand"
+
+    ```yaml
+    {%
+      include "../../definitions/intermediate-tutorial/aggregations/producer-simple.yaml"
+    %}
+    ```
+
+??? info "Simple processor (reduce only) - click to expand"
+
+    ```yaml
+    {%
+      include "../../definitions/intermediate-tutorial/aggregations/processor-simple.yaml"
+    %}
+    ```
+
+**Verifying the results:**
+
+Since binary data isn't human-readable in Kowl UI, use command-line tools to verify:
+
+```bash
+# Check current totals
+kcat -b localhost:9092 -t transaction_sums -C -o end -c 5 -f 'Key: %k, Total: %s\n' -s value=Q
+
+# Verify by summing all transactions for one account
+kcat -b localhost:9092 -t financial_transactions -C -o beginning -f '%k,%s\n' -s value=Q -e | \
+  grep "ACC001" | cut -d',' -f2 | awk '{sum += $1} END {print "Sum:", sum}'
+```
+
+> **Note:** Binary formats like `long` are common in production for performance and storage efficiency.
+
+### Human-Readable Reduce (JSON Format)
+
+This example shows the same reduce logic but with JSON messages for better visibility in Kafka UI tools.
+
+**Additional concepts demonstrated:**
+
+- `transformValue` for data extraction and formatting  
+- Type handling (JSON → long → JSON) for processing efficiency
+- Human-readable message formats
+
+??? info "JSON producer (human-readable) - click to expand"
 
     ```yaml
     {%
@@ -174,7 +232,7 @@ Combining values without initialization:
     %}
     ```
 
-??? info "Sum transaction amounts processor (click to expand)"
+??? info "JSON processor (with transformations) - click to expand"
 
     ```yaml
     {%
@@ -198,9 +256,74 @@ Choose **aggregate** when:
 
 ## Aggregate Example
 
-Building complex statistics:
+The `aggregate` operation provides custom initialization and aggregation logic, making it perfect for building complex statistics or when input and output types differ. This section shows two approaches: a simple binary format for core concepts, and a JSON format for comprehensive statistics.
 
-??? info "Payment events producer (click to expand)"
+### Simple Aggregate (Binary Format)
+
+This example demonstrates the core aggregate concept with minimal complexity, using binary long values.
+
+**What it does:**
+
+1. **Initializes to zero**: Starts aggregation with a zero value using simple expression
+2. **Groups by customer**: Groups payment amounts by customer_id (the message key)
+3. **Sums amounts**: Adds each payment amount to the running total
+4. **Outputs totals**: Writes aggregated totals as long values
+
+**Key KSML concepts demonstrated:**
+
+- `initializer` with simple expression (no custom function needed)
+- `aggregator` with simple arithmetic expression  
+- Binary data types for processing efficiency
+
+??? info "Simple producer (binary long values) - click to expand"
+
+    ```yaml
+    {%
+      include "../../definitions/intermediate-tutorial/aggregations/producer-simple-aggregate.yaml"
+    %}
+    ```
+
+??? info "Simple processor (aggregate only) - click to expand"
+
+    ```yaml
+    {%
+      include "../../definitions/intermediate-tutorial/aggregations/processor-simple-aggregate.yaml"
+    %}
+    ```
+
+**Verifying the results:**
+
+Since binary data isn't human-readable in Kowl UI, use command-line tools to verify:
+
+```bash
+# Check current totals (convert cents to dollars)
+kcat -b localhost:9092 -t payment_totals -C -o end -c 5 -f 'Key: %k, Total cents: %s\n' -s value=Q
+
+# Calculate expected total for one customer
+kcat -b localhost:9092 -t payment_amounts -C -o beginning -f '%k,%s\n' -s value=Q -e | \
+  grep "CUST001" | cut -d',' -f2 | awk '{sum += $1} END {print "Expected:", sum}'
+```
+
+### Complex Aggregate (JSON Format)  
+
+This example shows advanced aggregation with comprehensive statistics using JSON for human readability.
+
+**Additional concepts demonstrated:**
+
+- Custom `initializer` function for complex state initialization
+- Custom `aggregator` function for multi-field updates
+- JSON state management for rich aggregations
+- Dynamic calculations (average) within aggregation logic
+
+**What it does:**
+
+1. **Initializes statistics**: Creates a JSON structure to track multiple metrics (count, total, min, max, average)
+2. **Groups by customer**: Groups payment events by account_id (the message key)
+3. **Updates statistics**: For each payment, updates all metrics in the aggregated state
+4. **Calculates average**: Dynamically computes the average amount per customer
+5. **Outputs comprehensive stats**: Produces JSON messages with complete payment statistics
+
+??? info "JSON payment events producer (click to expand)"
 
     ```yaml
     {%
@@ -208,13 +331,15 @@ Building complex statistics:
     %}
     ```
 
-??? info "Calculate payment statistics processor (click to expand)"
+??? info "JSON statistics processor (click to expand)"
 
     ```yaml
     {%
       include "../../definitions/intermediate-tutorial/aggregations/processor-aggregate-stats.yaml"
     %}
     ```
+
+Both approaches demonstrate the flexibility of the `aggregate` operation. The simple version focuses on the core concept, while the complex version shows real-world statistical aggregation with human-readable JSON output.
 
 ### Aggregate Components
 

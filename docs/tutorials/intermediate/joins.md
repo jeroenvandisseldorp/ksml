@@ -6,6 +6,8 @@ This tutorial explores how to implement join operations in KSML, allowing you to
 
 Joins are fundamental operations in stream processing that combine data from multiple sources based on common keys. KSML provides three main types of joins, each serving different use cases in real-time data processing.
 
+KSML joins are built on top of Kafka Streams join operations, providing a YAML-based interface to powerful stream processing capabilities without requiring Java code.
+
 ## Prerequisites
 
 Before starting this tutorial, you should understand:
@@ -14,12 +16,47 @@ Before starting this tutorial, you should understand:
 - Basic KSML concepts from the [Basics Tutorial](../../getting-started/basics-tutorial.md)
 - [Stateful Operations](../../core-concepts/operations.md#stateful-operations)
 
+## Core Join Concepts
+
+### ValueJoiner Functions
+
+All join operations require a valueJoiner function to combine data from both sides:
+
+```yaml
+valueJoiner:
+  type: valueJoiner
+  code: |
+    # value1: left stream/table value
+    # value2: right stream/table value
+    result = {"combined": value1, "enriched": value2}
+  expression: result
+  resultType: json
+```
+
+**Requirements:**
+
+- Must include `expression` and `resultType` fields
+- Handle null values gracefully (especially for left/outer joins)
+- Return appropriate data structure for downstream processing
+
+### Co-partitioning Requirements
+
+Stream-stream and stream-table joins require co-partitioning:
+
+- **Same number of partitions** in both topics
+- **Same partitioning strategy** (how keys map to partitions)
+- **Same key type** and serialization format
+
+GlobalTable joins don't require co-partitioning since data is replicated to all instances.
+
 ## Types of Joins in KSML
 
 KSML supports three main categories of joins, each with specific characteristics and use cases:
 
 ### 1. Stream-Stream Joins
 Join two event streams within a time window to correlate related events.
+
+**Kafka Streams equivalent:** `KStream.join()`, `KStream.leftJoin()`, `KStream.outerJoin()`
 
 **When to use:**
 
@@ -30,11 +67,14 @@ Join two event streams within a time window to correlate related events.
 **Key characteristics:**
 
 - Requires time windows for correlation
-- Both streams must be co-partitioned (same number of partitions, same key)
+- Both streams must be co-partitioned
 - Results are emitted when matching events occur within the window
+- Supports inner, left, and outer join semantics
 
 ### 2. Stream-Table Joins
 Enrich a stream of events with the latest state from a changelog table.
+
+**Kafka Streams equivalent:** `KStream.join()`, `KStream.leftJoin()` with KTable
 
 **When to use:**
 
@@ -47,9 +87,12 @@ Enrich a stream of events with the latest state from a changelog table.
 - Stream events are enriched with the latest table value
 - Table provides point-in-time lookups
 - Requires co-partitioning between stream and table
+- Supports inner and left join semantics
 
 ### 3. Stream-GlobalTable Joins
 Enrich events using replicated reference data available on all instances.
+
+**Kafka Streams equivalent:** `KStream.join()`, `KStream.leftJoin()` with GlobalKTable
 
 **When to use:**
 
@@ -62,6 +105,7 @@ Enrich events using replicated reference data available on all instances.
 - GlobalTable is replicated to all application instances
 - Supports foreign key extraction via mapper functions
 - No co-partitioning required
+- Supports inner and left join semantics
 
 ## Stream-Stream Join
 
@@ -164,51 +208,41 @@ The `mapper` function extracts the foreign key from stream records:
 - **Output**: Key to lookup in the GlobalTable
 - **Example**: Extract product_id from order to join with product catalog
 
-## Advanced Configuration
+## Join Type Variants
 
-### ValueJoiner Functions
+Each join type supports different semantics for handling missing matches:
 
-All join types require a valueJoiner to combine data:
-
+### Inner Joins
 ```yaml
-valueJoiner:
-  type: valueJoiner
-  code: |
-    # value1: left stream/table
-    # value2: right stream/table
-    result = {...}
-  expression: result
-  resultType: json
+type: join  # Default inner join
 ```
+Produces output **only** when both sides have matching keys.
 
-Key requirements:
-
-- Must include `expression` and `resultType` fields
-- Handle null values gracefully
-- Return appropriate data structure
-
-### Window Store Configuration
-
-For stream-stream joins, configure window stores carefully:
-
+### Left Joins
 ```yaml
-thisStore:
-  name: stream1_store
-  type: window
-  windowSize: 60m         # 2 × timeDifference
-  retention: 65m          # 2 × timeDifference + grace
-  retainDuplicates: true  # Required for joins
+type: leftJoin
 ```
+Always produces output for the left side (stream), with null for missing right side values.
 
-### Co-partitioning Requirements
+### Outer Joins (Stream-Stream only)
+```yaml
+type: outerJoin
+```
+Produces output whenever **either** side has data, with null for missing values.
 
-Stream-stream and stream-table joins require co-partitioning:
+**Note:** Table and GlobalTable joins don't support outer joins since tables represent current state, not events.
 
-- Same number of partitions in both topics
-- Same partitioning strategy
-- Same key type and serialization
+## Performance Considerations
 
-GlobalTable joins don't require co-partitioning since data is replicated.
+### State Management
+- **Window sizes**: Larger windows consume more memory but capture more correlations
+- **Retention periods**: Balance between late data handling and resource usage
+- **Grace periods**: Allow late arrivals while managing state cleanup
+
+### Topology Optimization
+- **Join order**: Join with smaller datasets first when chaining multiple joins
+- **GlobalTable usage**: Use for frequently accessed reference data to avoid repartitioning
+- **Rekeying overhead**: Minimize unnecessary rekeying operations
 
 ## Conclusion
 

@@ -391,21 +391,49 @@ Dynamic windows based on periods of inactivity.
 
 ### Windowed Aggregation Example
 
-??? info "Sensor readings producer (click to expand)"
+This example demonstrates windowed aggregation by calculating temperature statistics (count, average, min, max) for each sensor within 30-second time windows. The windowed key contains both the original sensor ID and the window time boundaries.
+
+**What it does:**
+
+1. **Groups by sensor**: Each sensor's readings are processed separately
+2. **Windows by time**: Creates 30-second tumbling windows for aggregation
+3. **Calculates statistics**: Tracks count, sum, average, min, and max temperature
+4. **Logs results**: Outputs window statistics without writing to a topic (avoiding WindowedString serialization issues)
+
+**Key KSML concepts demonstrated:**
+
+- `windowByTime` with tumbling windows for time-based aggregation
+- Window stores with configurable retention
+- Accessing window metadata (start/end times) from the WindowedString key
+- Complex aggregation state using JSON
+
+??? info "Temperature sensor producer (click to expand)"
 
     ```yaml
     {%
-      include "../../definitions/intermediate-tutorial/aggregations/producer-sensors.yaml"
+      include "../../definitions/intermediate-tutorial/aggregations/producer-windowed.yaml"
     %}
     ```
 
-??? info "Hourly sensor statistics processor (click to expand)"
+??? info "Windowed temperature statistics processor (click to expand)"
 
     ```yaml
     {%
-      include "../../definitions/intermediate-tutorial/aggregations/processor-windowed.yaml"
+      include "../../definitions/intermediate-tutorial/aggregations/processor-windowed-aggregate.yaml"
     %}
     ```
+
+**Understanding the WindowedString key:**
+
+When using windowed aggregations, the key becomes a `WindowedString` object containing:
+
+- `key`: The original key (sensor ID)
+- `start`/`end`: Window boundaries in milliseconds
+- `startTime`/`endTime`: Human-readable UTC timestamps
+
+This allows you to know exactly which time window each aggregation result belongs to.
+
+> **Note:** Writing windowed aggregations to output topics requires careful handling of the WindowedString key type. For simplicity, this example uses `forEach` to log results instead of writing to a topic.
 
 ### Window Store Configuration
 

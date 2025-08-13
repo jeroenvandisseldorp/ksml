@@ -18,6 +18,10 @@ functions:
   update_average:
     type: aggregator
     code: |
+      # Initialize if first time
+      if aggregatedValue is None:
+        aggregatedValue = {"sum": 0.0, "count": 0}
+      
       # Update sum and count
       aggregatedValue["sum"] += value.get("value", 0.0)
       aggregatedValue["count"] += 1

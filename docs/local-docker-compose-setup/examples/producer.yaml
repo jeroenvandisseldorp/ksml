@@ -1,107 +1,45 @@
 functions:
-  generate_order:
+  generate_sensor_reading:
     type: generator
     globalCode: |
       import random
       import time
-      order_counter = 0
-      customers = ["alice", "bob", "charlie", "diana", "eve"]
+      reading_counter = 0
+      sensors = ["temp_01", "temp_02", "humidity_01", "pressure_01"]
     code: |
-      global order_counter, customers
+      global reading_counter, sensors
 
-      order_counter += 1
-      customer = random.choice(customers)
+      reading_counter += 1
+      sensor_id = random.choice(sensors)
+
+      # Generate realistic sensor values
+      if "temp" in sensor_id:
+        value_reading = round(random.uniform(18.0, 25.0), 2)
+        unit = "celsius"
+      elif "humidity" in sensor_id:
+        value_reading = round(random.uniform(30.0, 70.0), 1)
+        unit = "percent"
+      else:  # pressure
+        value_reading = round(random.uniform(1010.0, 1030.0), 1)
+        unit = "hPa"
 
       value = {
-        "order_id": f"ORD{order_counter:04d}",
-        "customer": customer,
-        "amount": round(random.uniform(10, 500), 2),
+        "reading_id": reading_counter,
+        "sensor_id": sensor_id,
+        "value": value_reading,
+        "unit": unit,
         "timestamp": int(time.time() * 1000)
       }
 
-      key = customer
+      key = sensor_id
     expression: (key, value)
     resultType: (string, json)
 
-  generate_refund:
-    type: generator
-    globalCode: |
-      import random
-      import time
-      refund_counter = 0
-      customers = ["alice", "bob", "charlie", "diana", "eve"]
-    code: |
-      global refund_counter, customers
-
-      # Generate refunds less frequently
-      if random.random() < 0.3:  # 30% chance of refund
-        refund_counter += 1
-        customer = random.choice(customers)
-
-        value = {
-          "refund_id": f"REF{refund_counter:04d}",
-          "customer": customer,
-          "amount": round(random.uniform(5, 100), 2),
-          "timestamp": int(time.time() * 1000)
-        }
-
-        key = customer
-      else:
-        key = None
-        value = None
-    expression: (key, value) if key else (None, None)
-    resultType: (string, json)
-
-  generate_bonus:
-    type: generator
-    globalCode: |
-      import random
-      import time
-      bonus_counter = 0
-      customers = ["alice", "bob", "charlie", "diana", "eve"]
-    code: |
-      global bonus_counter, customers
-
-      # Generate bonuses rarely
-      if random.random() < 0.1:  # 10% chance of bonus
-        bonus_counter += 1
-        customer = random.choice(customers)
-
-        value = {
-          "bonus_id": f"BON{bonus_counter:04d}",
-          "customer": customer,
-          "points": random.randint(10, 100),
-          "timestamp": int(time.time() * 1000)
-        }
-
-        key = customer
-      else:
-        key = None
-        value = None
-    expression: (key, value) if key else (None, None)
-    resultType: (string, json)
-
 producers:
-  order_producer:
-    generator: generate_order
+  sensor_producer:
+    generator: generate_sensor_reading
     interval: 2s
     to:
-      topic: customer_orders
-      keyType: string
-      valueType: json
-
-  refund_producer:
-    generator: generate_refund
-    interval: 3s
-    to:
-      topic: customer_refunds
-      keyType: string
-      valueType: json
-
-  bonus_producer:
-    generator: generate_bonus
-    interval: 5s
-    to:
-      topic: customer_bonuses
+      topic: sensor_readings
       keyType: string
       valueType: json

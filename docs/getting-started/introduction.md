@@ -1,6 +1,6 @@
 # Understanding KSML
 
-Now that you've seen KSML in action with the [Quick Start](installation.md), let's understand what just happened and why KSML makes stream processing so much simpler.
+Now that you've seen KSML in action with the [Quick Start](quick-start.md), let's understand what just happened and why KSML makes stream processing so much simpler.
 
 ## What You Just Saw
 

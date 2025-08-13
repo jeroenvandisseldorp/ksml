@@ -119,6 +119,7 @@ This example demonstrates:
 - **Data enrichment**: Adding processing timestamps and status fields
 
 **Expected Behavior:**
+
 - High-value orders (>$1000) from premium customers → `priority_orders` topic
 - US/EU orders (not priority) → `regional_orders` topic  
 - International orders (APAC/LATAM) → `international_orders` topic

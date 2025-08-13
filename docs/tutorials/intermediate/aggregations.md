@@ -12,7 +12,6 @@ KSML aggregations(stateful processing capabilities) are built on top of Kafka St
 
 Before starting this tutorial:
 
-- Please familiarise yourself with [Stream types (KStream, KTable)](../../reference/stream-type-reference.md)
 - Have [Docker Compose KSML environment setup running](../../getting-started/basics-tutorial.md#choose-your-setup-method)
 
 ## Core Aggregation Concepts
@@ -696,6 +695,4 @@ Choose the appropriate aggregation type based on your use case, and always consi
 
 ## Further Reading
 
-- [Core Concepts: Operations](../../core-concepts/operations.md)
-- [Reference: Aggregation Operations](../../reference/operation-reference.md)
-- [Windowing Tutorial](windowing.md)
+- [Reference: Stateful Operations](../../reference/operation-reference.md/#stateful-operations)

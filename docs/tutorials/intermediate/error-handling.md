@@ -2,6 +2,12 @@
 
 This tutorial explores strategies for handling errors and implementing recovery mechanisms in KSML applications, helping you build more robust and resilient stream processing pipelines.
 
+## Prerequisites
+
+Before starting this tutorial:
+
+- Have [Docker Compose KSML environment setup running](../../getting-started/basics-tutorial.md#choose-your-setup-method)
+
 ## Introduction to Error Handling
 
 Error handling is a critical aspect of any production-grade stream processing application. In streaming contexts, errors can occur for various reasons:
@@ -210,3 +216,7 @@ Key concepts:
 | **Dead Letter Queue** | Permanent failures | No data loss, failure analysis | Additional topics, storage overhead |
 | **Circuit Breaker** | External service failures | Prevents cascading failures | Added complexity, state management |
 | **Compensating Transactions** | Multi-step operations | Data consistency, rollback capability | Complex implementation, coordination overhead |
+
+## Next Steps
+
+- [Reference: Error Handling Operations](../../reference/operation-reference.md/#error-handling-operations)

@@ -2,6 +2,12 @@
 
 State stores are persistent or in-memory storage components used by stateful operations in Kafka Streams to maintain intermediate results, aggregations, and other stateful data. KSML provides flexible configuration options for state stores, allowing you to optimize performance, durability, and storage characteristics for your specific use cases.
 
+## Prerequisites
+
+Before starting this tutorial:
+
+- Have [Docker Compose KSML environment setup running](../../getting-started/basics-tutorial.md#choose-your-setup-method)
+
 ## Understanding State Stores in Kafka Streams
 
 State stores serve several critical purposes in stream processing:

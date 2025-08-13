@@ -6,11 +6,9 @@ Branching in KSML allows you to split a stream into multiple paths based on cond
 
 ## Prerequisites
 
-Before we begin:
+Before starting this tutorial:
 
-- Make sure you have a running Docker Compose KSML environment as described in the [Quick Start](../../getting-started/installation.md)
-- We recommend completing the [KSML Basics Tutorial](../../getting-started/basics-tutorial.md)
-- Familiarity with [Filtering and Transforming](../beginner/filtering-transforming.md) is helpful
+- Have [Docker Compose KSML environment setup running](../../getting-started/basics-tutorial.md#choose-your-setup-method)
 
 ## Relationship to Kafka Streams
 
@@ -328,6 +326,4 @@ Branching in KSML provides powerful conditional routing capabilities that map di
 
 ## Next Steps
 
-- Learn about [Joins](joins.md) to combine data from multiple streams
-- Explore [Aggregations and Windowing](aggregations-windowing.md) for stateful processing
-- Check out [Error Handling](error-handling.md) patterns that use branching
+- [Reference: Branch Operations](../../reference/operation-reference.md/#branch-operations)

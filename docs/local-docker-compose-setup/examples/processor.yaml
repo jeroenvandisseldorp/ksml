@@ -1,77 +1,68 @@
 streams:
-  sensor_readings:
-    topic: sensor_readings
+  product_clicks:
+    topic: product_clicks
     keyType: string
     valueType: json
 
-  sensor_averages:
-    topic: sensor_moving_averages
-    keyType: json:windowed(string)
+  product_purchases:
+    topic: product_purchases
+    keyType: string
+    valueType: json
+
+  correlated_user_actions:
+    topic: correlated_user_actions
+    keyType: string
     valueType: json
 
 functions:
-  initialize_average:
-    type: initializer
-    expression: {"sum": 0.0, "count": 0}
-    resultType: json
-
-  update_average:
-    type: aggregator
+  correlate_click_and_purchase:
+    type: valueJoiner
     code: |
-      # Initialize if first time
-      if aggregatedValue is None:
-        aggregatedValue = {"sum": 0.0, "count": 0}
+      result = {}
 
-      # Update sum and count
-      aggregatedValue["sum"] += value.get("value", 0.0)
-      aggregatedValue["count"] += 1
+      # Add click data
+      if value1 is not None:
+        result["click"] = value1
 
-      new_value = aggregatedValue
+      # Add purchase data
+      if value2 is not None:
+        result["purchase"] = value2
+
+      # Calculate conversion if both exist
+      if value1 is not None and value2 is not None:
+        result["converted"] = True
+        click_time = value1.get("timestamp", 0)
+        purchase_time = value2.get("timestamp", 0)
+        result["conversion_time_ms"] = purchase_time - click_time
+      else:
+        result["converted"] = False
+
+      new_value = result
     expression: new_value
     resultType: json
 
-  calculate_final_average:
-    type: valueTransformer
-    code: |
-      if value is None or value.get("count", 0) == 0:
-        return None
-
-      # Calculate average
-      average = value["sum"] / value["count"]
-
-      result = {
-        "average": round(average, 2),
-        "sample_count": value["count"],
-        "total_sum": round(value["sum"], 2)
-      }
-    expression: result
-    resultType: json
-
 pipelines:
-  moving_average_2min:
-    from: sensor_readings
+  match_clicks_with_purchases:
+    from: product_clicks
     via:
-      - type: groupByKey
-      - type: windowByTime
-        windowType: hopping
-        duration: 2m        # 2-minute windows
-        advanceBy: 30s      # Move forward every 30 seconds (overlapping)
-        grace: 10s
-      - type: aggregate
-        store:
-          name: sensor_averages_hopping
+      - type: join
+        stream: product_purchases
+        valueJoiner: correlate_click_and_purchase
+        timeDifference: 30m  # Look for purchases within 30 minutes of a click
+        grace: 5m  # Grace period for late events
+        thisStore:
+          name: clicks_join_store
           type: window
-          windowSize: 2m
-          retention: 10m
-          caching: false
-        initializer: initialize_average
-        aggregator: update_average
-      - type: toStream
-      - type: convertKey
-        into: json:windowed(string)
-      - type: mapValues
-        mapper: calculate_final_average
+          windowSize: 60m  # Must be 2*timeDifference
+          retention: 65m   # Must be 2*timeDifference + grace = 60m + 5m
+          retainDuplicates: true
+        otherStore:
+          name: purchases_join_store
+          type: window
+          windowSize: 60m  # Must be 2*timeDifference
+          retention: 65m   # Must be 2*timeDifference + grace = 60m + 5m
+          retainDuplicates: true
       - type: peek
         forEach:
-          code: log.info("HOPPING AVERAGE (2min/30s) - sensor={}, avg={}", key, value.get("average") if value else None)
-    to: sensor_averages
+          code: log.info("CORRELATION - user={}, converted={}, click_product={}, purchase_product={}", key, value.get("converted"), value.get("click", {}).get("product_id"), value.get("purchase", {}).get("product_id"))
+    to: correlated_user_actions

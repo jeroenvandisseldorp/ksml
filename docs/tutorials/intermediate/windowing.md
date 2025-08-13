@@ -217,6 +217,16 @@ temp_01 | {"reading_id":1,"sensor_id":"temp_01","value":21.57,"unit":"celsius","
 {"end":1755043080000,"endTime":"2025-08-12T23:58:00Z","key":"temp_01","start":1755042960000,"startTime":"2025-08-12T23:56:00Z"} | {"average":21.49,"sample_count":4,"total_sum":85.96}
 ```
 
+**Understanding the hopping window output:**
+
+- **Key structure**: The output key contains window boundaries and the original record key
+  - `start`: Window start time (23:56:00Z)
+  - `end`: Window end time (23:58:00Z) 
+  - `key`: Original sensor ID (temp_01)
+- **Window duration**: 2-minute window covering 23:56:00Z to 23:58:00Z
+- **Value aggregation**: Contains calculated average (21.49°C) from 4 sensor readings
+- **Overlapping nature**: Since windows advance every 30 seconds, this sensor will appear in multiple overlapping windows, each with slightly different averages as new data arrives and old data expires
+
 **Why hopping windows for averages?**
 
 - **Smooth updates**: New average every 30 seconds instead of waiting 2 minutes
@@ -364,38 +374,24 @@ store:
 ### Optimization Strategies
 
 1. **Right-size windows**:
-   ```yaml
-   # Too small: High overhead, frequent updates
-   duration: 10s
-   
-   # Too large: High memory, delayed results  
-   duration: 24h
-   
-   # Balanced: Matches business requirements
-   duration: 5m
-   ```
+   - **Too small (10 seconds)**: Creates excessive overhead with frequent window updates and high CPU usage
+   - **Too large (24 hours)**: Consumes excessive memory and delays results until window closes
+   - **Balanced approach**: Choose window size that matches your business requirements (e.g., 5 minutes for real-time dashboards, 1 hour for reporting)
 
 2. **Tune grace periods**:
-   ```yaml
-   # Minimal: Fast processing, may lose late data
-   grace: 5s
-   
-   # Conservative: Handles most late data, slower processing
-   grace: 5m
-   ```
+   - **Minimal grace (5 seconds)**: Provides fast processing but may lose legitimate late-arriving data
+   - **Conservative grace (5 minutes)**: Handles most network delays and clock skew but slows down result publication
+   - **Best practice**: Set grace period based on your network characteristics and data source reliability
 
 3. **Enable caching**:
-   ```yaml
-   store:
-     caching: true     # Reduces downstream updates
-   ```
+   - **Purpose**: Reduces the number of downstream updates by batching window changes
+   - **Benefit**: Lower CPU usage and fewer Kafka messages when windows are frequently updated
+   - **Trade-off**: Slightly higher memory usage for improved throughput
 
 4. **Optimize retention**:
-   ```yaml
-   store:
-     retention: 1h     # Minimum: windowSize + grace
-     # Longer retention = more memory usage
-   ```
+   - **Minimum requirement**: Window size plus grace period (e.g., 5-minute window + 30-second grace = 5.5 minutes minimum)
+   - **Memory impact**: Longer retention keeps more data in memory for join operations and late data handling
+   - **Performance balance**: Set retention just long enough to handle your latest acceptable late data
 
 ## Troubleshooting Common Issues
 
@@ -454,5 +450,4 @@ store:
 
 ## Further Reading
 
-- [Core Concepts: Operations](../../core-concepts/operations.md)
-- [Reference: Windowing Operations](../../reference/operation-reference.md)
+- [Reference: Windowing Operations](../../reference/operation-reference.md#windowing-operations)

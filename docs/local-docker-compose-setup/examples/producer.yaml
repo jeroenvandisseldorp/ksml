@@ -1,45 +1,75 @@
 functions:
-  generate_sensor_reading:
+  generate_click:
     type: generator
     globalCode: |
       import random
       import time
-      reading_counter = 0
-      sensors = ["temp_01", "temp_02", "humidity_01", "pressure_01"]
+      click_counter = 0
+      users = ["user1", "user2", "user3", "user4", "user5"]
+      products = ["PROD001", "PROD002", "PROD003", "PROD004", "PROD005"]
     code: |
-      global reading_counter, sensors
+      global click_counter, users, products
 
-      reading_counter += 1
-      sensor_id = random.choice(sensors)
-
-      # Generate realistic sensor values
-      if "temp" in sensor_id:
-        value_reading = round(random.uniform(18.0, 25.0), 2)
-        unit = "celsius"
-      elif "humidity" in sensor_id:
-        value_reading = round(random.uniform(30.0, 70.0), 1)
-        unit = "percent"
-      else:  # pressure
-        value_reading = round(random.uniform(1010.0, 1030.0), 1)
-        unit = "hPa"
+      click_counter += 1
+      user_id = random.choice(users)
 
       value = {
-        "reading_id": reading_counter,
-        "sensor_id": sensor_id,
-        "value": value_reading,
-        "unit": unit,
+        "click_id": f"CLK{click_counter:04d}",
+        "user_id": user_id,
+        "product_id": random.choice(products),
+        "page": "product_detail",
         "timestamp": int(time.time() * 1000)
       }
 
-      key = sensor_id
+      key = user_id
+    expression: (key, value)
+    resultType: (string, json)
+
+  generate_purchase:
+    type: generator
+    globalCode: |
+      import random
+      import time
+      purchase_counter = 0
+      users = ["user1", "user2", "user3", "user4", "user5"]
+      products = ["PROD001", "PROD002", "PROD003", "PROD004", "PROD005"]
+    code: |
+      global purchase_counter, users, products
+
+      # Only generate purchases 30% of the time to simulate conversion
+      if random.random() > 0.3:
+        # Return a proper tuple with None values to skip generation
+        key = None
+        value = None
+      else:
+        purchase_counter += 1
+        user_id = random.choice(users)
+
+        value = {
+          "purchase_id": f"PUR{purchase_counter:04d}",
+          "user_id": user_id,
+          "product_id": random.choice(products),
+          "amount": round(random.uniform(20.0, 300.0), 2),
+          "timestamp": int(time.time() * 1000)
+        }
+
+        key = user_id
     expression: (key, value)
     resultType: (string, json)
 
 producers:
-  sensor_producer:
-    generator: generate_sensor_reading
-    interval: 2s
+  click_producer:
+    generator: generate_click
+    interval: 1s
     to:
-      topic: sensor_readings
+      topic: product_clicks
+      keyType: string
+      valueType: json
+
+  purchase_producer:
+    generator: generate_purchase
+    interval: 3s
+    to:
+      topic: product_purchases
       keyType: string
       valueType: json

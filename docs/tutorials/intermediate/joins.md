@@ -10,11 +10,9 @@ KSML joins are built on top of Kafka Streams join operations, providing a YAML-b
 
 ## Prerequisites
 
-Before starting this tutorial, you should understand:
+Before starting this tutorial:
 
-- [Stream types (KStream, KTable, GlobalKTable)](../../reference/stream-type-reference.md)
-- Basic KSML concepts from the [Basics Tutorial](../../getting-started/basics-tutorial.md)
-- [Stateful Operations](../../core-concepts/operations.md#stateful-operations)
+- Have [Docker Compose KSML environment setup running](../../getting-started/basics-tutorial.md#choose-your-setup-method)
 
 ## Core Join Concepts
 
@@ -256,6 +254,4 @@ Choose the appropriate join type based on your data characteristics and business
 
 ## Further Reading
 
-- [Core Concepts: Operations](../../core-concepts/operations.md)
-- [Reference: Join Operations](../../reference/operation-reference.md)
-- [Stream Type Reference](../../reference/stream-type-reference.md)
+- [Reference: Join Operations](../../reference/operation-reference.md/#join-operations)

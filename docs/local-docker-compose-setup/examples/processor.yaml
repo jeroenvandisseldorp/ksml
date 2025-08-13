@@ -1,83 +1,77 @@
-# $schema: https://raw.githubusercontent.com/Axual/ksml/refs/heads/release/1.0.x/docs/ksml-language-spec.json
-
-# Simple compensating transaction example demonstrating rollback
-
 streams:
-  business_transactions:
-    topic: business_transactions
+  sensor_readings:
+    topic: sensor_readings
     keyType: string
     valueType: json
 
-  completed_transactions:
-    topic: completed_transactions
-    keyType: string
-    valueType: json
-
-  failed_transactions:
-    topic: failed_transactions
-    keyType: string
+  sensor_averages:
+    topic: sensor_moving_averages
+    keyType: json:windowed(string)
     valueType: json
 
 functions:
-  process_transaction:
-    type: valueTransformer
-    code: |
-      transaction_id = value.get("transaction_id")
-      transaction_type = value.get("type")
-
-      try:
-        # Step 1: Reserve inventory
-        log.info("Step 1: Reserving inventory for {}", transaction_id)
-
-        # Step 2: Process payment
-        if transaction_type == "payment_fail":
-          log.info("Step 2: Payment failed for {}", transaction_id) 
-          # Rollback inventory reservation
-          log.info("Compensating: Releasing inventory for {}", transaction_id)
-          raise RuntimeError("Payment processing failed")
-
-        log.info("Step 2: Payment processed for {}", transaction_id)
-
-        # Step 3: Create shipment
-        if transaction_type == "shipping_fail":
-          log.info("Step 3: Shipping failed for {}", transaction_id)
-          # Rollback payment and inventory
-          log.info("Compensating: Refunding payment for {}", transaction_id)
-          log.info("Compensating: Releasing inventory for {}", transaction_id)
-          raise RuntimeError("Shipping service unavailable")
-
-        log.info("Step 3: Shipment created for {}", transaction_id)
-
-        # Success
-        return {
-          "transaction_id": transaction_id,
-          "status": "completed",
-          "steps": ["inventory", "payment", "shipping"]
-        }
-
-      except Exception as e:
-        # Transaction failed with compensation
-        return {
-          "transaction_id": transaction_id,
-          "status": "failed", 
-          "error": str(e),
-          "compensated": True
-        }
-
-    expression: result if 'result' in locals() else error_record if 'error_record' in locals() else value
+  initialize_average:
+    type: initializer
+    expression: {"sum": 0.0, "count": 0}
     resultType: json
 
-  is_completed:
-    type: predicate
-    expression: value.get("status") == "completed"
+  update_average:
+    type: aggregator
+    code: |
+      # Initialize if first time
+      if aggregatedValue is None:
+        aggregatedValue = {"sum": 0.0, "count": 0}
+
+      # Update sum and count
+      aggregatedValue["sum"] += value.get("value", 0.0)
+      aggregatedValue["count"] += 1
+
+      new_value = aggregatedValue
+    expression: new_value
+    resultType: json
+
+  calculate_final_average:
+    type: valueTransformer
+    code: |
+      if value is None or value.get("count", 0) == 0:
+        return None
+
+      # Calculate average
+      average = value["sum"] / value["count"]
+
+      result = {
+        "average": round(average, 2),
+        "sample_count": value["count"],
+        "total_sum": round(value["sum"], 2)
+      }
+    expression: result
+    resultType: json
 
 pipelines:
-  compensating_transaction_demo:
-    from: business_transactions
+  moving_average_2min:
+    from: sensor_readings
     via:
+      - type: groupByKey
+      - type: windowByTime
+        windowType: hopping
+        duration: 2m        # 2-minute windows
+        advanceBy: 30s      # Move forward every 30 seconds (overlapping)
+        grace: 10s
+      - type: aggregate
+        store:
+          name: sensor_averages_hopping
+          type: window
+          windowSize: 2m
+          retention: 10m
+          caching: false
+        initializer: initialize_average
+        aggregator: update_average
+      - type: toStream
+      - type: convertKey
+        into: json:windowed(string)
       - type: mapValues
-        mapper: process_transaction
-    branch:
-      - if: is_completed
-        to: completed_transactions
-      - to: failed_transactions
+        mapper: calculate_final_average
+      - type: peek
+        forEach:
+          code: log.info("HOPPING AVERAGE (2min/30s) - sensor={}, avg={}", key, value.get("average") if value else None)
+    to: sensor_averages

@@ -23,48 +23,87 @@ functions:
     type: valueTransformer
     code: |
       transaction_id = value.get("transaction_id")
-      transaction_type = value.get("type")
+      transaction_type = value.get("transaction_type")
+      completed_steps = []
       
       try:
         # Step 1: Reserve inventory
         log.info("Step 1: Reserving inventory for {}", transaction_id)
         
-        # Step 2: Process payment
-        if transaction_type == "payment_fail":
-          log.info("Step 2: Payment failed for {}", transaction_id) 
-          # Rollback inventory reservation
-          log.info("Compensating: Releasing inventory for {}", transaction_id)
-          raise RuntimeError("Payment processing failed")
+        # Check for inventory failure based on product_id
+        if transaction_type == "order_fulfillment":
+          product_id = value.get("order_details", {}).get("product_id", "")
+          if "inventory_fail" in product_id:
+            log.warn("Step 1: Inventory reservation failed for {}", transaction_id)
+            raise RuntimeError("Inventory unavailable for product")
+        elif transaction_type == "exchange_order":
+          new_product = value.get("exchange_details", {}).get("new_product_id", "")
+          if "inventory_fail" in new_product:
+            log.warn("Step 1: Inventory reservation failed for exchange {}", transaction_id)
+            raise RuntimeError("Exchange product unavailable")
         
-        log.info("Step 2: Payment processed for {}", transaction_id)
+        completed_steps.append("inventory_reserved")
+        
+        # Step 2: Process payment
+        log.info("Step 2: Processing payment for {}", transaction_id)
+        
+        # Check for payment failure
+        if transaction_type == "order_fulfillment":
+          product_id = value.get("order_details", {}).get("product_id", "")
+          if "payment_fail" in product_id:
+            log.warn("Step 2: Payment failed for {}", transaction_id)
+            # Compensate: Release inventory
+            log.info("COMPENSATING: Releasing inventory reservation for {}", transaction_id)
+            raise RuntimeError("Payment processing failed")
+        elif transaction_type == "exchange_order" and value.get("payment_required"):
+          new_product = value.get("exchange_details", {}).get("new_product_id", "")
+          if "payment_fail" in new_product:
+            log.warn("Step 2: Payment failed for exchange {}", transaction_id)
+            log.info("COMPENSATING: Releasing inventory reservation for {}", transaction_id)
+            raise RuntimeError("Payment for exchange failed")
+        
+        completed_steps.append("payment_processed")
         
         # Step 3: Create shipment
-        if transaction_type == "shipping_fail":
-          log.info("Step 3: Shipping failed for {}", transaction_id)
-          # Rollback payment and inventory
-          log.info("Compensating: Refunding payment for {}", transaction_id)
-          log.info("Compensating: Releasing inventory for {}", transaction_id)
-          raise RuntimeError("Shipping service unavailable")
+        log.info("Step 3: Creating shipment for {}", transaction_id)
         
-        log.info("Step 3: Shipment created for {}", transaction_id)
+        # Check for shipping failure
+        if transaction_type == "order_fulfillment":
+          product_id = value.get("order_details", {}).get("product_id", "")
+          if "shipping_fail" in product_id:
+            log.warn("Step 3: Shipping failed for {}", transaction_id)
+            # Compensate in reverse order
+            log.info("COMPENSATING: Cancelling shipment for {}", transaction_id)
+            log.info("COMPENSATING: Refunding payment for {}", transaction_id)
+            log.info("COMPENSATING: Releasing inventory for {}", transaction_id)
+            raise RuntimeError("Shipping service unavailable")
         
-        # Success
+        completed_steps.append("shipment_created")
+        
+        # Success - all steps completed
+        log.info("Transaction {} completed successfully", transaction_id)
         return {
           "transaction_id": transaction_id,
           "status": "completed",
-          "steps": ["inventory", "payment", "shipping"]
+          "transaction_type": transaction_type,
+          "completed_steps": completed_steps,
+          "original_transaction": value
         }
         
       except Exception as e:
-        # Transaction failed with compensation
+        # Transaction failed - compensation already logged
+        log.error("Transaction {} failed: {}", transaction_id, str(e))
         return {
           "transaction_id": transaction_id,
-          "status": "failed", 
+          "status": "failed",
+          "transaction_type": transaction_type,
           "error": str(e),
-          "compensated": True
+          "completed_steps": completed_steps,
+          "compensated": True,
+          "original_transaction": value
         }
         
-    expression: result if 'result' in locals() else error_record if 'error_record' in locals() else value
+    expression: result if 'result' in locals() else value
     resultType: json
   
   is_completed:

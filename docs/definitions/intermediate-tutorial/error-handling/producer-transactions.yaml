@@ -17,19 +17,19 @@ functions:
       transaction_types.extend(["order_fulfillment", "refund_process", "exchange_order"])
     code: |
       global data_counter, customers, products, transaction_types
-
+      
       data_counter += 1
-
+      
       transaction_type = random.choice(transaction_types)
       customer_id = random.choice(customers)
-
+      
       # Create different transaction scenarios
       transaction = {}
       transaction["transaction_id"] = f"txn_{data_counter:04d}"
       transaction["customer_id"] = customer_id
       transaction["transaction_type"] = transaction_type
       transaction["timestamp"] = int(time.time() * 1000)
-
+      
       if transaction_type == "order_fulfillment":
         # New order that requires inventory, payment, and shipping
         transaction["order_details"] = {
@@ -66,9 +66,9 @@ functions:
           transaction["payment_required"] = True
         elif transaction["exchange_details"]["price_difference"] < 0:
           transaction["refund_required"] = True
-
+      
       key = transaction["transaction_id"]
-
+      
     expression: (key, transaction)
     resultType: (string, json)
 

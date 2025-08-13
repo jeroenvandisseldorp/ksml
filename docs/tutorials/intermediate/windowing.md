@@ -143,6 +143,27 @@ The `convertKey` operation transforms the internal `WindowedString` to `json:win
 - `start`/`end`: Window boundaries in milliseconds
 - `startTime`/`endTime`: Human-readable timestamps
 
+**Verifying tumbling window data:**
+
+```bash
+# View click counts per 5-minute window
+docker exec broker kafka-console-consumer.sh \
+  --bootstrap-server broker:9093 \
+  --topic user_click_counts_5min \
+  --from-beginning \
+  --max-messages 5 \
+  --property print.key=true \
+  --property key.separator=" | " \
+  --key-deserializer org.apache.kafka.common.serialization.StringDeserializer \
+  --value-deserializer org.apache.kafka.common.serialization.LongDeserializer
+```
+
+**Example output:**
+```
+{"end":1755042000000,"endTime":"2025-08-12T23:40:00Z","key":"alice","start":1755041700000,"startTime":"2025-08-12T23:35:00Z"} | 8
+{"end":1755042000000,"endTime":"2025-08-12T23:40:00Z","key":"bob","start":1755041700000,"startTime":"2025-08-12T23:35:00Z"} | 12
+```
+
 ### Hopping Window: Moving Averages
 
 This example calculates moving averages using overlapping 2-minute windows that advance every 30 seconds.
@@ -182,6 +203,41 @@ This example calculates moving averages using overlapping 2-minute windows that 
 - **Real-time dashboards**: Continuous data flow for visualization
 - **Reduced noise**: 2-minute window smooths out brief spikes
 
+**Verifying hopping window data:**
+
+```bash
+# View sensor moving averages (JSON values)
+docker exec broker kafka-console-consumer.sh \
+  --bootstrap-server broker:9093 \
+  --topic sensor_moving_averages \
+  --from-beginning \
+  --max-messages 5 \
+  --property print.key=true \
+  --property key.separator=" | " \
+  --key-deserializer org.apache.kafka.common.serialization.StringDeserializer \
+  --value-deserializer org.apache.kafka.common.serialization.StringDeserializer
+
+# View raw sensor readings
+docker exec broker kafka-console-consumer.sh \
+  --bootstrap-server broker:9093 \
+  --topic sensor_readings \
+  --from-beginning \
+  --max-messages 10 \
+  --property print.key=true \
+  --property key.separator=" | " \
+  --key-deserializer org.apache.kafka.common.serialization.StringDeserializer \
+  --value-deserializer org.apache.kafka.common.serialization.StringDeserializer
+```
+
+**Example output:**
+```
+# Raw sensor readings:
+temp_01 | {"reading_id":1,"sensor_id":"temp_01","value":21.57,"unit":"celsius","timestamp":1755042846167}
+
+# Moving averages:
+{"end":1755043080000,"endTime":"2025-08-12T23:58:00Z","key":"temp_01","start":1755042960000,"startTime":"2025-08-12T23:56:00Z"} | {"average":21.49,"sample_count":4,"total_sum":85.96}
+```
+
 ### Session Window: User Activity Analysis
 
 This example uses session windows to analyze user browsing patterns by grouping clicks within activity periods.
@@ -199,21 +255,21 @@ This example uses session windows to analyze user browsing patterns by grouping 
 - Complex aggregation state with lists and timestamps
 - Automatic session merging and boundary detection
 
-??? info "User session analysis processor (click to expand)"
-
-    ```yaml
-    {%
-      include "../../definitions/intermediate-tutorial/windowing/processor-session-activity.yaml"
-    %}
-    ```
-
 **Session window behavior**:
 - **Dynamic sizing**: Windows grow and shrink based on activity
 - **Automatic merging**: Late-arriving data can extend or merge sessions
 - **Activity-based**: Perfect for user behavior analysis
 - **Variable retention**: Different sessions can have different lifespans
 
-??? info \"User session analysis processor (click to expand)\"
+??? info "User clicks producer (click to expand)"
+
+    ```yaml
+    {%
+      include "../../definitions/intermediate-tutorial/windowing/producer-user-clicks.yaml"
+    %}
+    ```
+
+??? info "User session analysis processor (click to expand)"
 
     ```yaml
     {%
@@ -236,6 +292,58 @@ USER SESSION - user=alice, clicks=23 (session: 23:47:01Z to 23:49:15Z)
 ```
 
 This shows how Alice had two separate sessions with an inactivity gap between them, while Bob had one continuous session.
+
+**Verifying session window data:**
+
+To check the raw session data, use these commands:
+
+```bash
+# View session summary output (windowed keys + click counts)
+# Note: Use StringDeserializer for values to handle mixed value types
+docker exec broker kafka-console-consumer.sh \
+  --bootstrap-server broker:9093 \
+  --topic user_session_summary \
+  --from-beginning \
+  --max-messages 5 \
+  --property print.key=true \
+  --property key.separator=" | " \
+  --key-deserializer org.apache.kafka.common.serialization.StringDeserializer \
+  --value-deserializer org.apache.kafka.common.serialization.StringDeserializer
+
+# Alternative: Use kcat for more flexible data inspection
+kcat -b localhost:9092 -t user_session_summary -C -o beginning -c 5 -f 'Key: %k\nValue: %s\n---\n'
+
+# View input click events  
+docker exec broker kafka-console-consumer.sh \
+  --bootstrap-server broker:9093 \
+  --topic user_clicks \
+  --from-beginning \
+  --max-messages 10 \
+  --property print.key=true \
+  --property key.separator=" | " \
+  --key-deserializer org.apache.kafka.common.serialization.StringDeserializer \
+  --value-deserializer org.apache.kafka.common.serialization.StringDeserializer
+```
+
+**Example output:**
+```
+# Input clicks (user_clicks topic):
+alice | {"click_id":"click_000001","user_id":"alice","page":"/home","session_id":"session_alice_1","timestamp":1755043944188}
+alice | {"click_id":"click_000002","user_id":"alice","page":"/products","session_id":"session_alice_1","timestamp":1755043945189}
+
+# Session summary (user_session_summary topic):  
+{"end":1755043970189,"endTime":"2025-08-13T00:12:50.189Z","key":"alice","start":1755043944188,"startTime":"2025-08-13T00:12:24.188Z"} | 15
+{"end":1755043938275,"endTime":"2025-08-13T00:12:18.275Z","key":"diana","start":1755043938275,"startTime":"2025-08-13T00:12:18.275Z"} | 1
+```
+
+The session summary shows:
+- **Key**: Windowed key with session boundaries and original user key
+- **Value**: Total click count for that session (15 clicks for Alice, 1 click for Diana)
+
+**Understanding the output:**
+- Alice had a session lasting ~26 seconds (00:12:24Z to 00:12:50Z) with 15 clicks
+- Diana had a brief session (single timestamp) with 1 click
+- Sessions automatically close after 2 minutes of inactivity
 
 ## Advanced Windowing Concepts
 

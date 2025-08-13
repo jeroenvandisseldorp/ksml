@@ -29,14 +29,14 @@ functions:
         aggregatedValue = {}
         aggregatedValue["total_value"] = 0.0
         aggregatedValue["count"] = 0
-
+      
       # Update totals
       aggregatedValue["total_value"] += value.get("value", 0.0)
       aggregatedValue["count"] += 1
-
+      
       # Calculate average
       aggregatedValue["average"] = round(aggregatedValue["total_value"] / aggregatedValue["count"], 2)
-
+      
       result = aggregatedValue
     expression: result
     resultType: json

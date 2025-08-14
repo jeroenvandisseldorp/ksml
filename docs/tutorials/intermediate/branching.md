@@ -82,10 +82,11 @@ This example demonstrates:
 - **Logging**: Each branch logs messages for monitoring
 
 **Expected Behavior:**
-- Messages from "data_center" → `datacenter_sensors` topic
-- Messages from "warehouse" → `warehouse_sensors` topic  
-- Messages from "office" → `office_sensors` topic
-- All other locations → `unknown_sensors` topic
+
+- Messages from "data_center" are routed to `datacenter_sensors` topic
+- Messages from "warehouse" are routed to `warehouse_sensors` topic  
+- Messages from "office" are routed to `office_sensors` topic
+- All other locations are routed to `unknown_sensors` topic
 
 ## Example 2: Multi-Condition Data Processing Pipeline
 
@@ -120,9 +121,9 @@ This example demonstrates:
 
 **Expected Behavior:**
 
-- High-value orders (>$1000) from premium customers → `priority_orders` topic
-- US/EU orders (not priority) → `regional_orders` topic  
-- International orders (APAC/LATAM) → `international_orders` topic
+- High-value orders (>$1000) from premium customers are routed to `priority_orders` topic
+- US/EU orders (not priority) are routed toare routed to `regional_orders` topic  
+- International orders (APAC/LATAM) are routed to `international_orders` topic
 
 ## Advanced Branching Patterns
 

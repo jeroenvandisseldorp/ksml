@@ -122,7 +122,7 @@ This example demonstrates:
 **Expected Behavior:**
 
 - High-value orders (>$1000) from premium customers are routed to `priority_orders` topic
-- US/EU orders (not priority) are routed toare routed to `regional_orders` topic  
+- US/EU orders (not priority) are routed to `regional_orders` topic  
 - International orders (APAC/LATAM) are routed to `international_orders` topic
 
 ## Advanced Branching Patterns

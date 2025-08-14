@@ -7,7 +7,7 @@ streams:
   user_action_counts:
     topic: user_action_counts
     keyType: string
-    valueType: long
+    valueType: string
 
 pipelines:
   count_by_user:
@@ -16,6 +16,8 @@ pipelines:
       - type: groupByKey
       - type: count
       - type: toStream
+      - type: convertValue
+        into: string
       - type: peek
         forEach:
           code: |

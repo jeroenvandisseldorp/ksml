@@ -68,6 +68,7 @@ store:
 ```
 
 **Important considerations:**
+
 - `windowSize` must match your `windowByTime` duration
 - `retention` should be at least `windowSize + grace period` to handle late-arriving data
 - Longer retention uses more disk space but allows querying historical windows

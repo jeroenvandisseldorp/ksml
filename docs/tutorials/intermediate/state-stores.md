@@ -53,6 +53,7 @@ Define stores in the global `stores` section and reference them by name:
     ```
 
 This example demonstrates:
+
 - **Predefined store configuration**: The `owner_count_store` is defined in the global `stores` section
 - **Store reference**: The `count` operation references the predefined store by name
 - **Persistent storage**: Data survives application restarts (`persistent: true`)
@@ -94,6 +95,7 @@ Define stores directly within operations for single-use scenarios:
     ```
 
 This example demonstrates:
+
 - **Inline store configuration**: Store defined directly within the `aggregate` operation
 - **Custom aggregation**: Uses initializer and aggregator functions for complex calculations
 - **Memory-only storage**: Non-persistent storage for temporary calculations (`persistent: false`)
@@ -125,16 +127,19 @@ State stores can automatically clean up old data based on retention policies:
 ### Performance Considerations
 
 **Caching (`caching: true`)**:
+
 - **Benefits**: Reduces downstream message volume, improves throughput
 - **Trade-offs**: Increases memory usage, adds latency to state updates
 - **Use when**: You can tolerate slightly delayed updates for better performance
 
 **Persistence (`persistent: true`)**:
+
 - **Benefits**: Data survives restarts, enables exactly-once processing
 - **Trade-offs**: Slower startup, additional disk I/O overhead
 - **Use when**: Data durability is important, or you need exactly-once guarantees
 
 **Changelog Logging (`logging: true`)**:
+
 - **Benefits**: Enables fault tolerance and exactly-once processing
 - **Trade-offs**: Additional Kafka topics, increased network and storage usage
 - **Use when**: You need fault tolerance or are using exactly-once semantics

@@ -1,0 +1,57 @@
+# Producer for retry strategies demo - generates operations that may fail
+
+functions:
+  generate_failing_operations:
+    type: generator
+    globalCode: |
+      import random
+      import time
+      operation_counter = 0
+    code: |
+      global operation_counter
+      
+      operation_counter += 1
+      
+      # Simple failure simulation (60% success, 40% failure)
+      if operation_counter % 5 in [0, 1]:  # 40% failure rate
+        if operation_counter % 10 == 0:
+          # Non-retryable error
+          operation_type = "api_call"
+          error_type = "invalid_data"
+          should_succeed = False
+        else:
+          # Retryable error (timeout)
+          operation_type = "database_write"
+          error_type = "timeout"
+          should_succeed = False
+      else:  # 60% success
+        operation_type = "cache_update"
+        error_type = "none"
+        should_succeed = True
+      
+      # Create structured JSON operation for better readability in Kowl UI
+      operation_data = {
+        "operation_type": operation_type,
+        "error_type": error_type,
+        "operation_id": operation_counter,
+        "timestamp": int(time.time() * 1000),
+        "should_succeed": should_succeed,
+        "client_id": f"client_{(operation_counter % 3) + 1}",
+        "resource_id": f"resource_{operation_counter}",
+        "metadata": {
+          "simulation": True,
+          "failure_rate": "40%"
+        }
+      }
+      
+    expression: (f"op_{operation_counter:04d}", operation_data)
+    resultType: (string, json)
+
+producers:
+  failing_operation_producer:
+    generator: generate_failing_operations
+    interval: 2s
+    to:
+      topic: failing_operations
+      keyType: string
+      valueType: json

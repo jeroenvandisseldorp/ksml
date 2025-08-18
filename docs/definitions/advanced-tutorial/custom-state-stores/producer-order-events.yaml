@@ -1,0 +1,55 @@
+# Producer for multi-store demo - generates order processing events
+
+functions:
+  generate_order_events:
+    type: generator
+    globalCode: |
+      import random
+      import time
+      order_counter = 0
+      customers = ["cust_001", "cust_002", "cust_003", "cust_004"]
+      products = ["prod_A", "prod_B", "prod_C", "prod_D"]
+      statuses = ["created", "paid", "shipped", "delivered", "cancelled"]
+    code: |
+      global order_counter, customers, products, statuses
+      
+      order_counter += 1
+      customer_id = random.choice(customers)
+      
+      # Generate order event
+      order_event = {
+        "order_id": f"order_{order_counter:04d}",
+        "customer_id": customer_id,
+        "product_id": random.choice(products),
+        "quantity": random.randint(1, 5),
+        "price": round(random.uniform(10.0, 100.0), 2),
+        "status": random.choice(statuses),
+        "timestamp": int(time.time() * 1000)
+      }
+      
+      # Add structured metadata for better readability in Kowl UI
+      order_event.update({
+        "region": random.choice(["US-EAST", "US-WEST", "EU", "ASIA"]),
+        "payment_method": random.choice(["credit_card", "paypal", "bank_transfer"]),
+        "shipping_address": {
+          "country": random.choice(["US", "CA", "UK", "DE", "FR"]),
+          "state": random.choice(["CA", "NY", "TX", "FL", "WA"])
+        },
+        "metadata": {
+          "simulation": True,
+          "multi_store_processing": True,
+          "order_sequence": order_counter
+        }
+      })
+      
+    expression: (order_event['order_id'], order_event)
+    resultType: (string, json)
+
+producers:
+  order_event_producer:
+    generator: generate_order_events
+    interval: 2s
+    to:
+      topic: order_events
+      keyType: string
+      valueType: json

@@ -13,6 +13,35 @@ KSML joins are built on top of Kafka Streams join operations, providing a YAML-b
 Before starting this tutorial:
 
 - Have [Docker Compose KSML environment setup running](../../getting-started/basics-tutorial.md#choose-your-setup-method)
+- Add the following topics to your `kafka-setup` service in docker-compose.yml to run the examples:
+
+??? info "Topic creation commands - click to expand"
+
+    ```yaml
+    # Stream-Stream Joins
+    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic product_clicks && \
+    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic product_purchases && \
+    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic correlated_user_actions && \
+    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic product_conversions && \
+    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic product_clicks_by_product && \
+    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic product_purchases_by_product && \
+    # Stream-Table Joins
+    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic new_orders && \
+    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic customer_data && \
+    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic enriched_orders && \
+    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic orders_with_customer_data && \
+    # Foreign Key Joins
+    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic product_catalog && \
+    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic orders_with_product_details && \
+    # Stream-Table Left Join
+    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic user_activity_events && \
+    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic user_location_data && \
+    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic activity_with_location && \
+    # Stream-Stream Outer Join
+    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic user_login_events && \
+    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic user_logout_events && \
+    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic user_session_analysis && \
+    ```
 
 ## Core Join Concepts
 
@@ -205,6 +234,80 @@ The `mapper` function extracts the foreign key from stream records:
 - **Input**: Stream's key and value
 - **Output**: Key to lookup in the GlobalTable
 - **Example**: Extract product_id from order to join with product catalog
+
+## Stream-Table Left Join
+
+Left joins preserve all records from the stream (left side) while adding data from the table (right side) when available. This is useful for enriching events with optional reference data.
+
+### Use Case: Activity Enrichment with Location
+
+Enrich user activity events with location data, preserving all activities even when location information is missing.
+
+??? info "Producer: User Activity and Locations (click to expand)"
+
+    ```yaml
+    {%
+      include "../../definitions/intermediate-tutorial/joins/producer-user-activity-locations.yaml"
+    %}
+    ```
+
+??? info "Processor: Stream-Table Left Join (click to expand)"
+
+    ```yaml
+    {%
+      include "../../definitions/intermediate-tutorial/joins/processor-stream-table-left-join.yaml"
+    %}
+    ```
+
+This example demonstrates:
+
+- **Left join semantics**: All activity events are preserved, even when location data is missing
+- **Graceful null handling**: Unknown locations get default values instead of causing errors
+- **Enrichment metadata**: Tracks whether enrichment data was available
+- **Real-world pattern**: Common scenario where reference data may be incomplete
+
+**Expected Behavior:**
+
+- Activities for users with location data are enriched with country/city information
+- Activities for users without location data get "UNKNOWN" placeholders
+- All activities are preserved regardless of location availability
+
+## Stream-Stream Outer Join
+
+Outer joins capture events from either stream, making them ideal for tracking incomplete or partial interactions between two event types.
+
+### Use Case: Login/Logout Session Analysis
+
+Track user sessions by correlating login and logout events, capturing incomplete sessions where only one event type occurs.
+
+??? info "Producer: Login and Logout Events (click to expand)"
+
+    ```yaml
+    {%
+      include "../../definitions/intermediate-tutorial/joins/producer-login-logout-events.yaml"
+    %}
+    ```
+
+??? info "Processor: Stream-Stream Outer Join (click to expand)"
+
+    ```yaml
+    {%
+      include "../../definitions/intermediate-tutorial/joins/processor-stream-stream-outer-join.yaml"
+    %}
+    ```
+
+This example demonstrates:
+
+- **Outer join semantics**: Captures login-only, logout-only, and complete sessions
+- **Session analysis**: Categorizes different session patterns for analytics
+- **Time window correlation**: Uses 10-minute window to correlate related events
+- **Business insights**: Identifies users who login but don't logout (active sessions) or logout without captured login
+
+**Expected Behavior:**
+
+- **COMPLETE sessions**: When both login and logout events occur within the time window
+- **LOGIN_ONLY sessions**: Users who logged in but no logout was captured (active sessions)
+- **LOGOUT_ONLY sessions**: Logout events without corresponding login (users already logged in)
 
 ## Join Type Variants
 

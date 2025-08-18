@@ -1,0 +1,46 @@
+# Producer for circuit breaker demo - generates service requests
+
+functions:
+  generate_service_requests:
+    type: generator
+    globalCode: |
+      import random
+      import time
+      request_counter = 0
+    code: |
+      global request_counter
+      
+      request_counter += 1
+      
+      # Simulate service requests with failures
+      # Every 5th request to "payment" service fails (to trigger circuit breaker)
+      if request_counter % 3 == 0:
+        service = "payment"  # This service will have failures
+        # Create failure pattern: fail requests 3, 6, 9, 12 to trigger circuit breaker
+        should_fail = (request_counter % 6 in [3, 0]) if request_counter <= 15 else False
+      else:
+        service = "auth"  # This service is stable
+        should_fail = False
+      
+      # Create structured JSON request for better readability in Kowl UI
+      request_data = {
+        "method": "GET",
+        "service": service,
+        "should_fail": should_fail,
+        "request_id": request_counter,
+        "timestamp": int(time.time() * 1000),
+        "client_id": f"client_{(request_counter % 5) + 1}",
+        "endpoint": f"/{service}/process"
+      }
+      
+    expression: (f"req_{request_counter:04d}", request_data)
+    resultType: (string, json)
+
+producers:
+  service_request_producer:
+    generator: generate_service_requests
+    interval: 3s
+    to:
+      topic: service_requests
+      keyType: string
+      valueType: json

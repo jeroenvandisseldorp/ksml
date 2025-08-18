@@ -1,0 +1,72 @@
+# Producer for dead letter queue demo - generates messages with varying quality
+
+functions:
+  generate_mixed_messages:
+    type: generator
+    globalCode: |
+      import random
+      import time
+      message_counter = 0
+    code: |
+      global message_counter
+      
+      message_counter += 1
+      
+      # Generate different message scenarios (70% valid, 30% invalid)
+      if message_counter % 10 in [0, 1, 2]:  # 30% invalid
+        if message_counter % 10 == 0:
+          # Missing required field (incomplete JSON)
+          message_data = {
+            "message_type": "ORDER",
+            "order_id": message_counter,
+            # Missing amount field deliberately
+            "timestamp": int(time.time() * 1000),
+            "customer_id": f"customer_{(message_counter % 5) + 1}",
+            "status": "incomplete"
+          }
+        elif message_counter % 10 == 1:
+          # Invalid data type (string instead of number)
+          message_data = {
+            "message_type": "ORDER",
+            "order_id": message_counter,
+            "amount": "NOT_A_NUMBER",  # Invalid data type
+            "timestamp": int(time.time() * 1000),
+            "customer_id": f"customer_{(message_counter % 5) + 1}",
+            "status": "invalid_type"
+          }
+        else:
+          # Negative amount (business rule violation)
+          message_data = {
+            "message_type": "ORDER",
+            "order_id": message_counter,
+            "amount": -50,  # Invalid negative amount
+            "timestamp": int(time.time() * 1000),
+            "customer_id": f"customer_{(message_counter % 5) + 1}",
+            "status": "negative_amount"
+          }
+      else:  # 70% valid
+        message_data = {
+          "message_type": "ORDER",
+          "order_id": message_counter,
+          "amount": random.randint(10, 500),
+          "timestamp": int(time.time() * 1000),
+          "customer_id": f"customer_{(message_counter % 5) + 1}",
+          "status": "valid",
+          "product_id": f"prod_{random.randint(100, 999)}",
+          "metadata": {
+            "simulation": True,
+            "failure_rate": "30%"
+          }
+        }
+      
+    expression: (f"msg_{message_counter:04d}", message_data)
+    resultType: (string, json)
+
+producers:
+  mixed_message_producer:
+    generator: generate_mixed_messages
+    interval: 2s
+    to:
+      topic: mixed_messages
+      keyType: string
+      valueType: json

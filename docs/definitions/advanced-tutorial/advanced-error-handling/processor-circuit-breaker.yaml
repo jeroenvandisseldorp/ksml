@@ -1,0 +1,152 @@
+# Processor demonstrating circuit breaker pattern
+
+streams:
+  service_requests:
+    topic: service_requests
+    keyType: string
+    valueType: json
+
+stores:
+  circuit_breaker_store:
+    type: keyValue
+    keyType: string
+    valueType: string
+    persistent: true
+    caching: true
+
+functions:
+  circuit_breaker_handler:
+    type: valueTransformer
+    globalCode: |
+      import json
+      import time
+      
+      # Circuit breaker configuration
+      FAILURE_THRESHOLD = 3  # Open circuit after 3 failures
+      RECOVERY_TIMEOUT_MS = 15000  # Test recovery after 15 seconds
+      
+      def get_circuit_info(service, store):
+        """Get circuit breaker state for service"""
+        info_str = store.get(f"circuit_{service}")
+        if info_str:
+          return json.loads(info_str)
+        return {"state": "CLOSED", "failures": 0, "last_failure_time": 0}
+      
+      def update_circuit_info(service, info, store):
+        """Update circuit breaker state"""
+        store.put(f"circuit_{service}", json.dumps(info))
+        
+    code: |
+      # Extract fields from JSON request
+      method = value.get("method", "GET")
+      service = value.get("service")
+      should_fail = value.get("should_fail", False)
+      request_id = value.get("request_id", 0)
+      timestamp = value.get("timestamp", int(time.time() * 1000))
+      client_id = value.get("client_id", "unknown")
+      endpoint = value.get("endpoint", "/unknown")
+      current_time = int(time.time() * 1000)
+      
+      if not service:
+        return None
+      
+      # Get current circuit state
+      circuit = get_circuit_info(service, circuit_breaker_store)
+      
+      # Check circuit state and decide if request should be processed
+      if circuit["state"] == "OPEN":
+        # Check if recovery timeout has passed
+        if current_time - circuit["last_failure_time"] > RECOVERY_TIMEOUT_MS:
+          circuit["state"] = "HALF_OPEN"
+          log.info("Circuit breaker HALF-OPEN for {}: Testing recovery", service)
+        else:
+          # Circuit still open, reject request
+          log.warn("Request REJECTED for {}: Circuit breaker is OPEN", service)
+          return {
+            "status": "REJECTED",
+            "reason": "circuit_open",
+            "method": method,
+            "service": service,
+            "endpoint": endpoint,
+            "client_id": client_id,
+            "request_id": request_id,
+            "circuit_state": circuit["state"],
+            "timestamp": timestamp,
+            "processing_time": current_time - timestamp
+          }
+      
+      # Process the request (simulate service call)
+      if should_fail:
+        # Request failed
+        circuit["failures"] += 1
+        circuit["last_failure_time"] = current_time
+        
+        if circuit["state"] == "CLOSED" and circuit["failures"] >= FAILURE_THRESHOLD:
+          # Open the circuit
+          circuit["state"] = "OPEN"
+          log.error("Circuit breaker OPENED for {}: {} failures", service, circuit["failures"])
+        elif circuit["state"] == "HALF_OPEN":
+          # Recovery test failed, back to open
+          circuit["state"] = "OPEN"
+          log.error("Circuit breaker back to OPEN for {}: Recovery test failed", service)
+        
+        update_circuit_info(service, circuit, circuit_breaker_store)
+        log.warn("Request FAILED for {}: Circuit state = {}", service, circuit["state"])
+        return {
+          "status": "FAILED",
+          "reason": "service_error",
+          "method": method,
+          "service": service,
+          "endpoint": endpoint,
+          "client_id": client_id,
+          "request_id": request_id,
+          "circuit_state": circuit["state"],
+          "failures": circuit["failures"],
+          "timestamp": timestamp,
+          "processing_time": current_time - timestamp
+        }
+      else:
+        # Request succeeded
+        if circuit["state"] == "HALF_OPEN":
+          # Recovery successful, close circuit
+          circuit["state"] = "CLOSED"
+          circuit["failures"] = 0
+          log.info("Circuit breaker CLOSED for {}: Service recovered", service)
+        elif circuit["state"] == "CLOSED":
+          # Reset failure count on success
+          circuit["failures"] = 0
+        
+        update_circuit_info(service, circuit, circuit_breaker_store)
+        log.info("Request SUCCESS for {}: Circuit state = {}", service, circuit["state"])
+        return {
+          "status": "SUCCESS",
+          "reason": "processed",
+          "method": method,
+          "service": service,
+          "endpoint": endpoint,
+          "client_id": client_id,
+          "request_id": request_id,
+          "circuit_state": circuit["state"],
+          "failures": circuit["failures"],
+          "timestamp": timestamp,
+          "processing_time": current_time - timestamp
+        }
+      
+    expression: result if result else None
+    resultType: json
+    stores:
+      - circuit_breaker_store
+
+pipelines:
+  circuit_breaker_pipeline:
+    from: service_requests
+    via:
+      - type: mapValues
+        mapper: circuit_breaker_handler
+      - type: filter
+        if:
+          expression: value is not None
+    to:
+      topic: service_responses
+      keyType: string
+      valueType: json

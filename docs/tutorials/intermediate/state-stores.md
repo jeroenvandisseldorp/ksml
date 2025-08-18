@@ -7,6 +7,17 @@ State stores are persistent or in-memory storage components used by stateful ope
 Before starting this tutorial:
 
 - Have [Docker Compose KSML environment setup running](../../getting-started/basics-tutorial.md#choose-your-setup-method)
+- Add the following topics to your `kafka-setup` service in docker-compose.yml to run the examples:
+
+??? info "Topic creation commands - click to expand"
+
+    ```yaml
+    # State Store Examples
+    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic sensor_ownership_data && \
+    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic owner_sensor_counts && \
+    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic sensor_type_totals && \
+    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic owner_counts && \
+    ```
 
 ## Understanding State Stores in Kafka Streams
 

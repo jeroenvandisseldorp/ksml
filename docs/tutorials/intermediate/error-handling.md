@@ -1,6 +1,6 @@
 # Error Handling and Recovery in KSML
 
-This tutorial explores strategies for handling errors and implementing recovery mechanisms in KSML applications, helping you build more robust and resilient stream processing pipelines.
+This tutorial explores comprehensive strategies for handling errors and implementing recovery mechanisms in KSML applications, helping you build robust and resilient stream processing pipelines.
 
 ## Prerequisites
 
@@ -21,43 +21,42 @@ Before starting this tutorial:
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic processed_sensors && \
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic sensor_errors && \
     # Dead Letter Queue
-    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic processed_orders && \
-    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic failed_orders && \
-    # Circuit Breaker Pattern
-    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic api_requests && \
-    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic api_responses && \
-    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic circuit_breaker_events && \
-    # Compensating Transactions
-    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic business_transactions && \
-    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic completed_transactions && \
-    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic failed_transactions && \
+    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic payment_requests && \
+    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic processed_payments && \
+    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic failed_payments && \
+    # Retry Strategies
+    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic api_operations && \
+    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic successful_operations && \
+    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic failed_operations && \
+    # Circuit Breaker
+    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic service_requests && \
+    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic service_responses && \
+    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic circuit_events && \
     ```
 
 ## Introduction to Error Handling
 
-Error handling is a critical aspect of any production-grade stream processing application. In streaming contexts, errors can occur for various reasons:
+Error handling is critical for production stream processing applications. Common error scenarios include:
 
 - **Data Quality Issues**: Invalid, malformed, or missing data
-- **External Service Failures**: Network timeouts, API errors, service unavailability
+- **External Service Failures**: Network timeouts, API errors, service unavailability  
 - **Resource Constraints**: Memory limitations, disk space issues
 - **Business Rule Violations**: Data that doesn't meet application requirements
-- **Unexpected Edge Cases**: Scenarios not covered in the original design
+- **Transient Failures**: Temporary network issues, rate limiting, service overload
 
-Without proper error handling, these issues can cause your application to crash, lose important messages, produce incorrect results, or create inconsistent state.
+Without proper error handling, these issues can cause application crashes, data loss, incorrect results, or inconsistent state.
 
-## Core Error Handling Strategies
-
-KSML provides several mechanisms to handle errors gracefully and implement recovery strategies, allowing your applications to continue processing even when problems occur.
+## Core Error Handling Patterns
 
 ### 1. Validation and Filtering
 
-Proactively validate data and filter out problematic messages before they cause errors downstream.
+Proactively validate data and filter out problematic messages before they cause downstream errors.
 
-??? info "Order Events Producer (for testing) - click to expand"
+??? info "Order Events Producer - click to expand"
 
     ```yaml
     {%
-      include "../../definitions/intermediate-tutorial/error-handling/producer-order-events.yaml"
+      include "../../definitions/intermediate-tutorial/error-handling/producer-order-validation.yaml"
     %}
     ```
 
@@ -69,25 +68,18 @@ Proactively validate data and filter out problematic messages before they cause 
     %}
     ```
 
-This example demonstrates:
+This example demonstrates the `branch` operation for routing messages based on validation results. Key features:
 
 - **Early validation**: Check required fields and data ranges before processing
-- **Route separation**: Valid orders go to one topic, invalid to another
-- **Detailed error information**: Add validation status and specific issues to messages
-- **Comprehensive logging**: Track what's happening with each message for debugging
-
-Key benefits:
-
-- Prevents downstream errors by catching issues early
-- Provides detailed information about data quality problems
-- Allows different handling strategies for different error types
-- Maintains processing flow even with bad data
+- **Route separation**: Valid messages go to one topic, invalid to another  
+- **Error classification**: Categorize different types of validation failures
+- **Detailed logging**: Track processing decisions for monitoring and debugging
 
 ### 2. Try-Catch Error Handling
 
-Use try-catch blocks in Python functions to handle errors gracefully and provide fallback values.
+Use try-catch blocks in Python functions to handle exceptions gracefully and provide fallback behavior.
 
-??? info "Sensor Data Producer (with error conditions) - click to expand"
+??? info "Sensor Data Producer - click to expand"
 
     ```yaml
     {%
@@ -95,7 +87,7 @@ Use try-catch blocks in Python functions to handle errors gracefully and provide
     %}
     ```
 
-??? info "Try-Catch Error Handling Processor - click to expand"
+??? info "Try-Catch Processor - click to expand"
 
     ```yaml
     {%
@@ -103,29 +95,22 @@ Use try-catch blocks in Python functions to handle errors gracefully and provide
     %}
     ```
 
-This example demonstrates:
+This example shows exception handling within `valueTransformer` functions. Key techniques:
 
-- **Graceful error handling**: Use try-catch to prevent function failures
-- **Error classification**: Distinguish between validation errors and processing errors
-- **Fallback strategies**: Return error information when processing fails
-- **Contextual logging**: Log different levels based on error severity
-
-Key patterns:
-
-- Always handle None/null values explicitly
-- Differentiate between expected errors (validation) and unexpected errors
-- Provide meaningful error messages with context
-- Use appropriate log levels (warn for expected issues, error for unexpected)
+- **Exception handling**: Use try-catch to prevent function failures from stopping processing
+- **Graceful degradation**: Return error information instead of crashing
+- **Error classification**: Distinguish between validation errors and processing errors  
+- **Fallback values**: Provide default values or error objects when processing fails
 
 ### 3. Dead Letter Queue Pattern
 
-Implement dead letter queues to capture messages that can't be processed, with retry logic for transient failures.
+Route messages that cannot be processed to dedicated error topics for later analysis or reprocessing.
 
-??? info "Order Events Producer (same as above) - click to expand"
+??? info "Payment Requests Producer - click to expand"
 
     ```yaml
     {%
-      include "../../definitions/intermediate-tutorial/error-handling/producer-order-events.yaml"
+      include "../../definitions/intermediate-tutorial/error-handling/producer-payment-requests.yaml"  
     %}
     ```
 
@@ -137,31 +122,50 @@ Implement dead letter queues to capture messages that can't be processed, with r
     %}
     ```
 
-This example demonstrates:
+This example demonstrates message routing based on processing results. Key concepts:
 
-- **Error classification**: Permanent errors vs. temporary errors that can be retried  
-- **Retry logic**: Attempt processing multiple times for transient failures
-- **Dead letter routing**: Send failed messages to dedicated error topics
-- **Rich error context**: Include original data, error details, and retry counts
+- **Error classification**: Permanent errors vs. temporary errors that can be retried
+- **Rich error context**: Include original data, error details, and processing metadata  
+- **Retry eligibility**: Mark messages as retryable or permanent failures
+- **Audit trail**: Maintain detailed records for debugging and compliance
 
-Key concepts:
+### 4. Retry Strategies with Exponential Backoff
 
-- **Permanent errors** (validation failures): Go directly to dead letter queue
-- **Temporary errors** (service timeouts): Can be retried with exponential backoff
-- **Retry limits**: Prevent infinite retry loops by setting maximum retry counts
-- **Error enrichment**: Add timestamps, retry counts, and error classifications
+Implement sophisticated retry logic for transient failures with exponential backoff and jitter.
 
-## Advanced Error Handling Patterns
-
-### 4. Circuit Breaker Pattern
-
-Implement circuit breakers to prevent cascading failures when external services are unavailable.
-
-??? info "API Requests Producer (with various service conditions) - click to expand"
+??? info "API Operations Producer - click to expand"
 
     ```yaml
     {%
-      include "../../definitions/intermediate-tutorial/error-handling/producer-api-requests.yaml"
+      include "../../definitions/intermediate-tutorial/error-handling/producer-api-operations.yaml"
+    %}
+    ```
+
+??? info "Retry Strategies Processor - click to expand"
+
+    ```yaml
+    {%
+      include "../../definitions/intermediate-tutorial/error-handling/processor-retry-strategies.yaml"
+    %}
+    ```
+
+This example shows advanced retry logic with exponential backoff. Key features:
+
+- **Exponential backoff**: Increasing delays (1s, 2s, 4s) prevent overwhelming failing services
+- **Jitter addition**: Random variance prevents synchronized retry storms across multiple instances
+- **Error classification**: Different retry policies for different error types (retryable vs permanent)
+- **Maximum attempts**: Prevent infinite retry loops with configurable limits
+- **Success tracking**: Monitor retry success rates for service health insights
+
+### 5. Circuit Breaker Pattern
+
+Prevent cascading failures by temporarily stopping calls to failing services, allowing them to recover.
+
+??? info "Service Requests Producer - click to expand"
+
+    ```yaml
+    {%
+      include "../../definitions/intermediate-tutorial/error-handling/producer-service-requests.yaml"
     %}
     ```
 
@@ -173,75 +177,50 @@ Implement circuit breakers to prevent cascading failures when external services 
     %}
     ```
 
-This example demonstrates:
+This example implements a circuit breaker using global state in functions. Key concepts:
 
-- **Circuit breaker states**: CLOSED (normal), OPEN (failing), HALF_OPEN (testing recovery)
-- **Failure threshold**: Opens circuit after consecutive failures
-- **Automatic recovery**: Transitions to HALF_OPEN after timeout period
-- **State management**: Tracks failure counts and success rates
-- **Fast failure**: Rejects requests immediately when circuit is open
-
-Key benefits:
-
-- Prevents resource exhaustion from repeated failures
-- Allows services to recover without being overwhelmed
-- Provides clear visibility into service health
-- Reduces latency by failing fast when services are down
-
-### 5. Compensating Transactions
-
-For complex business operations that span multiple systems, implement compensating actions to maintain consistency.
-
-??? info "Business Transactions Producer - click to expand"
-
-    ```yaml
-    {%
-      include "../../definitions/intermediate-tutorial/error-handling/producer-transactions.yaml"
-    %}
-    ```
-
-??? info "Compensating Transactions Processor - click to expand"
-
-    ```yaml
-    {%
-      include "../../definitions/intermediate-tutorial/error-handling/processor-compensating-transactions.yaml"
-    %}
-    ```
-
-This example demonstrates:
-
-- **Multi-step transactions**: Order fulfillment with inventory, payment, and shipping
-- **Compensation logic**: Automatically undo completed steps when failures occur
-- **Rollback order**: Compensate operations in reverse order of execution
-- **Detailed tracking**: Record all completed operations and compensation events
-- **Business logic**: Handle different transaction types (orders, refunds, exchanges)
-
-Key concepts:
-
-- **Saga pattern**: Coordinate distributed transactions across multiple services
-- **Compensation events**: Publish events for each rollback action
-- **Idempotency**: Ensure compensation actions can be safely repeated
-- **Audit trail**: Maintain complete history of operations and compensations
+- **Circuit states**: CLOSED (normal), OPEN (failing), HALF_OPEN (testing recovery)
+- **Failure threshold**: Opens circuit after consecutive failures to prevent further damage
+- **Automatic recovery**: Transitions to HALF_OPEN after timeout, then CLOSED after success
+- **Fast failure**: Rejects requests immediately when circuit is open, reducing latency
+- **State management**: Tracks failure counts, success rates, and recovery timing
 
 ## Error Handling Best Practices
 
-- **Use appropriate data types**: Choose `json` for flexible error objects, specific types for performance
-- **Test error scenarios**: Explicitly test error handling code with simulated failures
-- **Limit retry attempts**: Prevent resource exhaustion with maximum retry counts
-- **Use timeouts**: Add timeouts to external service calls to prevent blocking
-- **Monitor memory usage**: Error handling can increase memory usage with additional data
-- **Clean up error topics**: Implement retention policies for error and retry topics
+### Data Type Recommendations
+- **Use JSON types**: Provides flexibility for error objects and easy inspection in Kowl UI
+- **Include context**: Add timestamps, retry counts, and error classifications to all error messages
+- **Preserve original data**: Keep original messages in error objects for debugging
 
-## Error Handling Patterns Summary
+### Function Design Patterns  
+- **Handle null values**: Always check for `None`/`null` values explicitly
+- **Use appropriate exceptions**: Choose specific exception types for different error conditions
+- **Provide meaningful errors**: Include context about what went wrong and potential solutions
+- **Log appropriately**: Use different log levels (info/warn/error) based on severity
 
-| Pattern | Use Case | Benefits | Trade-offs |
-|:--------|:---------|:---------|:-----------|
-| **Validation & Filtering** | Data quality issues | Early error detection, clear routing | Additional processing overhead |
-| **Try-Catch** | Function-level errors | Graceful degradation, detailed context | Code complexity, performance impact |
-| **Dead Letter Queue** | Permanent failures | No data loss, failure analysis | Additional topics, storage overhead |
-| **Circuit Breaker** | External service failures | Prevents cascading failures | Added complexity, state management |
-| **Compensating Transactions** | Multi-step operations | Data consistency, rollback capability | Complex implementation, coordination overhead |
+### Monitoring and Alerting
+- **Track error rates**: Monitor error percentages by type and set appropriate thresholds
+- **Circuit breaker metrics**: Alert when circuits open and track recovery times  
+- **Retry success rates**: Measure effectiveness of retry strategies
+- **Dead letter queue size**: Monitor unprocessable message volume
+
+### Testing Error Scenarios
+- **Simulate failures**: Test error handling code with various failure scenarios
+- **Load testing**: Ensure error handling works under high load conditions
+- **Recovery testing**: Verify systems can recover from failure states
+
+## Error Pattern Selection Guide
+
+| Pattern | Use Case | Benefits | When to Use |
+|:--------|:---------|:---------|:------------|
+| **Validation & Filtering** | Data quality issues | Early detection, clear routing | Input data validation, format checking |
+| **Try-Catch** | Function-level errors | Graceful degradation | Type conversion, calculations, parsing |
+| **Dead Letter Queue** | Permanent failures | No data loss, failure analysis | Malformed data, business rule violations |
+| **Retry Strategies** | Transient failures | Fault tolerance, automatic recovery | Network timeouts, rate limits, temporary errors |
+| **Circuit Breaker** | External service failures | Prevents cascading failures | API calls, database connections, service dependencies |
 
 ## Next Steps
 
-- [Reference: Error Handling Operations](../../reference/operation-reference.md/#error-handling-operations)
+- [Stream Processing Operations Reference](../../reference/operation-reference.md)
+- [Function Types Reference](../../reference/function-reference.md)
+- [Advanced Stream Processing Patterns](../advanced/)

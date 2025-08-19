@@ -1,69 +1,91 @@
-tables:
-  customer_profiles:
-    topic: customer_profiles
-    keyType: string  # Customer ID
-    valueType: json  # Profile data
-
-  customer_preferences:
-    topic: customer_preferences
-    keyType: string  # Customer ID
-    valueType: json  # Preference data
-
 streams:
-  enriched_customer_data:
-    topic: enriched_customer_data
-    keyType: string  # Customer ID
-    valueType: json  # Combined profile and preferences
+  service_requests:
+    topic: service_requests
+    keyType: string
+    valueType: json
+    
+  service_responses:
+    topic: service_responses
+    keyType: string
+    valueType: json
+    
+  circuit_events:
+    topic: circuit_events
+    keyType: string
+    valueType: json
 
 functions:
-  combine_profile_and_preferences:
-    type: valueJoiner
+  circuit_breaker_handler:
+    type: valueTransformer
     globalCode: |
-      import time
-    code: |
-      # Inner join: only combine when both profile and preferences exist
-      result = {}
+      # Circuit breaker state
+      failure_count = 0
+      circuit_state = "CLOSED"  # CLOSED, OPEN, HALF_OPEN
       
-      # Combine profile data (value1) and preferences data (value2)
-      if value1 is not None and value2 is not None:
+    code: |
+      global failure_count, circuit_state
+      
+      request_id = value.get("request_id", "unknown")
+      should_succeed = value.get("should_succeed", True)
+      
+      # Handle request based on circuit state
+      if circuit_state == "OPEN":
+        # Circuit is open - reject request immediately
         result = {
-          "customer_id": value1.get("customer_id"),
-          "profile": {
-            "name": value1.get("name"),
-            "email": value1.get("email"),
-            "tier": value1.get("tier"),
-            "registration_date": value1.get("registration_date"),
-            "address": value1.get("address")
-          },
-          "preferences": {
-            "newsletter_subscribed": value2.get("newsletter_subscribed"),
-            "preferred_categories": value2.get("preferred_categories"),
-            "communication_channel": value2.get("communication_channel"),
-            "language": value2.get("language"),
-            "notifications": value2.get("notifications")
-          },
-          "joined_at": int(time.time() * 1000),
-          "data_complete": True
+          "request_id": request_id,
+          "status": "circuit_open",
+          "circuit_state": circuit_state,
+          "failure_count": failure_count
         }
       else:
-        # This shouldn't happen in an inner join, but safety check
-        result = None
-      
-      new_value = result
-    expression: new_value
+        # Try to process request
+        if should_succeed:
+          # Request succeeds - reset failure count
+          failure_count = 0
+          circuit_state = "CLOSED"
+          result = {
+            "request_id": request_id,
+            "status": "success", 
+            "circuit_state": circuit_state
+          }
+        else:
+          # Request fails
+          failure_count += 1
+          if failure_count >= 3:
+            circuit_state = "OPEN"
+            
+          result = {
+            "request_id": request_id,
+            "status": "failure",
+            "circuit_state": circuit_state,
+            "failure_count": failure_count
+          }
+    
+    expression: result
     resultType: json
 
 pipelines:
-  join_customer_data:
-    from: customer_profiles
+  circuit_breaker_processor:
+    from: service_requests
     via:
-      # Inner join with customer preferences
-      - type: join
-        table: customer_preferences
-        valueJoiner: combine_profile_and_preferences
-      # Convert table to stream to enable peek operation
-      - type: toStream
+      - type: transformValue
+        mapper: circuit_breaker_handler
       - type: peek
         forEach:
-          code: log.info("CUSTOMER DATA JOIN - customer={}, tier={}, categories={}, channel={}", key, value.get("profile", {}).get("tier"), value.get("preferences", {}).get("preferred_categories"), value.get("preferences", {}).get("communication_channel"))
-    to: enriched_customer_data
+          code: |
+            status = value.get("status", "unknown")
+            circuit_state = value.get("circuit_state", "unknown")
+            req_id = value.get("request_id", "unknown")
+            
+            if status == "circuit_open":
+              log.warn("CIRCUIT OPEN - {}: Request rejected", req_id)
+            elif status == "success":
+              log.info("REQUEST OK - {} [{}]", req_id, circuit_state)
+            else:
+              failures = value.get("failure_count", 0)
+              log.error("REQUEST FAILED - {} [{}]: {} failures", req_id, circuit_state, failures)
+    branch:
+      - if:
+          expression: value.get("status") == "success"
+        to: service_responses
+      - to: circuit_events

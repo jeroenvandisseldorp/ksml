@@ -183,3 +183,9 @@ State stores can automatically clean up old data based on retention policies:
 - Consider the trade-off between durability and performance
 
 State stores are a powerful feature in KSML that enable sophisticated stateful stream processing patterns. By understanding the configuration options and trade-offs, you can build robust and efficient streaming applications.
+
+## Next Steps
+
+Ready to explore more advanced state store patterns? Continue with:
+
+- **[Custom State Stores Tutorial](../advanced/custom-state-stores.md)** - Learn advanced patterns including window stores, session stores, multi-store coordination, and optimization techniques for production applications

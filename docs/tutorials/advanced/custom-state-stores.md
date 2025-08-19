@@ -18,6 +18,7 @@ KSML provides built-in state store capabilities that integrate seamlessly with K
 
 Before starting this tutorial:
 
+- **Complete the [State Stores Tutorial](../intermediate/state-stores.md)** - This tutorial builds on fundamental state store concepts, configuration methods, and basic patterns covered in the intermediate tutorial
 - Have [Docker Compose KSML environment setup running](../../getting-started/basics-tutorial.md#choose-your-setup-method)
 - Add the following topics to your `kafka-setup` service in docker-compose.yml to run the examples:
 
@@ -41,9 +42,9 @@ Before starting this tutorial:
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic order_processing_results && \
     ```
 
-## Basic Key-Value Store
+## Advanced Key-Value Store Patterns
 
-Key-value stores are the simplest type of state store, mapping keys to values. This example demonstrates user session tracking.
+Building on the basic key-value concepts from the [State Stores Tutorial](../intermediate/state-stores.md), this example demonstrates advanced user session tracking with complex business logic.
 
 **What it does**:
 
@@ -222,3 +223,5 @@ Complex applications often require multiple state stores working together to man
 ## Conclusion
 
 Custom state stores in KSML provide powerful capabilities for building stateful stream processing applications. By understanding the different store types, configuration options, and optimization techniques, you can build efficient and scalable applications that maintain state effectively across events.
+
+For foundational concepts and basic configuration patterns, refer back to the [State Stores Tutorial](../intermediate/state-stores.md).

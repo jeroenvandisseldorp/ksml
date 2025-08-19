@@ -27,17 +27,13 @@ Before starting this tutorial:
     # Pattern Detection
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic pattern_events && \
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic detected_patterns && \
-    # Temporal Pattern Matching
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic temporal_events && \
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic temporal_patterns && \
-    # Event Correlation
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic user_events && \
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic system_events && \
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic correlated_events && \
-    # Anomaly Detection
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic sensor_metrics && \
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic anomalies_detected && \
-    # Fraud Detection System
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic credit_card_transactions && \
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic fraud_alerts && \
     ```
@@ -48,11 +44,11 @@ Pattern detection identifies specific sequences of events within a stream. This 
 
 **What it does**:
 
-- Generates JSON events with event types, session IDs, and metadata
-- Tracks event sequences per session using state stores
-- Detects when events occur in the pattern A→B→C
-- Returns JSON results with pattern completion status and timing information
-- Resets tracking when pattern is complete or broken
+- **Produces events**: Creates events with types A, B, C, D, E - deliberately generates A→B→C sequences for session_001 to demonstrate pattern completion
+- **Tracks sequences**: Uses a state store to remember where each session is in the A→B→C pattern (stores "A", "AB", or deletes when complete)
+- **Detects completion**: When event C arrives and the state shows "AB", it recognizes the full A→B→C pattern is complete
+- **Outputs results**: Only emits a detection message when the complete pattern A→B→C is found, otherwise filters out partial matches
+- **Resets state**: Clears the pattern tracking after successful detection or if the sequence breaks (e.g., gets A→D instead of A→B)
 
 ??? info "Pattern Events Producer - click to expand"
 
@@ -82,11 +78,11 @@ Temporal patterns add time constraints to event sequences. This example detects 
 
 **What it does**:
 
-- Generates JSON shopping events with action types, product details, and timestamps
-- Monitors user shopping behavior using state stores
-- Detects when checkout occurs within 5 minutes of adding to cart
-- Returns JSON correlation results with time differences and strength indicators
-- Distinguishes between quick and slow checkouts
+- **Produces shopping events**: Creates events like "add_to_cart" and "checkout" with realistic timestamps and shopping details
+- **Stores cart events**: When "add_to_cart" happens, saves the cart timestamp and details in state store as JSON
+- **Measures time gaps**: When "checkout" arrives, calculates milliseconds between cart and checkout events  
+- **Classifies by speed**: If checkout happens within 5 minutes (300,000ms) = "QUICK_CHECKOUT", otherwise "SLOW_CHECKOUT"
+- **Outputs results**: Only emits a message when both cart and checkout events are found, showing the time difference and classification
 
 ??? info "Temporal Events Producer - click to expand"
 
@@ -116,11 +112,11 @@ Event correlation combines related events from different streams to provide enri
 
 **What it does**:
 
-- Generates JSON events for both user activities and system events
-- Uses stream-table joins to correlate user context with system events
-- Detects specific correlation patterns (form errors, page load queries, API calls)
-- Returns JSON correlation results with event details, timing analysis, and relationship strength
-- Identifies cause-and-effect relationships between user actions and system behavior
+- **Produces two event streams**: Creates user events (page_view, click, form_submit) and system events (api_call, db_query, error) with the same user IDs
+- **Joins streams by user**: Uses leftJoin to connect system events with the latest user activity for each user ID
+- **Detects specific patterns**: Looks for meaningful combinations like "form_submit + error", "page_view + db_query", or "click + api_call"
+- **Measures timing**: Calculates milliseconds between user action and system response to determine correlation strength (HIGH/MEDIUM)
+- **Outputs correlations**: Only emits results when it finds the specific patterns, showing both events with timing analysis and relationship details
 
 ??? info "Correlation Events Producer (generates both user and system events) - click to expand"
 
@@ -150,11 +146,11 @@ Anomaly detection identifies unusual patterns using statistical analysis.
 
 **What it does**:
 
-- Generates JSON sensor metrics with values, sensor metadata, and timestamps
-- Calculates running statistics (mean, standard deviation, z-scores) for each sensor
-- Detects statistical anomalies when values fall outside 3 standard deviations
-- Returns JSON anomaly reports with statistical analysis, severity levels, and sensor details
-- Identifies both spikes and drops in sensor readings
+- **Produces sensor readings**: Creates temperature values that are normally 40-60°C, but every 20th reading is a spike (90-100°C) and every 25th is a drop (0-10°C)
+- **Tracks statistics per sensor**: Stores running count, sum, sum-of-squares, min, max in state store to calculate mean and standard deviation
+- **Calculates z-scores**: After 10+ readings, computes how many standard deviations each new reading is from the mean
+- **Detects outliers**: When z-score > 3.0, flags as anomaly (spike if above mean, drop if below mean)
+- **Outputs anomalies**: Only emits detection messages when statistical threshold is exceeded, showing z-score, mean, and severity level
 
 ??? info "Metrics Producer (with occasional anomalies) - click to expand"
 
@@ -184,12 +180,11 @@ A practical example combining multiple CEP techniques for real-time fraud detect
 
 **What it does**:
 
-- Generates JSON credit card transactions with transaction metadata
-- Tracks transaction history and cardholder patterns using state stores
-- Detects multiple fraud patterns: high amounts, rapid transactions, location changes, suspicious merchants
-- Calculates fraud risk scores based on multiple factors
-- Returns JSON fraud alerts with transaction details, detected patterns, risk analysis, and recommendations
-- Generates both high-risk (FRAUD_ALERT) and medium-risk (SUSPICIOUS_TRANSACTION) alerts
+- **Produces transactions**: Creates credit card purchases with amounts, merchants, locations - deliberately generates suspicious patterns (high amounts every 15th, rapid transactions every 20th)
+- **Stores transaction history**: Keeps last location, timestamp, and totals for each card number in state store
+- **Scores fraud risk**: Adds points for patterns: +40 for amounts >$5000, +30 for transactions <60s apart, +20 for location changes <1hr, +20 for suspicious merchants
+- **Classifies threats**: If score ≥70 = "FRAUD_ALERT", if 30-69 = "SUSPICIOUS_TRANSACTION", otherwise no output
+- **Outputs alerts**: Only emits results when fraud score thresholds are met, showing detected patterns, risk factors, and recommended actions
 
 ??? info "Credit Card Transactions Producer - click to expand"
 

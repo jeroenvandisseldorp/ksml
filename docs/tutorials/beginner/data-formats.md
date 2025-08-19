@@ -6,30 +6,6 @@ Learn how to process, convert, and validate data using KSML's supported formats 
 
 - Basic understanding of Kafka concepts (topics, messages)
 - Familiarity with basic KSML concepts (streams, functions, pipelines)
-- Add the following topics to your `kafka-setup` service in docker-compose.yml to run the examples:
-
-??? info "Topic creation commands - click to expand"
-
-    ```yaml
-    # Data Formats Tutorial
-    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic sensor_data_avro && \
-    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic sensor_data_json && \
-    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic sensor_data_json_raw && \
-    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic sensor_data_json_processed && \
-    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic sensor_data_transformed && \
-    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic sensor_data_converted_formats && \
-    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic ksml_sensordata_xml && \
-    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic ksml_sensordata_xml_processed && \
-    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic ksml_sensordata_csv && \
-    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic ksml_sensordata_csv_processed && \
-    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic ksml_sensordata_binary && \
-    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic ksml_sensordata_binary_processed && \
-    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic ksml_soap_requests && \
-    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic ksml_soap_responses && \
-    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic device_config && \
-    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic sensor_readings && \
-    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic combined_sensor_data && \
-    ```
 
 ## Supported Data Formats
 
@@ -66,6 +42,7 @@ Schema-based formats (Avro, XML, CSV) require a schema name: `format:SchemaName`
 ### Setup Requirements
 
 - Create `docker-compose.yml` with schema registry and pre-created topics 
+- **Note**: This tutorial requires a different docker-compose.yml than other tutorials because AVRO format needs a schema registry to store and manage schema definitions 
 
 ??? info "Docker Compose Configuration (click to expand)"
 

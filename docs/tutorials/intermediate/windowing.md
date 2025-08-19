@@ -24,7 +24,6 @@ Before starting this tutorial:
 ??? info "Topic creation commands - click to expand"
 
     ```yaml
-    # Windowing Examples
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic user_clicks && \
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic user_click_counts_5min && \
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic click_counts && \

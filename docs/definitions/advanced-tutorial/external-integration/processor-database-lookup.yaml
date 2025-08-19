@@ -10,7 +10,7 @@ stores:
   product_reference_store:
     type: keyValue
     keyType: string
-    valueType: json
+    valueType: string
     persistent: true
     caching: true
 
@@ -46,8 +46,8 @@ functions:
         products = load_product_catalog()
         
         for product_id, product_data in products.items():
-          # Store as JSON object directly
-          product_reference_store.put(product_id, product_data)
+          # Store as JSON string to avoid ForeignObject issues
+          product_reference_store.put(product_id, json.dumps(product_data))
         
         data_loaded = True
         log.info("Product reference data loaded into state store")
@@ -59,127 +59,72 @@ functions:
     code: |
       import json
       
-      # Extract fields from JSON product event
+      # Extract fields from JSON product event using .get() method
       if not value:
         return None
         
-      event_id = value.get("event_id")
-      event_type = value.get("event_type")
-      product_id = value.get("product_id")
-      quantity = value.get("quantity")
-      timestamp = value.get("timestamp")
-      sequence_number = value.get("sequence_number")
-      user_id = value.get("user_id")
-      session_info = value.get("session_info", {})
-      event_context = value.get("event_context", {})
-      product_interaction = value.get("product_interaction", {})
-      metadata = value.get("metadata", {})
+      event_id = str(value.get("event_id", ""))
+      event_type = str(value.get("event_type", ""))
+      product_id = str(value.get("product_id", ""))
+      quantity = int(value.get("quantity", 0))
+      timestamp = int(value.get("timestamp", 0))
+      user_id = str(value.get("user_id", ""))
+      session_id = str(value.get("session_id", ""))
+      page_location = str(value.get("page_location", ""))
       
-      if not event_type or not product_id or quantity is None:
+      if not event_type or not product_id or quantity == 0:
         return None
       
       # Look up product data from state store (cached database data)
-      product_data = product_reference_store.get(product_id)
+      product_data_str = product_reference_store.get(product_id)
       
-      if product_data:
-        # Calculate total price for purchase events
-        total_price = product_data["price"] * quantity if event_type in ["purchased", "added_to_cart"] else 0.0
+      if product_data_str:
+        # Parse JSON string to get product data
+        product_data = json.loads(product_data_str)
         
-        # Create comprehensive enriched event with product details
+        # Calculate total price for purchase events
+        unit_price = product_data.get("price", 0.0)
+        total_price = unit_price * quantity if event_type in ["purchased", "added_to_cart"] else 0.0
+        
+        # Create enriched event with product details
         enriched_event = {
-          "enrichment_status": "SUCCESS",
-          "enrichment_type": "DATABASE_PRODUCT_LOOKUP",
-          "original_event": {
-            "event_id": event_id,
-            "event_type": event_type,
-            "product_id": product_id,
-            "quantity": quantity,
-            "timestamp": timestamp,
-            "sequence_number": sequence_number,
-            "user_id": user_id,
-            "session_info": session_info,
-            "event_context": event_context,
-            "product_interaction": product_interaction
-          },
+          "event_id": event_id,
+          "event_type": event_type,
+          "product_id": product_id,
+          "quantity": quantity,
+          "timestamp": timestamp,
+          "user_id": user_id,
+          "session_id": session_id,
+          "page_location": page_location,
           "enriched_data": {
-            "product_details": {
-              "product_id": product_id,
-              "name": product_data["name"],
-              "category": product_data["category"],
-              "unit_price": product_data["price"],
-              "total_price": total_price
-            },
-            "calculated_metrics": {
-              "has_financial_impact": event_type in ["purchased", "added_to_cart"],
-              "transaction_value": total_price,
-              "unit_value": product_data["price"],
-              "quantity_modifier": quantity,
-              "category_tier": {"Electronics": "premium", "Sports": "active", "Kitchen": "lifestyle", "Office": "productivity"}.get(product_data["category"], "standard")
-            },
-            "business_context": {
-              "revenue_generating": event_type == "purchased",
-              "conversion_funnel_stage": {
-                "viewed": "awareness",
-                "added_to_cart": "consideration", 
-                "purchased": "conversion",
-                "removed_from_cart": "abandonment"
-              }.get(event_type, "unknown"),
-              "category_insights": {
-                "category": product_data["category"],
-                "price_tier": "high" if product_data["price"] > 100 else "medium" if product_data["price"] > 50 else "low"
-              }
-            }
+            "name": product_data.get("name", "Unknown"),
+            "category": product_data.get("category", "Unknown"),
+            "unit_price": unit_price,
+            "total_price": total_price
           },
-          "cache_metrics": {
-            "cache_hit": True,
-            "lookup_source": "local_state_store",
-            "data_freshness": "cached_reference_data"
-          },
-          "processing_info": {
-            "enrichment_timestamp": timestamp,
-            "processor_version": "1.0",
-            "enrichment_rules": ["product_lookup", "price_calculation", "business_categorization"]
-          }
+          "cache_hit": True
         }
         
-        log.info("Enriched {} event for product: {} ({})", event_type, product_data["name"], product_id)
+        log.info("Enriched {} event for product: {} ({})", event_type, product_data.get("name"), product_id)
         return enriched_event
       else:
-        # Product not found in cache - return structured failure response
+        # Product not found in cache
         fallback_event = {
-          "enrichment_status": "FAILED",
-          "enrichment_type": "DATABASE_PRODUCT_LOOKUP", 
-          "original_event": {
-            "event_id": event_id,
-            "event_type": event_type,
-            "product_id": product_id,
-            "quantity": quantity,
-            "timestamp": timestamp,
-            "sequence_number": sequence_number,
-            "user_id": user_id,
-            "session_info": session_info,
-            "event_context": event_context,
-            "product_interaction": product_interaction
-          },
+          "event_id": event_id,
+          "event_type": event_type,
+          "product_id": product_id,
+          "quantity": quantity,
+          "timestamp": timestamp,
+          "user_id": user_id,
+          "session_id": session_id,
+          "page_location": page_location,
           "enriched_data": {
-            "product_details": None,
-            "fallback_data": {
-              "product_id": product_id,
-              "estimated_category": "unknown",
-              "estimated_price": 0.0,
-              "data_missing": True
-            }
+            "name": "Unknown Product",
+            "category": "Unknown",
+            "unit_price": 0.0,
+            "total_price": 0.0
           },
-          "cache_metrics": {
-            "cache_hit": False,
-            "lookup_source": "local_state_store",
-            "error_reason": "Product not found in reference data"
-          },
-          "processing_info": {
-            "enrichment_timestamp": timestamp,
-            "processor_version": "1.0",
-            "fallback_applied": True
-          }
+          "cache_hit": False
         }
         
         log.warn("Product not found in reference data: {}", product_id)

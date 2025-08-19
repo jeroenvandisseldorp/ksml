@@ -25,29 +25,12 @@ functions:
         "product_id": product_id,
         "quantity": quantity,
         "timestamp": current_timestamp,
-        "sequence_number": event_counter,
-        "user_id": f"user_{random.randint(1000, 9999)}",  # Random user for analytics
-        "session_info": {
-          "session_id": f"session_{event_counter // 10}_{random.randint(100, 999)}",
-          "device_type": random.choice(["web", "mobile", "tablet"]),
-          "platform": random.choice(["desktop", "ios", "android"])
-        },
-        "event_context": {
-          "page_location": random.choice(["/products", "/category", "/search", "/recommendations"]),
-          "source": random.choice(["browse", "search", "recommendation", "promotion"]),
-          "cart_size": random.randint(0, 5),
-          "user_tier": random.choice(["basic", "premium", "vip"])
-        },
-        "product_interaction": {
-          "view_duration_ms": random.randint(5000, 60000) if event_type == "viewed" else None,
-          "interaction_method": random.choice(["click", "tap", "voice", "scan"]),
-          "from_wishlist": random.choice([True, False]) if event_type == "added_to_cart" else False
-        },
+        "user_id": f"user_{random.randint(1000, 9999)}",
+        "session_id": f"session_{event_counter // 10}_{random.randint(100, 999)}",
+        "page_location": random.choice(["/products", "/category", "/search"]),
         "metadata": {
           "simulation": True,
-          "database_lookup": True,
-          "needs_product_details": True,
-          "tracking_id": f"track_{event_counter}_{product_id}"
+          "database_lookup": True
         }
       }
       

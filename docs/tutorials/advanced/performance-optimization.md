@@ -1,16 +1,10 @@
 # Performance Optimization in KSML
 
-This tutorial explores strategies and techniques for optimizing the performance of your KSML applications, helping you build efficient, scalable, and resource-friendly stream processing solutions.
+This tutorial covers optimization techniques for KSML applications to improve throughput, reduce latency, and minimize resource usage.
 
 ## Introduction
 
-Performance optimization is crucial for stream processing applications that need to handle high volumes of data with low latency. Optimizing your KSML applications can help you:
-
-- Process more data with the same resources
-- Reduce processing latency
-- Lower infrastructure costs
-- Handle spikes in data volume
-- Ensure consistent performance under load
+Performance optimization helps you process more data efficiently while reducing costs and maintaining low latency under high loads.
 
 ## Prerequisites
 
@@ -22,19 +16,15 @@ Before starting this tutorial:
 ??? info "Topic creation commands - click to expand"
 
     ```yaml
-    # Pipeline Optimization
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic mixed_quality_events && \
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic filtered_events && \
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic enriched_events && \
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic final_processed_events && \
-    # Serialization Optimization
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic binary_events && \
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic optimized_events && \
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic readable_events && \
-    # State Store Optimization
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic user_activity && \
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic user_metrics_summary && \
-    # Efficient Processing
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic high_volume_events && \
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic processed_events && \
     ```
@@ -62,12 +52,13 @@ Before optimizing, identify where performance bottlenecks exist:
 
 This example demonstrates optimized Python code and efficient data handling techniques.
 
-**Key concepts demonstrated:**
+**What it does:**
 
-- Pre-computed values outside processing loops
-- Early filtering to discard unwanted data
-- Minimal string operations and object creation
-- Efficient data structure usage
+- **Produces high-volume events**: Creates user events (click, purchase, view) with categories, values, but also includes low-value events (scroll, hover)
+- **Filters early**: Immediately discards uninteresting events (scroll, hover) to avoid processing overhead downstream
+- **Pre-computes efficiently**: Uses global dictionaries for priority events and category multipliers, calculates scores with minimal object creation
+- **Processes with JSON**: Extracts fields from JSON using `.get()`, builds result objects for Kowl UI readability
+- **Logs selectively**: Only logs high-score events to reduce I/O overhead while maintaining performance visibility
 
 ??? info "High-volume producer (compact format) - click to expand"
 
@@ -87,22 +78,21 @@ This example demonstrates optimized Python code and efficient data handling tech
 
 **Key optimization techniques:**
 
-- **JSON structure**: Uses JSON data instead of compact strings for better visibility in Kowl UI
 - **Global code optimization**: Pre-compute expensive operations outside processing loops
 - **Early filtering**: Discard unwanted events immediately to reduce downstream processing
-- **Direct field access**: Extract fields using `value.get()` for cleaner code than string parsing
 - **Efficient logging**: Log only important events to reduce I/O overhead
 
 ### State Store Optimization
 
 This example shows how to configure and use state stores efficiently for high-performance scenarios.
 
-**Key concepts demonstrated:**
+**What it does:**
 
-- Optimized state store configuration with increased cache sizes
-- Compact string format instead of JSON for reduced serialization overhead
-- Efficient state update patterns
-- Minimal logging for performance
+- **Produces activity events**: Creates user activities (login, page_view, click, purchase, logout) with scores, durations, timestamps in JSON format
+- **Stores metrics compactly**: Converts JSON to compact string format "total_count:login_count:page_view_count:click_count:purchase_count:logout_count:total_score"
+- **Updates efficiently**: Parses compact string to array, updates counters by index mapping, avoids object creation during updates
+- **Uses optimized store**: Configures state store with increased cache size (16MB) and segments (32) for better performance
+- **Outputs JSON summaries**: Returns readable JSON results with averages and totals while keeping internal storage compact
 
 ??? info "User metrics producer (activity data) - click to expand"
 
@@ -132,12 +122,13 @@ This example shows how to configure and use state stores efficiently for high-pe
 
 This example demonstrates optimized pipeline design with early filtering and staged processing.
 
-**Key concepts demonstrated:**
+**What it does:**
 
-- Early filtering to reduce data volume flowing through pipelines
-- Staged processing with lightweight and heavy operations separated
-- Efficient predicate functions for filtering
-- Multi-stage pipeline design for better resource utilization
+- **Produces mixed quality events**: Creates events with valid/invalid data, various priorities (high, low, spam), different event types for filtering tests
+- **Filters early**: Uses predicate function to immediately discard invalid events, spam, and bot traffic before expensive processing
+- **Processes in stages**: Stage 1 = lightweight enrichment (add status, extract fields), Stage 2 = heavy processing (complex calculations)
+- **Separates concerns**: Lightweight operations (field extraction) happen first, expensive operations (calculations) happen on filtered data only
+- **Outputs progressively**: filtered_events → enriched_events → final_processed_events, each stage adds more data while maintaining JSON readability
 
 ??? info "Mixed events producer (quality testing) - click to expand"
 
@@ -157,22 +148,20 @@ This example demonstrates optimized pipeline design with early filtering and sta
 
 **Pipeline design principles:**
 
-- **JSON structure**: All stages use JSON for better observability and debugging in Kowl UI
 - **Filter early**: Remove unwanted data before expensive processing using JSON field checks
 - **Staged processing**: Separate lightweight and heavy operations into different stages
-- **Structured data flow**: JSON messages maintain structure through all processing stages
 - **Efficient predicates**: Use `value.get()` for fast field-based filtering
 
 ### Serialization Optimization
 
 This example shows efficient data format usage and minimal serialization overhead.
 
-**Key concepts demonstrated:**
+**What it does:**
 
-- **JSON vs. compact formats**: Demonstrates the trade-off between JSON readability and compact formats
-- **Structured data processing**: Uses JSON for better observability while maintaining processing efficiency
-- **Lookup tables**: Pre-computed mappings in `globalCode` for fast event type conversions
-- **Multi-stage transformation**: Raw JSON → optimized JSON → final readable JSON format
+- **Produces compact data**: Creates events with numeric event_type_ids (1=view, 2=click, 3=purchase) instead of strings for efficiency
+- **Uses lookup tables**: Pre-computes event type mappings in globalCode for fast ID-to-name conversions without string operations
+- **Filters by score**: Early filtering discards events with score <10 to reduce processing volume
+- **Processes by type**: Applies different logic based on event_type_id (purchases get 10% value bonus + 20 score bonus)
 
 ??? info "Binary data producer (compact format) - click to expand"
 
@@ -192,8 +181,6 @@ This example shows efficient data format usage and minimal serialization overhea
 
 **Serialization best practices:**
 
-- **JSON for visibility**: Use JSON format to enable better monitoring and debugging in Kowl UI
-- **Structured processing**: Maintain data structure through processing stages for clarity  
 - **Lookup tables**: Pre-compute mappings to avoid repeated string operations
 - **Progressive transformation**: Transform data from raw → optimized → final readable formats
 - **Field-based access**: Use `value.get()` instead of string parsing for cleaner, faster code
@@ -380,7 +367,7 @@ Choose optimal data structures based on KSML's data type system and your use cas
 
 #### KSML Data Types (Performance Ranking)
 
-```yaml
+```text
 # Fastest - Use for high-throughput scenarios
 keyType: string         # Most efficient for keys
 valueType: string       # Fastest serialization
@@ -400,7 +387,7 @@ valueType: soap        # SOAP envelope overhead
 
 #### Python Data Structure Guidelines
 
-```python
+```text
 # Optimal patterns for different scenarios
 
 # 1. Fast Counters/Accumulators
@@ -424,13 +411,13 @@ STATUS_CODES = {1: "active", 2: "inactive", 3: "pending"}  # Pre-computed
 status = STATUS_CODES.get(status_id, "unknown")  # O(1) lookup
 
 # 5. Efficient String Operations
-# Avoid: result = f"processed:{type}:{user}:{score}"
-# Use: result = "processed:" + type + ":" + user + ":" + str(score)
+Avoid: result = f"processed:{type}:{user}:{score}"
+Use: result = "processed:" + type + ":" + user + ":" + str(score)
 ```
 
 #### Memory-Efficient Patterns
 
-```python
+```text
 # Optimal memory usage techniques
 
 # 1. Reuse Objects
@@ -448,8 +435,8 @@ if condition_needs_it:  # Only compute when needed
     expensive_result = expensive_calculation()
 
 # 4. Compact Data Types
-# Use: timestamp = int(time.time())      # 4-8 bytes
-# Not: timestamp = str(time.time())      # ~20 bytes + overhead
+Use: timestamp = int(time.time())      # 4-8 bytes
+Not: timestamp = str(time.time())      # ~20 bytes + overhead
 ```
 
 **KSML-Specific Optimizations:**
@@ -461,14 +448,14 @@ if condition_needs_it:  # Only compute when needed
 
 **Data Type Performance Comparison:**
 
-| Data Type | Serialization Speed | Size Efficiency | Schema Evolution | Use Case |
-|-----------|-------------------|-----------------|------------------|----------|
-| **string** | Fastest | Good | Limited | Simple values, IDs, compact formats |
-| **long/int** | Fastest | Excellent | None | Counters, timestamps, numeric keys |
-| **avro** | Fast | Excellent | Excellent | Complex schemas, production systems |
-| **json** | Moderate | Good | Good | Development, debugging, flexible data |
-| **protobuf** | Fast | Excellent | Good | High-performance, cross-language |
-| **xml/soap** | Slow | Poor | Limited | Legacy systems, specific protocols |
+| Data Type                 | Serialization Speed | Size Efficiency | Schema Evolution | Use Case |
+|---------------------------|-------------------|-----------------|------------------|----------|
+| **string**                | Fastest | Good | Limited | Simple values, IDs, compact formats |
+| **long/int**              | Fastest | Excellent | None | Counters, timestamps, numeric keys |
+| **avro**                  | Fast | Excellent | Excellent | Complex schemas, production systems |
+| **json**                  | Moderate | Good | Good | Development, debugging, flexible data |
+| **protobuf(coming soon)** | Fast | Excellent | Good | High-performance, cross-language |
+| **xml/soap**              | Slow | Poor | Limited | Legacy systems, specific protocols |
 
 ## Monitoring Performance
 

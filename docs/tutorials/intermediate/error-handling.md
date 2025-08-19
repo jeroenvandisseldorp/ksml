@@ -12,23 +12,18 @@ Before starting this tutorial:
 ??? info "Topic creation commands - click to expand"
 
     ```yaml
-    # Validation and Filtering
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic incoming_orders && \
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic valid_orders && \
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic invalid_orders && \
-    # Try-Catch Error Handling
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic sensor_readings && \
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic processed_sensors && \
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic sensor_errors && \
-    # Dead Letter Queue
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic payment_requests && \
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic processed_payments && \
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic failed_payments && \
-    # Retry Strategies
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic api_operations && \
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic successful_operations && \
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic failed_operations && \
-    # Circuit Breaker
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic service_requests && \
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic service_responses && \
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic circuit_events && \
@@ -68,12 +63,13 @@ Proactively validate data and filter out problematic messages before they cause 
     %}
     ```
 
-This example demonstrates the `branch` operation for routing messages based on validation results. Key features:
+**What it does:**
 
-- **Early validation**: Check required fields and data ranges before processing
-- **Route separation**: Valid messages go to one topic, invalid to another  
-- **Error classification**: Categorize different types of validation failures
-- **Detailed logging**: Track processing decisions for monitoring and debugging
+- **Produces order events**: Creates orders with varying quality - some valid with all fields, some missing product_id, some with invalid quantity, some marked as "malformed" 
+- **Validates with branching**: Uses branch operation with expression to check `value and "malformed" not in value and "product_id" in value and value.get("quantity", 0) > 0`
+- **Routes by validity**: Valid orders go to valid_orders topic with "valid" status, everything else goes to invalid_orders topic
+- **Categorizes errors**: Adds specific error_reason (malformed_data, missing_required_fields, invalid_quantity, validation_failed) to invalid orders
+- **Logs decisions**: Tracks processing with logging for valid/invalid determinations and specific error reasons for debugging
 
 ### 2. Try-Catch Error Handling
 
@@ -95,12 +91,13 @@ Use try-catch blocks in Python functions to handle exceptions gracefully and pro
     %}
     ```
 
-This example shows exception handling within `valueTransformer` functions. Key techniques:
+**What it does:**
 
-- **Exception handling**: Use try-catch to prevent function failures from stopping processing
-- **Graceful degradation**: Return error information instead of crashing
-- **Error classification**: Distinguish between validation errors and processing errors  
-- **Fallback values**: Provide default values or error objects when processing fails
+- **Produces sensor data**: Creates sensor readings with varying quality - some valid with all fields, some with missing sensor_id or temperature, some with non-numeric temperature values
+- **Handles with try-catch**: Uses try-catch in valueTransformer to catch ValueError and TypeError exceptions during processing
+- **Processes safely**: Attempts to convert temperature to float, validate sensor_id, set default humidity values within exception handling
+- **Creates error objects**: When exceptions occur, returns error object with sensor_id, error message, status="error", original_data for debugging
+- **Routes by success**: Uses branch to send successful processing to processed_sensors, errors to sensor_errors topic based on status field
 
 ### 3. Dead Letter Queue Pattern
 
@@ -122,12 +119,13 @@ Route messages that cannot be processed to dedicated error topics for later anal
     %}
     ```
 
-This example demonstrates message routing based on processing results. Key concepts:
+**What it does:**
 
-- **Error classification**: Permanent errors vs. temporary errors that can be retried
-- **Rich error context**: Include original data, error details, and processing metadata  
-- **Retry eligibility**: Mark messages as retryable or permanent failures
-- **Audit trail**: Maintain detailed records for debugging and compliance
+- **Produces payment requests**: Creates payment events with varying scenarios - some successful, some with insufficient funds, some with invalid cards, some with network issues
+- **Simulates processing**: Mock payment processing with different failure types - permanent (invalid_card, insufficient_funds) vs transient (network_error, timeout)
+- **Classifies errors**: Determines retry eligibility based on error type - network/timeout errors are retryable, invalid card/insufficient funds are permanent
+- **Enriches with context**: Adds processing metadata, error classification, retry recommendations, original request data to failed messages
+- **Routes by result**: Uses branch to send successful payments to processed_payments, failures to failed_payments topic with full error context
 
 ### 4. Retry Strategies with Exponential Backoff
 
@@ -149,13 +147,13 @@ Implement sophisticated retry logic for transient failures with exponential back
     %}
     ```
 
-This example shows advanced retry logic with exponential backoff. Key features:
+**What it does:**
 
-- **Exponential backoff**: Increasing delays (1s, 2s, 4s) prevent overwhelming failing services
-- **Jitter addition**: Random variance prevents synchronized retry storms across multiple instances
-- **Error classification**: Different retry policies for different error types (retryable vs permanent)
-- **Maximum attempts**: Prevent infinite retry loops with configurable limits
-- **Success tracking**: Monitor retry success rates for service health insights
+- **Produces API operations**: Creates operations (fetch_user, update_profile, delete_account) with deliberate failures for some operations to test retry logic
+- **Simulates API calls**: Mock external API with different failure scenarios (timeout, rate_limit, server_error) and success cases  
+- **Implements retry logic**: Calculates exponential backoff delays (1s, 2s, 4s, 8s) with added jitter to prevent retry storms
+- **Tracks attempts**: Maintains retry count, determines retry eligibility based on error type and max attempts (3), stores original operation data
+- **Routes by outcome**: Successful operations go to successful_operations, failed/exhausted retries go to failed_operations with retry history
 
 ### 5. Circuit Breaker Pattern
 
@@ -177,13 +175,13 @@ Prevent cascading failures by temporarily stopping calls to failing services, al
     %}
     ```
 
-This example implements a circuit breaker using global state in functions. Key concepts:
+**What it does:**
 
-- **Circuit states**: CLOSED (normal), OPEN (failing), HALF_OPEN (testing recovery)
-- **Failure threshold**: Opens circuit after consecutive failures to prevent further damage
-- **Automatic recovery**: Transitions to HALF_OPEN after timeout, then CLOSED after success
-- **Fast failure**: Rejects requests immediately when circuit is open, reducing latency
-- **State management**: Tracks failure counts, success rates, and recovery timing
+- **Produces service requests**: Creates requests with request_ids, some designed to fail to trigger circuit breaker state changes  
+- **Tracks circuit state**: Uses global variables (failure_count, circuit_state) to maintain CLOSED/OPEN/HALF_OPEN states across all requests
+- **Opens on failures**: After 3 consecutive failures, circuit transitions from CLOSED to OPEN state to protect failing service
+- **Rejects when open**: In OPEN state, immediately returns circuit_open status without attempting processing, showing current failure count
+- **Processes requests**: In CLOSED state, simulates service calls with success/failure scenarios, updating failure counter and circuit state accordingly
 
 ## Error Handling Best Practices
 

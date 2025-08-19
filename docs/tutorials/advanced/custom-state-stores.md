@@ -25,19 +25,14 @@ Before starting this tutorial:
 ??? info "Topic creation commands - click to expand"
 
     ```yaml
-    # Basic Key-Value Store Pattern
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic user_activity && \
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic user_session_stats && \
-    # Window Store Pattern  
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic server_metrics && \
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic windowed_metrics && \
-    # Session Store Pattern
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic user_clicks && \
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic session_analytics && \
-    # Optimized Store Pattern
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic device_events && \
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic device_alerts && \
-    # Multi-Store Pattern
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic order_events && \
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic order_processing_results && \
     ```
@@ -48,11 +43,11 @@ Building on the basic key-value concepts from the [State Stores Tutorial](../int
 
 **What it does**:
 
-- Generates JSON user activity events with comprehensive metadata including device, browser, and location information
-- Tracks user sessions across multiple activities using persistent state stores
-- Counts actions per user and calculates total session time with enhanced user profiling
-- Detects session boundaries and transitions with detailed session analytics
-- Returns JSON session statistics with user profiles, device usage patterns, and behavioral insights
+- **Produces user activities**: Creates events like login, page_view, click with user IDs, session IDs (changes every 10 events), browser/device info
+- **Stores user profiles**: Keeps running JSON data per user including total sessions, action counts, time spent, devices/browsers used 
+- **Detects session changes**: When session_id changes from previous event, increments session counter and logs the transition
+- **Tracks comprehensive stats**: Updates action counters, adds new pages/devices/countries to lists, calculates total time across all sessions
+- **Outputs session updates**: Returns enriched user profile showing current session, lifetime statistics, and behavioral patterns whenever activity occurs
 
 ??? info "User Activity Producer - click to expand"
 
@@ -82,11 +77,11 @@ Window stores organize data by time windows, enabling time-based aggregations an
 
 **What it does**:
 
-- Generates JSON server metrics with detailed metadata including datacenter, environment, service information, and alerting thresholds
-- Aggregates server metrics into 5-minute time windows using state stores for efficient time-based processing
-- Calculates statistics (min, max, average, count, range) with categorical data tracking
-- Returns JSON window aggregation results with alerting status, distribution analysis, and recent sampling data
-- Demonstrates time-based state partitioning with enhanced observability for monitoring applications
+- **Produces server metrics**: Creates metrics like cpu_usage, memory_usage, disk_io with varying values (base + sine wave + noise) for different servers
+- **Creates time windows**: Divides timestamps into 5-minute buckets (300,000ms), creates unique window keys like "server1:cpu_usage:1640995200000" 
+- **Accumulates window stats**: For each metric in a time window, stores running count, sum, min, max, and recent sample list in state store
+- **Calculates aggregates**: When outputting, computes average from sum/count, range from max-min, tracks categorical data like datacenter/environment
+- **Outputs window results**: Returns complete window statistics only when window has enough samples, showing aggregated metrics with alerting thresholds and metadata
 
 ??? info "Metrics Data Producer - click to expand"
 
@@ -116,11 +111,11 @@ Session stores organize data by session windows, automatically handling session 
 
 **What it does**:
 
-- Generates JSON click events with device information, page metadata, interaction details, and session gap simulation
-- Tracks user click sessions with 30-second timeout using session state stores for automatic session boundary detection
-- Automatically detects session start and end with comprehensive session lifecycle management
-- Calculates detailed session metrics including duration, page count, conversion tracking, and user behavior patterns
-- Returns JSON session analytics with device context, user profiling, and behavioral insights
+- **Produces click events**: Creates user page visits with timestamps, occasionally adding 1-5 second gaps (20% chance) to simulate session breaks
+- **Tracks session timeouts**: Uses 30-second inactivity threshold - if time since last click > 30s, starts new session and increments session counter
+- **Stores session state**: Keeps running data per user including current session ID, start time, page count, total duration, devices used
+- **Detects session boundaries**: When timeout exceeded, logs session end, resets counters, starts fresh session with new session ID
+- **Outputs session analytics**: Returns comprehensive session data showing current session metrics, lifetime totals, device/page patterns, and conversion events
 
 ??? info "User Clicks Producer - click to expand"
 
@@ -150,11 +145,11 @@ For high-volume scenarios, proper store configuration is crucial for performance
 
 **What it does**:
 
-- Generates JSON device events with facility, zone, and operational metadata for better tracking and debugging
-- Processes high-volume device events efficiently using optimized state stores with JSON-based state management
-- Tracks device status, temperature readings, error counts, and heartbeat monitoring with comprehensive device profiling
-- Returns JSON alerts for temperature warnings, status updates, errors, and heartbeat summaries
-- Implements selective output to reduce volume while maintaining rich observability through data
+- **Produces device events**: Creates high-frequency events (sensor_reading, status_update, error, heartbeat) for multiple devices with facility/zone info
+- **Stores compact state**: Keeps minimal JSON per device with just current status, last_temp, error_count, heartbeat_count, location info
+- **Processes selectively**: Updates state for all events, but only outputs alerts when specific conditions met (temp >75°C, errors, status changes)
+- **Optimizes for volume**: Uses efficient JSON storage, processes fast, emits only critical alerts to reduce downstream message volume  
+- **Tracks device health**: Monitors temperature trends, error accumulation, heartbeat patterns, status transitions with location context
 
 ??? info "High Volume Events Producer - click to expand"
 
@@ -184,11 +179,11 @@ Complex applications often require multiple state stores working together to man
 
 **What it does**:
 
-- Generates JSON order events with customer details, product information, regional data, and payment methods
-- Manages order processing with three separate state stores for order state, customer metrics, and inventory tracking
-- Tracks complex order lifecycles, customer purchasing patterns, and real-time inventory management
-- Returns JSON processing results with order status, customer analytics, inventory impact, and business context
-- Demonstrates coordinated updates across multiple stores with rich data for business intelligence
+- **Produces order events**: Creates order status updates (created, shipped, delivered) with product IDs, quantities, prices as pipe-delimited strings
+- **Uses three state stores**: Updates order_state_store (current order status), customer_metrics_store (totals per customer), product_inventory_store (stock levels)
+- **Coordinates updates**: For each order event, atomically updates all three stores - order status, customer spending totals, inventory levels
+- **Tracks relationships**: Maps orders to customers via hash function, maintains order history lists, tracks inventory changes per product
+- **Outputs comprehensive results**: Returns formatted string combining data from all three stores showing order details, customer analytics, and inventory impact
 
 ??? info "Order Events Producer - click to expand"
 

@@ -41,6 +41,10 @@ Before starting this tutorial:
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic user_login_events && \
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic user_logout_events && \
     kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic user_session_analysis && \
+    # Table-Table Inner Join
+    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic customer_profiles && \
+    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic customer_preferences && \
+    kafka-topics.sh --create --if-not-exists --bootstrap-server broker:9093 --partitions 1 --replication-factor 1 --topic enriched_customer_data && \
     ```
 
 ## Core Join Concepts
@@ -308,6 +312,44 @@ This example demonstrates:
 - **COMPLETE sessions**: When both login and logout events occur within the time window
 - **LOGIN_ONLY sessions**: Users who logged in but no logout was captured (active sessions)
 - **LOGOUT_ONLY sessions**: Logout events without corresponding login (users already logged in)
+
+## Table-Table Inner Join
+
+Table-to-table joins combine reference data from two changelog topics, creating a materialized view that updates whenever either source table changes.
+
+### Use Case: Customer Profile and Preference Integration
+
+Combine customer profile data with preference settings to create a complete customer view for personalization engines.
+
+??? info "Producer: Customer Profiles and Preferences (click to expand)"
+
+    ```yaml
+    {%
+      include "../../definitions/intermediate-tutorial/joins/producer-customer-profile-preferences.yaml"
+    %}
+    ```
+
+??? info "Processor: Table-Table Inner Join (click to expand)"
+
+    ```yaml
+    {%
+      include "../../definitions/intermediate-tutorial/joins/processor-table-table-join.yaml"
+    %}
+    ```
+
+This example demonstrates:
+
+- **Inner join semantics**: Only customers with both profile and preference data appear in output
+- **Changelog combination**: Updates to either table trigger recalculation of the joined result
+- **Reference data joining**: Ideal for creating materialized views from multiple reference datasets
+- **Stream conversion**: Uses `toStream` to enable stream operations like `peek` on table results
+
+**Expected Behavior:**
+
+- Only customers present in **both** tables appear in the enriched output
+- Updates to customer profiles or preferences automatically update the joined result
+- Missing data in either table excludes that customer from the output (inner join semantics)
+- The joined data provides a complete customer view combining identity and preference information
 
 ## Join Type Variants
 

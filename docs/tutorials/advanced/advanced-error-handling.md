@@ -308,3 +308,7 @@ functions:
 ## Conclusion
 
 Advanced error handling in KSML enables you to build resilient stream processing applications that can withstand failures in distributed environments. By implementing patterns like circuit breakers, sophisticated retry strategies, and dead letter queues, you can ensure your applications remain available and maintain data integrity even when components fail.
+
+## Next Steps
+
+- [Reference: Error Handling Operations](../../reference/operation-reference.md/#error-handling-operations)

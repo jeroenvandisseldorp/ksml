@@ -5,7 +5,6 @@ Learn how to process, convert, and validate data using KSML's supported formats 
 ## Prerequisites
 
 - Basic understanding of Kafka concepts (topics, messages)
-- Completed the [Building a Simple Data Pipeline](simple-pipeline.md) tutorial
 - Familiarity with basic KSML concepts (streams, functions, pipelines)
 - Add the following topics to your `kafka-setup` service in docker-compose.yml to run the examples:
 

@@ -387,56 +387,73 @@ valueType: soap        # SOAP envelope overhead
 
 #### Python Data Structure Guidelines
 
-```text
-# Optimal patterns for different scenarios
+Optimal patterns for different scenarios:
 
-# 1. Fast Counters/Accumulators
+1. Fast counters/accumulators
+```python
 count = int(store.get(key) or "0")  # String storage, int operations
 count += 1
 store.put(key, str(count))
+```
 
-# 2. Compact State Representation  
+2. Compact State Representation
+```python
 # Instead of JSON: {"count": 5, "sum": 100, "avg": 20}
 compact_state = f"{count}:{total_sum}:{average}"  # String format
 store.put(key, compact_state)
+```
 
-# 3. Efficient Collections (limit size)
+3. Efficient Collections (limit size)
+```python
 items = json.loads(store.get(key) or "[]")
 items.append(new_item)
 items = items[-100:]  # Keep only last 100 items
 store.put(key, json.dumps(items))
+```
 
-# 4. Fast Lookup Tables (use globalCode)
+4. Fast Lookup Tables (use globalCode)
+```python
 STATUS_CODES = {1: "active", 2: "inactive", 3: "pending"}  # Pre-computed
 status = STATUS_CODES.get(status_id, "unknown")  # O(1) lookup
+```
 
-# 5. Efficient String Operations
+5. Efficient String Operations
+```python
+# avoid
 Avoid: result = f"processed:{type}:{user}:{score}"
+# use this instead
 Use: result = "processed:" + type + ":" + user + ":" + str(score)
 ```
 
 #### Memory-Efficient Patterns
 
-```text
-# Optimal memory usage techniques
+Optimal memory usage techniques:
 
-# 1. Reuse Objects
+1. Reuse Objects
+```python
 result = {"status": "ok", "count": 0}  # Create once in globalCode
 result["count"] = new_count            # Reuse, don't recreate
+```
 
-# 2. Generator Patterns
+2. Generator Patterns
+```python
 def process_batch(items):
     for item in items:  # Memory efficient iteration
         yield process_item(item)
-
-# 3. Lazy Evaluation  
+```
+3. Lazy Evaluation 
+```python
 expensive_result = None
 if condition_needs_it:  # Only compute when needed
     expensive_result = expensive_calculation()
+```
 
-# 4. Compact Data Types
-Use: timestamp = int(time.time())      # 4-8 bytes
-Not: timestamp = str(time.time())      # ~20 bytes + overhead
+4. Compact Data Types
+```python
+# use this:
+timestamp = int(time.time())      # 4-8 bytes
+# instead of this
+timestamp = str(time.time())      # ~20 bytes + overhead
 ```
 
 **KSML-Specific Optimizations:**

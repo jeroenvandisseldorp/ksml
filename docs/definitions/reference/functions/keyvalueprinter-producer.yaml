@@ -1,0 +1,35 @@
+functions:
+  generate_transaction_data:
+    type: generator
+    globalCode: |
+      import random
+      counter = 0
+      merchants = ["Amazon", "Walmart", "Target", "Best Buy", "Home Depot"]
+      categories = ["Electronics", "Groceries", "Clothing", "Home", "Books"]
+    code: |
+      global counter, merchants, categories
+      
+      transaction_id = f"txn_{counter:05d}"
+      counter += 1
+      
+      value = {
+        "transaction_id": transaction_id,
+        "merchant": random.choice(merchants),
+        "category": random.choice(categories),
+        "amount": round(random.uniform(5.99, 999.99), 2),
+        "customer_id": f"cust_{random.randint(1, 1000):04d}",
+        "timestamp": counter * 1000,
+        "payment_method": random.choice(["credit", "debit", "cash", "digital"])
+      }
+      
+    expression: (transaction_id, value)
+    resultType: (string, json)
+
+producers:
+  transaction_producer:
+    generator: generate_transaction_data
+    interval: 2s
+    to:
+      topic: financial_transactions
+      keyType: string
+      valueType: json

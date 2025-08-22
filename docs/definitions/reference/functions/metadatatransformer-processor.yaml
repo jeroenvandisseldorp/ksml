@@ -1,0 +1,56 @@
+streams:
+  api_events_input:
+    topic: api_events
+    keyType: string
+    valueType: json
+  enriched_events_output:
+    topic: enriched_api_events
+    keyType: string
+    valueType: json
+
+functions:
+  enrich_headers:
+    type: metadataTransformer
+    code: |
+      import time
+      
+      # Add processing metadata to message headers
+      current_time = str(int(time.time() * 1000))
+      
+      # Determine event priority based on status code
+      status_code = value.get("status_code", 200) if value else 200
+      priority = "high" if status_code >= 500 else "medium" if status_code >= 400 else "normal"
+      
+      # Create new headers with processing metadata
+      new_headers = [
+        {"key": "processed_at", "value": current_time},
+        {"key": "processor_version", "value": "ksml-v1.0"},
+        {"key": "event_priority", "value": priority},
+        {"key": "source_topic", "value": "api_events"}
+      ]
+      
+      # Append to existing headers (if any)
+      existing_headers = metadata.get("headers", [])
+      metadata["headers"] = existing_headers + new_headers
+      
+      log.debug("Added {} headers to message {}", len(new_headers), key)
+      
+      return metadata
+      
+  log_enriched:
+    type: forEach
+    code: |
+      log.info("Processed API event: {} {} - Status: {}, Priority: {}", 
+               value.get("method"), value.get("endpoint"), 
+               value.get("status_code"), 
+               "determined from headers")
+
+pipelines:
+  enrich_metadata:
+    from: api_events_input
+    via:
+      - type: transformMetadata
+        metadataTransformer: enrich_headers
+      - type: peek
+        forEach: log_enriched
+    to: enriched_events_output

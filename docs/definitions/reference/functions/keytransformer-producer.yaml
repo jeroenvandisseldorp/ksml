@@ -1,0 +1,34 @@
+functions:
+  generate_region_data:
+    type: generator
+    globalCode: |
+      import random
+      counter = 0
+      regions = ["us-east", "us-west", "europe", "asia"]
+    code: |
+      global counter, regions
+      
+      # Generate transaction ID as key
+      transaction_id = f"txn_{counter:05d}"
+      counter += 1
+      
+      # Generate transaction data
+      value = {
+        "transaction_id": transaction_id,
+        "region": random.choice(regions),
+        "amount": round(random.uniform(10.0, 1000.0), 2),
+        "customer_id": f"cust_{random.randint(1, 100):03d}",
+        "timestamp": counter * 1000
+      }
+      
+    expression: (transaction_id, value)
+    resultType: (string, json)
+
+producers:
+  region_data_producer:
+    generator: generate_region_data
+    interval: 2s
+    to:
+      topic: transaction_events
+      keyType: string
+      valueType: json

@@ -1,0 +1,39 @@
+functions:
+  generate_events_with_timestamps:
+    type: generator
+    globalCode: |
+      import random
+      import time
+      counter = 0
+      base_time = int(time.time() * 1000)
+    code: |
+      global counter, base_time
+      
+      event_id = f"event_{counter:04d}"
+      counter += 1
+      
+      # Generate events with custom timestamps (some in the past, some current)
+      # Simulate out-of-order events and delayed processing
+      time_offset = random.randint(-300, 60)  # Events from 5 minutes ago to 1 minute in future
+      event_timestamp = base_time + (counter * 1000) + (time_offset * 1000)
+      
+      value = {
+        "event_id": event_id,
+        "event_timestamp": event_timestamp,  # Custom timestamp field
+        "event_type": random.choice(["user_action", "system_event", "data_update"]),
+        "user_id": f"user_{random.randint(1, 100):03d}",
+        "data": f"Event data #{counter}",
+        "processing_delay": abs(time_offset) if time_offset < 0 else 0
+      }
+      
+    expression: (event_id, value)
+    resultType: (string, json)
+
+producers:
+  event_producer:
+    generator: generate_events_with_timestamps
+    interval: 1s
+    to:
+      topic: timestamped_events
+      keyType: string
+      valueType: json

@@ -1,11 +1,148 @@
 # Function Reference
 
-This document provides a comprehensive reference for all function types available in KSML. Each function type is
-described with its parameters, behavior, and examples.
+This document provides a comprehensive reference for all function types available in KSML. Functions in KSML allow you to implement custom logic for processing your streaming data using Python, making stream processing accessible to data scientists, analysts, and developers who may not be familiar with Java or Kafka Streams API.
+
+## What are Functions in KSML?
+
+Functions provide the flexibility to go beyond built-in operations and implement specific business logic, transformations, and data processing requirements. They are written in Python and executed within the KSML runtime, combining the power of Kafka Streams with the simplicity and expressiveness of Python.
+
+## Writing Python Functions
+
+### Example Function Definition
+??? info "Example Function Definition"
+
+      ```yaml
+      functions:
+        # Example of a complete function definition with all components
+        process_sensor_data:
+          type: valueTransformer
+          globalCode: |
+            # This code runs once when the application starts
+            import json
+            import time
+            
+            # Initialize global variables
+            sensor_threshold = 25.0
+            alert_count = 0
+            
+          code: |
+            # This code runs for each message
+            global alert_count
+            
+            # Process the sensor value
+            if value is None:
+              return None
+              
+            temperature = value.get("temperature", 0)
+            
+            # Convert Celsius to Fahrenheit
+            temperature_f = (temperature * 9/5) + 32
+            
+            # Check for alerts
+            is_alert = temperature > sensor_threshold
+            if is_alert:
+              alert_count += 1
+              log.warn("High temperature detected: {}°C", temperature)
+            
+            # Return enriched data
+            result = {
+              "original_temp_c": temperature,
+              "temp_fahrenheit": temperature_f,
+              "is_alert": is_alert,
+              "total_alerts": alert_count,
+              "processed_at": int(time.time() * 1000)
+            }
+            
+            return result
+            
+          resultType: json
+          
+        # Example of a simple expression-based function
+        is_high_priority:
+          type: predicate
+          expression: value.get("priority", 0) > 7
+          resultType: boolean
+      ```
+
+KSML functions are defined in the `functions` section of your KSML definition file. A typical function definition includes:
+
+- **Type**: Specifies the function's purpose and behavior
+- **Parameters**: Input parameters the function accepts (defined by the function type)
+- **GlobalCode**: Python code executed only once upon application start
+- **Code**: Python code implementing the function's logic
+- **Expression**: Shorthand for simple return expressions
+- **ResultType**: The expected return type of the function
+
+## Function Definition Formats
+
+KSML supports two formats for defining functions:
+
+### Expression Format
+
+For simple, one-line functions:
+
+```yaml
+functions:
+  is_valid:
+    type: predicate
+    code: |
+      # Code is optional here
+    expression: value.get("status") == "ACTIVE"
+```
+
+### Code Block Format
+
+For more complex functions:
+
+```yaml
+functions:
+  process_transaction:
+    type: keyValueMapper
+    code: |
+      result = {}
+
+      # Copy basic fields
+      result["transaction_id"] = value.get("id")
+      result["amount"] = value.get("amount", 0)
+
+      # Calculate fee
+      amount = value.get("amount", 0)
+      if amount > 1000:
+        result["fee"] = amount * 0.02
+      else:
+        result["fee"] = amount * 0.03
+
+      # Add timestamp
+      result["processed_at"] = int(time.time() * 1000)
+
+      return result
+    resultType: struct
+```
+
+
+## Function Execution Context
+
+When your Python functions execute, they have access to:
+
+- **Logger**: For outputting information to application logs
+      - `log.<log-level>("Debug message")` - <log_level> can be debug, info, warn, error, trace
+
+- **Metrics**: For monitoring function performance and behavior
+      - `metrics.counter("name").increment()` - Count occurrences
+      - `metrics.gauge("name").record(value)` - Record values
+      - `with metrics.timer("name"):` - Measure execution time
+
+- **State Stores**: For maintaining state between function invocations (when configured)
+      - `store.get(key)` - Retrieve value from store
+      - `store.put(key, value)` - Store a value
+      - `store.delete(key)` - Remove a value
+      - Must be declared in the function's `stores` parameter
+
+This execution context provides the tools needed for debugging, monitoring, and implementing stateful processing.
 
 ## Function Types Overview
 
-KSML supports various function types, each designed for specific purposes in stream processing:
+KSML supports 21 function types, each designed for specific purposes in stream processing. Functions can range from simple one-liners to complex implementations with multiple operations:
 
 | Function Type                                                           | Purpose                                              | Used In                                     |
 |-------------------------------------------------------------------------|------------------------------------------------------|---------------------------------------------|
@@ -63,6 +200,10 @@ None (the function is called for its side effects)
 {% include "../definitions/reference/functions/foreach-example.yaml" %}
 ```
 
+**See how `forEach` is used in an example definition**: 
+
+- [Tutorial: Filtering and Transforming Example](../tutorials/beginner/filtering-transforming.md#complex-filtering-techniques)
+
 ### keyTransformer
 
 Transforms a key/value into a new key, which then gets combined with the original value as a new message on the output
@@ -81,9 +222,25 @@ New key for the output message
 
 #### Example
 
-```yaml
-{% include "../definitions/reference/functions/keytransformer-example.yaml" %}
-```
+??? info "Producer - Regional Transaction Data (click to expand)"
+
+    ```yaml
+    {%
+      include "../definitions/reference/functions/keytransformer-producer.yaml"
+    %}
+    ```
+
+??? info "Processor - Repartition by Region (click to expand)"
+
+    ```yaml
+    {%
+      include "../definitions/reference/functions/keytransformer-processor.yaml"
+    %}
+    ```
+
+**See how `keyTransformer` is used in an example definition**:
+
+- [Tutorial: Stream Table Join Example](../tutorials/intermediate/joins.md#stream-table-join)
 
 ### keyValueToKeyValueListTransformer
 
@@ -106,6 +263,11 @@ A list of key-value pairs `[(key1, value1), (key2, value2), ...]`
 {% include "../definitions/reference/functions/keyvaluetokeyvaluelisttransformer.yaml" %}
 ```
 
+**See it in action**: 
+
+- [Reference: Function Examples](../definitions/reference/functions/) - comprehensive function examples
+- [Tutorial: Advanced Processing](../tutorials/beginner/filtering-transforming.md#advanced-transformation) - function usage patterns
+
 ### keyValueToValueListTransformer
 
 Takes one message and converts it into a list of output values, which then get combined with the original key and sent
@@ -124,20 +286,21 @@ A list of values `[value1, value2, ...]` that will be combined with the original
 
 #### Example
 
-```yaml
-functions:
-  explode_items:
-    type: keyValueToValueListTransformer
-    code: |
-      # Input: key = "order123", value = {"items": [{"id": "item1"}, {"id": "item2"}]}
-      # Output: ("order123", {"id": "item1"}), ("order123", {"id": "item2"})
+??? info "Producer - Order Data with Items (click to expand)"
 
-      if value is None or "items" not in value:
-        return []
+    ```yaml
+    {%
+      include "../definitions/reference/functions/keyvaluetovaluelisttransformer-producer.yaml"
+    %}
+    ```
 
-      return value["items"]
-    result: "[struct]"
-```
+??? info "Processor - Explode Order Items (click to expand)"
+
+    ```yaml
+    {%
+      include "../definitions/reference/functions/keyvaluetovaluelisttransformer-processor.yaml"
+    %}
+    ```
 
 ### keyValueTransformer
 
@@ -237,6 +400,11 @@ functions:
       - event_store
 ```
 
+**See it in action**: 
+
+- [Tutorial: Filtering and Transforming](../tutorials/beginner/filtering-transforming.md#complex-filtering-techniques) - predicate functions for data filtering
+- [Tutorial: Branching](../tutorials/intermediate/branching.md#conditional-routing) - predicates for stream routing
+
 ### valueTransformer
 
 Transforms a key/value into a new value, which is combined with the original key and sent to the output stream.
@@ -270,6 +438,11 @@ functions:
     resultType: struct
 
 ```
+
+**See it in action**: 
+
+- [Tutorial: Filtering and Transforming](../tutorials/beginner/filtering-transforming.md#advanced-transformation-techniques) - valueTransformer for data enrichment
+- [Tutorial: Data Formats](../tutorials/beginner/data-formats.md#format-conversion) - value transformation between formats
 
 ## Functions for stateful operations
 
@@ -308,6 +481,11 @@ functions:
         }
     resultType: struct
 ```
+
+**See it in action**: 
+
+- [Tutorial: Aggregations](../tutorials/intermediate/aggregations.md#aggregate-example) - comprehensive aggregator function examples
+- [Tutorial: Windowing](../tutorials/intermediate/windowing.md#windowed-aggregations) - aggregators in time windows
 
 ### initializer
 
@@ -486,6 +664,11 @@ functions:
     resultType: (string, struct)                  # Indicate the type of key and value
 ```
 
+**See it in action**: 
+
+- [Tutorial: Filtering and Transforming](../tutorials/beginner/filtering-transforming.md#creating-test-data) - generator functions for test data
+- [Tutorial: Performance Testing](../tutorials/advanced/performance-optimization.md#data-generation) - generators for load testing
+
 ### keyValueMapper
 
 Transforms both the key and value of a record.
@@ -531,28 +714,26 @@ String to be written to file or stdout
 
 #### Example
 
-```yaml
-functions:
-  format_message:
-    type: keyValuePrinter
-    code: |
-      # Format the message as a JSON string with timestamp
-      import json
-      import time
+??? info "Producer - Financial Transaction Data (click to expand)"
 
-      timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    ```yaml
+    {%
+      include "../definitions/reference/functions/keyvalueprinter-producer.yaml"
+    %}
+    ```
 
-      if value is None:
-        return f"[{timestamp}] Key: {key}, Value: null"
+??? info "Processor - Format Transaction Reports (click to expand)"
 
-      try:
-        # Try to format value as JSON
-        value_str = json.dumps(value, indent=2)
-        return f"[{timestamp}] Key: {key}\nValue:\n{value_str}"
-      except:
-        # Fall back to string representation
-        return f"[{timestamp}] Key: {key}, Value: {str(value)}"
-```
+    ```yaml
+    {%
+      include "../definitions/reference/functions/keyvalueprinter-processor.yaml"
+    %}
+    ```
+
+**See it in action**: 
+
+- [Reference: Transaction Reports](../definitions/reference/functions/keyvalueprinter-processor.yaml) - formatting financial data for output
+- [Tutorial: Logging and Monitoring](../tutorials/beginner/logging-monitoring.md#output-formatting) - keyValuePrinter for readable logs
 
 ### metadataTransformer
 
@@ -572,26 +753,38 @@ Modified metadata for the output message
 
 #### Example
 
-```yaml
-functions:
-  addTime:
-    type: metadataTransformer
-    code: |
-      # Add a custom header to the message
-      metadata["headers"] = metadata["headers"] + [ { "key": "my_own_header_key", "value": "some_value" } ]
-    expression: metadata
-```
+??? info "Producer - API Events (click to expand)"
+
+    ```yaml
+    {%
+      include "../definitions/reference/functions/metadatatransformer-producer.yaml"
+    %}
+    ```
+
+??? info "Processor - Enrich Headers and Metadata (click to expand)"
+
+    ```yaml
+    {%
+      include "../definitions/reference/functions/metadatatransformer-processor.yaml"
+    %}
+    ```
+
+**See it in action**: 
+
+- [Reference: API Event Enrichment](../definitions/reference/functions/metadatatransformer-processor.yaml) - adding processing headers and metadata
+- [Example: Metadata Transformation](../../examples/16-example-transform-metadata.yaml) - comprehensive metadata modification patterns
 
 ### valueJoiner
 
-Combines data from multiple streams during join operations.
+Combines values from two streams or tables during join operations, creating enriched records that contain data from both sources. The function must handle cases where one or both values might be null, depending on the join type (inner, left, outer). This function has access to the join key for context-aware value combination.
 
 #### Parameters
 
 | Parameter | Type | Description                      |
 |-----------|------|----------------------------------|
-| value1    | Any  | The value from the first stream  |
-| value2    | Any  | The value from the second stream |
+| key       | Any  | The join key used to match records |
+| value1    | Any  | The value from the first stream/table |
+| value2    | Any  | The value from the second stream/table |
 
 #### Return Value
 
@@ -626,6 +819,11 @@ functions:
     resultType: struct
 ```
 
+**See it in action**: 
+
+- [Tutorial: Joins](../tutorials/intermediate/joins.md#core-join-concepts) - valueJoiner functions for stream enrichment
+- [Tutorial: Stream-Table Joins](../tutorials/intermediate/joins.md#stream-table-join-example) - practical valueJoiner examples
+
 ## Stream Related Functions
 
 ### timestampExtractor
@@ -634,11 +832,10 @@ Extracts timestamps from messages for time-based operations.
 
 #### Parameters
 
-| Parameter         | Type | Description                                      |
-|-------------------|------|--------------------------------------------------|
-| key               | Any  | The key of the record being processed            |
-| value             | Any  | The value of the record being processed          |
-| previousTimestamp | Long | The previous timestamp (can be used as fallback) |
+| Parameter         | Type   | Description                                      |
+|-------------------|--------|--------------------------------------------------|
+| record            | Object | The ConsumerRecord containing key, value, timestamp, and metadata |
+| previousTimestamp | Long   | The previous timestamp (can be used as fallback) |
 
 #### Return Value
 
@@ -646,29 +843,39 @@ Timestamp in milliseconds (long)
 
 #### Example
 
-```yaml
-functions:
-  event_timestamp_extractor:
-    type: timestampExtractor
-    code: |
-      # Try to get timestamp from the event
-      if value is not None and "timestamp" in value:
-        return value.get("timestamp")
+??? info "Producer - Events with Custom Timestamps (click to expand)"
 
-      # Fall back to record timestamp
-      return previousTimestamp
-```
+    ```yaml
+    {%
+      include "../definitions/reference/functions/timestampextractor-producer.yaml"
+    %}
+    ```
+
+??? info "Processor - Extract Event Time (click to expand)"
+
+    ```yaml
+    {%
+      include "../definitions/reference/functions/timestampextractor-processor.yaml"
+    %}
+    ```
+
+**See it in action**: 
+
+- [Reference: Event Time Processing](../definitions/reference/functions/timestampextractor-processor.yaml) - extracting custom timestamps for time-based operations
+- [Example: Timestamp Extraction](../../examples/18-example-timestamp-extractor.yaml) - comprehensive timestamp extraction patterns
+- [Tutorial: Windowing](../tutorials/intermediate/windowing.md#time-based-processing) - timestampExtractor in windowed operations
 
 ### topicNameExtractor
 
-Derives a target topic name from key and value. Used to dynamically route messages to different topics.
+Dynamically determines the target topic for message routing based on record content. This enables intelligent message distribution, multi-tenancy support, and content-based routing patterns without requiring separate processing pipelines. The function has access to record context for advanced routing decisions.
 
 #### Parameters
 
-| Parameter | Type | Description                             |
-|-----------|------|-----------------------------------------|
-| key       | Any  | The key of the record being processed   |
-| value     | Any  | The value of the record being processed |
+| Parameter     | Type   | Description                             |
+|---------------|--------|-----------------------------------------|
+| key           | Any    | The key of the record being processed   |
+| value         | Any    | The value of the record being processed |
+| recordContext | Object | Record metadata and processing context  |
 
 #### Return Value
 
@@ -676,17 +883,26 @@ String representing the topic name to send the message to
 
 #### Example
 
-```yaml
-functions:
-  route_by_sensor:
-    type: topicNameExtractor
-    code: |
-      if key == 'sensor1':
-        return 'sensordata_sensor1'
-      if key == 'sensor2':
-        return 'sensordata_sensor2'
-      return 'sensordata_other_sensors'
-```
+??? info "Producer - Mixed Sensor Data (click to expand)"
+
+    ```yaml
+    {%
+      include "../definitions/reference/functions/topicnameextractor-producer.yaml"
+    %}
+    ```
+
+??? info "Processor - Dynamic Topic Routing (click to expand)"
+
+    ```yaml
+    {%
+      include "../definitions/reference/functions/topicnameextractor-processor.yaml"
+    %}
+    ```
+
+**See it in action**: 
+
+- [Reference: Sensor Data Routing](../definitions/reference/functions/topicnameextractor-processor.yaml) - dynamic topic routing by sensor type and priority
+- [Example: Dynamic Routing](../../examples/05-example-route.yaml) - comprehensive topic routing patterns
 
 ### streamPartitioner
 
@@ -764,124 +980,7 @@ functions:
     resultType: struct
 ```
 
-## Function Definition Formats
 
-KSML supports two formats for defining functions:
-
-### Expression Format
-
-For simple, one-line functions:
-
-```yaml
-functions:
-  is_valid:
-    type: predicate
-    code: |
-      # Code is optional here
-    expression: value.get("status") == "ACTIVE"
-```
-
-### Code Block Format
-
-For more complex functions:
-
-```yaml
-functions:
-  process_transaction:
-    type: keyValueMapper
-    code: |
-      result = {}
-
-      # Copy basic fields
-      result["transaction_id"] = value.get("id")
-      result["amount"] = value.get("amount", 0)
-
-      # Calculate fee
-      amount = value.get("amount", 0)
-      if amount > 1000:
-        result["fee"] = amount * 0.02
-      else:
-        result["fee"] = amount * 0.03
-
-      # Add timestamp
-      result["processed_at"] = int(time.time() * 1000)
-
-      return result
-    resultType: struct
-```
-
-## Function Execution Context
-
-When your Python functions execute, they have access to:
-
-### Logger
-
-For outputting information to the application logs:
-
-```yaml
-# In your function code, you can use the log object:
-# Example:
-# log.debug("Debug message")
-# log.info("Info message")
-# log.warn("Warning message")
-# log.error("Error message")
-```
-
-### Metrics
-
-For monitoring function performance and behavior:
-
-```yaml
-# In your function code, you can use the metrics object:
-# Examples:
-# Increment a counter
-# metrics.counter("records_processed").increment()
-#
-# Record a value
-# metrics.gauge("record_size").record(len(str(value)))
-```
-
-### State Stores
-
-In your function code, you can use the state stores declared by the function as variables:
-
-```yaml
-  deduplicate_events:
-    type: predicate
-    code: |
-      previous_value = my_state_store.get(key)
-      if previous_value is not None:
-        
-      
-      # Access a state store to check for duplicates
-      event_id = value.get("event_id")
-      if event_id is None:
-        return True
-
-      # Check if we've seen this event before
-      seen_before = event_store.get(event_id)
-      if seen_before:
-        # Skip duplicate event
-        return False
-
-      # Mark this event as seen
-      stateStore.put(event_id, True)
-
-      # Process the event
-      return True
-    stores:
-      - event_store
-      
-# Examples:
-# Get a value from the state store
-# previous_value = state_store.get(key)
-#
-# Put a value in the state store
-# state_store.put(key, new_value)
-#
-# Delete a value from the state store
-# state_store.delete(key)
-```
 
 ## Best Practices
 
@@ -893,9 +992,25 @@ In your function code, you can use the state stores declared by the function as 
 6. **Document your functions**: Add comments to explain complex logic and business rules
 7. **Test thoroughly**: Write unit tests for your functions to ensure they behave as expected
 
-## Related Topics
+## How KSML Functions Relate to Kafka Streams
 
-- [KSML Language Reference](language-reference.md)
-- [Operations Reference](operation-reference.md)
-- [Data Types Reference](data-type-reference.md)
-- [Configuration Reference](configuration-reference.md)
+KSML functions are Python implementations that map directly to Kafka Streams Java interfaces. Understanding this relationship helps you leverage Kafka Streams documentation and concepts:
+
+### Direct Mappings
+
+| KSML Function Type | Kafka Streams Interface | Purpose |
+|-------------------|-------------------------|---------|
+| predicate | `Predicate<K,V>` | Filter records based on conditions |
+| valueTransformer | `ValueTransformer<V,VR>` / `ValueMapper<V,VR>` | Transform values |
+| keyTransformer | `KeyValueMapper<K,V,KR>` | Transform keys |
+| keyValueTransformer | `KeyValueMapper<K,V,KeyValue<KR,VR>>` | Transform both key and value |
+| forEach | `ForeachAction<K,V>` | Process records for side effects |
+| aggregator | `Aggregator<K,V,VA>` | Aggregate records incrementally |
+| initializer | `Initializer<VA>` | Provide initial aggregation values |
+| reducer | `Reducer<V>` | Combine values of same type |
+| merger | `Merger<K,V>` | Merge aggregation results |
+| valueJoiner | `ValueJoiner<V1,V2,VR>` | Join values from two streams |
+| timestampExtractor | `TimestampExtractor` | Extract event time from records |
+| streamPartitioner | `StreamPartitioner<K,V>` | Custom partitioning logic |
+| foreignKeyExtractor | `Function<V,FK>` | Extract foreign key for joins |
+| topicNameExtractor | `TopicNameExtractor<K,V>` | Dynamic topic routing |

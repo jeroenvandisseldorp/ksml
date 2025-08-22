@@ -1,0 +1,44 @@
+streams:
+  transactions:
+    topic: financial_transactions
+    keyType: string
+    valueType: json
+
+functions:
+  format_transaction_report:
+    type: keyValuePrinter
+    code: |
+      import time
+      
+      if value is None:
+        return f"[ERROR] Transaction {key}: No data available"
+      
+      # Format transaction for human-readable output
+      timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+      
+      merchant = value.get("merchant", "Unknown")
+      category = value.get("category", "Unknown")
+      amount = value.get("amount", 0)
+      customer = value.get("customer_id", "Unknown")
+      payment = value.get("payment_method", "Unknown")
+      
+      # Create formatted output
+      report = f"""
+[{timestamp}] Transaction Report
+=====================================
+Transaction ID: {key}
+Customer:       {customer}
+Merchant:       {merchant}
+Category:       {category}
+Amount:         ${amount:.2f}
+Payment Method: {payment}
+=====================================
+"""
+      
+      return report.strip()
+
+pipelines:
+  print_transactions:
+    from: transactions
+    print:
+      keyValuePrinter: format_transaction_report

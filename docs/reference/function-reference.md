@@ -244,7 +244,7 @@ New key for the output message
 
 ### keyValueToKeyValueListTransformer
 
-Takes one message and converts it into a list of output messages, which then get sent to the output stream.
+Takes one message and converts it into a list of output messages, which then get sent to the output stream. Unlike `keyValueToValueListTransformer`, this function can create new keys for each output message, enabling data reshaping and repartitioning.
 
 #### Parameters
 
@@ -259,14 +259,17 @@ A list of key-value pairs `[(key1, value1), (key2, value2), ...]`
 
 #### Example
 
-```yaml
-{% include "../definitions/reference/functions/keyvaluetokeyvaluelisttransformer.yaml" %}
-```
+This example demonstrates splitting batch orders into individual orders with unique keys, useful for processing bulk data into individual records.
 
-**See it in action**: 
+??? info "Producer - `keyvaluetokeyvaluelisttransformer` example (click to expand)"
+      ```yaml
+      {% include "../definitions/reference/functions/keyvaluetokeyvaluelisttransformer-producer.yaml" %}
+      ```
 
-- [Reference: Function Examples](../definitions/reference/functions/) - comprehensive function examples
-- [Tutorial: Advanced Processing](../tutorials/beginner/filtering-transforming.md#advanced-transformation) - function usage patterns
+??? info "Processor - `keyvaluetokeyvaluelisttransformer` example (click to expand)"
+      ```yaml
+      {% include "../definitions/reference/functions/keyvaluetokeyvaluelisttransformer-processor.yaml" %}
+      ```
 
 ### keyValueToValueListTransformer
 

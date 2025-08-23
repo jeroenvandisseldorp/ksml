@@ -784,23 +784,41 @@ String representing the topic name to send the message to
 ??? info "Producer - Mixed Sensor Data (click to expand)"
 
     ```yaml
-    {%
-      include "../definitions/reference/functions/topicnameextractor-producer.yaml"
-    %}
+    {% include "../definitions/reference/functions/topicnameextractor-producer.yaml" %}
     ```
 
 ??? info "Processor - Dynamic Topic Routing (click to expand)"
 
     ```yaml
-    {%
-      include "../definitions/reference/functions/topicnameextractor-processor.yaml"
-    %}
+    {% include "../definitions/reference/functions/topicnameextractor-processor.yaml" %}
     ```
 
-**See it in action**: 
+**What the example does:**
 
-- [Reference: Sensor Data Routing](../definitions/reference/functions/topicnameextractor-processor.yaml) - dynamic topic routing by sensor type and priority
-- [Example: Dynamic Routing](../../examples/05-example-route.yaml) - comprehensive topic routing patterns
+Demonstrates dynamic topic routing based on message content:
+
+* Creates mixed sensor data (temperature, humidity, pressure) with varying alert levels
+* Routes messages to different topics based on sensor type and priority
+* Prioritizes critical alerts to a dedicated topic regardless of sensor type
+* Distributes normal/warning messages to type-specific topics
+
+**Key Technical Features:**
+
+* `topicNameExtractor` function for dynamic topic selection
+* Priority-based routing with alert level evaluation
+* Fallback topic handling for unknown sensor types
+* `toTopicNameExtractor` operation instead of static `to` operation
+* Integration with logging for routing visibility
+
+**Expected Results:**
+
+When running this example, you'll see messages routed to different topics:
+
+- Critical alerts: `"Critical alert from sensor sensor_05: pressure reading = 78.26"` → `critical_sensor_alerts` topic
+- Normal temperature readings → `temperature_sensors` topic
+- Normal humidity readings → `humidity_sensors` topic
+- Normal pressure readings → `pressure_sensors` topic
+- Unknown sensor types → `unknown_sensor_data` topic
 
 ### streamPartitioner
 

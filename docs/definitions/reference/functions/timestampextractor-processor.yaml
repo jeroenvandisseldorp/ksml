@@ -6,29 +6,32 @@ streams:
     # Configure custom timestamp extraction
     timestampExtractor:
       code: |
-        import time
-        
-        # Extract the record value
-        value = record.value()
-        
-        if value is not None and "event_timestamp" in value:
-          event_time = value.get("event_timestamp")
-          if event_time and event_time > 0:
-            log.debug("Using event timestamp {} for record {}", 
-                     event_time, value.get("event_id"))
-            return event_time
-        
-        # Fall back to record timestamp if no valid event timestamp
-        record_timestamp = record.timestamp()
-        if record_timestamp > 0:
-          log.debug("Using record timestamp {} for record {}", 
-                   record_timestamp, value.get("event_id") if value else "unknown")
-          return record_timestamp
+        # Extract custom timestamp from message value
+        try:
+          # Try different ways to get the value data
+          value_data = None
           
-        # Last resort: use current time
+          # Method 1: If record is a ConsumerRecord with .value() method
+          if hasattr(record, 'value') and callable(record.value):
+            value_data = record.value()
+          # Method 2: If record is the value directly (dict)
+          elif isinstance(record, dict):
+            value_data = record
+          
+          # Extract custom timestamp from event data
+          if value_data and "event_timestamp" in value_data:
+            event_time = value_data.get("event_timestamp")
+            if event_time and event_time > 0:
+              log.info("Using event timestamp: {} for {}", event_time, value_data.get("event_id"))
+              return event_time
+              
+        except Exception as e:
+          log.warn("Error extracting custom timestamp: {}", str(e))
+        
+        # Fallback to record timestamp or current time
+        import time
         current_time = int(time.time() * 1000)
-        log.warn("No valid timestamp found, using current time {} for record {}", 
-                current_time, value.get("event_id") if value else "unknown")
+        log.info("Using current time as fallback: {}", current_time)
         return current_time
         
   ordered_events:

@@ -734,24 +734,34 @@ Timestamp in milliseconds (long)
 ??? info "Producer - Events with Custom Timestamps (click to expand)"
 
     ```yaml
-    {%
-      include "../definitions/reference/functions/timestampextractor-producer.yaml"
-    %}
+    {% include "../definitions/reference/functions/timestampextractor-producer.yaml" %}
     ```
 
 ??? info "Processor - Extract Event Time (click to expand)"
 
     ```yaml
-    {%
-      include "../definitions/reference/functions/timestampextractor-processor.yaml"
-    %}
+    {% include "../definitions/reference/functions/timestampextractor-processor.yaml" %}
     ```
 
-**See it in action**: 
+**What the example does:**
 
-- [Reference: Event Time Processing](../definitions/reference/functions/timestampextractor-processor.yaml) - extracting custom timestamps for time-based operations
-- [Example: Timestamp Extraction](../../examples/18-example-timestamp-extractor.yaml) - comprehensive timestamp extraction patterns
-- [Tutorial: Windowing](../tutorials/intermediate/windowing.md#time-based-processing) - timestampExtractor in windowed operations
+Demonstrates custom timestamp extraction for event-time processing:
+
+* Creates events with custom timestamps that simulate out-of-order and delayed processing scenarios
+* Extracts event-time timestamps from message content rather than using record timestamps
+* Processes events based on their event time rather than arrival time
+* Provides robust fallback mechanisms for missing or invalid timestamps
+* Uses custom `timestampExtractor` function in stream definition
+* Uses Python time manipulation and timestamp handling
+* Support for both ConsumerRecord and direct value access patterns
+
+**Expected Results:**
+
+When running this example, you'll see events processed in time order:
+
+- `Event processed in time order: event_0001 (event_time=1755974335641, delay=155s)`
+- `Event processed in time order: event_0002 (event_time=1755974539885, delay=41s)`  
+- Log messages showing: "Using event timestamp: 1755974601885 for event_0015"
 
 ### topicNameExtractor
 

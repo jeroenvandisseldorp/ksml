@@ -428,29 +428,19 @@ The merged aggregation result
 
 #### Example
 
-```yaml
-functions:
-  merge_stats:
-    type: merger
-    code: |
-      # Merge two statistics objects
-      if value1 is None:
-        return value2
-      if value2 is None:
-        return value1
+The merger function is specifically used with session window aggregations. When late-arriving events connect previously separate sessions, the merger function combines their aggregated results.
 
-      # Combine counts and sums
-      count = value1.get("count", 0) + value2.get("count", 0)
-      sum = value1.get("sum", 0) + value2.get("sum", 0)
-      result = {
-        "count": count,
-        "sum": sum,
-        "average": sum/count if count>0 else 0
-      }
+??? info "Producer - Session Activity Events (click to expand)"
 
-      return result
-    resultType: struct
-```
+    ```yaml
+    {% include "../definitions/reference/functions/merger-example-producer.yaml" %}
+    ```
+
+??? info "Processor - Session Window with Merger (click to expand)"
+
+    ```yaml
+    {% include "../definitions/reference/functions/merger-example-processor.yaml" %}
+    ```
 
 ### reducer
 
@@ -467,22 +457,9 @@ Combines two values into one.
 
 Combined value
 
-#### Example
+**See how `reducer` is used in an example definition**:
 
-```yaml
-functions:
-  sum_reducer:
-    type: reducer
-    code: |
-      count = value1.get("count", 0) + value2.get("count", 0)
-      sum = value1.get("sum", 0) + value2.get("sum", 0)
-      return {
-        "count": count,
-        "sum": sum,
-        "average": sum/count if count>0 else 0
-      }
-    resultType: struct
-```
+- [Example for `reducer` function](../tutorials/intermediate/aggregations.md#human-readable-reduce-json-format)
 
 ## Special Purpose Functions
 

@@ -428,8 +428,6 @@ The merged aggregation result
 
 #### Example
 
-The merger function is specifically used with session window aggregations. When late-arriving events connect previously separate sessions, the merger function combines their aggregated results.
-
 ??? info "Producer - Session Activity Events (click to expand)"
 
     ```yaml
@@ -441,6 +439,33 @@ The merger function is specifically used with session window aggregations. When 
     ```yaml
     {% include "../definitions/reference/functions/merger-example-processor.yaml" %}
     ```
+
+
+The merger function is specifically designed for session window aggregations where late-arriving events can merge previously separate sessions. This example demonstrates user activity tracking with session-based counting.
+
+**What the example does:**
+
+The example simulates user activity tracking where events are grouped into sessions with automatic session merging:
+
+- **Session Windowing**: Events are grouped into sessions with 10-minute inactivity gaps
+- **Event Counting**: Each session counts the number of activity events per user
+- **Session Merging**: When late-arriving events connect previously separate sessions, the merger function combines their event counts
+- **Realistic Behavior**: The producer creates session gaps (15% chance) to demonstrate session merging in action
+
+**Key Technical Features:**
+
+- **Session Windows**: Automatically handle overlapping time periods and late-arriving data
+- **Type Safety**: KSML enforces that merger `value1` and `value2` parameters have identical types (both integers in this case)
+- **Windowed Keys**: Session aggregations produce complex windowed keys that require transformation for string topic output
+- **Merge Logic**: Simple addition of event counts when two sessions are combined into one
+
+**Expected Results:**
+
+When running this example, you'll see log messages like:
+
+- `"Merging sessions: 3 + 2 = 5"` - Shows the merger function combining session counts
+- `"User alice session: 4 events"` - Displays final session results after merging
+- Session windows spanning different time periods for each user
 
 ### reducer
 
@@ -479,8 +504,6 @@ The key to look up in the table being joined with
 
 #### Example
 
-The foreignKeyExtractor is used in table joins when the join key needs to be extracted from the joining table's value. This example shows extracting a customer_id from orders to join with a customers table.
-
 ??? info "Producer - Orders and Customers (click to expand)"
 
     ```yaml
@@ -492,6 +515,41 @@ The foreignKeyExtractor is used in table joins when the join key needs to be ext
     ```yaml
     {% include "../definitions/reference/functions/foreignkeyextractor-processor.yaml" %}
     ```
+
+The foreignKeyExtractor enables table joins where the join key is embedded within the record value rather than being the record key. This example demonstrates order enrichment by joining with customer data using a foreign key relationship.
+
+**What the example does:**
+
+This example simulates an e-commerce system where orders need to be enriched with customer information:
+
+- **Order Processing**: Orders are keyed by `order_id` but contain a `customer_id` field in their value
+- **Customer Lookup**: Customer details are stored in a separate table keyed by `customer_id`  
+- **Foreign Key Extraction**: The `extract_customer_id` function extracts the `customer_id` from each order's value
+- **Data Enrichment**: Orders are joined with customer data to create enriched order records containing both order and customer information
+
+**Key Technical Features:**
+
+- **Foreign Key Pattern**: Demonstrates the common pattern where records reference other entities through embedded IDs
+- **Table Join**: Uses KSML's table join capability with foreign key extraction for efficient lookups
+- **Data Enrichment**: Shows how to combine data from multiple sources into enriched output records
+- **Key Transformation**: Maintains original order keys while using foreign keys for join operations
+
+**Expected Results:**
+
+When running this example, you'll see log messages like:
+
+- `"Joined order order_001 with customer Alice Johnson"` - Shows successful order-customer joins
+- `"Enriched order: order_003 for customer: Bob Smith"` - Displays enriched results with customer names
+- Orders enriched with customer tier, email, and name information
+
+**Use Cases:**
+
+This pattern is commonly used for:
+
+- Order enrichment with customer details
+- Transaction enrichment with account information  
+- Event enrichment with user profiles
+- Any scenario where records contain foreign key references
 
 ### generator
 

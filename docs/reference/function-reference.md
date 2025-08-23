@@ -660,26 +660,37 @@ Modified metadata for the output message
 
 #### Example
 
-??? info "Producer - API Events (click to expand)"
+??? info "Producer - API Event Generation (click to expand)"
 
     ```yaml
-    {%
-      include "../definitions/reference/functions/metadatatransformer-producer.yaml"
-    %}
+    {% include "../definitions/reference/functions/metadatatransformer-producer.yaml" %}
     ```
 
-??? info "Processor - Enrich Headers and Metadata (click to expand)"
+??? info "Processor - Header Enrichment and Processing (click to expand)"
 
     ```yaml
-    {%
-      include "../definitions/reference/functions/metadatatransformer-processor.yaml"
-    %}
+    {% include "../definitions/reference/functions/metadatatransformer-processor.yaml" %}
     ```
 
-**See it in action**: 
+**This example:**
 
-- [Reference: API Event Enrichment](../definitions/reference/functions/metadatatransformer-processor.yaml) - adding processing headers and metadata
-- [Example: Metadata Transformation](../../examples/16-example-transform-metadata.yaml) - comprehensive metadata modification patterns
+- Shows metadata enrichment in stream processing.
+* Generates realistic API events (endpoints + status codes)
+* Enriches headers with timestamps, severity, processor ID
+* Classifies events (critical/warning/info) by status code
+* Logs enrichment for monitoring/debugging
+* Uses Python `time` for timestamps
+* Has conditional + extensible headers
+* Uses `transformMetadata` with `mapper` param
+* Output is formatted via `print`
+
+**Expected Results:**
+
+When running this example, you'll see enriched events with additional headers:
+
+- `ENRICHED EVENT | evt_0001 | POST /api/users | Status: 200 | Headers processed`
+- `ENRICHED EVENT | evt_0002 | DELETE /api/health | Status: 400 | Headers processed`
+- Log messages showing: "Enriched event evt_0001 with 3 additional headers"
 
 ### valueJoiner
 
@@ -699,37 +710,7 @@ Combined value
 
 #### Example
 
-```yaml
-functions:
-  join_order_with_customer:
-    type: valueJoiner
-    code: |
-      order = value1
-      customer = value2
-
-      if customer is None:
-        customer_name = "Unknown"
-        customer_email = "Unknown"
-      else:
-        customer_name = customer.get("name", "Unknown")
-        customer_email = customer.get("email", "Unknown")
-
-      return {
-        "order_id": order.get("order_id"),
-        "customer_id": order.get("customer_id"),
-        "customer_name": customer_name,
-        "customer_email": customer_email,
-        "items": order.get("items", []),
-        "total": order.get("total", 0),
-        "status": order.get("status", "PENDING")
-      }
-    resultType: struct
-```
-
-**See it in action**: 
-
 - [Tutorial: Joins](../tutorials/intermediate/joins.md#core-join-concepts) - valueJoiner functions for stream enrichment
-- [Tutorial: Stream-Table Joins](../tutorials/intermediate/joins.md#stream-table-join-example) - practical valueJoiner examples
 
 ## Stream Related Functions
 

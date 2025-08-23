@@ -479,18 +479,19 @@ The key to look up in the table being joined with
 
 #### Example
 
-```yaml
-functions:
-  extract_customer_id:
-    type: foreignKeyExtractor
-    code: |
-      # Extract customer ID from an order to join with customer table
-      if value is None:
-        return None
+The foreignKeyExtractor is used in table joins when the join key needs to be extracted from the joining table's value. This example shows extracting a customer_id from orders to join with a customers table.
 
-      return value.get("customer_id")
-    resultType: string
-```
+??? info "Producer - Orders and Customers (click to expand)"
+
+    ```yaml
+    {% include "../definitions/reference/functions/foreignkeyextractor-producer.yaml" %}
+    ```
+
+??? info "Processor - Table Join with ForeignKeyExtractor (click to expand)"
+
+    ```yaml
+    {% include "../definitions/reference/functions/foreignkeyextractor-processor.yaml" %}
+    ```
 
 ### generator
 

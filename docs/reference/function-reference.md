@@ -563,48 +563,10 @@ None
 
 A tuple of (key, value) representing the generated message
 
-#### Example
+#### See how `generator` is used in an example definition:
 
-```yaml
-functions:
-  generate_sensordata_message:
-    type: generator
-    globalCode: |
-      import time
-      import random
-      sensorCounter = 0
-    code: |
-      global sensorCounter
-
-      key = "sensor"+str(sensorCounter)           # Set the key to return ("sensor0" to "sensor9")
-      sensorCounter = (sensorCounter+1) % 10      # Increase the counter for next iteration
-
-      # Generate some random sensor measurement data
-      types = { 0: { "type": "AREA", "unit": random.choice([ "m2", "ft2" ]), "value": str(random.randrange(1000)) },
-                1: { "type": "HUMIDITY", "unit": random.choice([ "g/m3", "%" ]), "value": str(random.randrange(100)) },
-                2: { "type": "LENGTH", "unit": random.choice([ "m", "ft" ]), "value": str(random.randrange(1000)) },
-                3: { "type": "STATE", "unit": "state", "value": random.choice([ "off", "on" ]) },
-                4: { "type": "TEMPERATURE", "unit": random.choice([ "C", "F" ]), "value": str(random.randrange(-100, 100)) }
-              }
-
-      # Build the result value using any of the above measurement types
-      value = { "name": key, "timestamp": str(round(time.time()*1000)), **random.choice(types) }
-      value["color"] = random.choice([ "black", "blue", "red", "yellow", "white" ])
-      value["owner"] = random.choice([ "Alice", "Bob", "Charlie", "Dave", "Evan" ])
-      value["city"] = random.choice([ "Amsterdam", "Xanten", "Utrecht", "Alkmaar", "Leiden" ])
-
-      if random.randrange(10) == 0:
-        key = None
-      if random.randrange(10) == 0:
-        value = None
-    expression: (key, value)                      # Return a message tuple with the key and value
-    resultType: (string, struct)                  # Indicate the type of key and value
-```
-
-**See it in action**: 
-
-- [Tutorial: Filtering and Transforming](../tutorials/beginner/filtering-transforming.md#creating-test-data) - generator functions for test data
-- [Tutorial: Performance Testing](../tutorials/advanced/performance-optimization.md#data-generation) - generators for load testing
+- [Example: Generating JSON data](../tutorials/beginner/filtering-transforming.md#creating-test-data)
+- [Example: Generating AVRO data](../tutorials/beginner/data-formats.md#working-with-avro-data)
 
 ### keyValueMapper
 
@@ -621,18 +583,9 @@ Transforms both the key and value of a record.
 
 Tuple of (new_key, new_value)
 
-#### Example
+#### See how `keyValueMapper` is used in an example definition:
 
-```yaml
-functions:
-  repartition_by_user_id:
-    type: keyValueMapper
-    code: |
-      new_key = value.get("user_id")
-      new_value = value
-      return (new_key, new_value)
-    resultType: "(string, struct)"
-```
+- [Example: Product Catalog Enrichment](../tutorials/intermediate/joins.md#use-case-product-catalog-enrichment)
 
 ### keyValuePrinter
 

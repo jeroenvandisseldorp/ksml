@@ -445,19 +445,21 @@ The merger function is specifically designed for session window aggregations whe
 
 **What the example does:**
 
-The example simulates user activity tracking where events are grouped into sessions with automatic session merging:
+Here’s a shorter version:
 
-- **Session Windowing**: Events are grouped into sessions with 10-minute inactivity gaps
-- **Event Counting**: Each session counts the number of activity events per user
-- **Session Merging**: When late-arriving events connect previously separate sessions, the merger function combines their event counts
-- **Realistic Behavior**: The producer creates session gaps (15% chance) to demonstrate session merging in action
+Simulates user activity tracking with session windows and merging:
 
-**Key Technical Features:**
+* Groups events into 10-min inactivity sessions
+* Counts events per user
+* Merges sessions when late events connect them
+* Producer simulates gaps to trigger merging
 
-- **Session Windows**: Automatically handle overlapping time periods and late-arriving data
-- **Type Safety**: KSML enforces that merger `value1` and `value2` parameters have identical types (both integers in this case)
-- **Windowed Keys**: Session aggregations produce complex windowed keys that require transformation for string topic output
-- **Merge Logic**: Simple addition of event counts when two sessions are combined into one
+**Key Features:**
+
+* Automatic session windowing & late data handling
+* Type-safe merger (integers)
+* Windowed key transformation for output
+* Merge logic adds event counts
 
 **Expected Results:**
 
@@ -518,21 +520,20 @@ The key to look up in the table being joined with
 
 The foreignKeyExtractor enables table joins where the join key is embedded within the record value rather than being the record key. This example demonstrates order enrichment by joining with customer data using a foreign key relationship.
 
-**What the example does:**
+**Example Summary**
+Simulates an e-commerce system enriching orders with customer data:
 
-This example simulates an e-commerce system where orders need to be enriched with customer information:
+* Orders keyed by `order_id`, referencing `customer_id`
+* Customer details looked up by `customer_id`
+* Foreign key extracted from orders
+* Orders joined with customers to produce enriched records
 
-- **Order Processing**: Orders are keyed by `order_id` but contain a `customer_id` field in their value
-- **Customer Lookup**: Customer details are stored in a separate table keyed by `customer_id`  
-- **Foreign Key Extraction**: The `extract_customer_id` function extracts the `customer_id` from each order's value
-- **Data Enrichment**: Orders are joined with customer data to create enriched order records containing both order and customer information
+**Key Features:**
 
-**Key Technical Features:**
-
-- **Foreign Key Pattern**: Demonstrates the common pattern where records reference other entities through embedded IDs
-- **Table Join**: Uses KSML's table join capability with foreign key extraction for efficient lookups
-- **Data Enrichment**: Shows how to combine data from multiple sources into enriched output records
-- **Key Transformation**: Maintains original order keys while using foreign keys for join operations
+* Foreign key join pattern
+* KSML table join with key extraction
+* Data enrichment from multiple sources
+* Preserves original order keys
 
 **Expected Results:**
 
@@ -604,26 +605,42 @@ String to be written to file or stdout
 
 #### Example
 
-??? info "Producer - Financial Transaction Data (click to expand)"
+The keyValuePrinter formats records for human-readable output to stdout or files. This example shows converting sales data into formatted reports for monitoring and debugging.
+
+??? info "Producer - Sales Data Generation (click to expand)"
 
     ```yaml
-    {%
-      include "../definitions/reference/functions/keyvalueprinter-producer.yaml"
-    %}
+    {% include "../definitions/reference/functions/keyvalueprinter-producer.yaml" %}
     ```
 
-??? info "Processor - Format Transaction Reports (click to expand)"
+??? info "Processor - Sales Report Formatting (click to expand)"
 
     ```yaml
-    {%
-      include "../definitions/reference/functions/keyvalueprinter-processor.yaml"
-    %}
+    {% include "../definitions/reference/functions/keyvalueprinter-processor.yaml" %}
     ```
 
-**See it in action**: 
+**What the example does:**
 
-- [Reference: Transaction Reports](../definitions/reference/functions/keyvalueprinter-processor.yaml) - formatting financial data for output
-- [Tutorial: Logging and Monitoring](../tutorials/beginner/logging-monitoring.md#output-formatting) - keyValuePrinter for readable logs
+Demonstrates formatted business reporting with KSML:
+
+* **Sales Data Processing:** Converts raw sales records into reports
+* **Custom Formatting:** Transforms JSON into readable output
+* **Print Operation:** Outputs formatted data via `print`
+* **Real-time Monitoring:** Enables instant visibility of transactions
+
+**Key Features:**
+
+* Python string formatting
+* Null/error handling
+* `keyValuePrinter` function
+* Field extraction from JSON
+
+**Expected Results:**
+
+When running this example, you'll see formatted output like:
+
+- `SALE REPORT | ID: sale_001 | Customer: alice | Product: laptop | Qty: 2 | Amount: $1299.99 | Region: north`
+- `SALE REPORT | ID: sale_002 | Customer: bob | Product: mouse | Qty: 1 | Amount: $29.99 | Region: south`
 
 ### metadataTransformer
 

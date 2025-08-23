@@ -873,30 +873,43 @@ Any value, depending on the function's purpose
 
 #### Example
 
-```yaml
-functions:
-  calculate_discount:
-    type: generic
-    parameters:
-      - name: basePrice
-        type: double
-      - name: discountPercentage
-        type: double
-    code: |
-      # Calculate the discounted price
-      discountAmount = basePrice * (discountPercentage / 100)
-      finalPrice = basePrice - discountAmount
+??? info "Producer - Product Data Generation (click to expand)"
 
-      # Return both the final price and the discount amount
-      return {
-        "finalPrice": finalPrice,
-        "discountAmount": discountAmount,
-        "discountPercentage": discountPercentage
-      }
-    resultType: struct
-```
+    ```yaml
+    {% include "../definitions/reference/functions/generic-producer.yaml" %}
+    ```
 
+??? info "Processor - Price Calculation with Generic Function (click to expand)"
 
+    ```yaml
+    {% include "../definitions/reference/functions/generic-processor.yaml" %}
+    ```
+
+**What the example does:**
+
+Demonstrates how to create reusable business logic with generic functions:
+
+* Creates sample product data with base prices and discount rates
+* `calculate_price` accepts parameters to compute final pricing with tax
+* The generic function is called from within a valueTransformer
+* Adds calculated pricing information to product records
+
+**Key Technical Features:**
+
+* `type: generic` for reusable custom functions
+* Custom parameter definitions with types (double, string, etc.)
+* Return any data structure (JSON objects, arrays, primitives)
+* Call generic functions from other functions using standard Python syntax
+* Mix generic functions with standard KSML function types
+
+**Expected Results:**
+
+When running these examples, you will see:
+
+- Product data being generated with random base prices and discount rates
+- Log messages showing: "Processed product: prod_001 - Original: $856.58, Final: $922.50, Saved: $128.49" 
+- Each product enriched with detailed pricing calculations including tax
+- Generic function providing consistent pricing logic across all products
 
 ## Best Practices
 

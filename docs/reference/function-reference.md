@@ -322,28 +322,9 @@ A tuple of (new_key, new_value)
 
 #### Example
 
-```yaml
-functions:
-  transform_order:
-    type: keyValueTransformer
-    code: |
-      if value is None:
-        return (None, None)
+**See how `keyValueTransformer` is used in an example definition**:
 
-      # Create a new key based on customer ID
-      new_key = value.get("customer_id", "unknown")
-
-      # Create a new value with selected fields
-      new_value = {
-        "order_id": value.get("order_id"),
-        "total_amount": value.get("total_amount", 0),
-        "item_count": len(value.get("items", [])),
-        "processed_at": int(time.time() * 1000)
-      }
-
-      return (new_key, new_value)
-    resultType: "(string,struct)"
-```
+- [Async Integration Pattern with `keyValueTransformer`](../tutorials/advanced/external-integration.md#async-integration-pattern)
 
 ### predicate
 
@@ -362,51 +343,9 @@ Boolean (true or false)
 
 #### Example
 
-```yaml
-functions:
-  is_adult:
-    type: predicate
-    expression: value.get("age") >= 18
-
-  is_valid_transaction:
-    type: predicate
-    code: |
-      if value is None:
-        return False
-
-      amount = value.get("amount")
-      if amount is None or amount <= 0:
-        return False
-
-      return True
-
-  deduplicate_events:
-    type: predicate
-    code: |
-      # Access a state store to check for duplicates
-      event_id = value.get("event_id")
-      if event_id is None:
-        return True
-
-      # Check if we've seen this event before
-      seen_before = event_store.get(event_id)
-      if seen_before:
-        # Skip duplicate event
-        return False
-
-      # Mark this event as seen
-      stateStore.put(event_id, True)
-
-      # Process the event
-      return True
-    stores:
-      - event_store
-```
-
 **See it in action**: 
 
 - [Tutorial: Filtering and Transforming](../tutorials/beginner/filtering-transforming.md#complex-filtering-techniques) - predicate functions for data filtering
-- [Tutorial: Branching](../tutorials/intermediate/branching.md#conditional-routing) - predicates for stream routing
 
 ### valueTransformer
 
@@ -425,27 +364,9 @@ New value for the output message
 
 #### Example
 
-```yaml
-functions:
-  enrich_user:
-    type: valueTransformer
-    code: |
-      return {
-        "id": value.get("user_id"),
-        "full_name": value.get("first_name") + " " + value.get("last_name"),
-        "email": value.get("email"),
-        "age": value.get("age"),
-        "is_adult": value.get("age", 0) >= 18,
-        "processed_at": int(time.time() * 1000)
-      }
-    resultType: struct
-
-```
-
 **See it in action**: 
 
-- [Tutorial: Filtering and Transforming](../tutorials/beginner/filtering-transforming.md#advanced-transformation-techniques) - valueTransformer for data enrichment
-- [Tutorial: Data Formats](../tutorials/beginner/data-formats.md#format-conversion) - value transformation between formats
+- [Tutorial: Filtering and Transforming](../tutorials/beginner/filtering-transforming.md#applying-multiple-transformations) - valueTransformer for data enrichment
 
 ## Functions for stateful operations
 
@@ -467,28 +388,9 @@ New aggregated value
 
 #### Example
 
-```yaml
-functions:
-  average_calculator:
-    type: aggregator
-    code: |
-      if aggregatedValue is None:
-        return {"count": 1, "sum": value.get("amount", 0), "average": value.get("amount", 0)}
-      else:
-        count = aggregatedValue.get("count", 0) + 1
-        sum = aggregatedValue.get("sum", 0) + value.get("amount", 0)
-        return {
-          "count": count,
-          "sum": sum,
-          "average": sum / count
-        }
-    resultType: struct
-```
-
 **See it in action**: 
 
 - [Tutorial: Aggregations](../tutorials/intermediate/aggregations.md#aggregate-example) - comprehensive aggregator function examples
-- [Tutorial: Windowing](../tutorials/intermediate/windowing.md#windowed-aggregations) - aggregators in time windows
 
 ### initializer
 
@@ -504,13 +406,9 @@ Initial value for aggregation
 
 #### Example
 
-```yaml
-functions:
-  counter_initializer:
-    type: initializer
-    expression: { "count": 0, "sum": 0, "average": 0 }
-    resultType: struct
-```
+**See it in action**:
+
+- [Example for `initializer`](../tutorials/intermediate/aggregations.md#complex-example-regional-sales-analytics)
 
 ### merger
 

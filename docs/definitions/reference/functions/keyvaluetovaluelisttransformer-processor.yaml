@@ -43,6 +43,6 @@ pipelines:
   explode_orders:
     from: orders_input
     via:
-      - type: flatMapValues
-        keyValueToValueListTransformer: explode_order_items
+      - type: transformKeyValueToValueList
+        mapper: explode_order_items
     to: items_output

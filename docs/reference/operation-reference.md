@@ -51,7 +51,7 @@ KSML supports 28 operations for stream processing. Each operation serves a speci
 | | | |
 | **Output Operations** | | |
 | [to](#to) | Send to a specific topic | Write results to Kafka |
-| [toTopicNameExtractor](#topicnameextractor) | Send to dynamically determined topic | Route to different topics |
+| [toTopicNameExtractor](#totopicnameextractor) | Send to dynamically determined topic | Route to different topics |
 | [forEach](#foreach) | Process without producing output | Side effects, external calls |
 | [print](#print) | Print to console | Debugging, monitoring |
 | | | |

@@ -87,20 +87,6 @@ The `mapper` can be defined using:
 - `expression`: A simple expression returning a tuple (key, value)
 - `code`: A Python code block returning a tuple (key, value)
 
-#### Example
-
-```yaml
-- type: map
-  mapper:
-    code: |
-      new_key = value.get("id")
-      new_value = {
-        "name": value.get("firstName") + " " + value.get("lastName"),
-        "age": value.get("age")
-      }
-      return (new_key, new_value)
-```
-
 ##### **See it in action**:
 
 - [Tutorial: Filtering and Transforming](../tutorials/beginner/filtering-transforming.md)
@@ -120,24 +106,6 @@ The `mapper` can be defined using:
 - `expression`: A simple expression
 - `code`: A Python code block
 
-#### Example
-
-```yaml
-- type: mapValues
-  mapper:
-    expression: {"name": value.get("firstName") + " " + value.get("lastName"), "age": value.get("age")}
-```
-
-```yaml
-- type: mapValues
-  mapper:
-    code: |
-      return {
-        "full_name": value.get("firstName") + " " + value.get("lastName"),
-        "age_in_months": value.get("age") * 12
-      }
-```
-
 ##### **See it in action**:
 
 - [Tutorial: Branching](../tutorials/intermediate/branching.md)
@@ -155,14 +123,6 @@ Transforms the key of each record without modifying the value.
 The `mapper` can be defined using:
 - `expression`: A simple expression returning the new key
 - `code`: A Python code block returning the new key
-
-#### Example
-
-```yaml
-- type: mapKey
-  mapper:
-    expression: key.upper()
-```
 
 ##### **See it in action**:
 
@@ -260,13 +220,6 @@ Transforms the key using a custom transformer function.
 |-----------|--------|----------|-----------------------------------|
 | `mapper`  | String | Yes      | Name of the key transformer function |
 
-#### Example
-
-```yaml
-- type: transformKey
-  mapper: normalize_key
-```
-
 ##### **See it in action**:
 
 - [Tutorial: Filtering and Transforming](../tutorials/beginner/filtering-transforming.md)
@@ -280,13 +233,6 @@ Transforms the value using a custom transformer function.
 | Parameter | Type   | Required | Description                          |
 |-----------|--------|----------|--------------------------------------|
 | `mapper`  | String | Yes      | Name of the value transformer function |
-
-#### Example
-
-```yaml
-- type: transformValue
-  mapper: enrich_user_data
-```
 
 ##### **See it in action**:
 
@@ -310,23 +256,6 @@ The `if` can be defined using:
 
 - `expression`: A simple boolean expression
 - `code`: A Python code block returning a boolean
-
-#### Example
-
-```yaml
-- type: filter
-  if:
-    expression: value.get("age") >= 18
-```
-
-```yaml
-- type: filter
-  if:
-    code: |
-      if value.get("status") == "ACTIVE" and value.get("age") >= 18:
-        return True
-      return False
-```
 
 ##### **See it in action**:
 
@@ -384,13 +313,6 @@ Converts the key to a different data format.
 |-----------|--------|----------|--------------------------|
 | `into`    | String | Yes      | Target format for the key |
 
-#### Example
-
-```yaml
-- type: convertKey
-  into: json
-```
-
 ##### **See it in action**:
 
 - [Tutorial: Windowing](../tutorials/intermediate/windowing.md)
@@ -404,13 +326,6 @@ Converts the value to a different data format.
 | Parameter | Type   | Required | Description                |
 |-----------|--------|----------|----------------------------|
 | `into`    | String | Yes      | Target format for the value |
-
-#### Example
-
-```yaml
-- type: convertValue
-  into: avro:UserRecord
-```
 
 ##### **See it in action**:
 
@@ -434,14 +349,6 @@ The `keySelector` can be defined using:
 - `expression`: A simple expression returning the grouping key
 - `code`: A Python code block returning the grouping key
 
-#### Example
-
-```yaml
-- type: groupBy
-  keySelector:
-    expression: value.get("category")
-```
-
 ##### **See it in action**:
 
 - [Tutorial: Aggregations](../tutorials/intermediate/aggregations.md)
@@ -453,13 +360,6 @@ Groups records by their existing key for subsequent aggregation operations.
 #### Parameters
 
 None. This operation is typically followed by an aggregation operation.
-
-#### Example
-
-```yaml
-- type: groupByKey
-- type: count
-```
 
 ##### **See it in action**:
 
@@ -486,23 +386,6 @@ Both `initializer` and `aggregator` can be defined using:
 - `expression`: A simple expression
 - `code`: A Python code block
 
-#### Example
-
-```yaml
-- type: aggregate
-  initializer:
-    expression: {"count": 0, "sum": 0}
-  aggregator:
-    code: |
-      if aggregate is None:
-        return {"count": 1, "sum": value.get("amount", 0)}
-      else:
-        return {
-          "count": aggregate.get("count", 0) + 1,
-          "sum": aggregate.get("sum", 0) + value.get("amount", 0)
-        }
-```
-
 ### `count`
 
 Counts the number of records for each key.
@@ -510,13 +393,6 @@ Counts the number of records for each key.
 #### Parameters
 
 None.
-
-#### Example
-
-```yaml
-- type: groupByKey
-- type: count
-```
 
 ##### **See it in action**:
 
@@ -537,18 +413,6 @@ The `reducer` can be defined using:
 - `expression`: A simple expression
 - `code`: A Python code block
 
-#### Example
-
-```yaml
-- type: reduce
-  reducer:
-    code: |
-      return {
-        "count": value1.get("count", 0) + value2.get("count", 0),
-        "sum": value1.get("sum", 0) + value2.get("sum", 0)
-      }
-```
-
 ##### **See it in action**:
 
 - [Tutorial: Aggregations](../tutorials/intermediate/aggregations.md)
@@ -568,13 +432,6 @@ Performs an inner join between two streams.
 | `with`       | String | Yes      | The name of the stream to join with                                   |
 | `windowSize` | Long   | No       | The size of the join window in milliseconds (for stream-stream joins) |
 
-#### Example
-
-```yaml
-- type: join
-  with: customers
-```
-
 ##### **See it in action**:
 
 - [Tutorial: Joins](../tutorials/intermediate/joins.md)
@@ -590,13 +447,6 @@ Performs a left join between two streams.
 | `with`       | String | Yes      | The name of the stream to join with                                   |
 | `windowSize` | Long   | No       | The size of the join window in milliseconds (for stream-stream joins) |
 
-#### Example
-
-```yaml
-- type: leftJoin
-  with: customers
-```
-
 ##### **See it in action**:
 
 - [Tutorial: Joins](../tutorials/intermediate/joins.md)
@@ -611,14 +461,6 @@ Performs an outer join between two streams.
 |--------------|--------|----------|-----------------------------------------------------------------------|
 | `with`       | String | Yes      | The name of the stream to join with                                   |
 | `windowSize` | Long   | No       | The size of the join window in milliseconds (for stream-stream joins) |
-
-#### Example
-
-```yaml
-- type: outerJoin
-  with: customers
-  windowSize: 60000  # 1 minute
-```
 
 ##### **See it in action**:
 
@@ -641,22 +483,6 @@ Groups records into time windows.
 | `advanceBy`      | Long     | No       | Only required for `hopping` windows, how often to advance the window |
 | `grace`          | Long     | No       | Grace period for late-arriving data                                  |
 
-#### Example
-
-```yaml
-- type: windowByTime
-  windowType: tumbling
-  timeDifference: 60000  # 1 minute window
-```
-
-```yaml
-- type: windowByTime
-  windowType: hopping
-  timeDifference: 5m  # 5 minute window
-  advanceBy: 1m       # Advance every 1 minute
-  grace: 15s          # 15 seconds grace
-```
-
 ##### **See it in action**:
 
 - [Tutorial: Windowing](../tutorials/intermediate/windowing.md)
@@ -672,19 +498,6 @@ to the same session.
 |-----------------|----------|----------|----------------------------------------------------------------------------------------------|
 | `inactivityGap` | Duration | Yes      | The maximum duration between events before they are seen as belonging to a different session |
 | `grace`         | Long     | No       | Grace period for late-arriving data                                                          |
-
-#### Example
-
-```yaml
-- type: windowBySession
-  inactivityGap: 1m  # 1 minute window
-```
-
-```yaml
-- type: windowBySession
-  inactivityGap: 1m  # 1 minute window
-  grace: 15s         # 15 seconds grace
-```
 
 ##### **See it in action**:
 
@@ -705,18 +518,6 @@ Sends records to a specific Kafka topic.
 | `topic`   | String | Yes      | The name of the target topic      |
 | `keyType` | String | No       | The data type of the key          |
 | `valueType` | String | No     | The data type of the value        |
-
-#### Example
-
-```yaml
-pipelines:
-  output_pipeline:
-    from: input_stream
-    to:
-      topic: output_topic
-      keyType: string
-      valueType: json
-```
 
 ##### **See it in action**:
 
@@ -771,18 +572,6 @@ Processes each record with a side effect, typically used for logging or external
 
 The `forEach` can be defined using:
 - `code`: A Python code block performing the side effect
-
-#### Example
-
-```yaml
-pipelines:
-  log_pipeline:
-    from: input_stream
-    forEach:
-      code: |
-        log.info("Final processing: key={}, value={}", key, value)
-        # Can also call external services here
-```
 
 ##### **See it in action**:
 
@@ -847,21 +636,6 @@ The tag `branches` does not exist in the KSML language, but is meant to represen
 | `if`       | Predicate | Yes      | A condition which can evaluate to True or False. When True, the message is sent down the branch's pipeline |
 | `pipeline` | Pipeline  | Yes      | A pipeline that contains a list of processing steps to send the message through                            |
 
-#### Example
-
-```yaml
-- branch:
-    - if: predicate1
-      via:
-        - type: transformValue
-          mapper: my_value_transformer
-      to: target_topic
-    - if: predicate2
-      as: some_name_to_refer_to_by_another_pipeline
-    - if: predicate3
-      toTopicNameExtractor: my_topic_name_extractor
-```
-
 ##### **See it in action**:
 
 - [Tutorial: Branching](../tutorials/intermediate/branching.md)
@@ -880,15 +654,6 @@ The `forEach` can be defined using:
 
 - `expression`: A simple expression (rarely used for peek)
 - `code`: A Python code block performing the side effect
-
-#### Example
-
-```yaml
-- type: peek
-  forEach:
-    code: |
-      log.info("Processing record with key={}, value={}", key, value)
-```
 
 ##### **See it in action**:
 

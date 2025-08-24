@@ -36,9 +36,6 @@ nav:
       - Understanding KSML: getting-started/introduction.md
   - Core Concepts:
       - Overview: core-concepts/index.md
-      - Pipelines: core-concepts/pipelines.md
-      - Error Handling: core-concepts/error-handling.md
-      - Advanced Topics: core-concepts/advanced-topics.md
   - Tutorials:
       - Overview: tutorials/index.md
       - KSML Basics Tutorial: getting-started/basics-tutorial.md
@@ -78,6 +75,9 @@ nav:
       - Notation Reference: reference/notation-reference.md
       - Function Reference: reference/function-reference.md
       - Operation Reference: reference/operation-reference.md
+      - Pipelines: core-concepts/pipelines.md
+      - Error Handling: core-concepts/error-handling.md
+      - Advanced Topics: core-concepts/advanced-topics.md
   - Resources:
       - Examples Library: resources/examples-library.md
       - Troubleshooting Guide: resources/troubleshooting.md

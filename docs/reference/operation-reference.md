@@ -34,7 +34,6 @@ KSML supports 28 operations for stream processing. Each operation serves a speci
 | **Grouping & Partitioning Operations** | | |
 | [groupBy](#groupby) | Group by a new key | Prepare for aggregation with new key |
 | [groupByKey](#groupbykey) | Group by existing key | Prepare for aggregation |
-| [repartition](#repartition) | Redistribute records across partitions | Improve parallelism, rebalance data |
 | | | |
 | **Stateful Aggregation Operations** | | |
 | [aggregate](#aggregate) | Build custom aggregations | Complex calculations, custom state |
@@ -65,7 +64,7 @@ KSML supports 28 operations for stream processing. Each operation serves a speci
 When designing your KSML application, consider these factors:
 
 - **State Requirements**: Stateful operations (aggregations, joins) require state stores and more resources
-- **Partitioning**: Operations like `groupBy` and `repartition` may trigger data redistribution
+- **Partitioning**: Operations like `groupBy` may trigger data redistribution
 - **Performance**: Some operations are more computationally expensive than others
 - **Error Handling**: Use `try` operations to handle potential failures gracefully
 
@@ -466,22 +465,6 @@ None. This operation is typically followed by an aggregation operation.
 
 - [Tutorial: Aggregations](../tutorials/intermediate/aggregations.md)
 
-### `repartition`
-
-Redistributes records across partitions based on the key.
-
-#### Parameters
-
-| Parameter | Type    | Required | Description                           |
-|-----------|---------|----------|---------------------------------------|
-| `partitions` | Integer | No    | Number of partitions (optional)      |
-
-#### Example
-
-```yaml
-- type: repartition
-  partitions: 4
-```
 
 ## Stateful Aggregation Operations
 

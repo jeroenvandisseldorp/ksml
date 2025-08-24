@@ -172,7 +172,6 @@ KSML supports 21 function types, each designed for specific purposes in stream p
 | **Stream Related Functions**                                            |                                                      |                                             |
 | [timestampExtractor](#timestampextractor)                               | Extract timestamps from messages                     | stream, table, globalTable                  |
 | [topicNameExtractor](#topicnameextractor)                               | Derive a target topic name from key and value        | toTopicNameExtractor                        |
-| [streamPartitioner](#streampartitioner)                                 | Determine to which partition(s) a record is produced | stream, table, globalTable                  |
 |                                                                         |                                                      |                                             |
 | **Other Functions**                                                     |                                                      |                                             |
 | [generic](#generic)                                                     | Generic custom function                              |                                             |
@@ -820,43 +819,6 @@ When running this example, you'll see messages routed to different topics:
 - Normal pressure readings → `pressure_sensors` topic
 - Unknown sensor types → `unknown_sensor_data` topic
 
-### streamPartitioner
-
-Determines to which partition a record is produced. Used to control the partitioning of output topics.
-
-#### Parameters
-
-| Parameter     | Type    | Description                                  |
-|---------------|---------|----------------------------------------------|
-| topic         | String  | The topic of the message                     |
-| key           | Any     | The key of the record being processed        |
-| value         | Any     | The value of the record being processed      |
-| numPartitions | Integer | The number of partitions in the output topic |
-
-#### Return Value
-
-Integer representing the partition number to which the message will be sent
-
-#### Example
-
-```yaml
-functions:
-  custom_partitioner:
-    type: streamPartitioner
-    code: |
-      # Partition by the first character of the key (if it's a string)
-      if key is None:
-        # Use default partitioning for null keys
-        return None
-
-      if isinstance(key, str) and len(key) > 0:
-        # Use the first character's ASCII value modulo number of partitions
-        return ord(key[0]) % numPartitions
-
-      # For non-string keys, use a hash of the string representation
-      return hash(str(key)) % numPartitions
-```
-
 ## Other Functions
 
 ### generic
@@ -940,6 +902,5 @@ KSML functions are Python implementations that map directly to Kafka Streams Jav
 | merger | `Merger<K,V>` | Merge aggregation results |
 | valueJoiner | `ValueJoiner<V1,V2,VR>` | Join values from two streams |
 | timestampExtractor | `TimestampExtractor` | Extract event time from records |
-| streamPartitioner | `StreamPartitioner<K,V>` | Custom partitioning logic |
 | foreignKeyExtractor | `Function<V,FK>` | Extract foreign key for joins |
 | topicNameExtractor | `TopicNameExtractor<K,V>` | Dynamic topic routing |

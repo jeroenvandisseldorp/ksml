@@ -783,27 +783,40 @@ pipelines:
 
 ### `print`
 
-Prints each record to stdout for debugging purposes.
+Prints each record to stdout for debugging purposes. This operation can use a custom mapper function to format the output, providing colored indicators and structured logging.
 
 #### Parameters
 
-| Parameter | Type   | Required | Description                           |
-|-----------|--------|----------|---------------------------------------|
-| `prefix`  | String | No       | Optional prefix for the printed output |
+| Parameter | Type   | Required | Description                                  |
+|-----------|--------|----------|----------------------------------------------|
+| `mapper`  | String | No       | Name of keyValuePrinter function to format output |
+| `prefix`  | String | No       | Optional prefix for the printed output       |
 
 #### Example
 
-```yaml
-pipelines:
-  debug_pipeline:
-    from: input_stream
-    via:
-      - type: filter
-        if:
-          expression: value.get("debug") == true
-    print:
-      prefix: "DEBUG: "
-```
+This example demonstrates printing debug messages with color-coded log levels and custom formatting:
+
+??? info "Producer definition (click to expand)"
+
+    ```yaml
+    {%
+      include "../definitions/reference/operations/print-producer.yaml"
+    %}
+    ```
+
+??? info "Processor definition (click to expand)"
+
+    ```yaml
+    {%
+      include "../definitions/reference/operations/print-processor.yaml"
+    %}
+    ```
+
+**What this example does:**
+
+- The producer generates different types of debug messages (INFO, WARNING, ERROR, DEBUG) from various system components
+- The processor uses `print` with a custom `keyValuePrinter` function to format each message with color indicators ("red" for ERROR, "yellow" for WARNING, "green" for INFO, "blue" for DEBUG)
+- The formatted output includes component name, message text, request ID, and thread information for comprehensive debugging
 
 ## Control Flow Operations
 

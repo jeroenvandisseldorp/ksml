@@ -1,0 +1,71 @@
+streams:
+  debug_messages:
+    topic: debug_messages
+    keyType: string
+    valueType: json
+
+functions:
+  generate_debug_message:
+    type: generator
+    resultType: (string,json)
+    code: |
+      import random
+      import time
+      
+      # Generate different types of debug messages
+      message_types = ["INFO", "WARNING", "ERROR", "DEBUG"]
+      components = ["UserService", "PaymentProcessor", "DataLoader", "ApiGateway"]
+      
+      message_type = random.choice(message_types)
+      component = random.choice(components)
+      timestamp = int(time.time())
+      
+      if message_type == "ERROR":
+        messages = [
+          "Connection timeout to database",
+          "Failed to process payment request",
+          "Invalid user credentials provided",
+          "Memory usage exceeded threshold"
+        ]
+      elif message_type == "WARNING": 
+        messages = [
+          "High CPU usage detected",
+          "Slow database query performance",
+          "Cache hit rate below optimal",
+          "API rate limit approaching"
+        ]
+      elif message_type == "DEBUG":
+        messages = [
+          "Processing user authentication",
+          "Loading configuration settings",
+          "Validating input parameters",
+          "Executing business logic"
+        ]
+      else:  # INFO
+        messages = [
+          "Service started successfully",
+          "Request processed normally",
+          "Database connection established",
+          "Configuration loaded"
+        ]
+      
+      message_text = random.choice(messages)
+      request_id = f"req_{random.randint(1000, 9999)}"
+      
+      result = {
+        "timestamp": timestamp,
+        "level": message_type,
+        "component": component,
+        "message": message_text,
+        "request_id": request_id,
+        "thread_id": f"thread-{random.randint(1, 10)}"
+      }
+      
+      return (request_id, result)
+
+producers:
+  # Produce debug messages every 2 seconds
+  debug_message_producer:
+    generator: generate_debug_message
+    interval: 2s
+    to: debug_messages

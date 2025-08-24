@@ -1,0 +1,38 @@
+streams:
+  debug_messages:
+    topic: debug_messages  
+    keyType: string
+    valueType: json
+
+functions:
+  format_debug_output:
+    type: keyValuePrinter
+    code: |
+      # Format debug message for console output
+      if value is None:
+        return f"[NULL] Key: {key}"
+      
+      timestamp = value.get("timestamp", 0)
+      level = value.get("level", "UNKNOWN")
+      component = value.get("component", "Unknown")
+      message = value.get("message", "No message")
+      request_id = value.get("request_id", "unknown")
+      thread_id = value.get("thread_id", "unknown")
+      
+      # Create formatted debug output with color indicators
+      level_indicator = {
+        "ERROR": "red",
+        "WARNING": "yellow", 
+        "INFO": "green",
+        "DEBUG": "blue"
+      }.get(level, "white")
+      
+      return f"{level_indicator} [{level}] {component} | {message} | ReqID: {request_id} | Thread: {thread_id}"
+    resultType: string
+
+pipelines:
+  print_debug_messages:
+    from: debug_messages
+    print:
+      mapper: format_debug_output
+      prefix: "DEBUG_CONSOLE: "

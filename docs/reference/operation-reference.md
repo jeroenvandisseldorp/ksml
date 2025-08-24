@@ -69,86 +69,9 @@ When designing your KSML application, consider these factors:
 - **Performance**: Some operations are more computationally expensive than others
 - **Error Handling**: Use `try` operations to handle potential failures gracefully
 
-## Stateless Operations
+## Stateless Transformation Operations
 
-Stateless operations process each record independently, without maintaining any state between records.
-
-### `filter`
-
-Keeps only records that satisfy a condition.
-
-#### Parameters
-
-| Parameter | Type   | Required | Description             |
-|-----------|--------|----------|-------------------------|
-| `if`      | Object | Yes      | Specifies the condition |
-
-The `if` can be defined using:
-
-- `expression`: A simple boolean expression
-- `code`: A Python code block returning a boolean
-
-#### Example
-
-```yaml
-- type: filter
-  if:
-    expression: value.get("age") >= 18
-```
-
-```yaml
-- type: filter
-  if:
-    code: |
-      if value.get("status") == "ACTIVE" and value.get("age") >= 18:
-        return True
-      return False
-```
-
-##### **See it in action**:
-
-- [Tutorial: Filtering and Transforming](../tutorials/beginner/filtering-transforming.md#complex-filtering-techniques)
-
-### `flatMap`
-
-Transforms each record into zero or more records, useful for splitting batch messages into individual records.
-
-#### Parameters
-
-| Parameter | Type   | Required | Description                                                  |
-|-----------|--------|----------|--------------------------------------------------------------|
-| `mapper`  | Object | Yes      | Specifies how to transform each record into multiple records |
-
-The `mapper` must specify:
-
-- `resultType`: Format `"[(keyType,valueType)]"` indicating list of tuples
-- `code`: Python code returning a list of tuples `[(key, value), ...]`
-
-#### Example
-
-This example splits order batches containing multiple items into individual item records:
-
-??? info "Producer definition (click to expand)"
-
-    ```yaml
-    {%
-      include "../definitions/reference/operations/flatmap-producer.yaml"
-    %}
-    ```
-
-??? info "Processor definition (click to expand)"
-
-    ```yaml
-    {%
-      include "../definitions/reference/operations/flatmap-processor.yaml"
-    %}
-    ```
-
-**What this example does:** 
-
-- The producer generates order batches containing multiple items.
-- The processor uses `flatMap` to split each order batch into individual item records - transforming 1 input record into 3 output records (one per item).
-- Each output record has a unique key combining order ID and item ID, with calculated total prices per item.
+Stateless transformation operations modify records (key, value, or both) without maintaining state between records. These operations are the most common building blocks for data processing pipelines.
 
 ### `map`
 
@@ -212,29 +135,68 @@ The `mapper` can be defined using:
       }
 ```
 
-### `peek`
+### `mapKey`
 
-Performs a side effect on each record without changing it.
+Transforms the key of each record without modifying the value.
 
 #### Parameters
 
-| Parameter | Type   | Required | Description                                    |
-|-----------|--------|----------|------------------------------------------------|
-| `forEach` | Object | Yes      | Specifies the action to perform on each record |
+| Parameter | Type   | Required | Description                        |
+|-----------|--------|----------|-----------------------------------|
+| `mapper`  | Object | Yes      | Specifies how to transform the key |
 
-The `forEach` can be defined using:
-
-- `expression`: A simple expression (rarely used for peek)
-- `code`: A Python code block performing the side effect
+The `mapper` can be defined using:
+- `expression`: A simple expression returning the new key
+- `code`: A Python code block returning the new key
 
 #### Example
 
 ```yaml
-- type: peek
-  forEach:
-    code: |
-      log.info("Processing record with key={}, value={}", key, value)
+- type: mapKey
+  mapper:
+    expression: key.upper()
 ```
+
+### `flatMap`
+
+Transforms each record into zero or more records, useful for splitting batch messages into individual records.
+
+#### Parameters
+
+| Parameter | Type   | Required | Description                                                  |
+|-----------|--------|----------|--------------------------------------------------------------|
+| `mapper`  | Object | Yes      | Specifies how to transform each record into multiple records |
+
+The `mapper` must specify:
+
+- `resultType`: Format `"[(keyType,valueType)]"` indicating list of tuples
+- `code`: Python code returning a list of tuples `[(key, value), ...]`
+
+#### Example
+
+This example splits order batches containing multiple items into individual item records:
+
+??? info "Producer definition (click to expand)"
+
+    ```yaml
+    {%
+      include "../definitions/reference/operations/flatmap-producer.yaml"
+    %}
+    ```
+
+??? info "Processor definition (click to expand)"
+
+    ```yaml
+    {%
+      include "../definitions/reference/operations/flatmap-processor.yaml"
+    %}
+    ```
+
+**What this example does:** 
+
+- The producer generates order batches containing multiple items.
+- The processor uses `flatMap` to split each order batch into individual item records - transforming 1 input record into 3 output records (one per item).
+- Each output record has a unique key combining order ID and item ID, with calculated total prices per item.
 
 ### `selectKey`
 
@@ -258,6 +220,80 @@ The `keySelector` can be defined using:
   keySelector:
     expression: value.get("userId")
 ```
+
+### `transformKey`
+
+Transforms the key using a custom transformer function.
+
+#### Parameters
+
+| Parameter | Type   | Required | Description                        |
+|-----------|--------|----------|-----------------------------------|
+| `mapper`  | String | Yes      | Name of the key transformer function |
+
+#### Example
+
+```yaml
+- type: transformKey
+  mapper: normalize_key
+```
+
+### `transformValue`
+
+Transforms the value using a custom transformer function.
+
+#### Parameters
+
+| Parameter | Type   | Required | Description                          |
+|-----------|--------|----------|--------------------------------------|
+| `mapper`  | String | Yes      | Name of the value transformer function |
+
+#### Example
+
+```yaml
+- type: transformValue
+  mapper: enrich_user_data
+```
+
+## Filtering Operations
+
+Filtering operations selectively pass or remove records based on conditions, allowing you to control which data continues through your processing pipeline.
+
+### `filter`
+
+Keeps only records that satisfy a condition.
+
+#### Parameters
+
+| Parameter | Type   | Required | Description             |
+|-----------|--------|----------|-------------------------|
+| `if`      | Object | Yes      | Specifies the condition |
+
+The `if` can be defined using:
+
+- `expression`: A simple boolean expression
+- `code`: A Python code block returning a boolean
+
+#### Example
+
+```yaml
+- type: filter
+  if:
+    expression: value.get("age") >= 18
+```
+
+```yaml
+- type: filter
+  if:
+    code: |
+      if value.get("status") == "ACTIVE" and value.get("age") >= 18:
+        return True
+      return False
+```
+
+##### **See it in action**:
+
+- [Tutorial: Filtering and Transforming](../tutorials/beginner/filtering-transforming.md#complex-filtering-techniques)
 
 ### `filterNot`
 
@@ -297,27 +333,9 @@ This example filters out products with "inactive" status, keeping all other prod
 - The processor uses `filterNot` with a predicate function to exclude products with "inactive" status
 - Products with other statuses (active, pending, discontinued) are kept and passed through to the output topic
 
-### `mapKey`
+## Format Conversion Operations
 
-Transforms the key of each record without modifying the value.
-
-#### Parameters
-
-| Parameter | Type   | Required | Description                        |
-|-----------|--------|----------|-----------------------------------|
-| `mapper`  | Object | Yes      | Specifies how to transform the key |
-
-The `mapper` can be defined using:
-- `expression`: A simple expression returning the new key
-- `code`: A Python code block returning the new key
-
-#### Example
-
-```yaml
-- type: mapKey
-  mapper:
-    expression: key.upper()
-```
+Format conversion operations change the serialization format of keys or values without altering the actual data content.
 
 ### `convertKey`
 
@@ -353,43 +371,67 @@ Converts the value to a different data format.
   into: avro:UserRecord
 ```
 
-### `transformKey`
+## Grouping & Partitioning Operations
 
-Transforms the key using a custom transformer function.
+Grouping and partitioning operations organize data by keys and control how records are distributed across partitions, preparing data for aggregation or improving processing parallelism.
+
+### `groupBy`
+
+Groups records by a new key derived from the record.
 
 #### Parameters
 
-| Parameter | Type   | Required | Description                        |
-|-----------|--------|----------|-----------------------------------|
-| `mapper`  | String | Yes      | Name of the key transformer function |
+| Parameter     | Type   | Required | Description                         |
+|---------------|--------|----------|-------------------------------------|
+| `keySelector` | Object | Yes      | Specifies how to select the new key |
+
+The `keySelector` can be defined using:
+- `expression`: A simple expression returning the grouping key
+- `code`: A Python code block returning the grouping key
 
 #### Example
 
 ```yaml
-- type: transformKey
-  mapper: normalize_key
+- type: groupBy
+  keySelector:
+    expression: value.get("category")
 ```
 
-### `transformValue`
+### `groupByKey`
 
-Transforms the value using a custom transformer function.
+Groups records by their existing key for subsequent aggregation operations.
 
 #### Parameters
 
-| Parameter | Type   | Required | Description                          |
-|-----------|--------|----------|--------------------------------------|
-| `mapper`  | String | Yes      | Name of the value transformer function |
+None. This operation is typically followed by an aggregation operation.
 
 #### Example
 
 ```yaml
-- type: transformValue
-  mapper: enrich_user_data
+- type: groupByKey
+- type: count
 ```
 
-## Stateful Operations
+### `repartition`
 
-Stateful operations maintain state between records, typically based on the record key.
+Redistributes records across partitions based on the key.
+
+#### Parameters
+
+| Parameter | Type    | Required | Description                           |
+|-----------|---------|----------|---------------------------------------|
+| `partitions` | Integer | No    | Number of partitions (optional)      |
+
+#### Example
+
+```yaml
+- type: repartition
+  partitions: 4
+```
+
+## Stateful Aggregation Operations
+
+Stateful aggregation operations maintain state between records to perform calculations like counting, summing, or building custom aggregates based on record keys.
 
 ### `aggregate`
 
@@ -439,60 +481,6 @@ None.
 - type: count
 ```
 
-### `groupByKey`
-
-Groups records by their existing key for subsequent aggregation operations.
-
-#### Parameters
-
-None. This operation is typically followed by an aggregation operation.
-
-#### Example
-
-```yaml
-- type: groupByKey
-- type: count
-```
-
-### `groupBy`
-
-Groups records by a new key derived from the record.
-
-#### Parameters
-
-| Parameter     | Type   | Required | Description                         |
-|---------------|--------|----------|-------------------------------------|
-| `keySelector` | Object | Yes      | Specifies how to select the new key |
-
-The `keySelector` can be defined using:
-- `expression`: A simple expression returning the grouping key
-- `code`: A Python code block returning the grouping key
-
-#### Example
-
-```yaml
-- type: groupBy
-  keySelector:
-    expression: value.get("category")
-```
-
-### `repartition`
-
-Redistributes records across partitions based on the key.
-
-#### Parameters
-
-| Parameter | Type    | Required | Description                           |
-|-----------|---------|----------|---------------------------------------|
-| `partitions` | Integer | No    | Number of partitions (optional)      |
-
-#### Example
-
-```yaml
-- type: repartition
-  partitions: 4
-```
-
 ### `reduce`
 
 Combines records with the same key using a reducer function.
@@ -522,7 +510,7 @@ The `reducer` can be defined using:
 
 ## Join Operations
 
-Join operations combine data from multiple streams based on keys.
+Join operations combine data from multiple streams or tables based on matching keys, enabling you to correlate related events from different data sources.
 
 ### `join`
 
@@ -581,32 +569,7 @@ Performs an outer join between two streams.
 
 ## Windowing Operations
 
-Windowing operations group records into time-based windows.
-
-### `windowBySession`
-
-Groups records into session windows, where events with timestamps within `inactivityGap` durations are seen as belonging
-to the same session.
-
-#### Parameters
-
-| Parameter       | Type     | Required | Description                                                                                  |
-|-----------------|----------|----------|----------------------------------------------------------------------------------------------|
-| `inactivityGap` | Duration | Yes      | The maximum duration between events before they are seen as belonging to a different session |
-| `grace`         | Long     | No       | Grace period for late-arriving data                                                          |
-
-#### Example
-
-```yaml
-- type: windowBySession
-  inactivityGap: 1m  # 1 minute window
-```
-
-```yaml
-- type: windowBySession
-  inactivityGap: 1m  # 1 minute window
-  grace: 15s         # 15 seconds grace
-```
+Windowing operations group records into time-based windows, enabling temporal aggregations and time-bounded processing.
 
 ### `windowByTime`
 
@@ -637,58 +600,34 @@ Groups records into time windows.
   grace: 15s          # 15 seconds grace
 ```
 
-## Terminal Operations
+### `windowBySession`
 
-Terminal operations represent the end of a pipeline or perform side effects.
-
-### `forEach`
-
-Processes each record with a side effect, typically used for logging or external actions. This is a terminal operation that does not forward records.
+Groups records into session windows, where events with timestamps within `inactivityGap` durations are seen as belonging
+to the same session.
 
 #### Parameters
 
-| Parameter | Type   | Required | Description                                    |
-|-----------|--------|----------|------------------------------------------------|
-| `forEach` | Object | Yes      | Specifies the action to perform on each record |
-
-The `forEach` can be defined using:
-- `code`: A Python code block performing the side effect
+| Parameter       | Type     | Required | Description                                                                                  |
+|-----------------|----------|----------|----------------------------------------------------------------------------------------------|
+| `inactivityGap` | Duration | Yes      | The maximum duration between events before they are seen as belonging to a different session |
+| `grace`         | Long     | No       | Grace period for late-arriving data                                                          |
 
 #### Example
 
 ```yaml
-pipelines:
-  log_pipeline:
-    from: input_stream
-    forEach:
-      code: |
-        log.info("Final processing: key={}, value={}", key, value)
-        # Can also call external services here
+- type: windowBySession
+  inactivityGap: 1m  # 1 minute window
 ```
-
-### `print`
-
-Prints each record to stdout for debugging purposes.
-
-#### Parameters
-
-| Parameter | Type   | Required | Description                           |
-|-----------|--------|----------|---------------------------------------|
-| `prefix`  | String | No       | Optional prefix for the printed output |
-
-#### Example
 
 ```yaml
-pipelines:
-  debug_pipeline:
-    from: input_stream
-    via:
-      - type: filter
-        if:
-          expression: value.get("debug") == true
-    print:
-      prefix: "DEBUG: "
+- type: windowBySession
+  inactivityGap: 1m  # 1 minute window
+  grace: 15s         # 15 seconds grace
 ```
+
+## Output Operations
+
+Output operations represent the end of a processing pipeline, sending records to topics or performing terminal actions like logging.
 
 ### `to`
 
@@ -745,9 +684,58 @@ pipelines:
       topicNameExtractor: route_by_type
 ```
 
-## Branch Operations
+### `forEach`
 
-Branch operations split a stream into multiple substreams.
+Processes each record with a side effect, typically used for logging or external actions. This is a terminal operation that does not forward records.
+
+#### Parameters
+
+| Parameter | Type   | Required | Description                                    |
+|-----------|--------|----------|------------------------------------------------|
+| `forEach` | Object | Yes      | Specifies the action to perform on each record |
+
+The `forEach` can be defined using:
+- `code`: A Python code block performing the side effect
+
+#### Example
+
+```yaml
+pipelines:
+  log_pipeline:
+    from: input_stream
+    forEach:
+      code: |
+        log.info("Final processing: key={}, value={}", key, value)
+        # Can also call external services here
+```
+
+### `print`
+
+Prints each record to stdout for debugging purposes.
+
+#### Parameters
+
+| Parameter | Type   | Required | Description                           |
+|-----------|--------|----------|---------------------------------------|
+| `prefix`  | String | No       | Optional prefix for the printed output |
+
+#### Example
+
+```yaml
+pipelines:
+  debug_pipeline:
+    from: input_stream
+    via:
+      - type: filter
+        if:
+          expression: value.get("debug") == true
+    print:
+      prefix: "DEBUG: "
+```
+
+## Control Flow Operations
+
+Control flow operations manage the flow of data through your processing pipeline, allowing for branching logic and record observation.
 
 ### `branch`
 
@@ -782,6 +770,29 @@ The tag `branches` does not exist in the KSML language, but is meant to represen
       toTopicNameExtractor: my_topic_name_extractor
 ```
 
+### `peek`
+
+Performs a side effect on each record without changing it.
+
+#### Parameters
+
+| Parameter | Type   | Required | Description                                    |
+|-----------|--------|----------|------------------------------------------------|
+| `forEach` | Object | Yes      | Specifies the action to perform on each record |
+
+The `forEach` can be defined using:
+
+- `expression`: A simple expression (rarely used for peek)
+- `code`: A Python code block performing the side effect
+
+#### Example
+
+```yaml
+- type: peek
+  forEach:
+    code: |
+      log.info("Processing record with key={}, value={}", key, value)
+```
 
 ## Combining Operations
 

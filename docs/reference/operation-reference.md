@@ -102,6 +102,10 @@ The `mapper` can be defined using:
       return (new_key, new_value)
 ```
 
+##### **See it in action**:
+
+- [Tutorial: Filtering and Transforming](../tutorials/beginner/filtering-transforming.md)
+
 ### `mapValues`
 
 Transforms the value of each record without changing the key.
@@ -135,6 +139,10 @@ The `mapper` can be defined using:
       }
 ```
 
+##### **See it in action**:
+
+- [Tutorial: Branching](../tutorials/intermediate/branching.md)
+
 ### `mapKey`
 
 Transforms the key of each record without modifying the value.
@@ -156,6 +164,10 @@ The `mapper` can be defined using:
   mapper:
     expression: key.upper()
 ```
+
+##### **See it in action**:
+
+- [Tutorial: Branching](../tutorials/intermediate/branching.md)
 
 ### `flatMap`
 
@@ -238,6 +250,10 @@ Transforms the key using a custom transformer function.
   mapper: normalize_key
 ```
 
+##### **See it in action**:
+
+- [Tutorial: Filtering and Transforming](../tutorials/beginner/filtering-transforming.md)
+
 ### `transformValue`
 
 Transforms the value using a custom transformer function.
@@ -254,6 +270,10 @@ Transforms the value using a custom transformer function.
 - type: transformValue
   mapper: enrich_user_data
 ```
+
+##### **See it in action**:
+
+- [Tutorial: Filtering and Transforming](../tutorials/beginner/filtering-transforming.md)
 
 ## Filtering Operations
 
@@ -354,6 +374,10 @@ Converts the key to a different data format.
   into: json
 ```
 
+##### **See it in action**:
+
+- [Tutorial: Windowing](../tutorials/intermediate/windowing.md)
+
 ### `convertValue`
 
 Converts the value to a different data format.
@@ -370,6 +394,10 @@ Converts the value to a different data format.
 - type: convertValue
   into: avro:UserRecord
 ```
+
+##### **See it in action**:
+
+- [Tutorial: Data Formats](../tutorials/beginner/data-formats.md)
 
 ## Grouping & Partitioning Operations
 
@@ -397,6 +425,10 @@ The `keySelector` can be defined using:
     expression: value.get("category")
 ```
 
+##### **See it in action**:
+
+- [Tutorial: Aggregations](../tutorials/intermediate/aggregations.md)
+
 ### `groupByKey`
 
 Groups records by their existing key for subsequent aggregation operations.
@@ -411,6 +443,10 @@ None. This operation is typically followed by an aggregation operation.
 - type: groupByKey
 - type: count
 ```
+
+##### **See it in action**:
+
+- [Tutorial: Aggregations](../tutorials/intermediate/aggregations.md)
 
 ### `repartition`
 
@@ -481,6 +517,10 @@ None.
 - type: count
 ```
 
+##### **See it in action**:
+
+- [Tutorial: Aggregations](../tutorials/intermediate/aggregations.md)
+
 ### `reduce`
 
 Combines records with the same key using a reducer function.
@@ -508,6 +548,10 @@ The `reducer` can be defined using:
       }
 ```
 
+##### **See it in action**:
+
+- [Tutorial: Aggregations](../tutorials/intermediate/aggregations.md)
+
 ## Join Operations
 
 Join operations combine data from multiple streams or tables based on matching keys, enabling you to correlate related events from different data sources.
@@ -530,6 +574,10 @@ Performs an inner join between two streams.
   with: customers
 ```
 
+##### **See it in action**:
+
+- [Tutorial: Joins](../tutorials/intermediate/joins.md)
+
 ### `leftJoin`
 
 Performs a left join between two streams.
@@ -547,6 +595,10 @@ Performs a left join between two streams.
 - type: leftJoin
   with: customers
 ```
+
+##### **See it in action**:
+
+- [Tutorial: Joins](../tutorials/intermediate/joins.md)
 
 ### `outerJoin`
 
@@ -566,6 +618,10 @@ Performs an outer join between two streams.
   with: customers
   windowSize: 60000  # 1 minute
 ```
+
+##### **See it in action**:
+
+- [Tutorial: Joins](../tutorials/intermediate/joins.md)
 
 ## Windowing Operations
 
@@ -600,6 +656,10 @@ Groups records into time windows.
   grace: 15s          # 15 seconds grace
 ```
 
+##### **See it in action**:
+
+- [Tutorial: Windowing](../tutorials/intermediate/windowing.md)
+
 ### `windowBySession`
 
 Groups records into session windows, where events with timestamps within `inactivityGap` durations are seen as belonging
@@ -624,6 +684,10 @@ to the same session.
   inactivityGap: 1m  # 1 minute window
   grace: 15s         # 15 seconds grace
 ```
+
+##### **See it in action**:
+
+- [Tutorial: Windowing](../tutorials/intermediate/windowing.md)
 
 ## Output Operations
 
@@ -652,6 +716,10 @@ pipelines:
       keyType: string
       valueType: json
 ```
+
+##### **See it in action**:
+
+- [Tutorial: Data Formats](../tutorials/beginner/data-formats.md)
 
 ### `toTopicNameExtractor`
 
@@ -708,6 +776,10 @@ pipelines:
         log.info("Final processing: key={}, value={}", key, value)
         # Can also call external services here
 ```
+
+##### **See it in action**:
+
+- [Tutorial: Filtering and Transforming](../tutorials/beginner/filtering-transforming.md)
 
 ### `print`
 
@@ -770,6 +842,10 @@ The tag `branches` does not exist in the KSML language, but is meant to represen
       toTopicNameExtractor: my_topic_name_extractor
 ```
 
+##### **See it in action**:
+
+- [Tutorial: Branching](../tutorials/intermediate/branching.md)
+
 ### `peek`
 
 Performs a side effect on each record without changing it.
@@ -793,6 +869,10 @@ The `forEach` can be defined using:
     code: |
       log.info("Processing record with key={}, value={}", key, value)
 ```
+
+##### **See it in action**:
+
+- [Tutorial: Filtering and Transforming](../tutorials/beginner/filtering-transforming.md)
 
 ## Combining Operations
 

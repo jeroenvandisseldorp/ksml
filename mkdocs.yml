@@ -37,7 +37,6 @@ nav:
   - Core Concepts:
       - Overview: core-concepts/index.md
       - Pipelines: core-concepts/pipelines.md
-      - Operations: core-concepts/operations.md
       - Error Handling: core-concepts/error-handling.md
       - Advanced Topics: core-concepts/advanced-topics.md
   - Tutorials:

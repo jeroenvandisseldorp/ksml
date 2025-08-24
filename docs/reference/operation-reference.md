@@ -1,7 +1,87 @@
 # Operation Reference
 
-This document provides a comprehensive reference for all operations available in KSML. Each operation is described with
-its parameters, behavior, and examples.
+This document provides a comprehensive reference for all operations available in KSML. Each operation is described with its parameters, behavior, and examples.
+
+## Introduction
+
+Operations are the building blocks of stream processing in KSML. They define how data is transformed, filtered, aggregated, and otherwise processed as it flows through your application. Operations form the middle part of pipelines, taking input from the previous operation and producing output for the next operation.
+
+Understanding the different types of operations and when to use them is crucial for building effective stream processing applications.
+
+## Types of Operations
+
+KSML operations can be broadly categorized into several types:
+
+### Stateless Operations
+These operations process each message independently, without maintaining state between messages:
+
+- **Map Operations**: Transform individual messages (e.g., `map`, `mapValues`, `mapKey`)
+- **Filter Operations**: Include or exclude messages based on conditions (e.g., `filter`, `filterNot`)
+- **Conversion Operations**: Change the format or structure of messages (e.g., `convertKey`, `convertValue`)
+
+Stateless operations are typically simpler and more efficient, as they don't require state storage.
+
+### Stateful Operations
+These operations maintain state across multiple messages, allowing for more complex processing:
+
+- **Aggregation Operations**: Combine multiple messages into a single result (e.g., `aggregate`, `count`, `reduce`)
+- **Join Operations**: Combine data from multiple streams (e.g., `join`, `leftJoin`, `outerJoin`)
+- **Windowing Operations**: Group and process data within time windows (e.g., `windowByTime`, `windowBySession`)
+
+Stateful operations require state stores to maintain their state, which has implications for performance and resource usage.
+
+### Grouping Operations
+These operations reorganize messages based on keys:
+
+- **Group By Operations**: Group messages by a specific key (e.g., `groupBy`, `groupByKey`)
+- **Repartition Operations**: Change how messages are distributed across partitions (e.g., `repartition`)
+
+Grouping operations often precede aggregation operations, as they organize data in a way that makes aggregation possible.
+
+### Windowing Operations
+- **Windowing by Session Operations**: bundle messages together based on their time difference, where a _session_ is defined as a series of events with a maximum `inactivityGap` duration (e.g., `windowBySession`)
+- **Windowing by Time Operations**: bundle messages together based on their specific message timestamp. The window type and parameters determine to which window(s) a message is assigned (e.g., `windowByTime`)
+
+### Sink Operations
+These operations represent the end of a pipeline, where data is sent to an external system or another part of your application:
+
+- **Output Operations**: Send data to Kafka topics (e.g., `to`, `toTopicNameExtractor`)
+- **Terminal Operations**: Process data without producing further output (e.g., `forEach`, `print`)
+- **Branching Operations**: Split a stream into multiple streams based on conditions (e.g., `branch`)
+
+## Common Operations and Their Uses
+
+### Transforming Data
+- **map**: Transform both key and value of messages
+- **mapValues**: Transform only the value of messages (preserves key)
+- **flatMap**: Transform a message into multiple output messages
+
+### Filtering Data
+- **filter**: Include messages that match a condition
+- **filterNot**: Exclude messages that match a condition
+
+### Aggregating Data
+- **aggregate**: Build custom aggregations using an initializer and aggregator function
+- **count**: Count the number of messages with the same key
+- **reduce**: Combine messages with the same key using a reducer function
+
+### Joining Streams
+- **join**: Inner join of two streams
+- **leftJoin**: Left join of two streams
+- **outerJoin**: Full outer join of two streams
+
+### Working with Windows
+- **windowByTime**: Group messages into time-based windows
+- **windowBySession**: Group messages into session-based windows
+
+## Choosing the Right Operation
+
+When designing your KSML application, consider these factors when choosing operations:
+
+- **State Requirements**: Stateful operations require more resources
+- **Performance Impact**: Some operations are more computationally expensive than others
+- **Ordering Guarantees**: Some operations may affect message ordering
+- **Parallelism**: Some operations affect how data is partitioned and processed in parallel
 
 ## Stateless Operations
 
@@ -38,6 +118,10 @@ The `if` can be defined using:
         return True
       return False
 ```
+
+##### **See it in action**:
+
+- [Tutorial: Filtering and Transforming](../tutorials/beginner/filtering-transforming.md#complex-filtering-techniques)
 
 ### `flatMap`
 
@@ -175,6 +259,118 @@ The `keySelector` can be defined using:
     expression: value.get("userId")
 ```
 
+### `filterNot`
+
+Excludes records that satisfy a condition (opposite of filter).
+
+#### Parameters
+
+| Parameter | Type   | Required | Description             |
+|-----------|--------|----------|-------------------------|
+| `if`      | Object | Yes      | Specifies the condition |
+
+The `if` can be defined using:
+- `expression`: A simple boolean expression
+- `code`: A Python code block returning a boolean
+
+#### Example
+
+```yaml
+- type: filterNot
+  if:
+    expression: value.get("status") == "INACTIVE"
+```
+
+### `mapKey`
+
+Transforms the key of each record without modifying the value.
+
+#### Parameters
+
+| Parameter | Type   | Required | Description                        |
+|-----------|--------|----------|-----------------------------------|
+| `mapper`  | Object | Yes      | Specifies how to transform the key |
+
+The `mapper` can be defined using:
+- `expression`: A simple expression returning the new key
+- `code`: A Python code block returning the new key
+
+#### Example
+
+```yaml
+- type: mapKey
+  mapper:
+    expression: key.upper()
+```
+
+### `convertKey`
+
+Converts the key to a different data format.
+
+#### Parameters
+
+| Parameter | Type   | Required | Description              |
+|-----------|--------|----------|--------------------------|
+| `into`    | String | Yes      | Target format for the key |
+
+#### Example
+
+```yaml
+- type: convertKey
+  into: json
+```
+
+### `convertValue`
+
+Converts the value to a different data format.
+
+#### Parameters
+
+| Parameter | Type   | Required | Description                |
+|-----------|--------|----------|----------------------------|
+| `into`    | String | Yes      | Target format for the value |
+
+#### Example
+
+```yaml
+- type: convertValue
+  into: avro:UserRecord
+```
+
+### `transformKey`
+
+Transforms the key using a custom transformer function.
+
+#### Parameters
+
+| Parameter | Type   | Required | Description                        |
+|-----------|--------|----------|-----------------------------------|
+| `mapper`  | String | Yes      | Name of the key transformer function |
+
+#### Example
+
+```yaml
+- type: transformKey
+  mapper: normalize_key
+```
+
+### `transformValue`
+
+Transforms the value using a custom transformer function.
+
+#### Parameters
+
+| Parameter | Type   | Required | Description                          |
+|-----------|--------|----------|--------------------------------------|
+| `mapper`  | String | Yes      | Name of the value transformer function |
+
+#### Example
+
+```yaml
+- type: transformValue
+  mapper: enrich_user_data
+```
+
 ## Stateful Operations
 
 Stateful operations maintain state between records, typically based on the record key.
@@ -229,7 +425,7 @@ None.
 
 ### `groupByKey`
 
-Groups records by key for subsequent aggregation operations.
+Groups records by their existing key for subsequent aggregation operations.
 
 #### Parameters
 
@@ -240,6 +436,45 @@ None. This operation is typically followed by an aggregation operation.
 ```yaml
 - type: groupByKey
 - type: count
+```
+
+### `groupBy`
+
+Groups records by a new key derived from the record.
+
+#### Parameters
+
+| Parameter     | Type   | Required | Description                         |
+|---------------|--------|----------|-------------------------------------|
+| `keySelector` | Object | Yes      | Specifies how to select the new key |
+
+The `keySelector` can be defined using:
+- `expression`: A simple expression returning the grouping key
+- `code`: A Python code block returning the grouping key
+
+#### Example
+
+```yaml
+- type: groupBy
+  keySelector:
+    expression: value.get("category")
+```
+
+### `repartition`
+
+Redistributes records across partitions based on the key.
+
+#### Parameters
+
+| Parameter | Type    | Required | Description                           |
+|-----------|---------|----------|---------------------------------------|
+| `partitions` | Integer | No    | Number of partitions (optional)      |
+
+#### Example
+
+```yaml
+- type: repartition
+  partitions: 4
 ```
 
 ### `reduce`
@@ -384,6 +619,114 @@ Groups records into time windows.
   timeDifference: 5m  # 5 minute window
   advanceBy: 1m       # Advance every 1 minute
   grace: 15s          # 15 seconds grace
+```
+
+## Terminal Operations
+
+Terminal operations represent the end of a pipeline or perform side effects.
+
+### `forEach`
+
+Processes each record with a side effect, typically used for logging or external actions. This is a terminal operation that does not forward records.
+
+#### Parameters
+
+| Parameter | Type   | Required | Description                                    |
+|-----------|--------|----------|------------------------------------------------|
+| `forEach` | Object | Yes      | Specifies the action to perform on each record |
+
+The `forEach` can be defined using:
+- `code`: A Python code block performing the side effect
+
+#### Example
+
+```yaml
+pipelines:
+  log_pipeline:
+    from: input_stream
+    forEach:
+      code: |
+        log.info("Final processing: key={}, value={}", key, value)
+        # Can also call external services here
+```
+
+### `print`
+
+Prints each record to stdout for debugging purposes.
+
+#### Parameters
+
+| Parameter | Type   | Required | Description                           |
+|-----------|--------|----------|---------------------------------------|
+| `prefix`  | String | No       | Optional prefix for the printed output |
+
+#### Example
+
+```yaml
+pipelines:
+  debug_pipeline:
+    from: input_stream
+    via:
+      - type: filter
+        if:
+          expression: value.get("debug") == true
+    print:
+      prefix: "DEBUG: "
+```
+
+### `to`
+
+Sends records to a specific Kafka topic.
+
+#### Parameters
+
+| Parameter | Type   | Required | Description                       |
+|-----------|--------|----------|-----------------------------------|
+| `topic`   | String | Yes      | The name of the target topic      |
+| `keyType` | String | No       | The data type of the key          |
+| `valueType` | String | No     | The data type of the value        |
+
+#### Example
+
+```yaml
+pipelines:
+  output_pipeline:
+    from: input_stream
+    to:
+      topic: output_topic
+      keyType: string
+      valueType: json
+```
+
+### `toTopicNameExtractor`
+
+Sends records to topics determined dynamically based on the record content.
+
+#### Parameters
+
+| Parameter              | Type   | Required | Description                                           |
+|------------------------|--------|----------|-------------------------------------------------------|
+| `topicNameExtractor`   | String | Yes      | Name of the function that determines the topic name   |
+
+#### Example
+
+```yaml
+functions:
+  route_by_type:
+    type: topicNameExtractor
+    code: |
+      if value.get("type") == "error":
+        return "error_topic"
+      elif value.get("type") == "warning":
+        return "warning_topic"
+      else:
+        return "info_topic"
+
+pipelines:
+  routing_pipeline:
+    from: input_stream
+    toTopicNameExtractor:
+      topicNameExtractor: route_by_type
 ```
 
 ## Branch Operations

@@ -74,6 +74,6 @@ After mastering these intermediate concepts, you're ready for the most advanced 
 
 ## Additional Resources
 
-- [Core Concepts: Operations](../../core-concepts/operations.md) - Detailed explanations of KSML operations
+- [Operation Reference](../../reference/operation-reference.md) - Detailed documentation of all KSML operations
 - [Reference: Stateful Operations](../../reference/operation-reference.md#stateful-operations) - Complete reference for stateful operations
 - [Examples Library: Intermediate Examples](../../resources/examples-library.md#intermediate-examples) - Ready-to-use examples for intermediate patterns

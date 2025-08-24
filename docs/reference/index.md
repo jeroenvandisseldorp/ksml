@@ -6,7 +6,7 @@ Understanding these fundamental components will give you a solid foundation for 
 
 ## Reference Sections
 
-### [Language Reference](language-reference.md)
+### [KSML Language Reference](language-reference.md)
 
 Complete documentation of the KSML language syntax and structure:
 
@@ -81,7 +81,7 @@ Learn about the various operations you can perform on your data:
   - Common use cases
   - Performance considerations
 
-### [Pipelines](../core-concepts/pipelines.md)
+### [Pipelines](pipelines.md)
 
 Explore how data flows through KSML applications:
 
@@ -91,7 +91,7 @@ Explore how data flows through KSML applications:
 - Best practices for pipeline design
 - Error handling in pipelines
 
-### [Error Handling](../core-concepts/error-handling.md)
+### [Error Handling](error-handling.md)
 
 Learn about error handling strategies and techniques in KSML:
 
@@ -101,7 +101,7 @@ Learn about error handling strategies and techniques in KSML:
 - Advanced error handling techniques
 - Monitoring and observability for errors
 
-### [Advanced Topics](../core-concepts/advanced-topics.md)
+### [Advanced Topics](advanced-topics.md)
 
 Explore advanced concepts and techniques in KSML:
 
@@ -127,10 +127,10 @@ Complete documentation of KSML configuration options:
 
 You can read through these reference topics in order for a comprehensive understanding, or jump to specific topics as needed:
 
-1. Start with [Language Reference](language-reference.md) and [Stream Type Reference](stream-type-reference.md) to understand the basic structure and data model
+1. Start with [KSML Language Reference](language-reference.md) and [Stream Type Reference](stream-type-reference.md) to understand the basic structure and data model
 2. Move on to [Data Types](data-type-reference.md) and [Notations](notation-reference.md) to learn about data handling
 3. Explore [Functions](function-reference.md) to see how to implement custom logic
 4. Learn about [Operations](operation-reference.md) to understand all the ways you can process your data
-5. Study [Pipelines](../core-concepts/pipelines.md) to learn how data flows through your application
-6. Review [Error Handling](../core-concepts/error-handling.md) and [Advanced Topics](../core-concepts/advanced-topics.md) for production-ready applications
+5. Study [Pipelines](pipelines.md) to learn how data flows through your application
+6. Review [Error Handling](error-handling.md) and [Advanced Topics](advanced-topics.md) for production-ready applications
 7. Finish with [Configuration Reference](configuration-reference.md) for deployment settings

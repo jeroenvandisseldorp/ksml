@@ -72,9 +72,9 @@ nav:
       - Notation Reference: reference/notation-reference.md
       - Function Reference: reference/function-reference.md
       - Operation Reference: reference/operation-reference.md
-      - Pipelines: core-concepts/pipelines.md
-      - Error Handling: core-concepts/error-handling.md
-      - Advanced Topics: core-concepts/advanced-topics.md
+      - Pipelines: reference/pipelines.md
+      - Error Handling: reference/error-handling.md
+      - Advanced Topics: reference/advanced-topics.md
       - Configuration Reference: reference/configuration-reference.md
   - Resources:
       - Examples Library: resources/examples-library.md

@@ -741,7 +741,7 @@ pipelines:
 
 ### `toTopicNameExtractor`
 
-Sends records to topics determined dynamically based on the record content.
+Sends records to topics determined dynamically based on the record content. This operation enables content-based routing, allowing you to distribute messages to different topics based on their attributes, priorities, or business logic.
 
 #### Parameters
 
@@ -751,24 +751,30 @@ Sends records to topics determined dynamically based on the record content.
 
 #### Example
 
-```yaml
-functions:
-  route_by_type:
-    type: topicNameExtractor
-    code: |
-      if value.get("type") == "error":
-        return "error_topic"
-      elif value.get("type") == "warning":
-        return "warning_topic"
-      else:
-        return "info_topic"
+This example demonstrates routing system events to different topics based on severity level:
 
-pipelines:
-  routing_pipeline:
-    from: input_stream
-    toTopicNameExtractor:
-      topicNameExtractor: route_by_type
-```
+??? info "Producer definition (click to expand)"
+
+    ```yaml
+    {%
+      include "../definitions/reference/operations/topicnameextractor-producer.yaml"
+    %}
+    ```
+
+??? info "Processor definition (click to expand)"
+
+    ```yaml
+    {%
+      include "../definitions/reference/operations/topicnameextractor-processor.yaml"
+    %}
+    ```
+
+**What this example does:**
+
+- The producer generates system events with different severity levels (INFO, WARNING, ERROR, CRITICAL) from various system components
+- The processor uses `toTopicNameExtractor` with a custom function to route events to different topics based on severity
+- Critical events are logged and sent to `critical_alerts` topic, while other severities go to their respective log topics
+- This pattern enables priority-based processing and separate handling of critical system issues
 
 ### `forEach`
 

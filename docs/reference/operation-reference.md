@@ -10,7 +10,7 @@ Understanding the different types of operations and when to use them is crucial 
 
 ## Operations Overview
 
-KSML supports 29 operations for stream processing. Each operation serves a specific purpose in transforming, filtering, aggregating, or routing data:
+KSML supports 28 operations for stream processing. Each operation serves a specific purpose in transforming, filtering, aggregating, or routing data:
 
 | Operation | Purpose | Common Use Cases |
 |-----------|---------|------------------|
@@ -59,7 +59,6 @@ KSML supports 29 operations for stream processing. Each operation serves a speci
 | **Control Flow Operations** | | |
 | [branch](#branch) | Split stream into multiple branches | Conditional routing |
 | [peek](#peek) | Observe records without modification | Logging, debugging |
-| [try](#try) | Handle errors in processing | Error recovery |
 
 ## Choosing the Right Operation
 
@@ -783,36 +782,6 @@ The tag `branches` does not exist in the KSML language, but is meant to represen
       toTopicNameExtractor: my_topic_name_extractor
 ```
 
-## Error Handling Operations
-
-Error handling operations provide mechanisms to handle errors during processing.
-
-### `try`
-
-Attempts to execute operations and catches any exceptions.
-
-#### Parameters
-
-| Parameter    | Type  | Required | Description                                  |
-|--------------|-------|----------|----------------------------------------------|
-| `operations` | Array | Yes      | Operations to try                            |
-| `catch`      | Array | Yes      | Operations to execute if an exception occurs |
-
-#### Example
-
-```yaml
-- type: try
-  operations:
-    - type: mapValues
-      mapper:
-        code: parse_complex_json(value)
-  catch:
-    - type: mapValues
-      mapper:
-        code: |
-          log.error("Failed to parse JSON: {}", exception)
-          return {"error": "Failed to parse", "original": value}
-```
 
 ## Combining Operations
 

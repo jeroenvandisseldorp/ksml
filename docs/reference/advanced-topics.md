@@ -165,7 +165,7 @@ Building sophisticated event processing applications:
 
 ## Related Topics
 
-- [Error Handling](error-handling.md): Learn about advanced error handling techniques
+- [Error Handling](../tutorials/intermediate/error-handling.md): Learn about error handling techniques with practical examples
 - [Performance Optimization](../tutorials/advanced/performance-optimization.md): Detailed tutorial on optimizing KSML applications
 - [Complex Event Processing](../tutorials/advanced/complex-event-processing.md): In-depth guide to implementing CEP patterns
 - [Custom State Stores](../tutorials/advanced/custom-state-stores.md): Tutorial on advanced state management

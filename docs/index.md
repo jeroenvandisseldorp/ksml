@@ -44,7 +44,6 @@ Welcome to the KSML documentation. KSML allows you to build powerful Kafka Strea
 - [Function Reference](reference/function-reference.md)
 - [Operation Reference](reference/operation-reference.md)
 - [Pipelines](reference/pipelines.md)
-- [Error Handling](reference/error-handling.md)
 - [Advanced Topics](reference/advanced-topics.md)
 - [Configuration Reference](reference/configuration-reference.md)
 

@@ -91,16 +91,6 @@ Explore how data flows through KSML applications:
 - Best practices for pipeline design
 - Error handling in pipelines
 
-### [Error Handling](error-handling.md)
-
-Learn about error handling strategies and techniques in KSML:
-
-- Types of errors in stream processing
-- Error handling strategies (DLQs, retries, etc.)
-- Implementing error handling at different levels
-- Advanced error handling techniques
-- Monitoring and observability for errors
-
 ### [Advanced Topics](advanced-topics.md)
 
 Explore advanced concepts and techniques in KSML:
@@ -132,5 +122,5 @@ You can read through these reference topics in order for a comprehensive underst
 3. Explore [Functions](function-reference.md) to see how to implement custom logic
 4. Learn about [Operations](operation-reference.md) to understand all the ways you can process your data
 5. Study [Pipelines](pipelines.md) to learn how data flows through your application
-6. Review [Error Handling](error-handling.md) and [Advanced Topics](advanced-topics.md) for production-ready applications
+6. Review [Advanced Topics](advanced-topics.md) for production-ready applications
 7. Finish with [Configuration Reference](configuration-reference.md) for deployment settings

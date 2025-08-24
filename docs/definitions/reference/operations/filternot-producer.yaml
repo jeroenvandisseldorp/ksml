@@ -1,0 +1,33 @@
+functions:
+  generate_product:
+    type: generator
+    globalCode: |
+      import random
+      counter = 0
+      products = ["laptop", "phone", "tablet", "headphones", "monitor"]
+      statuses = ["active", "inactive", "pending", "discontinued"]
+      
+    code: |
+      global counter
+      counter += 1
+      product_id = f"prod_{counter:03d}"
+      
+      product_data = {
+        "product_id": product_id,
+        "name": random.choice(products),
+        "status": random.choice(statuses),
+        "price": round(random.uniform(50.0, 1500.0), 2),
+        "stock": random.randint(0, 100)
+      }
+      
+      return product_id, product_data
+    resultType: (string, json)
+
+producers:
+  product_producer:
+    generator: generate_product
+    interval: 2s
+    to:
+      topic: product_stream
+      keyType: string
+      valueType: json

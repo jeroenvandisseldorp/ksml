@@ -275,7 +275,7 @@ The `keySelector` can be defined using:
 
 ### `filterNot`
 
-Excludes records that satisfy a condition (opposite of filter).
+Excludes records that satisfy a condition (opposite of filter). Records are kept when the condition returns false.
 
 #### Parameters
 
@@ -283,17 +283,33 @@ Excludes records that satisfy a condition (opposite of filter).
 |-----------|--------|----------|-------------------------|
 | `if`      | Object | Yes      | Specifies the condition |
 
-The `if` can be defined using:
-- `expression`: A simple boolean expression
-- `code`: A Python code block returning a boolean
+The `if` parameter must reference a predicate function that returns a boolean.
 
 #### Example
 
-```yaml
-- type: filterNot
-  if:
-    expression: value.get("status") == "INACTIVE"
-```
+This example filters out products with "inactive" status, keeping all other products:
+
+??? info "Producer definition (click to expand)"
+
+    ```yaml
+    {%
+      include "../definitions/reference/operations/filternot-producer.yaml"
+    %}
+    ```
+
+??? info "Processor definition (click to expand)"
+
+    ```yaml
+    {%
+      include "../definitions/reference/operations/filternot-processor.yaml"
+    %}
+    ```
+
+**What this example does:**
+
+- The producer generates products with different statuses: active, inactive, pending, discontinued
+- The processor uses `filterNot` with a predicate function to exclude products with "inactive" status
+- Products with other statuses (active, pending, discontinued) are kept and passed through to the output topic
 
 ### `mapKey`
 

@@ -212,26 +212,44 @@ This example splits order batches containing multiple items into individual item
 
 ### `selectKey`
 
-Changes the key of each record without modifying the value.
+Changes the key of each record without modifying the value. This operation is useful for repartitioning data or preparing streams for joins based on different key attributes.
 
 #### Parameters
 
-| Parameter     | Type   | Required | Description                         |
-|---------------|--------|----------|-------------------------------------|
-| `keySelector` | Object | Yes      | Specifies how to select the new key |
+| Parameter | Type   | Required | Description                                    |
+|-----------|--------|----------|------------------------------------------------|
+| `mapper`  | Object | Yes      | Specifies how to extract the new key from the record |
 
-The `keySelector` can be defined using:
+The `mapper` can be defined using:
 
 - `expression`: A simple expression returning the new key
 - `code`: A Python code block returning the new key
 
 #### Example
 
-```yaml
-- type: selectKey
-  keySelector:
-    expression: value.get("userId")
-```
+This example demonstrates changing the key from session_id to user_id for better data organization:
+
+??? info "Producer definition (click to expand)"
+
+    ```yaml
+    {%
+      include "../definitions/reference/operations/selectkey-producer.yaml"
+    %}
+    ```
+
+??? info "Processor definition (click to expand)"
+
+    ```yaml
+    {%
+      include "../definitions/reference/operations/selectkey-processor.yaml"
+    %}
+    ```
+
+**What this example does:**
+
+- The producer generates user events (login, purchase, view, logout, search) with different session IDs as keys
+- The processor uses `selectKey` to change the key from `session_id` to `user_id`, enabling better data partitioning for user-centric analytics
+- This rekeying allows subsequent operations to group and aggregate data by user rather than by session
 
 ### `transformKey`
 

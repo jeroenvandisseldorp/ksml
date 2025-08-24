@@ -91,16 +91,6 @@ Explore how data flows through KSML applications:
 - Best practices for pipeline design
 - Error handling in pipelines
 
-### [Advanced Topics](advanced-topics.md)
-
-Explore advanced concepts and techniques in KSML:
-
-- Performance optimization
-- Complex event processing
-- Custom state stores
-- Integration patterns
-- Advanced windowing and joining
-
 ### [Configuration Reference](configuration-reference.md)
 
 Complete documentation of KSML configuration options:
@@ -122,5 +112,5 @@ You can read through these reference topics in order for a comprehensive underst
 3. Explore [Functions](function-reference.md) to see how to implement custom logic
 4. Learn about [Operations](operation-reference.md) to understand all the ways you can process your data
 5. Study [Pipelines](pipelines.md) to learn how data flows through your application
-6. Review [Advanced Topics](advanced-topics.md) for production-ready applications
+6. Review advanced tutorials for production-ready applications
 7. Finish with [Configuration Reference](configuration-reference.md) for deployment settings

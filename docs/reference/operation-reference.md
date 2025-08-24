@@ -125,7 +125,7 @@ The `if` can be defined using:
 
 ### `flatMap`
 
-Transforms each record into zero or more records.
+Transforms each record into zero or more records, useful for splitting batch messages into individual records.
 
 #### Parameters
 
@@ -133,22 +133,36 @@ Transforms each record into zero or more records.
 |-----------|--------|----------|--------------------------------------------------------------|
 | `mapper`  | Object | Yes      | Specifies how to transform each record into multiple records |
 
-The `mapper` can be defined using:
+The `mapper` must specify:
 
-- `expression`: A simple expression returning a list of tuples (key, value)
-- `code`: A Python code block returning a list of tuples (key, value)
+- `resultType`: Format `"[(keyType,valueType)]"` indicating list of tuples
+- `code`: Python code returning a list of tuples `[(key, value), ...]`
 
 #### Example
 
-```yaml
-- type: flatMap
-  mapper:
-    code: |
-      result = []
-      for item in value.get("items", []):
-        result.append((item.get("id"), item))
-      return result
-```
+This example splits order batches containing multiple items into individual item records:
+
+??? info "Producer definition (click to expand)"
+
+    ```yaml
+    {%
+      include "../definitions/reference/operations/flatmap-producer.yaml"
+    %}
+    ```
+
+??? info "Processor definition (click to expand)"
+
+    ```yaml
+    {%
+      include "../definitions/reference/operations/flatmap-processor.yaml"
+    %}
+    ```
+
+**What this example does:** 
+
+- The producer generates order batches containing multiple items.
+- The processor uses `flatMap` to split each order batch into individual item records - transforming 1 input record into 3 output records (one per item).
+- Each output record has a unique key combining order ID and item ID, with calculated total prices per item.
 
 ### `map`
 

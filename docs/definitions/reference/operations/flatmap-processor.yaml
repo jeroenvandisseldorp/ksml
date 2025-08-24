@@ -1,0 +1,37 @@
+streams:
+  order_batches_input:
+    topic: order_batches
+    keyType: string
+    valueType: json
+
+pipelines:
+  main:
+    from: order_batches_input
+    via:
+      - type: flatMap
+        mapper:
+          resultType: "[(string,json)]"
+          code: |
+            order_id = value['order_id']
+            customer_id = value['customer_id']
+            items = value['items']
+            
+            # Split order batch into individual item records
+            result = []
+            for item in items:
+                item_key = f"{order_id}_{item['item_id']}"
+                item_record = {
+                    "order_id": order_id,
+                    "customer_id": customer_id,
+                    "item_id": item['item_id'],
+                    "quantity": item['quantity'],
+                    "price": item['price'],
+                    "total_price": item['quantity'] * item['price']
+                }
+                result.append((item_key, item_record))
+            
+            return result
+    to:
+      topic: individual_items
+      keyType: string
+      valueType: json

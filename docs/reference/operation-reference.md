@@ -8,80 +8,67 @@ Operations are the building blocks of stream processing in KSML. They define how
 
 Understanding the different types of operations and when to use them is crucial for building effective stream processing applications.
 
-## Types of Operations
+## Operations Overview
 
-KSML operations can be broadly categorized into several types:
+KSML supports 29 operations for stream processing. Each operation serves a specific purpose in transforming, filtering, aggregating, or routing data:
 
-### Stateless Operations
-These operations process each message independently, without maintaining state between messages:
-
-- **Map Operations**: Transform individual messages (e.g., `map`, `mapValues`, `mapKey`)
-- **Filter Operations**: Include or exclude messages based on conditions (e.g., `filter`, `filterNot`)
-- **Conversion Operations**: Change the format or structure of messages (e.g., `convertKey`, `convertValue`)
-
-Stateless operations are typically simpler and more efficient, as they don't require state storage.
-
-### Stateful Operations
-These operations maintain state across multiple messages, allowing for more complex processing:
-
-- **Aggregation Operations**: Combine multiple messages into a single result (e.g., `aggregate`, `count`, `reduce`)
-- **Join Operations**: Combine data from multiple streams (e.g., `join`, `leftJoin`, `outerJoin`)
-- **Windowing Operations**: Group and process data within time windows (e.g., `windowByTime`, `windowBySession`)
-
-Stateful operations require state stores to maintain their state, which has implications for performance and resource usage.
-
-### Grouping Operations
-These operations reorganize messages based on keys:
-
-- **Group By Operations**: Group messages by a specific key (e.g., `groupBy`, `groupByKey`)
-- **Repartition Operations**: Change how messages are distributed across partitions (e.g., `repartition`)
-
-Grouping operations often precede aggregation operations, as they organize data in a way that makes aggregation possible.
-
-### Windowing Operations
-- **Windowing by Session Operations**: bundle messages together based on their time difference, where a _session_ is defined as a series of events with a maximum `inactivityGap` duration (e.g., `windowBySession`)
-- **Windowing by Time Operations**: bundle messages together based on their specific message timestamp. The window type and parameters determine to which window(s) a message is assigned (e.g., `windowByTime`)
-
-### Sink Operations
-These operations represent the end of a pipeline, where data is sent to an external system or another part of your application:
-
-- **Output Operations**: Send data to Kafka topics (e.g., `to`, `toTopicNameExtractor`)
-- **Terminal Operations**: Process data without producing further output (e.g., `forEach`, `print`)
-- **Branching Operations**: Split a stream into multiple streams based on conditions (e.g., `branch`)
-
-## Common Operations and Their Uses
-
-### Transforming Data
-- **map**: Transform both key and value of messages
-- **mapValues**: Transform only the value of messages (preserves key)
-- **flatMap**: Transform a message into multiple output messages
-
-### Filtering Data
-- **filter**: Include messages that match a condition
-- **filterNot**: Exclude messages that match a condition
-
-### Aggregating Data
-- **aggregate**: Build custom aggregations using an initializer and aggregator function
-- **count**: Count the number of messages with the same key
-- **reduce**: Combine messages with the same key using a reducer function
-
-### Joining Streams
-- **join**: Inner join of two streams
-- **leftJoin**: Left join of two streams
-- **outerJoin**: Full outer join of two streams
-
-### Working with Windows
-- **windowByTime**: Group messages into time-based windows
-- **windowBySession**: Group messages into session-based windows
+| Operation | Purpose | Common Use Cases |
+|-----------|---------|------------------|
+| **Stateless Transformation Operations** | | |
+| [map](#map) | Transform both key and value | Change message format, enrich data |
+| [mapValues](#mapvalues) | Transform only the value (preserves key) | Modify payload without affecting partitioning |
+| [mapKey](#mapkey) | Transform only the key | Change partitioning key |
+| [flatMap](#flatmap) | Transform one record into multiple records | Split batch messages, expand arrays |
+| [selectKey](#selectkey) | Select a new key from the value | Extract key from message content |
+| [transformKey](#transformkey) | Transform key using custom function | Complex key transformations |
+| [transformValue](#transformvalue) | Transform value using custom function | Complex value transformations |
+| | | |
+| **Filtering Operations** | | |
+| [filter](#filter) | Keep records that match a condition | Remove unwanted messages |
+| [filterNot](#filternot) | Remove records that match a condition | Exclude specific messages |
+| | | |
+| **Format Conversion Operations** | | |
+| [convertKey](#convertkey) | Convert key format (e.g., JSON to Avro) | Change serialization format |
+| [convertValue](#convertvalue) | Convert value format (e.g., JSON to Avro) | Change serialization format |
+| | | |
+| **Grouping & Partitioning Operations** | | |
+| [groupBy](#groupby) | Group by a new key | Prepare for aggregation with new key |
+| [groupByKey](#groupbykey) | Group by existing key | Prepare for aggregation |
+| [repartition](#repartition) | Redistribute records across partitions | Improve parallelism, rebalance data |
+| | | |
+| **Stateful Aggregation Operations** | | |
+| [aggregate](#aggregate) | Build custom aggregations | Complex calculations, custom state |
+| [count](#count) | Count records per key | Track occurrences |
+| [reduce](#reduce) | Combine records with same key | Accumulate values |
+| | | |
+| **Join Operations** | | |
+| [join](#join) | Inner join two streams | Correlate related events |
+| [leftJoin](#leftjoin) | Left outer join two streams | Include all left records |
+| [outerJoin](#outerjoin) | Full outer join two streams | Include all records from both sides |
+| | | |
+| **Windowing Operations** | | |
+| [windowByTime](#windowbytime) | Group into fixed time windows | Time-based aggregations |
+| [windowBySession](#windowbysession) | Group into session windows | User session analysis |
+| | | |
+| **Output Operations** | | |
+| [to](#to) | Send to a specific topic | Write results to Kafka |
+| [toTopicNameExtractor](#topicnameextractor) | Send to dynamically determined topic | Route to different topics |
+| [forEach](#foreach) | Process without producing output | Side effects, external calls |
+| [print](#print) | Print to console | Debugging, monitoring |
+| | | |
+| **Control Flow Operations** | | |
+| [branch](#branch) | Split stream into multiple branches | Conditional routing |
+| [peek](#peek) | Observe records without modification | Logging, debugging |
+| [try](#try) | Handle errors in processing | Error recovery |
 
 ## Choosing the Right Operation
 
-When designing your KSML application, consider these factors when choosing operations:
+When designing your KSML application, consider these factors:
 
-- **State Requirements**: Stateful operations require more resources
-- **Performance Impact**: Some operations are more computationally expensive than others
-- **Ordering Guarantees**: Some operations may affect message ordering
-- **Parallelism**: Some operations affect how data is partitioned and processed in parallel
+- **State Requirements**: Stateful operations (aggregations, joins) require state stores and more resources
+- **Partitioning**: Operations like `groupBy` and `repartition` may trigger data redistribution
+- **Performance**: Some operations are more computationally expensive than others
+- **Error Handling**: Use `try` operations to handle potential failures gracefully
 
 ## Stateless Operations
 

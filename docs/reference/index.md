@@ -11,19 +11,12 @@ Understanding these fundamental components will give you a solid foundation for 
 Complete documentation for writing KSML definitions:
 
 - YAML structure and formatting
+- Stream types (KStream, KTable, GlobalKTable)
 - Definition file organization
 - Syntax rules and conventions
-- Schema validation
-- Common syntax patterns
-
-### [Stream Type Reference](stream-type-reference.md)
-
-Learn about the fundamental building blocks of KSML applications:
-
-- Understanding stream types (KStream, KTable, GlobalKTable)
-- Choosing the right stream type
+- Data types and schemas
 - Best practices
-- Examples
+
 
 ### [Data Type Reference](data-type-reference.md)
 
@@ -81,15 +74,15 @@ Learn about the various operations you can perform on your data:
   - Common use cases
   - Performance considerations
 
-### [Pipelines](pipelines.md)
+### [Pipeline Reference](pipeline-reference.md)
 
-Explore how data flows through KSML applications:
+Comprehensive guide to pipeline structure and data flow in KSML:
 
 - Pipeline structure and components
 - Input and output configurations
-- Connecting pipelines
+- Connecting and branching pipelines
 - Best practices for pipeline design
-- Error handling in pipelines
+- Duration specifications and patterns
 
 ### [Configuration Reference](configuration-reference.md)
 
@@ -107,10 +100,10 @@ Complete documentation of KSML configuration options:
 
 You can read through these reference topics in order for a comprehensive understanding, or jump to specific topics as needed:
 
-1. Start with [KSML Definition Reference](definition-reference.md) and [Stream Type Reference](stream-type-reference.md) to understand the basic structure and data model
+1. Start with [KSML Definition Reference](definition-reference.md) to understand the basic structure, stream types, and data model
 2. Move on to [Data Types](data-type-reference.md) and [Notations](notation-reference.md) to learn about data handling
 3. Explore [Functions](function-reference.md) to see how to implement custom logic
 4. Learn about [Operations](operation-reference.md) to understand all the ways you can process your data
-5. Study [Pipelines](pipelines.md) to learn how data flows through your application
+5. Study [Pipeline Reference](pipeline-reference.md) to learn how data flows through your application
 6. Review advanced tutorials for production-ready applications
 7. Finish with [Configuration Reference](configuration-reference.md) for deployment settings

@@ -1,10 +1,10 @@
-# Definition Reference
+# KSML Definition Reference
 
-This document provides a comprehensive reference for writing KSML definitions. It covers all aspects of KSML definition syntax and structure, including file organization, data types, and configuration options for building Kafka Streams applications.
+This comprehensive reference guide covers everything you need to know about writing KSML definitions - from basic syntax to advanced data modeling.
 
 ## KSML File Structure
 
-A KSML definition file is written in YAML and consists of several top-level sections:
+Every KSML definition file is written in YAML and consists of these top-level sections:
 
 ```yaml
 {% include "../definitions/reference/template-definition.yaml" %}
@@ -12,15 +12,11 @@ A KSML definition file is written in YAML and consists of several top-level sect
 
 ## Application Metadata
 
-### Basic Metadata
-
 | Property      | Type   | Required | Description                          |
 |---------------|--------|----------|--------------------------------------|
 | `name`        | String | No       | The name of the KSML definition      |
 | `version`     | String | No       | The version of the KSML definition   |
 | `description` | String | No       | A description of the KSML definition |
-
-Example:
 
 ```yaml
 name: "order-processing-app"
@@ -28,84 +24,109 @@ version: "1.2.3"
 description: "Processes orders from the order topic and enriches them with customer data"
 ```
 
-## Data source and target definitions
+## Data Sources and Targets
 
-### Streams
+KSML supports three types of data streams, each with different characteristics:
 
-Streams represent unbounded sequences of records.
+### Streams (KStream)
 
-| Property             | Type   | Required | Description                                                                  |
-|----------------------|--------|----------|------------------------------------------------------------------------------|
-| `topic`              | String | Yes      | The Kafka topic to read from or write to                                     |
-| `keyType`            | String | Yes      | The type of the record key                                                   |
-| `valueType`          | String | Yes      | The type of the record value                                                 |
-| `offsetResetPolicy`  | String | No       | The offset reset policy (`earliest`, `latest`, `none`)                       |
-| `timestampExtractor` | String | No       | The function to extract timestamps from records                              |
-| `partitioner`        | String | No       | The function that determines to which topic partitions a message is produced |
-
-Example:
+**Use for:** Event-based processing where each record is an independent event.
 
 ```yaml
 streams:
-  orders:
-    topic: "orders"
-    keyType: "string"
-    valueType: "avro:Order"
-    offsetResetPolicy: "earliest"
+  user_clicks_stream:
+    topic: user-clicks
+    keyType: string
+    valueType: json
+    offsetResetPolicy: earliest  # Optional: earliest, latest, none, by_duration:<duration>
+    timestampExtractor: click_timestamp_extractor  # Optional
+    partitioner: click_partitioner  # Optional
 ```
 
-### Tables
-
-Tables represent changelog streams from a primary-keyed table.
+**Key characteristics:**
+- Records are immutable and processed individually
+- Ideal for processing user actions, sensor readings, transactions
+- Records arrive in order and are processed one at a time
 
 | Property             | Type   | Required | Description                                                                  |
 |----------------------|--------|----------|------------------------------------------------------------------------------|
 | `topic`              | String | Yes      | The Kafka topic to read from or write to                                     |
 | `keyType`            | String | Yes      | The type of the record key                                                   |
 | `valueType`          | String | Yes      | The type of the record value                                                 |
-| `offsetResetPolicy`  | String | No       | The offset reset policy (`earliest`, `latest`, `none`)                       |
-| `timestampExtractor` | String | No       | The function to extract timestamps from records                              |
-| `partitioner`        | String | No       | The function that determines to which topic partitions a message is produced |
-| `store`              | String | No       | The name of the key/value state store to use                                 |
+| `offsetResetPolicy`  | String | No       | The offset reset policy (`earliest`, `latest`, `none`, `by_duration:<dur>`) |
+| `timestampExtractor` | String | No       | Function to extract timestamps from records                                  |
+| `partitioner`        | String | No       | Function that determines message partitioning                                |
 
-Example:
+### Tables (KTable)
+
+**Use for:** State-based processing where records represent updates to entities.
 
 ```yaml
 tables:
-  customers:
-    topic: "customers"
-    keyType: "string"
-    valueType: "avro:Customer"
-    store: "customer-store"
+  user_profiles_table:
+    topic: user-profiles
+    keyType: string
+    valueType: avro:UserProfile
+    store: user_profiles_store  # Optional state store name
 ```
 
-### Global Tables
+**Key characteristics:**
+- Records with the same key represent updates to the same entity
+- Only the latest record for each key is retained (compacted)
+- Ideal for user profiles, inventory levels, configuration settings
 
-Global tables are similar to tables but are fully replicated on each instance of the application.
+| Property             | Type   | Required | Description                                                                  |
+|----------------------|--------|----------|------------------------------------------------------------------------------|
+| `topic`              | String | Yes      | The Kafka topic to read from or write to                                     |
+| `keyType`            | String | Yes      | The type of the record key                                                   |
+| `valueType`          | String | Yes      | The type of the record value                                                 |
+| `offsetResetPolicy`  | String | No       | The offset reset policy                                                      |
+| `timestampExtractor` | String | No       | Function to extract timestamps from records                                  |
+| `partitioner`        | String | No       | Function that determines message partitioning                                |
+| `store`              | String | No       | The name of the key/value state store to use                                 |
+
+### Global Tables (GlobalKTable)
+
+**Use for:** Reference data that needs to be available on all application instances.
+
+```yaml
+globalTables:
+  product_catalog:
+    topic: product-catalog
+    keyType: string
+    valueType: avro:Product
+    store: product_catalog_store  # Optional state store name
+```
+
+**Key characteristics:**
+- Fully replicated on each application instance (not partitioned)
+- Allows joins without requiring co-partitioning
+- Ideal for product catalogs, country codes, small to medium reference datasets
 
 | Property             | Type   | Required | Description                                                                  |
 |----------------------|--------|----------|------------------------------------------------------------------------------|
 | `topic`              | String | Yes      | The Kafka topic to read from                                                 |
 | `keyType`            | String | Yes      | The type of the record key                                                   |
 | `valueType`          | String | Yes      | The type of the record value                                                 |
-| `offsetResetPolicy`  | String | No       | The offset reset policy (`earliest`, `latest`, `none`)                       |
-| `timestampExtractor` | String | No       | The function to extract timestamps from records                              |
-| `partitioner`        | String | No       | The function that determines to which topic partitions a message is produced |
+| `offsetResetPolicy`  | String | No       | The offset reset policy                                                      |
+| `timestampExtractor` | String | No       | Function to extract timestamps from records                                  |
+| `partitioner`        | String | No       | Function that determines message partitioning                                |
 | `store`              | String | No       | The name of the key/value state store to use                                 |
 
-Example:
+### Choosing the Right Stream Type
 
-```yaml
-globalTables:
-  products:
-    topic: "products"
-    keyType: "string"
-    valueType: "avro:Product"
-```
+| If you need to...                                         | Consider using... |
+|-----------------------------------------------------------|-------------------|
+| Process individual events as they occur                   | KStream           |
+| Maintain the latest state of entities                     | KTable            |
+| Join with data that's needed across all partitions        | GlobalKTable      |
+| Process time-ordered events                               | KStream           |
+| Track changes to state over time                          | KTable            |
+| Access reference data without worrying about partitioning | GlobalKTable      |
 
 ## Function Definitions
 
-Functions define reusable pieces of logic that can be referenced in pipelines.
+Functions define reusable Python logic that can be referenced in pipelines:
 
 | Property     | Type      | Required  | Description                                                                                                                                                      |
 |--------------|-----------|-----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -114,174 +135,161 @@ Functions define reusable pieces of logic that can be referenced in pipelines.
 | `globalCode` | String    | No        | Python code executed once upon startup                                                                                                                           |
 | `code`       | String    | No        | Python code implementing the function                                                                                                                            |
 | `expression` | String    | No        | An expression that the function will return as value                                                                                                             |
-| `resultType` | Data type | Sometimes | The data type returned by the function. This is sometimes derived from the function `type`, but where it is not, you need to explicitly declare the result type. |
-
-Example:
+| `resultType` | Data type | Sometimes | The data type returned by the function. Required when it cannot be derived from function type.                                                                  |
 
 ```yaml
 functions:
   is_valid_order:
     type: "predicate"
+    expression: value.get("total") > 0 and value.get("items") is not None
+
+  calculate_total:
+    type: "valueTransformer"
     code: |
-      if value is None:
-        return False
-
-      if "orderId" not in value:
-        return False
-
-      if "items" not in value or not value["items"]:
-        return False
-    expression: True
-
-  enrich_order:
-    type: "mapper"
-    expression: |
-      {
-        "order_id": value.get("orderId"),
-        "customer_id": value.get("customerId"),
-        "items": value.get("items", []),
-        "total": sum(item.get("price", 0) * item.get("quantity", 0) for item in value.get("items", [])),
-        "timestamp": value.get("timestamp", int(time.time() * 1000))
-      }
+      total = sum(item.get("price", 0) * item.get("quantity", 0) 
+                  for item in value.get("items", []))
+      return {**value, "total": total}
+    resultType: struct
 ```
 
 ## Pipeline Definitions
 
-Pipelines define the flow of data through the application.
+Pipelines define the flow of data through your application with three main components:
 
-| Property | Type         | Required | Description                         |
-|----------|--------------|----------|-------------------------------------|
-| `from`   | String/Array | Yes      | The source stream(s) or table(s)    |
-| `via`    | Array        | No       | The operations to apply to the data |
-| `to`     | String/Array | Yes      | The destination stream(s)           |
+| Property | Type         | Required | Description                                    |
+|----------|--------------|----------|------------------------------------------------|
+| `from`   | String/Array | Yes      | The source stream(s), table(s), or pipeline(s)|
+| `via`    | Array        | No       | The operations to apply to the data            |
+| `to`     | String/Array | No*      | The destination stream(s)                      |
+| `as`     | String       | No*      | Save result for use in later pipelines        |
+| `branch` | Array        | No*      | Split pipeline based on conditions            |
+| `print`  | Boolean      | No*      | Output messages for debugging                  |
 
-Example:
+*At least one sink type is required.
 
 ```yaml
 pipelines:
   process_orders:
-    from: "orders"
-    via:
-      - type: "filter"
-        if:
-          code: "is_valid_order(key, value)"
-      - type: "mapValues"
-        mapper:
-          code: "enrich_order(key, value)"
-      - type: "peek"
-        forEach:
-          code: |
-            log.info("Processing order: {}", value.get("order_id"))
-    to: "processed_orders"
-```
-
-### Example
-
-```yaml
-pipelines:
-  order_processing:
     from: orders
     via:
       - type: filter
         if:
-          expression: value.get("total") > 100
-      - type: mapValues
+          functionRef: is_valid_order
+      - type: transformValue
         mapper: calculate_total
+      - type: join
+        with: customers
+        valueJoiner:
+          expression: {**value1, "customer": value2}
     to: processed_orders
+```
+
+## Data Types
+
+KSML supports comprehensive data typing for both keys and values:
+
+### Primitive Types
+- `boolean`, `byte`, `short`, `int`, `long`, `float`, `double`, `string`, `bytes`, `null`
+
+### Complex Types
+- `struct`: Key-value map (like JSON objects)
+- `[type]`: List of elements (e.g., `[string]`, `[struct]`)
+- `(type1, type2, ...)`: Tuple of different types (e.g., `(string, int)`)
+- `enum(val1, val2, ...)`: Enumeration of allowed values
+- `union(type1, type2, ...)`: Union of possible types
+- `windowed(type)`: Windowed keys from time-based operations
+- `?` or `any`: Any type (use with caution)
+
+### Data Format Notations
+
+KSML supports various data formats through notation prefixes:
+
+- `json`: JSON format
+- `avro:SchemaName`: AVRO with schema registry
+- `csv:SchemaName`: CSV with defined schema
+- `xml:SchemaName`: XML with defined schema
+- `protobuf:MessageType`: Protocol Buffers
+
+```yaml
+streams:
+  events:
+    topic: events
+    keyType: string
+    valueType: avro:EventData  # Uses AVRO schema from registry
 ```
 
 ## Operations
 
-Operations are the building blocks of pipelines. They transform, filter, or aggregate data.
+Operations are the building blocks of pipelines that transform, filter, or aggregate data:
 
-### Common Operation Types
+### Stateless Operations
+- `map`, `mapValues`: Transform records
+- `filter`: Keep records matching conditions
+- `flatMap`, `flatMapValues`: Transform to multiple records
+- `peek`: Side effects without changing records
+- `selectKey`: Change record keys
 
-#### Stateless Operations
+### Stateful Operations
+- `aggregate`, `count`, `reduce`: Combine records by key
+- `join`, `leftJoin`, `outerJoin`: Combine streams/tables
+- `groupBy`, `groupByKey`: Group records for aggregation
+- `windowedBy`: Create time-based windows
 
-- **mapValues**: Transforms the value of each record.
-- **map**: Transforms both the key and value of each record.
-- **filter**: Keeps only records that satisfy a condition.
-- **flatMap**: Transforms each record into zero or more records.
-- **peek**: Performs a side effect on each record without changing it.
-
-#### Stateful Operations
-
-- **aggregate**: Aggregates records by key.
-- **count**: Counts records by key.
-- **reduce**: Combines records with the same key.
-- **join**: Joins two streams based on key.
-- **windowBySession**: Groups records into time windows.
-- **windowByTime**: Groups records into time windows.
-
-### Operation Parameters
-
-Each operation type has its own set of parameters. Common parameters include:
-
-- **mapper**: For map operations, specifies the transformation.
-- **if**: For filter operations, specifies the condition.
-- **initializer**: For aggregate operations, specifies the initial value.
-- **aggregator**: For aggregate operations, specifies how to combine values.
-
-## Data Types
-
-KSML supports various [data types](data-type-reference.md) for stream keys and values.
-
-### Type Conversion
-
-KSML automatically handles type conversion between compatible types. For example, a JSON string can be converted to an
-AVRO message if the structure (schema) matches.
-
-## Returning a value from a function
-
-KSML supports two methods to return a value from a function:
-
-### Python Expressions
-
-Simple expressions can be defined directly in YAML:
-
-```yaml
-functions:
-  my_function:
-    type: predicate
-    expression: value.get("total") > 100
-```
-
-### Python Code Blocks
-
-More complex logic can be implemented using Python code blocks:
-
-```yaml
-functions:
-  my_function:
-    type: predicate
-    code: |
-      if value.get("status") == "COMPLETED" and value.get("total") > 100:
-        return True
-      return False
-```
+For complete operation details, see [Operation Reference](operation-reference.md).
 
 ## Best Practices
 
-### Naming Conventions
+### 1. Choose Appropriate Stream Types
+```yaml
+# Good: Use KStream for events, KTable for state
+streams:
+  user_actions:    # Events - use KStream
+    topic: clicks
+    keyType: string
+    valueType: json
 
-- Use descriptive names for streams, functions, and pipelines.
-- Use snake_case for state store, function and pipeline names.
+tables:
+  user_profiles:   # State - use KTable
+    topic: profiles
+    keyType: string
+    valueType: avro:UserProfile
+```
 
-### Code Organization
+### 2. Use Meaningful Names
+```yaml
+# Good: Descriptive names
+pipelines:
+  enrich_orders_with_customer_data:
+    from: orders
+    # ...
 
-- Keep functions small and focused on a single task.
-- Reuse functions across pipelines when possible.
-- Group related pipelines together.
+# Avoid: Generic names
+pipelines:
+  process_data:
+    from: stream1
+    # ...
+```
 
-### Performance Considerations
+### 3. Keep Functions Focused
+```yaml
+# Good: Single responsibility
+functions:
+  is_high_value_order:
+    type: predicate
+    expression: value.get("total") > 1000
 
-- Use stateless operations when possible.
-- Be mindful of window sizes in windowed operations.
-- Consider partitioning when designing your pipelines.
+  calculate_discount:
+    type: valueTransformer
+    expression: {**value, "discount": value.get("total") * 0.1}
+```
 
-## Resources
+### 4. Use Appropriate Data Types
+- Be specific about types (avoid `any` when possible)
+- Use AVRO with schema registry for production
+- Use JSON for development and debugging
+- Consider schema evolution when choosing formats
 
-## Appendix: Full Example
+## Complete Example
 
 ```yaml
 streams:
@@ -290,66 +298,41 @@ streams:
     keyType: string
     valueType: json
 
+tables:
   customers:
-    topic: customer_data
+    topic: customer_profiles
     keyType: string
-    valueType: json
-
-  enriched_orders:
-    topic: processed_orders
-    keyType: string
-    valueType: json
+    valueType: avro:Customer
 
 functions:
   calculate_total:
     type: valueTransformer
     code: |
-      total = 0
-      for item in value.get("items", []):
-        total += item.get("price", 0) * item.get("quantity", 0)
+      total = sum(item.get("price", 0) * item.get("quantity", 0) 
+                  for item in value.get("items", []))
       return {**value, "total": total}
     resultType: struct
 
-  join_with_customers:
-    type: valueJoiner
-    code: |
-      return {
-        **value1,
-        "customer": value2
-      }
-    resultType: struct
-
-  enrich_order:
-    type: valueTransformer
-    code: |
-      customer = value.get("customer")
-      if customer is None:
-        return value
-      return {
-        **value,
-        "customer_name": customer.get("name"),
-        "customer_tier": customer.get("tier", "standard"),
-        "loyalty_points": value.get("total", 0) * 0.1
-      }
-    resultType: struct
-
 pipelines:
-  order_processing:
+  process_orders:
     from: orders
     via:
       - type: transformValue
         mapper: calculate_total
-      - type: join
-        with: customers
-        valueJoiner: join_with_customers
-      - type: transformValue
-        mapper: enrich_order
       - type: filter
         if:
           expression: value.get("total") > 0
-    to: enriched_orders
+      - type: join
+        with: customers
+        valueJoiner:
+          expression: {**value1, "customer": value2}
+    to: processed_orders
 ```
 
-This example demonstrates a complete KSML application that processes orders, calculates totals, enriches them with
-customer data, and filters out zero-total orders.
+## Related Topics
 
+- [Pipeline Reference](pipeline-reference.md) - Detailed pipeline syntax and patterns
+- [Operation Reference](operation-reference.md) - Complete operation documentation
+- [Function Reference](function-reference.md) - Python function integration
+- [Data Type Reference](data-type-reference.md) - Comprehensive type system
+- [Configuration Reference](configuration-reference.md) - Runtime configuration options

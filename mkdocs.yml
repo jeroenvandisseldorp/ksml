@@ -67,12 +67,11 @@ nav:
   - References:
       - Overview: reference/index.md
       - KSML Definition Reference: reference/definition-reference.md
-      - Stream Type Reference: reference/stream-type-reference.md
+      - Pipeline Reference: reference/pipeline-reference.md
       - Data Type Reference: reference/data-type-reference.md
       - Notation Reference: reference/notation-reference.md
       - Function Reference: reference/function-reference.md
       - Operation Reference: reference/operation-reference.md
-      - Pipelines: reference/pipelines.md
       - Configuration Reference: reference/configuration-reference.md
   - Resources:
       - Examples Library: resources/examples-library.md

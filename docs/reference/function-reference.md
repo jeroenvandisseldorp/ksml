@@ -233,7 +233,7 @@ New key for the output message
 
 **See how `keyTransformer` is used in an example definition**:
 
-- [Tutorial: Stream Table Join Example](../tutorials/intermediate/joins.md#stream-table-join)
+- [Tutorial: Stream Table Join Example](../tutorials/intermediate/joins.md#use-case-order-enrichment)
 
 ### keyValueToKeyValueListTransformer
 
@@ -438,8 +438,6 @@ The merger function is specifically designed for session window aggregations whe
 
 **What the example does:**
 
-Here’s a shorter version:
-
 Simulates user activity tracking with session windows and merging:
 
 * Groups events into 10-min inactivity sessions
@@ -513,8 +511,9 @@ The key to look up in the table being joined with
 
 The foreignKeyExtractor enables table joins where the join key is embedded within the record value rather than being the record key. This example demonstrates order enrichment by joining with customer data using a foreign key relationship.
 
-**Example Summary**
-Simulates an e-commerce system enriching orders with customer data:
+**Example**
+
+This example simulates an e-commerce system enriching orders with customer data:
 
 * Orders keyed by `order_id`, referencing `customer_id`
 * Customer details looked up by `customer_id`

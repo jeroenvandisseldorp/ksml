@@ -12,19 +12,14 @@ functions:
   extract_region_key:
     type: keyTransformer
     code: |
-      # Extract region from transaction data to use as new key
-      # This repartitions data by region for region-based analytics
-      if value is None:
-        return "unknown"
-      
-      region = value.get("region", "unknown")
-      return region
+      if value is None: return "unknown"
+      return value.get("region", "unknown")
     resultType: string
     
   log_repartitioned:
     type: forEach
     code: |
-      log.info("Transaction repartitioned - Original key: {}, New key (region): {}, Amount: ${}", 
+      log.info("Repartitioned - Key: {}, Region: {}, Amount: ${}", 
                key, value.get("region"), value.get("amount"))
 
 pipelines:
@@ -32,7 +27,7 @@ pipelines:
     from: transaction_input
     via:
       - type: mapKey
-        keyTransformer: extract_region_key
+        mapper: extract_region_key
       - type: peek
         forEach: log_repartitioned
     to: region_output

@@ -2,30 +2,22 @@ functions:
   generate_order_batch:
     type: generator
     globalCode: |
-      import json
-      import random
+      import json, random
       counter = 0
-      customers = ["alice", "bob", "charlie", "diana"]
-      
     code: |
       global counter
       counter += 1
-      customer_id = random.choice(customers)
-      
-      # Generate batch of items for a single order
-      items = [
-        {"item_id": "laptop", "quantity": 1, "price": 999.99},
-        {"item_id": "mouse", "quantity": 2, "price": 29.99},
-        {"item_id": "keyboard", "quantity": 1, "price": 79.99}
-      ]
-      
-      order_batch = {
-        "order_id": f"order-{counter}",
-        "customer_id": customer_id,
-        "items": items
+      cust = random.choice(["alice", "bob", "charlie"])
+      batch = {
+        "order_id": f"ord-{counter}",
+        "customer_id": cust,
+        "items": [
+          {"item_id": "laptop", "quantity": 1, "price": 999.99},
+          {"item_id": "mouse", "quantity": 2, "price": 29.99},
+          {"item_id": "keyboard", "quantity": 1, "price": 79.99}
+        ]
       }
-      
-      return customer_id, json.dumps(order_batch)
+      return cust, json.dumps(batch)
     resultType: (string, json)
 
 producers:

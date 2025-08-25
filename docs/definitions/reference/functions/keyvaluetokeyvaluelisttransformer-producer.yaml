@@ -4,39 +4,15 @@ functions:
     globalCode: |
       import random
       counter = 0
-      products = ["laptop", "tablet", "phone", "monitor", "keyboard"]
-      customers = [
-        "alice@example.com", "bob@example.com", "charlie@example.com", 
-        "diana@example.com", "eve@example.com"
-      ]
     code: |
-      global counter, products, customers
-      
-      # Generate batch ID as key
-      batch_id = f"batch_{counter:03d}"
+      global counter
       counter += 1
-      
-      # Generate batch with 2-4 orders
-      num_orders = random.randint(2, 4)
-      orders = []
-      
-      for i in range(num_orders):
-        order = {
-          "product": random.choice(products),
-          "quantity": random.randint(1, 5),
-          "customer_email": random.choice(customers)
-        }
-        orders.append(order)
-      
-      # Create batch value
-      batch_value = {
-        "batch_id": batch_id,
-        "orders": orders,
-        "timestamp": counter * 1000,
-        "total_orders": num_orders
-      }
-      
-    expression: (batch_id, batch_value)
+      bid = f"b{counter:03d}"
+      prods = ["laptop", "phone", "tablet"]
+      custs = ["alice@co", "bob@co", "charlie@co"]
+      orders = [{"product": random.choice(prods), "qty": random.randint(1,5), 
+                 "customer": random.choice(custs)} for _ in range(random.randint(2,4))]
+      return bid, {"batch_id": bid, "orders": orders, "total": len(orders)}
     resultType: (string, json)
 
 producers:

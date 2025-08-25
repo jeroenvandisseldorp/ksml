@@ -9,57 +9,19 @@ functions:
     type: generator
     resultType: (string,json)
     code: |
-      import random
-      import time
-      
-      # Generate user events from different sources
-      user_ids = ["user_001", "user_002", "user_003", "user_004", "user_005"]
-      event_types = ["login", "purchase", "view", "logout", "search"]
-      products = ["laptop", "mouse", "keyboard", "monitor", "headphones"]
-      
-      user_id = random.choice(user_ids)
-      event_type = random.choice(event_types)
-      timestamp = int(time.time())
-      session_id = f"sess_{random.randint(1000, 9999)}"
-      
-      if event_type == "purchase":
-        event_data = {
-          "user_id": user_id,
-          "event_type": event_type,
-          "product": random.choice(products),
-          "amount": round(random.uniform(10.0, 500.0), 2),
-          "session_id": session_id,
-          "timestamp": timestamp
-        }
-      elif event_type == "view":
-        event_data = {
-          "user_id": user_id,
-          "event_type": event_type,
-          "product": random.choice(products),
-          "duration_seconds": random.randint(5, 300),
-          "session_id": session_id,
-          "timestamp": timestamp
-        }
-      elif event_type == "search":
-        event_data = {
-          "user_id": user_id,
-          "event_type": event_type,
-          "query": random.choice(products),
-          "results_count": random.randint(0, 50),
-          "session_id": session_id,
-          "timestamp": timestamp
-        }
-      else:  # login, logout
-        event_data = {
-          "user_id": user_id,
-          "event_type": event_type,
-          "session_id": session_id,
-          "timestamp": timestamp,
-          "ip_address": f"192.168.1.{random.randint(1, 254)}"
-        }
-      
-      # Original key is session_id, we'll change it to user_id using selectKey
-      return (session_id, event_data)
+      import random, time
+      uid = random.choice(["u01", "u02", "u03"])
+      evt = random.choice(["login", "purchase", "view"])
+      sid = f"s{random.randint(100, 999)}"
+      data = {
+        "user_id": uid,
+        "event_type": evt,
+        "session_id": sid,
+        "timestamp": int(time.time())
+      }
+      if evt == "purchase":
+        data["amount"] = round(random.uniform(10, 500), 2)
+      return (sid, data)
 
 producers:
   # Produce user events every 3 seconds

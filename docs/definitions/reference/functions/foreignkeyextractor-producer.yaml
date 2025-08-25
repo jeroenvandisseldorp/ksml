@@ -2,63 +2,39 @@ functions:
   generate_orders:
     type: generator
     globalCode: |
-      import random
-      import time
-      
+      import random, time
       order_counter = 1
-      customers = ["cust_001", "cust_002", "cust_003"]
-      products = ["laptop", "phone", "tablet", "headphones"]
-      
     code: |
-      global order_counter, customers, products
-      
-      # Generate order data
-      order_id = f"order_{order_counter:03d}"
-      customer_id = random.choice(customers)
-      product = random.choice(products)
-      amount = random.randint(100, 1000)
-      
-      order_value = {
-        "order_id": order_id,
-        "customer_id": customer_id,  # This will be extracted by foreignKeyExtractor
-        "product": product,
-        "amount": amount,
+      global order_counter
+      oid = f"ord_{order_counter:03d}"
+      order_counter += 1
+      return oid, {
+        "order_id": oid,
+        "customer_id": random.choice(["c001", "c002", "c003"]),
+        "product": random.choice(["laptop", "phone"]),
+        "amount": random.randint(100, 1000),
         "timestamp": int(time.time() * 1000)
       }
-      
-      order_counter += 1
-      
-    expression: (order_id, order_value)
     resultType: (string, json)
     
   generate_customers:
     type: generator
     globalCode: |
-      import time
-      import random
-      
-      customer_data = [
-        {"id": "cust_001", "name": "Alice Johnson", "email": "alice@example.com", "tier": "gold"},
-        {"id": "cust_002", "name": "Bob Smith", "email": "bob@example.com", "tier": "silver"},
-        {"id": "cust_003", "name": "Charlie Brown", "email": "charlie@example.com", "tier": "bronze"}
+      import time, random
+      custs = [
+        {"id": "c001", "name": "Alice", "tier": "gold"},
+        {"id": "c002", "name": "Bob", "tier": "silver"},  
+        {"id": "c003", "name": "Charlie", "tier": "bronze"}
       ]
-      
     code: |
-      global customer_data
-      
-      # Pick a random customer to create (or recreate)
-      customer = random.choice(customer_data)
-      customer_id = customer["id"]
-      
-      customer_value = {
-        "customer_id": customer_id,
-        "name": customer["name"],
-        "email": customer["email"],
-        "tier": customer["tier"],
+      global custs
+      c = random.choice(custs)
+      return c["id"], {
+        "customer_id": c["id"],
+        "name": c["name"],
+        "tier": c["tier"],
         "created_at": int(time.time() * 1000)
       }
-      
-    expression: (customer_id, customer_value)
     resultType: (string, json)
 
 producers:

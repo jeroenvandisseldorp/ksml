@@ -2,46 +2,24 @@ functions:
   generate_user_activity:
     type: generator
     globalCode: |
-      import random
-      import time
-      
-      # Initialize data for session simulation
-      event_counter = 0
-      users = ["alice", "bob", "charlie"]
-      pages = ["home", "products", "profile", "settings"]
-      
-      # Track timing for realistic sessions
-      last_activity = {}
-      base_time = int(time.time() * 1000)
-      
+      import random, time
+      counter = 0
+      last_act = {}
+      base_t = int(time.time() * 1000)
     code: |
-      global event_counter, users, pages, last_activity, base_time
-      
-      # Select user with weighted probability
-      user_id = random.choice(users)
-      
-      # Calculate event timing
-      current_time = base_time + (event_counter * 2000)  # 2 seconds between events
-      
-      # Occasionally create session gaps (15% chance)
-      if user_id in last_activity and random.random() < 0.15:
-        # Create gap longer than inactivity timeout (10+ minutes)
-        current_time = last_activity[user_id] + (11 * 60 * 1000) + random.randint(0, 120000)
-        log.info("Creating session gap for user {}", user_id)
-      
-      last_activity[user_id] = current_time
-      
-      # Generate activity event
-      activity = {
-        "user_id": user_id,
-        "page": random.choice(pages),
-        "timestamp": current_time,
+      global counter, last_act, base_t
+      uid = random.choice(["alice", "bob", "charlie"])
+      t = base_t + (counter * 2000)
+      if uid in last_act and random.random() < 0.15:
+        t = last_act[uid] + 660000  # 11min gap
+      last_act[uid] = t
+      counter += 1
+      return uid, {
+        "user_id": uid,
+        "page": random.choice(["home", "products", "profile"]),
+        "timestamp": t,
         "event_type": "page_view"
       }
-      
-      event_counter += 1
-      
-    expression: (user_id, activity)
     resultType: (string, json)
 
 producers:

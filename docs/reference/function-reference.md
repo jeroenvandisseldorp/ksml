@@ -8,8 +8,8 @@ Functions provide the flexibility to go beyond built-in operations and implement
 
 ## Writing Python Functions
 
-### Example Function Definition
-??? info "Example Function Definition"
+### Example KSML Function Definition
+??? info "Example KSML Function Definition"
 
       ```yaml
       functions:

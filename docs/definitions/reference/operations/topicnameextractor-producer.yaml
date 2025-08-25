@@ -9,77 +9,23 @@ functions:
     type: generator
     resultType: (string,json)
     code: |
-      import random
-      import time
-      
-      # Generate system events with different severity levels
-      severities = ["INFO", "WARNING", "ERROR", "CRITICAL"]
-      components = ["api-gateway", "payment-service", "user-service", "database", "cache"]
-      
-      severity = random.choice(severities)
-      component = random.choice(components)
-      timestamp = int(time.time())
-      event_id = f"evt_{random.randint(10000, 99999)}"
-      
-      if severity == "CRITICAL":
-        messages = [
-          "System failure detected",
-          "Service completely unavailable",
-          "Data corruption detected",
-          "Security breach attempt"
-        ]
-        metrics = {
-          "cpu_usage": random.uniform(95, 100),
-          "memory_usage": random.uniform(90, 100),
-          "error_rate": random.uniform(50, 100)
-        }
-      elif severity == "ERROR":
-        messages = [
-          "Request timeout",
-          "Database connection failed",
-          "Authentication error",
-          "Service degradation detected"
-        ]
-        metrics = {
-          "cpu_usage": random.uniform(70, 90),
-          "memory_usage": random.uniform(70, 85),
-          "error_rate": random.uniform(10, 50)
-        }
-      elif severity == "WARNING":
-        messages = [
-          "High memory usage",
-          "Slow response time",
-          "Rate limit approaching",
-          "Disk space low"
-        ]
-        metrics = {
-          "cpu_usage": random.uniform(50, 70),
-          "memory_usage": random.uniform(60, 70),
-          "error_rate": random.uniform(1, 10)
-        }
-      else:  # INFO
-        messages = [
-          "Service started",
-          "Health check passed",
-          "Configuration reloaded",
-          "Backup completed"
-        ]
-        metrics = {
-          "cpu_usage": random.uniform(10, 50),
-          "memory_usage": random.uniform(30, 60),
-          "error_rate": random.uniform(0, 1)
-        }
-      
-      event_data = {
-        "event_id": event_id,
-        "severity": severity,
-        "component": component,
-        "message": random.choice(messages),
-        "timestamp": timestamp,
-        "metrics": metrics
+      import random, time
+      sev = random.choice(["INFO", "WARNING", "ERROR", "CRITICAL"])
+      msgs = {
+        "CRITICAL": ["System failure", "Service down"],
+        "ERROR": ["Request timeout", "DB failed"],
+        "WARNING": ["High CPU", "Disk low"],
+        "INFO": ["Service started", "Health OK"]
       }
-      
-      return (event_id, event_data)
+      eid = f"e{random.randint(1000, 9999)}"
+      return eid, {
+        "event_id": eid,
+        "severity": sev,
+        "component": random.choice(["api", "db", "cache"]),
+        "message": random.choice(msgs[sev]),
+        "timestamp": int(time.time()),
+        "cpu": random.uniform(10 if sev=="INFO" else 70, 100)
+      }
 
 producers:
   # Produce system events every 2 seconds

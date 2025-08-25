@@ -12,25 +12,13 @@ pipelines:
         mapper:
           resultType: "[(string,json)]"
           code: |
-            order_id = value['order_id']
-            customer_id = value['customer_id']
-            items = value['items']
-            
-            # Split order batch into individual item records
-            result = []
-            for item in items:
-                item_key = f"{order_id}_{item['item_id']}"
-                item_record = {
-                    "order_id": order_id,
-                    "customer_id": customer_id,
-                    "item_id": item['item_id'],
-                    "quantity": item['quantity'],
-                    "price": item['price'],
-                    "total_price": item['quantity'] * item['price']
-                }
-                result.append((item_key, item_record))
-            
-            return result
+            return [(f"{value['order_id']}_{i['item_id']}", {
+              "order_id": value['order_id'],
+              "customer_id": value['customer_id'],
+              "item_id": i['item_id'],
+              "quantity": i['quantity'],
+              "total": i['quantity'] * i['price']
+            }) for i in value['items']]
     to:
       topic: individual_items
       keyType: string

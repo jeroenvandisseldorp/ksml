@@ -382,7 +382,7 @@ functions:
 
 ## Related Topics
 
-- [KSML Language Reference](language-reference.md)
+- [KSML Definition Reference](definition-reference.md)
 - [Operations Reference](operation-reference.md)
 - [Functions Reference](function-reference.md)
 - [Configuration Reference](configuration-reference.md)

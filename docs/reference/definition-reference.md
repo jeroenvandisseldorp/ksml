@@ -1,7 +1,6 @@
-# Language Reference
+# Definition Reference
 
-This document provides a comprehensive reference for the KSML (Kafka Streams Markup Language) syntax and structure. It
-covers all aspects of the KSML language specification, including file structure, data types, and configuration options.
+This document provides a comprehensive reference for writing KSML definitions. It covers all aspects of KSML definition syntax and structure, including file organization, data types, and configuration options for building Kafka Streams applications.
 
 ## KSML File Structure
 

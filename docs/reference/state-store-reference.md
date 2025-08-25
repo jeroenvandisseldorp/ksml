@@ -388,7 +388,7 @@ pipelines:
 
 ## Related Topics
 
-- [KSML Language Reference](language-reference.md)
+- [KSML Definition Reference](definition-reference.md)
 - [Operations Reference](operation-reference.md)
 - [Pipeline Reference](pipeline-reference.md)
 - [Data Types Reference](data-type-reference.md)

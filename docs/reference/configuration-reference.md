@@ -824,7 +824,7 @@ config:
 
 ## Related Topics
 
-- [KSML Language Reference](language-reference.md)
+- [KSML Definition Reference](definition-reference.md)
 - [Operations Reference](operation-reference.md)
 - [Functions Reference](function-reference.md)
 - [Data Types Reference](data-type-reference.md)

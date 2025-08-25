@@ -6,9 +6,9 @@ Understanding these fundamental components will give you a solid foundation for 
 
 ## Reference Sections
 
-### [KSML Language Reference](language-reference.md)
+### [KSML Definition Reference](definition-reference.md)
 
-Complete documentation of the KSML language syntax and structure:
+Complete documentation for writing KSML definitions:
 
 - YAML structure and formatting
 - Definition file organization
@@ -107,7 +107,7 @@ Complete documentation of KSML configuration options:
 
 You can read through these reference topics in order for a comprehensive understanding, or jump to specific topics as needed:
 
-1. Start with [KSML Language Reference](language-reference.md) and [Stream Type Reference](stream-type-reference.md) to understand the basic structure and data model
+1. Start with [KSML Definition Reference](definition-reference.md) and [Stream Type Reference](stream-type-reference.md) to understand the basic structure and data model
 2. Move on to [Data Types](data-type-reference.md) and [Notations](notation-reference.md) to learn about data handling
 3. Explore [Functions](function-reference.md) to see how to implement custom logic
 4. Learn about [Operations](operation-reference.md) to understand all the ways you can process your data

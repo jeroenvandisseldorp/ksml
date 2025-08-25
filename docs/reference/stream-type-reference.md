@@ -226,7 +226,7 @@ Understanding streams and data types is fundamental to building effective KSML a
 stream types, data types, and notations for your use case, you can create efficient, maintainable, and scalable stream
 processing pipelines.
 
-For more detailed information, refer to the [KSML Language Reference](language-reference.md)
+For more detailed information, refer to the [KSML Definition Reference](definition-reference.md)
 and [Data Types Reference](data-type-reference.md).
 
 ## Next Steps

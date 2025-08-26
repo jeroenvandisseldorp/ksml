@@ -44,18 +44,19 @@ streams:
 ```
 
 **Key characteristics:**
+
 - Records are immutable and processed individually
 - Ideal for processing user actions, sensor readings, transactions
 - Records arrive in order and are processed one at a time
 
-| Property             | Type   | Required | Description                                                                  |
-|----------------------|--------|----------|------------------------------------------------------------------------------|
-| `topic`              | String | Yes      | The Kafka topic to read from or write to                                     |
-| `keyType`            | String | Yes      | The type of the record key                                                   |
-| `valueType`          | String | Yes      | The type of the record value                                                 |
+| Property             | Type   | Required | Description                                                                 |
+|----------------------|--------|----------|-----------------------------------------------------------------------------|
+| `topic`              | String | Yes      | The Kafka topic to read from or write to                                    |
+| `keyType`            | String | Yes      | The type of the record key                                                  |
+| `valueType`          | String | Yes      | The type of the record value                                                |
 | `offsetResetPolicy`  | String | No       | The offset reset policy (`earliest`, `latest`, `none`, `by_duration:<dur>`) |
-| `timestampExtractor` | String | No       | Function to extract timestamps from records                                  |
-| `partitioner`        | String | No       | Function that determines message partitioning                                |
+| `timestampExtractor` | String | No       | Function to extract timestamps from records                                 |
+| `partitioner`        | String | No       | Function that determines message partitioning                               |
 
 ### Tables (KTable)
 
@@ -71,6 +72,7 @@ tables:
 ```
 
 **Key characteristics:**
+
 - Records with the same key represent updates to the same entity
 - Only the latest record for each key is retained (compacted)
 - Ideal for user profiles, inventory levels, configuration settings
@@ -99,6 +101,7 @@ globalTables:
 ```
 
 **Key characteristics:**
+
 - Fully replicated on each application instance (not partitioned)
 - Allows joins without requiring co-partitioning
 - Ideal for product catalogs, country codes, small to medium reference datasets
@@ -128,14 +131,14 @@ globalTables:
 
 Functions define reusable Python logic that can be referenced in pipelines:
 
-| Property     | Type      | Required  | Description                                                                                                                                                      |
-|--------------|-----------|-----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `type`       | String    | Yes       | The type of function (predicate, mapper, aggregator, etc.)                                                                                                       |
-| `parameters` | Array     | No        | Parameters for the function                                                                                                                                      |
-| `globalCode` | String    | No        | Python code executed once upon startup                                                                                                                           |
-| `code`       | String    | No        | Python code implementing the function                                                                                                                            |
-| `expression` | String    | No        | An expression that the function will return as value                                                                                                             |
-| `resultType` | Data type | Sometimes | The data type returned by the function. Required when it cannot be derived from function type.                                                                  |
+| Property     | Type      | Required  | Description                                                                                    |
+|--------------|-----------|-----------|------------------------------------------------------------------------------------------------|
+| `type`       | String    | Yes       | The type of function (predicate, mapper, aggregator, etc.)                                     |
+| `parameters` | Array     | No        | Parameters for the function                                                                    |
+| `globalCode` | String    | No        | Python code executed once upon startup                                                         |
+| `code`       | String    | No        | Python code implementing the function                                                          |
+| `expression` | String    | No        | An expression that the function will return as value                                           |
+| `resultType` | Data type | Sometimes | The data type returned by the function. Required when it cannot be derived from function type. |
 
 ```yaml
 functions:
@@ -158,11 +161,11 @@ Pipelines define the flow of data through your application with three main compo
 
 | Property | Type         | Required | Description                                    |
 |----------|--------------|----------|------------------------------------------------|
-| `from`   | String/Array | Yes      | The source stream(s), table(s), or pipeline(s)|
+| `from`   | String/Array | Yes      | The source stream(s), table(s), or pipeline(s) |
 | `via`    | Array        | No       | The operations to apply to the data            |
 | `to`     | String/Array | No*      | The destination stream(s)                      |
-| `as`     | String       | No*      | Save result for use in later pipelines        |
-| `branch` | Array        | No*      | Split pipeline based on conditions            |
+| `as`     | String       | No*      | Save result for use in later pipelines         |
+| `branch` | Array        | No*      | Split pipeline based on conditions             |
 | `print`  | Boolean      | No*      | Output messages for debugging                  |
 
 *At least one sink type is required.

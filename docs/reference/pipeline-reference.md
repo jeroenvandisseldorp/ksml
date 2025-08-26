@@ -9,6 +9,7 @@ In KSML, pipelines form the heart of stream processing logic. A pipeline defines
 Think of a pipeline as a recipe that describes exactly how data should be processed from start to finish.
 
 Pipelines connect:
+
 - **Sources**: Where data comes from (Kafka topics via streams, tables, or global tables)
 - **Operations**: What happens to the data (transformations, filters, aggregations, etc.)
 - **Sinks**: Where the processed data goes (output topics, other pipelines, functions, etc.)
@@ -46,6 +47,7 @@ from: user_clicks_stream
 ```
 
 A source can be:
+
 - A **stream** (KStream): For event-based processing
 - A **table** (KTable): For state-based processing
 - A **globalTable** (GlobalKTable): For reference data
@@ -79,6 +81,7 @@ via:
 ```
 
 Each operation:
+
 - Has a `type` that defines what it does
 - Takes parameters specific to that operation type
 - Receives data from the previous operation (or the source)
@@ -92,14 +95,14 @@ For a complete list of available operations, see the [Operation Reference](opera
 
 The sink defines where the processed data should be sent. KSML supports several sink types:
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `to` | String | No* | The destination stream or topic name |
-| `as` | String | No* | Name to save the result for use in later pipelines |
-| `branch` | Array | No* | Split the pipeline based on conditions |
-| `forEach` | Object | No* | Process each message with a function (terminal operation) |
-| `print` | Boolean | No* | Output messages for debugging |
-| `toTopicNameExtractor` | Object | No* | Dynamically determine the output topic |
+| Parameter              | Type    | Required | Description                                               |
+|------------------------|---------|----------|-----------------------------------------------------------|
+| `to`                   | String  | No*      | The destination stream or topic name                      |
+| `as`                   | String  | No*      | Name to save the result for use in later pipelines        |
+| `branch`               | Array   | No*      | Split the pipeline based on conditions                    |
+| `forEach`              | Object  | No*      | Process each message with a function (terminal operation) |
+| `print`                | Boolean | No*      | Output messages for debugging                             |
+| `toTopicNameExtractor` | Object  | No*      | Dynamically determine the output topic                    |
 
 *At least one sink type is required.
 
@@ -126,6 +129,7 @@ toTopicNameExtractor:  # Dynamic topic routing
 ```
 
 Common sink types include:
+
 - `to`: Send to a predefined stream, table, or topic
 - `as`: Save the result under a name for use in later pipelines
 - `branch`: Split the pipeline based on conditions
@@ -159,6 +163,7 @@ pipelines:
 ```
 
 This approach allows you to:
+
 - Break complex logic into smaller, more manageable pieces
 - Reuse intermediate results in multiple downstream pipelines
 - Create cleaner, more maintainable code
@@ -202,6 +207,7 @@ pipelines:
 ```
 
 This is useful for:
+
 - Partitioning data across multiple topics
 - Creating topic hierarchies
 - Implementing multi-tenant architectures
@@ -223,6 +229,7 @@ streams:
 ```
 
 Important configuration options include:
+
 - `offsetResetPolicy`: Determines where to start consuming from when no offset is stored
 - `timestampExtractor`: Defines how to extract event timestamps from messages
 - `keyType` and `valueType`: Define the data types and formats
@@ -257,6 +264,7 @@ Some pipeline operations require specifying time durations. In KSML, durations a
 ```
 
 Where:
+
 - `###` is a positive number
 - `x` is an optional time unit:
   - (none): milliseconds

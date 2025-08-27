@@ -44,15 +44,17 @@ stores:
 | `name` | String | _none_ | Optional | The name of the state store. If not specified, the operation's name will be used. |
 | `type` | String | _none_ | Required | The type of state store. Possible values: `keyValue`, `window`, `session`. |
 | `persistent` | Boolean | `false` | Optional | When `true`, the state store is persisted to disk. When `false`, the state store is in-memory only. |
-| `timestamped` | Boolean | `false` | Optional | (Only relevant for keyValue and window stores) When `true`, all messages in the state store are timestamped. |
+| `timestamped` | Boolean | `false` | Optional | When `true`, all messages in the state store are timestamped. |
 | `versioned` | Boolean | `false` | Optional | (Only relevant for keyValue stores) When `true`, elements in the store are versioned. |
-| `keyType` | String | _none_ | Required | The key type of the state store. See [Data Types Reference](data-type-reference.md) for more information. |
-| `valueType` | String | _none_ | Required | The value type of the state store. See [Data Types Reference](data-type-reference.md) for more information. |
+| `historyRetention` | Duration | _none_ | Optional | (Only relevant for versioned keyValue stores) Duration for which old record versions are available for query. |
+| `segmentInterval` | Duration | _none_ | Optional | (Only relevant for versioned keyValue stores) Size of segments for storing old record versions. |
+| `keyType` | String | _none_ | Required | The key type of the state store. See [Data Types and Formats Reference](data-and-formats-reference.md) for more information. |
+| `valueType` | String | _none_ | Required | The value type of the state store. See [Data Types and Formats Reference](data-and-formats-reference.md) for more information. |
 | `caching` | Boolean | `false` | Optional | When `true`, the state store caches entries. When `false`, all changes to the state store will be emitted immediately. |
 | `logging` | Boolean | `false` | Optional | When `true`, state changes are written to a changelog topic. When `false`, no changelog topic is written. |
 | `retention` | Duration | _none_ | Optional | (Only relevant for window and session stores) How long to retain data in the store. |
 | `windowSize` | Duration | _none_ | Optional | (Only relevant for window stores) The size of the window. |
-| `grace` | Duration | _none_ | Optional | (Only relevant for window stores) The grace period for late-arriving data. |
+| `retainDuplicates` | Boolean | `false` | Optional | (Only relevant for window stores) Whether or not to retain duplicates. |
 
 ### Example Configurations
 
@@ -69,6 +71,21 @@ stores:
     logging: true
 ```
 
+#### Versioned Key-Value Store
+
+```yaml
+stores:
+  versioned_user_store:
+    type: keyValue
+    keyType: string
+    valueType: json
+    persistent: true
+    versioned: true
+    historyRetention: 7d
+    segmentInterval: 1h
+    timestamped: true
+```
+
 #### Window Store
 
 ```yaml
@@ -79,8 +96,10 @@ stores:
     valueType: json
     windowSize: 1h
     retention: 24h
+    retainDuplicates: false
     persistent: true
     caching: true
+    timestamped: true
 ```
 
 #### Session Store

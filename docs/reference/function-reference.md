@@ -2,6 +2,22 @@
 
 This document provides a comprehensive reference for all function types available in KSML. Functions in KSML allow you to implement custom logic for processing your streaming data using Python, making stream processing accessible to data scientists, analysts, and developers who may not be familiar with Java or Kafka Streams API.
 
+## Function Definition Structure
+
+Functions are defined in the `functions` section of your KSML definition file. Each function has the following properties:
+
+| Property     | Type      | Required  | Description                                                                                    |
+|--------------|-----------|-----------|------------------------------------------------------------------------------------------------|
+| `type`       | String    | Yes       | The type of function (predicate, mapper, aggregator, etc.)                                     |
+| `parameters` | Array     | No        | **Additional** custom parameters to add to the function's built-in parameters (see note below) |
+| `globalCode` | String    | No        | Python code executed once upon startup                                                         |
+| `code`       | String    | No        | Python code implementing the function                                                          |
+| `expression` | String    | No        | An expression that the function will return as value                                           |
+| `resultType` | Data type | Sometimes | The data type returned by the function. Required when it cannot be derived from function type. |
+| `stores`     | Array     | No        | List of state stores the function can access                                                   |
+
+**Note about parameters:** Every function type has built-in parameters that are automatically provided by KSML (e.g., `key` and `value` for most function types). The `parameters` property is only needed when you want to add custom parameters beyond these built-in ones. These additional parameters can then be passed when calling the function from Python code.
+
 ## What are Functions in KSML?
 
 Functions provide the flexibility to go beyond built-in operations and implement specific business logic, transformations, and data processing requirements. They are written in Python and executed within the KSML runtime, combining the power of Kafka Streams with the simplicity and expressiveness of Python.

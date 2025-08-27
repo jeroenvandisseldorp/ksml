@@ -72,6 +72,7 @@ nav:
       - Notation Reference: reference/notation-reference.md
       - Function Reference: reference/function-reference.md
       - Operation Reference: reference/operation-reference.md
+      - State Store Reference: reference/state-store-reference.md
       - Configuration Reference: reference/configuration-reference.md
   - Resources:
       - Examples Library: resources/examples-library.md

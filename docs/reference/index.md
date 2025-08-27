@@ -83,6 +83,18 @@ Learn about the various operations you can perform on your data:
   - Common use cases
   - Performance considerations
 
+### [State Store Reference](state-store-reference.md)
+
+Understand how to work with stateful processing in KSML:
+
+- State store types (KeyValue, Window, Session)
+- Store configuration options
+- Persistence and caching
+- Using stores in functions
+- Store queries and management
+- Performance tuning
+- Best practices for stateful operations
+
 ### [Configuration Reference](configuration-reference.md)
 
 Complete documentation of KSML configuration options:
@@ -104,5 +116,6 @@ You can read through these reference topics in order for a comprehensive underst
 3. Move on to [Data Types](data-type-reference.md) and [Notations](notation-reference.md) to learn about data handling
 4. Explore [Functions](function-reference.md) to see how to implement custom logic
 5. Learn about [Operations](operation-reference.md) to understand all the ways you can process your data
-6. Review advanced tutorials for production-ready applications
-7. Finish with [Configuration Reference](configuration-reference.md) for deployment settings
+6. Understand [State Stores](state-store-reference.md) for stateful processing and data persistence
+7. Review advanced tutorials for production-ready applications
+8. Finish with [Configuration Reference](configuration-reference.md) for deployment settings

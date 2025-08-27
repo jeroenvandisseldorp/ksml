@@ -32,6 +32,23 @@ pipelines:
 
 This structure makes pipelines easy to read and understand, with a clear flow from source to operations to sink.
 
+## Pipeline Properties
+
+Each pipeline in the `pipelines` section has these main properties:
+
+| Property | Type         | Required | Description                                    |
+|----------|--------------|----------|------------------------------------------------|
+| `from`   | String/Array | Yes      | The source stream(s), table(s), or pipeline(s) |
+| `via`    | Array        | No       | List of operations to apply to the data        |
+| `to`     | String       | No*      | The destination stream or topic               |
+| `as`     | String       | No*      | Name to save the result for later pipelines   |
+| `branch` | Array        | No*      | Split the pipeline based on conditions        |
+| `forEach`| Object       | No*      | Process each message with a function          |
+| `print`  | Boolean      | No*      | Output messages for debugging                 |
+| `toTopicNameExtractor` | Object | No* | Dynamically determine the output topic    |
+
+*At least one sink type (`to`, `as`, `branch`, `forEach`, `print`, or `toTopicNameExtractor`) is required.
+
 ## Pipeline Components
 
 ### Sources: Where Data Comes From

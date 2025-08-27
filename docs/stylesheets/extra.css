@@ -1,0 +1,24 @@
+/* Custom CSS for KSML Documentation */
+
+/* Widen the first column (Property) in reference tables to prevent text wrapping */
+.md-typeset table th:first-of-type,
+.md-typeset table td:first-of-type {
+  width: 25%;
+  min-width: 200px;
+}
+
+/* Adjust other columns proportionally */
+.md-typeset table th:nth-of-type(2),
+.md-typeset table td:nth-of-type(2) {
+  width: 15%;
+}
+
+.md-typeset table th:nth-of-type(3), 
+.md-typeset table td:nth-of-type(3) {
+  width: 15%;
+}
+
+.md-typeset table th:nth-of-type(4),
+.md-typeset table td:nth-of-type(4) {
+  width: 45%;
+}

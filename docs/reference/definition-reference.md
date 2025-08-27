@@ -117,6 +117,32 @@ tables:
 
 #### Table Example with `store`
 
+This example demonstrates using a custom inline state store for a table. The table uses custom persistence and caching settings, and the processor function accesses the table to enrich streaming data.
+
+??? info "Producer - User Profile Data (click to expand)"
+
+    ```yaml
+    {%
+      include "../definitions/reference/table-store-producer.yaml"
+    %}
+    ```
+
+??? info "Processor - Enrich Activity with Profiles (click to expand)"
+
+    ```yaml
+    {%
+      include "../definitions/reference/table-store-processor.yaml"
+    %}
+    ```
+
+The table `user_profiles` uses an inline store definition with custom settings:
+
+- `persistent: true` - Data survives application restarts
+- `caching: true` - Enables local caching for better performance  
+- `logging: false` - Disables changelog topic creation
+
+The enrichment function accesses the table via `stores: [user_profiles]` declaration and performs lookups using `user_profiles.get(user_id)`.
+
 ### Global Tables (GlobalKTable)
 
 **Use for:** Reference data that needs to be available on all application instances.

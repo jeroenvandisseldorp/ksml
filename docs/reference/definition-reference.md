@@ -68,14 +68,14 @@ streams:
 - Records arrive in order and are processed one at a time
 - Ideal for: user actions, sensor readings, transactions, logs
 
-| Property             | Type   | Required | Description                                                                 |
-|----------------------|--------|----------|-----------------------------------------------------------------------------|
-| `topic`              | String | Yes      | The Kafka topic to read from or write to                                    |
-| `keyType`            | String | Yes      | The type of the record key                                                  |
-| `valueType`          | String | Yes      | The type of the record value                                                |
-| `offsetResetPolicy`  | String | No       | The offset reset policy (`earliest`, `latest`, `none`, `by_duration:<dur>`) |
-| `timestampExtractor` | String | No       | Function to extract timestamps from records                                 |
-| `partitioner`        | String | No       | Function that determines message partitioning                               |
+| Property             | Type   | Required | Description                                                                                                               |
+|----------------------|--------|----------|---------------------------------------------------------------------------------------------------------------------------|
+| `topic`              | String | Yes      | The Kafka topic to read from or write to                                                                                  |
+| `keyType`            | String | Yes      | The type of the record key                                                                                                |
+| `valueType`          | String | Yes      | The type of the record value                                                                                              |
+| `offsetResetPolicy`  | String | No       | The offset reset policy. Valid values: earliest, latest, none, by_duration:<duration> (e.g., by_duration:PT1H for 1 hour) |
+| `timestampExtractor` | String | No       | Function name to extract timestamps from records                                                                          |
+| `partitioner`        | String | No       | Function name that determines message partitioning for this stream/table                                                  |
 
 ### Tables (KTable)
 
@@ -97,15 +97,15 @@ tables:
 - Represents a changelog stream with the current state
 - Ideal for: user profiles, inventory levels, configuration settings
 
-| Property             | Type   | Required | Description                                                                  |
-|----------------------|--------|----------|------------------------------------------------------------------------------|
-| `topic`              | String | Yes      | The Kafka topic to read from or write to                                     |
-| `keyType`            | String | Yes      | The type of the record key                                                   |
-| `valueType`          | String | Yes      | The type of the record value                                                 |
-| `offsetResetPolicy`  | String | No       | The offset reset policy                                                      |
-| `timestampExtractor` | String | No       | Function to extract timestamps from records                                  |
-| `partitioner`        | String | No       | Function that determines message partitioning                                |
-| `store`              | String | No       | The name of the key/value state store to use                                 |
+| Property             | Type   | Required | Description                                                                                                               |
+|----------------------|--------|----------|---------------------------------------------------------------------------------------------------------------------------|
+| `topic`              | String | Yes      | The Kafka topic to read from or write to                                                                                  |
+| `keyType`            | String | Yes      | The type of the record key                                                                                                |
+| `valueType`          | String | Yes      | The type of the record value                                                                                              |
+| `offsetResetPolicy`  | String | No       | The offset reset policy. Valid values: earliest, latest, none, by_duration:<duration> (e.g., by_duration:PT1H for 1 hour) |
+| `timestampExtractor` | String | No       | Function name to extract timestamps from records                                                                          |
+| `partitioner`        | String | No       | Function that determines message partitioning                                                                             |
+| `store`              | String | No       | The name of the key/value state store to use                                                                              |
 
 ### Global Tables (GlobalKTable)
 
@@ -127,15 +127,15 @@ globalTables:
 - Provides global access to reference data
 - Ideal for: product catalogs, country codes, small to medium reference datasets
 
-| Property             | Type   | Required | Description                                                                  |
-|----------------------|--------|----------|------------------------------------------------------------------------------|
-| `topic`              | String | Yes      | The Kafka topic to read from                                                 |
-| `keyType`            | String | Yes      | The type of the record key                                                   |
-| `valueType`          | String | Yes      | The type of the record value                                                 |
-| `offsetResetPolicy`  | String | No       | The offset reset policy                                                      |
-| `timestampExtractor` | String | No       | Function to extract timestamps from records                                  |
-| `partitioner`        | String | No       | Function that determines message partitioning                                |
-| `store`              | String | No       | The name of the key/value state store to use                                 |
+| Property             | Type   | Required | Description                                                                                                               |
+|----------------------|--------|----------|---------------------------------------------------------------------------------------------------------------------------|
+| `topic`              | String | Yes      | The Kafka topic to read from                                                                                              |
+| `keyType`            | String | Yes      | The type of the record key                                                                                                |
+| `valueType`          | String | Yes      | The type of the record value                                                                                              |
+| `offsetResetPolicy`  | String | No       | The offset reset policy. Valid values: earliest, latest, none, by_duration:<duration> (e.g., by_duration:PT1H for 1 hour) |
+| `timestampExtractor` | String | No       | Function name to extract timestamps from records                                                                          |
+| `partitioner`        | String | No       | Function that determines message partitioning                                                                             |
+| `store`              | String | No       | The name of the key/value state store to use                                                                              |
 
 ### Choosing the Right Stream Type
 
@@ -289,3 +289,11 @@ producers:
         ("order-" + str(counter), {"amount": 100, "customerId": "cust-1"})
     interval: 5000
 ```
+
+## Related References
+
+- [Pipeline Reference](pipeline-reference.md) - Detailed pipeline structure and operations
+- [Function Reference](function-reference.md) - All function types and Python integration
+- [Data Type Reference](data-type-reference.md) - Supported data types and formats
+- [Operation Reference](operation-reference.md) - Stream processing operations
+- [Configuration Reference](configuration-reference.md) - Runtime configuration

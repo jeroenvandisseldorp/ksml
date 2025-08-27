@@ -148,35 +148,6 @@ globalTables:
 | Track changes to state over time                          | KTable            |
 | Access reference data without worrying about partitioning | GlobalKTable      |
 
-## State Stores
-
-Define persistent state stores for stateful operations:
-
-```yaml
-stores:
-  session_store:
-    type: keyValue
-    keyType: string
-    valueType: json
-    persistent: true
-    caching: true
-```
-
-For details, see [State Store Reference](state-store-reference.md).
-
-## Functions
-
-Define reusable Python logic for processing:
-
-```yaml
-functions:
-  is_valid_order:
-    type: predicate
-    expression: value.get("total") > 0
-```
-
-For complete function documentation, see [Function Reference](function-reference.md).
-
 ## Pipelines
 
 Define how data flows through your application:
@@ -194,6 +165,51 @@ pipelines:
 ```
 
 For complete pipeline documentation, see [Pipeline Reference](pipeline-reference.md).
+
+## Functions
+
+Define reusable Python logic for processing:
+
+```yaml
+functions:
+  is_valid_order:
+    type: predicate
+    expression: value.get("total") > 0
+```
+
+For complete function documentation, see [Function Reference](function-reference.md).
+
+## Operations
+
+Operations are the building blocks that transform, filter, and process your data within pipelines:
+
+```yaml
+via:
+  - type: filter        # Keep matching records
+    if: is_valid_order
+  - type: mapValues     # Transform record values
+    mapper: enrich_order
+  - type: join          # Combine with other streams
+    with: customers
+```
+
+For complete operation documentation, see [Operation Reference](operation-reference.md).
+
+## State Stores
+
+Define persistent state stores for stateful operations:
+
+```yaml
+stores:
+  session_store:
+    type: keyValue
+    keyType: string
+    valueType: json
+    persistent: true
+    caching: true
+```
+
+For details, see [State Store Reference](state-store-reference.md).
 
 ## Producers
 

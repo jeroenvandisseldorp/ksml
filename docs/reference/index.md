@@ -113,9 +113,9 @@ You can read through these reference topics in order for a comprehensive underst
 
 1. Start with [KSML Definition Reference](definition-reference.md) to understand the basic structure, stream types, and data model
 2. Study [Pipeline Reference](pipeline-reference.md) to learn how data flows through your application
-3. Move on to [Data Types](data-type-reference.md) and [Notations](notation-reference.md) to learn about data handling
-4. Explore [Functions](function-reference.md) to see how to implement custom logic
-5. Learn about [Operations](operation-reference.md) to understand all the ways you can process your data
+3. Explore [Functions](function-reference.md) to see how to implement custom logic in Python
+4. Learn about [Operations](operation-reference.md) to understand all the ways you can process your data
+5. Move on to [Data Types](data-type-reference.md) and [Notations](notation-reference.md) to learn about data handling
 6. Understand [State Stores](state-store-reference.md) for stateful processing and data persistence
 7. Review advanced tutorials for production-ready applications
 8. Finish with [Configuration Reference](configuration-reference.md) for deployment settings

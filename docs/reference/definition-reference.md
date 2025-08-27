@@ -134,23 +134,32 @@ Functions define reusable Python logic that can be referenced in pipelines:
 | Property     | Type      | Required  | Description                                                                                    |
 |--------------|-----------|-----------|------------------------------------------------------------------------------------------------|
 | `type`       | String    | Yes       | The type of function (predicate, mapper, aggregator, etc.)                                     |
-| `parameters` | Array     | No        | Parameters for the function                                                                    |
+| `parameters` | Array     | No        | **Additional** custom parameters to add to the function's built-in parameters (see note below) |
 | `globalCode` | String    | No        | Python code executed once upon startup                                                         |
 | `code`       | String    | No        | Python code implementing the function                                                          |
 | `expression` | String    | No        | An expression that the function will return as value                                           |
 | `resultType` | Data type | Sometimes | The data type returned by the function. Required when it cannot be derived from function type. |
 
+**Note about parameters:** Every function type has built-in parameters that are automatically provided by KSML (e.g., `key` and `value` for most function types). The `parameters` property is only needed when you want to add custom parameters beyond these built-in ones. These additional parameters can then be passed when calling the function from Python code.
+
 ```yaml
 functions:
+  # Simple function - uses only built-in key and value parameters
   is_valid_order:
     type: "predicate"
     expression: value.get("total") > 0 and value.get("items") is not None
 
+  # Function with custom parameter - adds 'discount_rate' to built-in parameters
   calculate_total:
     type: "valueTransformer"
+    parameters:
+      - name: discount_rate
+        type: double
     code: |
       total = sum(item.get("price", 0) * item.get("quantity", 0) 
                   for item in value.get("items", []))
+      if discount_rate > 0:
+        total = total * (1 - discount_rate)
       return {**value, "total": total}
     resultType: struct
 ```

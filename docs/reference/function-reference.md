@@ -120,6 +120,71 @@ functions:
 ```
 
 
+## Function Parameters
+
+### Built-in vs Custom Parameters
+
+Every function type in KSML has **built-in parameters** that are automatically provided by KSML. These are implicitly available in your function code without needing to declare them:
+
+Most function types (like `forEach`, `predicate`, `valueTransformer`) automatically receive:
+
+  - `key` - The record key
+  - `value` - The record value
+
+Some specialized types have different built-in parameters:
+
+  - `aggregator`: receives `key`, `value`, and `aggregate`
+  - `merger`: receives `key`, `aggregate1`, and `aggregate2`
+  - `initializer`: receives no parameters
+
+### Adding Custom Parameters
+
+The `parameters` property allows you to **add custom parameters** beyond the built-in ones. This is useful when:
+
+1. **Creating reusable functions** that can behave differently based on configuration
+2. **Calling functions from Python code** with specific arguments
+3. **Using the `generic` function type** which has no built-in parameters
+
+#### Example WITHOUT custom parameters:
+```yaml
+functions:
+  simple_logger:
+    type: forEach
+    # Only uses built-in key and value parameters
+    code: |
+      log.info("Processing: key={}, value={}", key, value)
+```
+
+#### Example WITH custom parameters:
+```yaml
+functions:
+  configurable_logger:
+    type: forEach
+    parameters:  # ADDS 'prefix' to the built-in key and value
+      - name: prefix
+        type: string
+    code: |
+      log.info("{}: key={}, value={}", prefix, key, value)
+```
+
+When calling this function from Python:
+```python
+# The custom parameter is passed along with built-in ones
+configurable_logger(key, value, prefix="DEBUG")
+```
+
+### Parameter Definition Structure
+
+When defining custom parameters:
+
+```yaml
+parameters:
+  - name: parameter_name   # Name of the parameter
+    type: parameter_type   # Data type (string, int, double, etc.)
+```
+
+**Important:** The `parameters` property **adds to** the built-in parameters - it doesn't replace them. Built-in parameters like `key` and `value` are still available in your function code.
+
 ## Function Execution Context
 
 When your Python functions execute, they have access to:

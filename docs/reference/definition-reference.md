@@ -119,6 +119,10 @@ tables:
 
 This example demonstrates using a custom inline state store for a table. The table uses custom persistence and caching settings, and the processor function accesses the table to enrich streaming data.
 
+```yaml
+--8<-- "definitions/reference/table-store-processor.yaml:11:22"
+```
+
 ??? info "Producer - User Profile Data (click to expand)"
 
     ```yaml
@@ -258,78 +262,3 @@ producers:
     generator: generate_test_data
     interval: 1000
 ```
-
-## Complete Example
-
-Here's a complete KSML definition showing all sections:
-
-```yaml
-name: "order-processing"
-version: "1.0.0"
-description: "Order processing with customer enrichment"
-
-streams:
-  orders:
-    topic: orders
-    keyType: string
-    valueType: json
-
-tables:
-  customers:
-    topic: customers
-    keyType: string
-    valueType: avro:Customer
-    store: customer_store
-
-stores:
-  customer_store:
-    type: keyValue
-    keyType: string
-    valueType: avro:Customer
-    persistent: true
-
-functions:
-  is_valid_order:
-    type: predicate
-    expression: value.get("amount") > 0
-    
-  enrich_order:
-    type: valueTransformer
-    code: |
-      customer = customer_store.get(value.get("customerId"))
-      return {**value, "customer": customer}
-    stores:
-      - customer_store
-
-pipelines:
-  process_orders:
-    from: orders
-    via:
-      - type: filter
-        if: is_valid_order
-      - type: join
-        with: customers
-        valueJoiner:
-          expression: {**value1, "customer": value2}
-    to:
-      topic: enriched-orders
-      keyType: string
-      valueType: json
-
-producers:
-  order_generator:
-    target: orders
-    generator:
-      type: generator
-      expression: |
-        ("order-" + str(counter), {"amount": 100, "customerId": "cust-1"})
-    interval: 5000
-```
-
-## Related References
-
-- [Pipeline Reference](pipeline-reference.md) - Detailed pipeline structure and operations
-- [Function Reference](function-reference.md) - All function types and Python integration
-- [Data Type Reference](data-type-reference.md) - Supported data types and formats
-- [Operation Reference](operation-reference.md) - Stream processing operations
-- [Configuration Reference](configuration-reference.md) - Runtime configuration

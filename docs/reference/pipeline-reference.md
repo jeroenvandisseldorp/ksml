@@ -36,16 +36,17 @@ This structure makes pipelines easy to read and understand, with a clear flow fr
 
 Each pipeline in the `pipelines` section has these main properties:
 
-| Property | Type         | Required | Description                                    |
-|----------|--------------|----------|------------------------------------------------|
-| `from`   | String/Array | Yes      | The source stream(s), table(s), or pipeline(s) |
-| `via`    | Array        | No       | List of operations to apply to the data        |
-| `to`     | String       | No*      | The destination stream or topic               |
-| `as`     | String       | No*      | Name to save the result for later pipelines   |
-| `branch` | Array        | No*      | Split the pipeline based on conditions        |
-| `forEach`| Object       | No*      | Process each message with a function          |
-| `print`  | Boolean      | No*      | Output messages for debugging                 |
-| `toTopicNameExtractor` | Object | No* | Dynamically determine the output topic    |
+| Property               | Type           | Required | Description                                                                             |
+|------------------------|----------------|----------|-----------------------------------------------------------------------------------------|
+| `name`                 | String         | No       | Pipeline name. If not defined, derived from context                                     |
+| `from`                 | String/Object  | Yes      | The source stream(s), table(s), or pipeline(s). Can be a reference or inline definition |
+| `via`                  | Array          | No       | List of operations to apply to the data                                                 |
+| `to`                   | String/Object  | No*      | The destination stream or topic. Can be a reference or inline definition                |
+| `as`                   | String         | No*      | Name to save the result for later pipelines                                             |
+| `branch`               | Array          | No*      | Split the pipeline based on conditions                                                  |
+| `forEach`              | Object         | No*      | Process each message with a function                                                    |
+| `print`                | Boolean/Object | No*      | Output messages for debugging (simple boolean or complex object)                        |
+| `toTopicNameExtractor` | Object         | No*      | Dynamically determine the output topic                                                  |
 
 *At least one sink type (`to`, `as`, `branch`, `forEach`, `print`, or `toTopicNameExtractor`) is required.
 

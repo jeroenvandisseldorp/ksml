@@ -231,6 +231,7 @@ Available serializer types:
 | `apicurio_protobuf`      | protobuf  | Apicurio        | Protobuf with Apicurio SR      |
 
 Built-in serializers (no configuration needed):
+
 - `json`: Schemaless JSON
 - `csv`: Comma-separated values
 - `xml`: XML format

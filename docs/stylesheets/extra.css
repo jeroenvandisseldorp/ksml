@@ -2,12 +2,12 @@
 
 /* Make tables use full width by targeting the wrapper containers */
 
-.md-typeset__table {
-  width: 100%;
-}
+/*.md-typeset__table {*/
+/*  width: 100%;*/
+/*}*/
 
 /* Column width definitions */
 .md-typeset table th:first-of-type,
 .md-typeset table td:first-of-type {
-  width: 25%;
+  min-width: 190px;
 }

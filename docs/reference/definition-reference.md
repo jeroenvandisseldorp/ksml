@@ -77,15 +77,13 @@ streams:
 | `timestampExtractor` | String | No       | Function name to extract timestamps from records. Default: Kafka Streams default (message timestamp, fallback to current time)                                                                          |
 | `partitioner`        | String | No       | Function name that determines message partitioning for this stream/table. Default: Kafka default (hash-based on key)                                                  |
 
-#### Regular Stream Example
+#### Stream Example with `offsetResetPolicy`
 
-- [Stream example](../tutorials/beginner/filtering-transforming.md#complex-filtering-techniques)
+- [`offsetResetPolicy` example](../tutorials/beginner/data-formats.md#working-with-avro-data)
 
 #### Stream Example with `timestampExtractor`
 
 - [`timestampExtractor` example](function-reference.md#timestampextractor)
-
-#### Stream Example with `partitioner`
 
 ### Tables (KTable)
 
@@ -116,6 +114,8 @@ tables:
 | `timestampExtractor` | String | No       | Function name to extract timestamps from records. Default: Kafka Streams default (message timestamp, fallback to current time)                                                                          |
 | `partitioner`        | String | No       | Function that determines message partitioning                                                                             |
 | `store`              | String | No       | The name of the key/value state store to use. Default: Auto-created store using topic name                                                                              |
+
+#### Table Example with `store`
 
 ### Global Tables (GlobalKTable)
 

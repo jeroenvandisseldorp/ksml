@@ -294,7 +294,13 @@ stream.
 
 New key for the output message
 
-#### Example
+#### Example(snippet)
+
+```yaml
+--8<-- "definitions/reference/functions/keytransformer-processor.yaml:11:17"
+```
+
+**Full example#1**
 
 ??? info "Producer - Regional Transaction Data (click to expand)"
 
@@ -311,7 +317,7 @@ New key for the output message
       include "../definitions/reference/functions/keytransformer-processor.yaml"
     %}
     ```
-
+**Full example#2**
 **See how `keyTransformer` is used in an example definition**:
 
 - [Tutorial: Stream Table Join Example](../tutorials/intermediate/joins.md#use-case-order-enrichment)

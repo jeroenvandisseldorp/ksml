@@ -294,13 +294,17 @@ stream.
 
 New key for the output message
 
-#### Example(snippet)
+#### Example
+
+**Function Definition:**
 
 ```yaml
 --8<-- "definitions/reference/functions/keytransformer-processor.yaml:11:17"
 ```
 
-**Full example#1**
+This function extracts the region from transaction data to use as the new message key, enabling region-based partitioning.
+
+**Complete Working Example:**
 
 ??? info "Producer - Regional Transaction Data (click to expand)"
 
@@ -317,10 +321,10 @@ New key for the output message
       include "../definitions/reference/functions/keytransformer-processor.yaml"
     %}
     ```
-**Full example#2**
-**See how `keyTransformer` is used in an example definition**:
 
-- [Tutorial: Stream Table Join Example](../tutorials/intermediate/joins.md#use-case-order-enrichment)
+**Additional Example:**
+
+See how `keyTransformer` is used for stream-table joins: [Stream Table Join Tutorial](../tutorials/intermediate/joins.md#use-case-order-enrichment)
 
 ### keyValueToKeyValueListTransformer
 

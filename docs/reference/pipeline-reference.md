@@ -58,7 +58,7 @@ The source of a pipeline is specified with the `from` keyword. It defines where 
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `from` | String or Array | Yes | The source stream, table, or pipeline name(s) |
+| `from` | String/Object | Yes | The source stream, table, or pipeline name. Can be a reference or inline definition |
 
 ```yaml
 from: user_clicks_stream
@@ -113,14 +113,14 @@ For a complete list of available operations, see the [Operation Reference](opera
 
 The sink defines where the processed data should be sent. KSML supports several sink types:
 
-| Parameter              | Type    | Required | Description                                               |
-|------------------------|---------|----------|-----------------------------------------------------------|
-| `to`                   | String  | No*      | The destination stream or topic name                      |
-| `as`                   | String  | No*      | Name to save the result for use in later pipelines        |
-| `branch`               | Array   | No*      | Split the pipeline based on conditions                    |
-| `forEach`              | Object  | No*      | Process each message with a function (terminal operation) |
-| `print`                | Boolean | No*      | Output messages for debugging                             |
-| `toTopicNameExtractor` | Object  | No*      | Dynamically determine the output topic                    |
+| Parameter              | Type           | Required | Description                                               |
+|------------------------|----------------|----------|-----------------------------------------------------------|
+| `to`                   | String/Object  | No*      | The destination stream or topic name. Can be a reference or inline definition |
+| `as`                   | String         | No*      | Name to save the result for use in later pipelines        |
+| `branch`               | Array          | No*      | Split the pipeline based on conditions                    |
+| `forEach`              | Object         | No*      | Process each message with a function (terminal operation) |
+| `print`                | Boolean/Object | No*      | Output messages for debugging (simple boolean or complex object with filename, label, mapper) |
+| `toTopicNameExtractor` | Object         | No*      | Dynamically determine the output topic                    |
 
 *At least one sink type is required.
 

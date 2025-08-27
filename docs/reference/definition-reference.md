@@ -73,9 +73,9 @@ streams:
 | `topic`              | String | Yes      | The Kafka topic to read from or write to                                                                                  |
 | `keyType`            | String | Yes      | The type of the record key                                                                                                |
 | `valueType`          | String | Yes      | The type of the record value                                                                                              |
-| `offsetResetPolicy`  | String | No       | The offset reset policy. Valid values: earliest, latest, none, by_duration:<duration> (e.g., by_duration:PT1H for 1 hour) |
-| `timestampExtractor` | String | No       | Function name to extract timestamps from records                                                                          |
-| `partitioner`        | String | No       | Function name that determines message partitioning for this stream/table                                                  |
+| `offsetResetPolicy`  | String | No       | The offset reset policy. Valid values: earliest, latest, none, by_duration:<duration> (e.g., by_duration:PT1H for 1 hour). Default: Kafka Streams default (typically latest) |
+| `timestampExtractor` | String | No       | Function name to extract timestamps from records. Default: Kafka Streams default (message timestamp, fallback to current time)                                                                          |
+| `partitioner`        | String | No       | Function name that determines message partitioning for this stream/table. Default: Kafka default (hash-based on key)                                                  |
 
 ### Tables (KTable)
 
@@ -102,10 +102,10 @@ tables:
 | `topic`              | String | Yes      | The Kafka topic to read from or write to                                                                                  |
 | `keyType`            | String | Yes      | The type of the record key                                                                                                |
 | `valueType`          | String | Yes      | The type of the record value                                                                                              |
-| `offsetResetPolicy`  | String | No       | The offset reset policy. Valid values: earliest, latest, none, by_duration:<duration> (e.g., by_duration:PT1H for 1 hour) |
-| `timestampExtractor` | String | No       | Function name to extract timestamps from records                                                                          |
+| `offsetResetPolicy`  | String | No       | The offset reset policy. Valid values: earliest, latest, none, by_duration:<duration> (e.g., by_duration:PT1H for 1 hour). Default: Kafka Streams default (typically latest) |
+| `timestampExtractor` | String | No       | Function name to extract timestamps from records. Default: Kafka Streams default (message timestamp, fallback to current time)                                                                          |
 | `partitioner`        | String | No       | Function that determines message partitioning                                                                             |
-| `store`              | String | No       | The name of the key/value state store to use                                                                              |
+| `store`              | String | No       | The name of the key/value state store to use. Default: Auto-created store using topic name                                                                              |
 
 ### Global Tables (GlobalKTable)
 
@@ -132,10 +132,10 @@ globalTables:
 | `topic`              | String | Yes      | The Kafka topic to read from                                                                                              |
 | `keyType`            | String | Yes      | The type of the record key                                                                                                |
 | `valueType`          | String | Yes      | The type of the record value                                                                                              |
-| `offsetResetPolicy`  | String | No       | The offset reset policy. Valid values: earliest, latest, none, by_duration:<duration> (e.g., by_duration:PT1H for 1 hour) |
-| `timestampExtractor` | String | No       | Function name to extract timestamps from records                                                                          |
+| `offsetResetPolicy`  | String | No       | The offset reset policy. Valid values: earliest, latest, none, by_duration:<duration> (e.g., by_duration:PT1H for 1 hour). Default: Kafka Streams default (typically latest) |
+| `timestampExtractor` | String | No       | Function name to extract timestamps from records. Default: Kafka Streams default (message timestamp, fallback to current time)                                                                          |
 | `partitioner`        | String | No       | Function that determines message partitioning                                                                             |
-| `store`              | String | No       | The name of the key/value state store to use                                                                              |
+| `store`              | String | No       | The name of the key/value state store to use. Default: Auto-created store using topic name                                                                              |
 
 ### Choosing the Right Stream Type
 

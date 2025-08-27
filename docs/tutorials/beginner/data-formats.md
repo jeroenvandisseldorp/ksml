@@ -1,6 +1,8 @@
 # Working with Different Data Formats
 
-Learn how to process, convert, and validate data using KSML's supported formats including JSON, Avro, CSV, XML, Binary, and SOAP.
+Learn how to process, convert, and validate data using KSML's supported formats through practical, hands-on examples. This tutorial provides complete working examples for each data format.
+
+For comprehensive syntax reference and format details, see the [Data Types and Formats Reference](../../reference/data-and-formats-reference.md).
 
 ## Prerequisites
 
@@ -357,7 +359,9 @@ This processor shows two pipelines handling different formats (Avro and JSON) an
 
 ## Conclusion
 
-You've learned to work with KSML's data formats: JSON, Avro, CSV, XML, Binary, and SOAP. Key concepts include format specification, schema usage, conversion operations, and multi-format pipelines.
+You've learned to work with KSML's data formats through practical examples: JSON, Avro, CSV, XML, Binary, and SOAP. Key concepts covered include format specification, schema usage, conversion operations, and multi-format pipelines.
+
+For complete syntax reference, type definitions, and advanced format features, refer to the [Data Types and Formats Reference](../../reference/data-and-formats-reference.md).
 
 ## Next Steps
 

@@ -385,10 +385,3 @@ pipelines:
               }
     to: user_session_analytics
 ```
-
-## Related Topics
-
-- [KSML Definition Reference](definition-reference.md)
-- [Operations Reference](operation-reference.md)
-- [Pipeline Reference](pipeline-reference.md)
-- [Data Types Reference](data-type-reference.md)

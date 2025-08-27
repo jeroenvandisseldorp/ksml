@@ -379,10 +379,3 @@ functions:
 5. **Validate data**: Check that data conforms to expected types and formats
 6. **Handle missing or null values**: Always handle the case where a value might be null
 7. **Document your types**: Add comments to explain complex type structures
-
-## Related Topics
-
-- [KSML Definition Reference](definition-reference.md)
-- [Operations Reference](operation-reference.md)
-- [Functions Reference](function-reference.md)
-- [Configuration Reference](configuration-reference.md)

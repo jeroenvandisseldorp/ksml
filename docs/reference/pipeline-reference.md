@@ -538,10 +538,3 @@ pipelines:
           }
     to: sales_by_category
 ```
-
-## Related Topics
-
-- [KSML Definition Reference](definition-reference.md)
-- [Operation Reference](operation-reference.md)
-- [Function Reference](function-reference.md)
-- [Configuration Reference](configuration-reference.md)

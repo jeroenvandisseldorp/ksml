@@ -289,11 +289,3 @@ producers:
         ("order-" + str(counter), {"amount": 100, "customerId": "cust-1"})
     interval: 5000
 ```
-
-## Related References
-
-- [Pipeline Reference](pipeline-reference.md) - Detailed pipeline structure and operations
-- [Function Reference](function-reference.md) - All function types and Python integration
-- [Data Type Reference](data-type-reference.md) - Supported data types and formats
-- [Operation Reference](operation-reference.md) - Stream processing operations
-- [Configuration Reference](configuration-reference.md) - Runtime configuration

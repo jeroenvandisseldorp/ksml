@@ -17,6 +17,15 @@ Complete documentation for writing KSML definitions:
 - Data types and schemas
 - Best practices
 
+### [Pipeline Reference](pipeline-reference.md)
+
+Comprehensive guide to pipeline structure and data flow in KSML:
+
+- Pipeline structure and components
+- Input and output configurations
+- Connecting and branching pipelines
+- Best practices for pipeline design
+- Duration specifications and patterns
 
 ### [Data Type Reference](data-type-reference.md)
 
@@ -74,16 +83,6 @@ Learn about the various operations you can perform on your data:
   - Common use cases
   - Performance considerations
 
-### [Pipeline Reference](pipeline-reference.md)
-
-Comprehensive guide to pipeline structure and data flow in KSML:
-
-- Pipeline structure and components
-- Input and output configurations
-- Connecting and branching pipelines
-- Best practices for pipeline design
-- Duration specifications and patterns
-
 ### [Configuration Reference](configuration-reference.md)
 
 Complete documentation of KSML configuration options:
@@ -101,9 +100,9 @@ Complete documentation of KSML configuration options:
 You can read through these reference topics in order for a comprehensive understanding, or jump to specific topics as needed:
 
 1. Start with [KSML Definition Reference](definition-reference.md) to understand the basic structure, stream types, and data model
-2. Move on to [Data Types](data-type-reference.md) and [Notations](notation-reference.md) to learn about data handling
-3. Explore [Functions](function-reference.md) to see how to implement custom logic
-4. Learn about [Operations](operation-reference.md) to understand all the ways you can process your data
-5. Study [Pipeline Reference](pipeline-reference.md) to learn how data flows through your application
+2. Study [Pipeline Reference](pipeline-reference.md) to learn how data flows through your application
+3. Move on to [Data Types](data-type-reference.md) and [Notations](notation-reference.md) to learn about data handling
+4. Explore [Functions](function-reference.md) to see how to implement custom logic
+5. Learn about [Operations](operation-reference.md) to understand all the ways you can process your data
 6. Review advanced tutorials for production-ready applications
 7. Finish with [Configuration Reference](configuration-reference.md) for deployment settings

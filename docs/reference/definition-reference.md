@@ -77,6 +77,16 @@ streams:
 | `timestampExtractor` | String | No       | Function name to extract timestamps from records. Default: Kafka Streams default (message timestamp, fallback to current time)                                                                          |
 | `partitioner`        | String | No       | Function name that determines message partitioning for this stream/table. Default: Kafka default (hash-based on key)                                                  |
 
+#### Regular Stream Example
+
+- [Stream example](../tutorials/beginner/filtering-transforming.md#complex-filtering-techniques)
+
+#### Stream Example with `timestampExtractor`
+
+- [`timestampExtractor` example](function-reference.md#timestampextractor)
+
+#### Stream Example with `partitioner`
+
 ### Tables (KTable)
 
 **Use for:** State-based processing where records represent updates to entities.

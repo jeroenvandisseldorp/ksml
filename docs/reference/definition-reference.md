@@ -207,6 +207,11 @@ globalTables:
 | `partitioner`        | String | No       | Function that determines message partitioning                                                                             |
 | `store`              | String | No       | The name of the key/value state store to use. Default: Auto-created store using topic name                                                                              |
 
+
+##### Global Table Example
+
+- [GlobalTable Example](../tutorials/intermediate/joins.md#use-case-product-catalog-enrichment)
+
 ### Choosing the Right Stream Type
 
 | If you need to...                                         | Consider using... |
@@ -292,3 +297,8 @@ producers:
     generator: generate_test_data
     interval: 1000
 ```
+
+##### Producer Example
+
+- [Producer Example](../getting-started/basics-tutorial.md#using-ksml-to-produce-messages)
+

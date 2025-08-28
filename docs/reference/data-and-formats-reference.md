@@ -138,6 +138,22 @@ functions:
       }
 ```
 
+??? info "Producer - Struct example (click to expand)"
+
+    ```yaml
+    {%
+      include "../definitions/reference/data-types/struct-producer.yaml"
+    %}
+    ```
+
+??? info "Processor - Struct example (click to expand)"
+
+    ```yaml
+    {%
+      include "../definitions/reference/data-types/struct-processor.yaml"
+    %}
+    ```
+
 #### Tuple
 
 A tuple combines multiple elements of different types into a single value.

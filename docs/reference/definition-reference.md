@@ -141,6 +141,10 @@ tables:
 | `partitioner`        | String | No       | Function that determines message partitioning                                                                             |
 | `store`              | String | No       | The name of the key/value state store to use. Default: Auto-created store using topic name                                                                              |
 
+#### Table Example without `store`
+
+- [Table example in Circuit Breaker Pattern](../tutorials/intermediate/error-handling.md#5-circuit-breaker-pattern)
+
 #### Table Example with `store`
 
 This example demonstrates using a custom inline state store for a table. The table uses custom persistence and caching settings, and the processor function accesses the table to enrich streaming data.

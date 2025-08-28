@@ -9,10 +9,73 @@ The KSML Runner configuration consists of two main sections:
 ```yaml
 ksml:
   # KSML-specific configuration
+  configDirectory: .
+  definitions:
+    my_app: app-definition.yaml
 
 kafka:
   # Kafka client configuration (standard Kafka properties)
+  bootstrap.servers: "localhost:9092"
+  application.id: "my-ksml-app"
 ```
+
+## Minimal Working Configurations
+
+### Without Schema Registry
+
+For applications that don't use schema-based formats (Avro, Protobuf, JSON Schema):
+
+??? info "Minimal Configuration - No Schema Registry (click to expand)"
+
+    ```yaml
+    ksml:
+      # Section where you specify which KSML definitions to load, parse and execute.
+      definitions:
+        # Format is <namespace>: <ksml_definition_filename>
+        producer: producer.yaml
+        processor: processor.yaml
+      storageDirectory: /ksml/state  # Directory for state stores (inside /ksml which is writable because /ksml is the mounted working directory)
+      createStorageDirectory: true    # Create the directory if it doesn't exist
+
+    # This setup connects to the Kafka broker and schema registry started with the example docker-compose file
+    # These examples are intended to run from a inside a container on the same network
+    kafka:
+      bootstrap.servers: broker:9093
+      application.id: io.ksml.example.producer
+      security.protocol: PLAINTEXT
+      acks: all
+    ```
+
+### With Schema Registry
+
+For applications using schema-based formats (Avro, Protobuf, JSON Schema):
+
+??? info "Minimal Configuration - With Schema Registry (click to expand)"
+
+    ```yaml
+    ksml:
+      definitions:
+        producer: producer.yaml
+        processor: processor.yaml
+      schemaRegistries:
+        my_schema_registry:
+          config:
+            schema.registry.url: http://schema-registry:8081/apis/ccompat/v7
+      notations:
+        avro:  
+          type: confluent_avro         # For AVRO there are two implementations: apicurio_avro and confluent_avro
+          schemaRegistry: my_schema_registry
+          ## Below this line, specify properties to be passed into Confluent's KafkaAvroSerializer and KafkaAvroDeserializer
+          config:
+            normalize.schemas: true
+            auto.register.schemas: true
+
+    kafka:
+      bootstrap.servers: broker:9093
+      application.id: io.ksml.example.producer
+      security.protocol: PLAINTEXT
+      acks: all
+    ```
 
 ## KSML Configuration Section
 
@@ -80,26 +143,26 @@ Each error type (`consume`, `process`, `produce`) supports these properties:
 | Property     | Type    | Default | Description                                           |
 |--------------|---------|---------|-------------------------------------------------------|
 | `log`        | Boolean | true    | Whether to log errors                                 |
-| `logPayload` | Boolean | true    | Whether to include message payload in error logs     |
-| `loggerName` | String  | -       | Custom logger name for this error type               |
-| `handler`    | String  | -       | Error handling strategy (`continueOnFail`, `stopOnFail`, `retryOnFail`) |
+| `logPayload` | Boolean | false   | Whether to include message payload in error logs     |
+| `loggerName` | String  | Auto-generated | Custom logger name for this error type               |
+| `handler`    | String  | stop    | Error handling strategy (`continueOnFail`, `stopOnFail`, `retryOnFail`) |
 
 ```yaml
 ksml:
   errorHandling:
     consume:
       log: true
-      logPayload: true
+      logPayload: false
       loggerName: ConsumeError
       handler: stopOnFail
     process:
       log: true
-      logPayload: true
+      logPayload: false
       loggerName: ProcessError
       handler: continueOnFail
     produce:
       log: true
-      logPayload: true
+      logPayload: false
       loggerName: ProduceError
       handler: continueOnFail
 ```
@@ -147,33 +210,47 @@ ksml:
 
 Configure connections to schema registries:
 
+#### Basic Configuration
+
 ```yaml
 ksml:
   schemaRegistries:
-    # Apicurio Schema Registry
-    apicurio:
-      config:
-        apicurio.registry.url: "http://apicurio:8080/apis/registry/v2"
-        # SSL configuration for Apicurio
-        # apicurio.registry.request.ssl.keystore.location: /path/to/keystore.jks
-        # apicurio.registry.request.ssl.keystore.type: JKS
-        # apicurio.registry.request.ssl.keystore.password: password
-        # apicurio.registry.request.ssl.truststore.location: /path/to/truststore.jks
-        # apicurio.registry.request.ssl.truststore.type: JKS
-        # apicurio.registry.request.ssl.truststore.password: password
-
     # Confluent Schema Registry
     confluent:
       config:
         schema.registry.url: "http://schema-registry:8081"
-        # SSL configuration for Confluent
-        # schema.registry.ssl.protocol: TLSv1.3
-        # schema.registry.ssl.keystore.location: /path/to/keystore.jks
-        # schema.registry.ssl.keystore.type: JKS
-        # schema.registry.ssl.keystore.password: password
-        # schema.registry.ssl.truststore.location: /path/to/truststore.jks
-        # schema.registry.ssl.truststore.type: JKS
-        # schema.registry.ssl.truststore.password: password
+
+    # Apicurio Schema Registry
+    apicurio:
+      config:
+        apicurio.registry.url: "http://apicurio:8080/apis/registry/v2"
+```
+
+#### SSL-Enabled Schema Registry
+
+```yaml
+ksml:
+  schemaRegistries:
+    confluent_secure:
+      config:
+        schema.registry.url: "https://schema-registry:8081"
+        schema.registry.ssl.protocol: TLSv1.3
+        schema.registry.ssl.keystore.location: /path/to/keystore.jks
+        schema.registry.ssl.keystore.type: JKS
+        schema.registry.ssl.keystore.password: "${KEYSTORE_PASSWORD}"
+        schema.registry.ssl.truststore.location: /path/to/truststore.jks
+        schema.registry.ssl.truststore.type: JKS
+        schema.registry.ssl.truststore.password: "${TRUSTSTORE_PASSWORD}"
+
+    apicurio_secure:
+      config:
+        apicurio.registry.url: "https://apicurio:8080/apis/registry/v2"
+        apicurio.registry.request.ssl.keystore.location: /path/to/keystore.jks
+        apicurio.registry.request.ssl.keystore.type: JKS
+        apicurio.registry.request.ssl.keystore.password: "${KEYSTORE_PASSWORD}"
+        apicurio.registry.request.ssl.truststore.location: /path/to/truststore.jks
+        apicurio.registry.request.ssl.truststore.type: JKS
+        apicurio.registry.request.ssl.truststore.password: "${TRUSTSTORE_PASSWORD}"
 ```
 
 ### Notation Configuration
@@ -274,6 +351,12 @@ The `kafka` section contains standard Kafka client configuration properties. All
 |-----------------------|--------|----------|------------------------------------------------|
 | `bootstrap.servers`   | String | Yes      | Comma-separated list of Kafka brokers         |
 | `application.id`      | String | Yes      | Unique identifier for the Kafka Streams app   |
+
+!!! note "Application ID Aliases"
+    You can use any of these property names for the application ID:
+    - `application.id` (standard Kafka property)
+    - `applicationId` (camelCase variant)  
+    - `app.id` (KSML shorthand)
 
 ### Common Properties
 
@@ -445,26 +528,43 @@ kafka:
 
 ## Best Practices
 
+### Configuration Management
+
+- Use environment variables for environment-specific values (URLs, passwords, IDs)
+- Keep sensitive information out of configuration files
+- Use different configuration files for different environments (dev, staging, prod)
+- Version control your configuration files (excluding secrets)
+
 ### Security
-- Use environment variables for sensitive information like passwords
-- Enable SSL/TLS for production environments
-- Use proper authentication mechanisms (SASL)
+
+- Use environment variables for sensitive information like passwords and API keys
+- Enable SSL/TLS for production environments  
+- Use proper authentication mechanisms (SASL_PLAIN, SASL_SSL, SCRAM, etc.)
 - Store certificates and keystores securely
+- Regularly rotate passwords and certificates
 
 ### Performance
+
 - Set appropriate batch sizes and linger times for producers
-- Configure adequate buffer memory
+- Configure adequate buffer memory for high-throughput scenarios
 - Use static member IDs (`group.instance.id`) for faster rebalancing
-- Monitor storage directory disk usage
+- Monitor storage directory disk usage for stateful applications
+- Choose appropriate serialization formats (Avro for efficiency, JSON for debugging)
 
 ### Operational
+
+- Set unique `application.id` for each KSML application
 - Enable application server for health checks and state store queries
-- Enable Prometheus metrics for monitoring
-- Configure appropriate error handling strategies
+- Enable Prometheus metrics for monitoring and alerting
+- Configure appropriate error handling strategies for your use case
 - Use descriptive application IDs and instance IDs
 - Regularly backup state store directories for stateful applications
+- Plan for disaster recovery and state store restoration
 
 ### Development
-- Use separate configuration files for different environments
-- Enable debug logging during development
+
+- Start with minimal configuration and add complexity as needed
+- Use `logPayload: true` during development for debugging (disable in production)
+- Test with different error scenarios to validate error handling configuration
+- Use schema registries to enforce data contracts between services
 - Use `continueOnFail` for non-critical processing errors during testing

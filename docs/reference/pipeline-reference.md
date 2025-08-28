@@ -208,6 +208,7 @@ pipelines:
 ```
 
 This is useful for:
+
 - Routing different types of events to different destinations
 - Implementing content-based routing patterns
 - Creating specialized processing flows for different data types
@@ -285,12 +286,12 @@ Where:
 
 - `###` is a positive number
 - `x` is an optional time unit:
-  - (none): milliseconds
-  - `s`: seconds
-  - `m`: minutes
-  - `h`: hours
-  - `d`: days
-  - `w`: weeks
+    - (none): milliseconds
+    - `s`: seconds
+    - `m`: minutes
+    - `h`: hours
+    - `d`: days
+    - `w`: weeks
 
 Examples:
 ```

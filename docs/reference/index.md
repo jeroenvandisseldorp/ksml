@@ -27,13 +27,13 @@ Comprehensive guide to pipeline structure and data flow in KSML:
 - Best practices for pipeline design
 - Duration specifications and patterns
 
-### [Data Types and Formats Reference](data-and-formats-reference.md)
+### [Data Types and Notations Reference](data-and-formats-reference.md)
 
-Comprehensive guide to data types and format notations in KSML:
+Comprehensive guide to data types and notation formats in KSML:
 
 - Primitive data types (boolean, int, string, etc.)
 - Complex data types (enum, list, struct, tuple, union, windowed)
-- Format notations (JSON, Avro, CSV, XML, Binary, SOAP, Protobuf)
+- Notation formats (JSON, Avro, CSV, XML, Binary, SOAP, Protobuf)
 - Schema management (local files vs schema registry)
 - Type conversion and format conversion
 - Best practices for data handling
@@ -101,7 +101,7 @@ You can read through these reference topics in order for a comprehensive underst
 2. Study [Pipeline Reference](pipeline-reference.md) to learn how data flows through your application
 3. Explore [Functions](function-reference.md) to see how to implement custom logic in Python
 4. Learn about [Operations](operation-reference.md) to understand all the ways you can process your data
-5. Review [Data Types and Formats](data-and-formats-reference.md) to learn about data handling and format notations
+5. Review [Data Types and Notations](data-and-formats-reference.md) to learn about data handling and notation formats
 6. Understand [State Stores](state-store-reference.md) for stateful processing and data persistence
 7. Review advanced tutorials for production-ready applications
 8. Finish with [Configuration Reference](configuration-reference.md) for deployment settings

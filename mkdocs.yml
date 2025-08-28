@@ -75,7 +75,7 @@ nav:
       - Pipeline Reference: reference/pipeline-reference.md
       - Function Reference: reference/function-reference.md
       - Operation Reference: reference/operation-reference.md
-      - Data Types and Formats Reference: reference/data-and-formats-reference.md
+      - Data Types and Notations Reference: reference/data-and-formats-reference.md
       - State Store Reference: reference/state-store-reference.md
       - Configuration Reference: reference/configuration-reference.md
   - Resources:

@@ -1,4 +1,4 @@
-# Data Types and Formats Reference
+# Data Types and Notations Reference
 
 KSML supports a wide range of data types and formats for both keys and values in your streams. This comprehensive reference covers all data types, notation formats, and type conversion capabilities available in KSML.
 

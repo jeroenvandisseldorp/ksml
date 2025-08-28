@@ -1,10 +1,10 @@
 # Pipeline Reference
 
-This page provides comprehensive reference documentation for pipelines in KSML - the heart of stream processing logic. Pipelines define how data flows from sources through operations to sinks.
+This page provides comprehensive reference documentation for pipelines in KSML - the heart of stream processing logic.
 
 ## What is a Pipeline?
 
-In KSML, pipelines form the heart of stream processing logic. A pipeline defines how data flows from one or more input streams through a series of operations and finally to one or more output destinations.
+In KSML, a pipeline defines how data flows from one or more input streams through a series of operations and finally to one or more output destinations.
 
 Think of a pipeline as a recipe that describes exactly how data should be processed from start to finish.
 
@@ -306,10 +306,10 @@ Examples:
 Durations are commonly used in windowing operations:
 
 ```yaml
-- type: windowedBy
-  timeWindows:
-    size: 5m        # 5-minute windows
-    advanceBy: 1m   # Advancing every minute (sliding window)
+- type: windowByTime
+  windowType: hopping
+  duration: 5m        # 5-minute windows
+  advanceBy: 1m       # Advancing every minute (sliding window)
 ```
 
 ## Best Practices for Pipeline Design
@@ -325,7 +325,7 @@ pipelines:
     from: raw_user_events
     via:
       - type: join
-        with: user_profiles
+        table: user_profiles
         valueJoiner:
           expression: {"event": value1, "user": value2}
     to: enriched_user_events
@@ -431,7 +431,7 @@ pipelines:
 
       # Group by user for aggregation
       - type: groupBy
-        keySelector:
+        mapper:
           expression: value.get('userId')
     to: processed_transactions
 ```
@@ -447,7 +447,7 @@ pipelines:
     from: large_stream_1
     via:
       - type: join
-        with: large_stream_2
+        table: large_stream_2
         # Missing proper key selection
     to: joined_output
 ```
@@ -459,10 +459,10 @@ pipelines:
     from: large_stream_1
     via:
       - type: selectKey
-        keySelector:
+        mapper:
           expression: value.get('joinKey')
       - type: join
-        with: large_stream_2
+        table: large_stream_2
         # Now the streams are properly keyed
     to: joined_output
 ```
@@ -502,7 +502,7 @@ pipelines:
     via:
       # Join with customer information
       - type: join
-        with: customers
+        table: customers
         valueJoiner:
           expression: {
             "orderId": value1.get('orderId'),
@@ -526,7 +526,7 @@ pipelines:
     via:
       # Group by product category
       - type: groupBy
-        keySelector:
+        mapper:
           expression: value.get('category')
 
       # Sum the sales amounts

@@ -57,6 +57,22 @@ functions:
     resultType: string
 ```
 
+??? info "Producer - Enum example (click to expand)"
+
+    ```yaml
+    {%
+      include "../definitions/reference/data-types/enum-producer.yaml"
+    %}
+    ```
+
+??? info "Processor - Enum example (click to expand)"
+
+    ```yaml
+    {%
+      include "../definitions/reference/data-types/enum-processor.yaml"
+    %}
+    ```
+
 #### List
 
 A list contains multiple elements of the same type.
@@ -83,6 +99,12 @@ functions:
     expression: value.get("tags", [])
     resultType: "[string]"
 ```
+
+**See it in action**:
+
+- [List example](../reference/function-reference.md#keyvaluetovaluelisttransformer) - predicate functions for data filtering
+
+
 
 #### Struct
 

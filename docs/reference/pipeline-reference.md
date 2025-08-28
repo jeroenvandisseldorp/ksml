@@ -157,34 +157,140 @@ Common sink types include:
 
 ## Pipeline Patterns and Techniques
 
+### When to Use `via` vs Multiple Pipelines
+
+One of the decisions in KSML is whether to use a single pipeline with multiple `via` operations or break processing into multiple connected pipelines. Here's when to use each approach:
+
+#### Use `via` (Single Pipeline) When:
+
+**✅ Operations are tightly coupled and belong together logically**
+```yaml
+# Good: One logical process - "validate and enrich user data"
+pipelines:
+  validate_and_enrich_user:
+    from: raw_user_data
+    via:
+      - type: filter           # Remove invalid data
+        if: 
+          expression: value.get('email') is not None
+      - type: transformValue   # Add computed field based on validation
+        mapper: add_user_status
+      - type: peek            # Log the final result
+        forEach:
+          code: |
+            log.info("Processed user: {}", key)
+    to: valid_users
+```
+
+**✅ Simple sequential processing with no reuse needs**
+```yaml
+# Good: Straightforward data transformation
+pipelines:
+  format_sensor_data:
+    from: raw_sensor_readings
+    via:
+      - type: transformValue
+        mapper: convert_temperature_units
+      - type: transformValue  
+        mapper: add_timestamp_formatting
+      - type: filter
+        if:
+          expression: value.get('temperature') > -50
+    to: formatted_sensor_data
+```
+
+#### Use Multiple Pipelines When:
+
+**✅ You need to reuse intermediate results**
+```yaml
+# Good: Filtered data used by multiple downstream processes
+pipelines:
+  filter_high_value_orders:
+    from: all_orders
+    via:
+      - type: filter
+        if:
+          expression: value.get('total') > 1000
+    as: high_value_orders  # Save for reuse
+
+  send_vip_notifications:
+    from: high_value_orders  # Reuse filtered data
+    via:
+      - type: transformValue
+        mapper: create_vip_notification
+    to: vip_notifications
+
+  update_customer_tier:
+    from: high_value_orders  # Reuse same filtered data
+    via:
+      - type: transformValue
+        mapper: calculate_customer_tier
+    to: customer_tier_updates
+```
+
+**✅ Different processing responsibilities should be separated**
+```yaml
+# Good: Separate data cleaning from business logic
+pipelines:
+  # Responsibility: Data standardization and validation
+  data_cleaning:
+    from: raw_transactions
+    via:
+      - type: filter
+        if:
+          expression: value.get('amount') > 0
+      - type: transformValue
+        mapper: standardize_format
+    as: clean_transactions
+
+  # Responsibility: Business rule application
+  fraud_detection:
+    from: clean_transactions
+    via:
+      - type: transformValue
+        mapper: calculate_fraud_score
+      - type: filter
+        if:
+          expression: value.get('fraud_score') < 0.8
+    to: verified_transactions
+```
+
 ### Connecting Pipelines
 
-KSML allows you to connect pipelines together, creating more complex processing flows:
+ KSML makes it easy to connect pipelines together. The key is using the `as:` parameter to save intermediate results:
 
 ```yaml
 pipelines:
+  # Pipeline 1: Save intermediate result with 'as:'
   filter_high_value_orders:
     from: orders_stream
     via:
       - type: filter
         if:
           expression: value.get('total') > 1000
-    as: high_value_orders  # Save the result for use in another pipeline
+    as: high_value_orders  # ← Save result for other pipelines
 
+  # Pipeline 2: Use the saved result as input
   process_high_value_orders:
-    from: high_value_orders  # Use the result from the previous pipeline
+    from: high_value_orders  # ← Reference the saved result
     via:
-      - type: mapValues
+      - type: transformValue
         mapper:
           expression: {"orderId": value.get('id'), "amount": value.get('total'), "priority": "high"}
     to: priority_orders_stream
 ```
 
-This approach allows you to:
+**When to connect pipelines:**
 
-- Break complex logic into smaller, more manageable pieces
-- Reuse intermediate results in multiple downstream pipelines
-- Create cleaner, more maintainable code
+- Multiple consumers need the same filtered/processed data
+- Different processing responsibilities should be separated  
+- Complex logic benefits from being broken into stages
+
+**When to use `via` instead:**
+
+- Operations are part of one business process
+- No need to reuse intermediate results
+- You want lower latency (no intermediate topics)
 
 ### Branching Pipelines
 
@@ -314,12 +420,12 @@ Durations are commonly used in windowing operations:
 
 ## Best Practices for Pipeline Design
 
-### 1. Keep Pipelines Focused
+### 1. Choose the Right Architecture Pattern
 
-Each pipeline should have a clear, single responsibility:
+Before implementing your pipeline logic, decide whether to use `via` or multiple pipelines (see the decision guide above):
 
 ```yaml
-# Good: Focused pipeline
+# Good: Single focused pipeline using via
 pipelines:
   enrich_user_events:
     from: raw_user_events
@@ -332,19 +438,42 @@ pipelines:
 ```
 
 ```yaml
-# Avoid: Pipeline doing too many things
+# Also Good: Multiple pipelines when you need reusability
+pipelines:
+  clean_events:
+    from: raw_events
+    via:
+      - type: filter
+        if:
+          expression: value.get('user_id') is not None
+    as: clean_events  # Reusable by other pipelines
+
+  create_user_metrics:
+    from: clean_events
+    via:
+      - type: aggregate
+        # User metrics logic
+    to: user_metrics
+
+  detect_anomalies:
+    from: clean_events  # Reuses the same clean data
+    via:
+      - type: transformValue
+        # Anomaly detection logic
+    to: anomaly_alerts
+```
+
+```yaml
+# Avoid: Pipeline doing too many unrelated things
 pipelines:
   do_everything:
     from: raw_events
     via:
-      - type: filter
-        # Filter logic
-      - type: join
-        # Join logic
-      - type: aggregate
-        # Aggregation logic
-      - type: mapValues
-        # Transformation logic
+      - type: filter        # Data cleaning
+      - type: join          # User enrichment  
+      - type: aggregate     # Business metrics
+      - type: transformValue # Fraud detection
+      # ← These should probably be separate pipelines
     to: final_output
 ```
 
@@ -376,9 +505,9 @@ pipelines:
     as: filtered_data
 ```
 
-### 3. Chain Pipelines for Complex Logic
+### 3. Apply the Architecture Decision Consistently
 
-Break complex processing into multiple pipelines:
+Once you've decided on `via` vs multiple pipelines, apply the pattern consistently throughout your KSML application:
 
 ```yaml
 pipelines:

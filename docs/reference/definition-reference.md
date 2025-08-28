@@ -4,27 +4,53 @@ This reference guide covers the structure and organization of KSML definition fi
 
 ## KSML File Structure
 
-Every KSML definition file consists of these top-level sections:
+KSML supports two main patterns for applications. Choose the pattern that matches your use case:
+
+### Stream Processing Applications
+
+Process data from input topics to output topics:
 
 ```yaml
 # Application metadata (optional)
-name: "my-application"
-version: "1.0.0"
-description: "Application description"
+name: "order-processor"         # Optional
+version: "1.0.0"               # Optional  
+description: "Process orders"  # Optional
 
-# Data sources and sinks
-streams:       # KStream definitions
-tables:        # KTable definitions  
-globalTables:  # GlobalKTable definitions
+# Data sources and sinks (optional - can be inlined)
+streams:       # KStream definitions (optional)
+tables:        # KTable definitions (optional)
+globalTables:  # GlobalKTable definitions (optional)
 
-# State storage
-stores:        # State store definitions
+# State storage (optional - only if needed)
+stores:        # State store definitions (optional)
 
 # Processing logic
-functions:     # Python function definitions
-pipelines:     # Data flow pipelines
-producers:     # Data producer definitions
+functions:     # Python function definitions (optional)
+pipelines:     # Data flow pipelines (REQUIRED)
 ```
+
+**Required sections:** `pipelines`  
+**Optional sections:** All others (streams/tables can be inlined in pipelines)
+
+### Data Generation Applications  
+
+Generate and produce data to Kafka topics:
+
+```yaml
+# Application metadata (optional)
+name: "sensor-data-generator"   # Optional
+version: "1.0.0"               # Optional
+description: "Generate sensor data"  # Optional
+
+# Processing logic
+functions:     # Python function definitions (REQUIRED - must include generator functions)
+producers:     # Data producer definitions (REQUIRED)
+```
+
+**Required sections:** `functions` (with generator functions), `producers`  
+**Optional sections:** `name`, `version`, `description`
+
+**Note:** Data generation applications don't use streams/tables/stores sections since they only produce data.
 
 ## Application Metadata
 

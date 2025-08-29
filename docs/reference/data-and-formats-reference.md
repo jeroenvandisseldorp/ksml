@@ -195,26 +195,38 @@ valueType: "union(<type1>, <type2>, ...)"
 ```
 
 **Example:**
+
+Union types are used in two main places in KSML:
+
+**1. In stream definitions** - to specify that a stream can contain multiple types:
 ```yaml
 streams:
-  optional_message_stream:
+  optional_messages:
     topic: optional-messages
     keyType: string
-    valueType: "union(null, string)"
+    valueType: "union(null, json)"  # This stream accepts either null OR a JSON object
 ```
 
-In Python code, a union type means the value can be one of the specified types. You need to handle each possible type:
+**2. In function return types** - to specify that a function can return multiple types:
 ```yaml
 functions:
-  handle_union:
-    type: valueTransformer
+  generate_optional:
+    type: generator
     code: |
-      if value is None:
-        return {"status": "empty"}
+      # Can return either null or a message
+      if random.random() > 0.5:
+        return ("key1", {"data": "value"})
       else:
-        return {"status": "present", "content": value}
-    resultType: json
+        return ("key1", None)
+    resultType: "(string, union(null, json))"  # Returns a tuple with union type
 ```
+
+**What union types mean:**
+
+- `union(null, json)` means the value can be either `null` OR a JSON object
+- When processing union types, your code must check which type was received and handle each case
+
+**Complete example showing both usages:**
 
 ??? info "Producer - Union example (click to expand)"
 

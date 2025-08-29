@@ -3,7 +3,7 @@ streams:
   optional_messages:
     topic: optional_messages
     keyType: string
-    valueType: json  # Stream uses JSON
+    valueType: "union(null, json)"  # Input as union type
   
   processed_messages:
     topic: processed_messages
@@ -40,7 +40,7 @@ pipelines:
   process_optional_messages:
     from: optional_messages
     via:
-      # Transform accepts the JSON which could be null (union behavior)
+      # Transform the union type value
       - type: transformValue
         mapper: process_optional
       

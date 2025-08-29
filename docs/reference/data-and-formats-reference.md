@@ -203,6 +203,35 @@ streams:
     valueType: "union(null, string)"
 ```
 
+In Python code, a union type means the value can be one of the specified types. You need to handle each possible type:
+```yaml
+functions:
+  handle_union:
+    type: valueTransformer
+    code: |
+      if value is None:
+        return {"status": "empty"}
+      else:
+        return {"status": "present", "content": value}
+    resultType: json
+```
+
+??? info "Producer - Union example (click to expand)"
+
+    ```yaml
+    {%
+      include "../definitions/reference/data-types/union-producer.yaml"
+    %}
+    ```
+
+??? info "Processor - Union example (click to expand)"
+
+    ```yaml
+    {%
+      include "../definitions/reference/data-types/union-processor.yaml"
+    %}
+    ```
+
 #### Windowed
 
 Some operations group messages on an input stream together in user-defined windows.
@@ -620,73 +649,3 @@ functions:
 | `notation:type` | **Optional** | `avro:SensorData` |
 | `notation:windowed(...)` | **Optional** | `json:windowed(string)` |
 | Simple types | **Optional** | `string`, `json`, `struct` |
-
-## Best Practices
-
-1. **Be specific about your types**: Avoid using `any` when possible
-2. **Use complex types for structured data**: Use structs, lists, etc. for complex data structures
-3. **Consider schema evolution**: Use AVRO with a schema registry for production systems that need backward compatibility
-4. **Choose the right notation**: Consider compatibility with upstream and downstream systems
-5. **Validate data**: Check that data conforms to expected types and formats
-6. **Handle missing or null values**: Always handle the case where a value might be null
-7. **Document your schemas**: Add comments to explain complex type structures
-8. **Use local schemas for development**: Keep schemas in version control for better change management
-9. **Schema registry for production**: Use schema registry in production for centralized schema management
-10. **Test type conversions**: Verify that automatic conversions work as expected in your pipelines
-
-## Common Patterns
-
-### Working with Optional Fields
-```yaml
-functions:
-  handle_optional:
-    type: valueTransformer
-    code: |
-      # Handle potentially missing fields
-      name = value.get("name", "Unknown")
-      age = value.get("age")
-      if age is not None and age > 0:
-        return {"name": name, "age": age, "valid": True}
-    expression: {"name": name, "valid": False}
-    resultType: struct
-```
-
-### Multi-Format Processing
-```yaml
-pipelines:
-  process_multiple_formats:
-    from: mixed_input
-    via:
-      - type: branch
-        branches:
-          - if: 
-              code: isinstance(value, dict)
-            via:
-              - type: convertValue
-                into: json
-            to: json_output
-          - if:
-              code: isinstance(value, str)
-            via:
-              - type: convertValue
-                into: csv:RecordSchema
-            to: csv_output
-```
-
-### Schema Validation
-```yaml
-functions:
-  validate_schema:
-    type: valueTransformer
-    code: |
-      required_fields = ["id", "name", "timestamp"]
-      if not isinstance(value, dict):
-        raise ValueError("Value must be a dictionary")
-      
-      for field in required_fields:
-        if field not in value:
-          raise ValueError(f"Missing required field: {field}")
-      
-      return value
-    resultType: struct
-```

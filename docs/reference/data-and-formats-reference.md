@@ -181,6 +181,10 @@ functions:
     resultType: "(string, int)"
 ```
 
+**See it in action**:
+
+- [Tuple example](../reference/function-reference.md#foreignkeyextractor)
+
 #### Union
 
 A union type can be one of several possible types.
@@ -517,6 +521,105 @@ pipelines:
         into: xml:OutputSchema
     to: xml_output
 ```
+
+## Type Definition Quoting Rules
+
+When defining types in KSML (for `keyType`, `valueType`, `resultType`, or any other type field), quotes around type expressions follow specific rules based on YAML parsing requirements:
+
+### Quotes MUST be used for:
+
+1. **Special type functions (these will fail without quotes):**
+   ```yaml
+   # enum types - MUST have quotes
+   valueType: "enum(PENDING, PROCESSING, SHIPPED)"
+   
+   # windowed types without notation prefix - MUST have quotes  
+   keyType: "windowed(string)"
+   
+   # union types - MUST have quotes
+   valueType: "union(null, string)"
+   
+   # List of tuples - MUST have quotes
+   resultType: "[(string, json)]"
+   ```
+
+2. **Complex type expressions with special characters:**
+   ```yaml
+   # Types with spaces or special chars - MUST have quotes
+   resultType: "(string, avro:SensorData)"
+   valueType: "list<string>"
+   ```
+
+### Quotes are OPTIONAL for:
+
+1. **Simple basic types (work with or without quotes):**
+   ```yaml
+   valueType: string       # Works
+   valueType: "string"     # Also works
+   keyType: json          # Works
+   keyType: "json"        # Also works
+   valueType: struct      # Works
+   resultType: bytes      # Works
+   ```
+
+2. **Simple tuples (both forms are valid):**
+   ```yaml
+   resultType: (string, json)      # Works without quotes
+   resultType: "(string, json)"    # Also works with quotes
+   ```
+
+3. **Notation:schema combinations (notation prefix makes quotes unnecessary):**
+   ```yaml
+   valueType: avro:SensorData         # Works without quotes
+   keyType: json:windowed(string)     # Notation prefix handles complexity
+   valueType: jsonschema:UserProfile  # Works without quotes
+   valueType: csv:Temperature         # Works without quotes
+   ```
+
+### Why These Rules Exist:
+
+- **YAML parsing**: Without quotes, YAML interprets `enum(A,B,C)` as a function call, causing parsing errors. The quotes tell YAML to treat it as a string literal.
+- **KSML parsing**: The UserTypeParser in KSML specifically looks for patterns like `enum(`, `windowed(`, `union(` at the start of strings to determine the type.
+- **Notation prefix**: When using `json:windowed(string)`, the colon acts as a delimiter that YAML handles correctly without quotes.
+
+### Examples from Real KSML Code:
+
+```yaml
+# Stream definitions
+streams:
+  sensor_data:
+    topic: sensor-readings
+    keyType: string                          # Simple type - no quotes needed
+    valueType: avro:SensorData               # Notation:schema - no quotes needed
+    
+  windowed_data:
+    topic: windowed-counts
+    keyType: "windowed(string)"              # Complex type - quotes required
+    valueType: long                          # Simple type - no quotes needed
+
+# Function definitions
+functions:
+  my_generator:
+    type: generator
+    resultType: (string, json)               # Simple tuple - quotes optional
+    
+  my_transformer:
+    type: valueTransformer  
+    resultType: "enum(SUCCESS, FAILURE)"     # Enum type - quotes required
+```
+
+### Quick Reference:
+
+| Type Pattern | Quotes Required? | Example |
+|-------------|-----------------|----------|
+| `enum(...)` | **Yes** | `"enum(ACTIVE, INACTIVE)"` |
+| `windowed(...)` | **Yes** (without notation) | `"windowed(string)"` |
+| `union(...)` | **Yes** | `"union(null, string)"` |
+| `[(...)]` | **Yes** | `"[(string, json)]"` |
+| `(type1, type2)` | **Optional** | `(string, json)` or `"(string, json)"` |
+| `notation:type` | **Optional** | `avro:SensorData` |
+| `notation:windowed(...)` | **Optional** | `json:windowed(string)` |
+| Simple types | **Optional** | `string`, `json`, `struct` |
 
 ## Best Practices
 

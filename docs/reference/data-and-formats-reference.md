@@ -280,6 +280,15 @@ Windowed types are most commonly used as output from windowing operations like c
     %}
     ```
 
+
+??? info "Processor - Windowed example with notation syntax (click to expand)"
+
+    ```yaml
+    {%
+      include "../definitions/reference/data-types/windowed-processor-notation.yaml"
+    %}
+    ```
+
 **What this example demonstrates:**
 
 This windowed processing example shows how to count events per user within time windows. It takes a stream of user events, groups them by user ID, applies a 10-second tumbling window, and counts events within each window. The result uses the `windowed(string)` key type, which contains both the original user key and window timing information (start/end times). This is essential for time-based analytics like counting user activity rates or detecting patterns over time intervals.

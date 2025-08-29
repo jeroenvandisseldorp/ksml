@@ -274,6 +274,10 @@ Processes each message for side effects like logging, without changing the messa
 
 None (the function is called for its side effects)
 
+```yaml
+--8<-- "definitions/reference/functions/keytransformer-processor.yaml:11:17"
+```
+
 **See how `forEach` is used in an example definition**: 
 
 - [Tutorial: Filtering and Transforming Example](../tutorials/beginner/filtering-transforming.md#complex-filtering-techniques)

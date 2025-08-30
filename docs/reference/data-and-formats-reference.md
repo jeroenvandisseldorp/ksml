@@ -334,16 +334,42 @@ Windowed types enable time-based analytics like counting events per time window,
 
 ### The Any Type
 
-The special type `?` or `any` can be used when the exact type is unknown or variable.
+The special type `?` or `any` can be used when the exact type is unknown or variable. This is particularly useful for functions that need to handle different data structures generically.
 
 **Syntax:**
 ```yaml
-resultType: "?"
+parameterType: "?"
 # or
-resultType: "any"
+parameterType: "any"
 ```
 
-**Note:** The `any` type cannot be used on Kafka topics, as KSML would not be able to tie the type to the right serializer.
+**Key Use Cases:**
+
+- Processing streams with variable JSON structures
+- Generic data transformation functions
+- Handling mixed data types within a single function
+
+**Important:** The `any` type can only be used in function signatures for internal processing. Kafka streams must still use concrete types (like `json`) for serialization.
+
+??? info "Producer - Any type data generation (click to expand)"
+
+    This example generates mixed JSON data with different structures, demonstrating variable data types that can be processed using `any` type functions.
+
+    ```yaml
+    --8<-- "definitions/reference/data-types/any-producer.yaml"
+    ```
+
+??? info "Processor - Any type processing (click to expand)"
+
+    This example shows how to use `parameterType: "any"` to process variable data structures. The function accepts any input type and handles it generically.
+
+    ```yaml
+    --8<-- "definitions/reference/data-types/any-processor.yaml:17:64"
+    ```
+
+**Key Takeaway:**
+
+The `any` type enables flexible data processing for functions that need to handle variable or unknown data structures. While streams require concrete types for serialization, functions can use `any` to process diverse data generically.
 
 ## Notation Formats
 
@@ -361,6 +387,11 @@ The choice of notation depends on your specific requirements:
 | Simple tabular data                         | CSV               |
 | Compact binary format                       | AVRO or Protobuf  |
 | Raw binary data handling                    | Binary            |
+
+### Examples
+**See a working example for every data format in this tutorial**:
+
+- [Data Format Examples](../tutorials/beginner/data-formats.md)
 
 ### AVRO
 
@@ -546,6 +577,11 @@ streams:
 
 When working with structured data, it's important to manage your schemas effectively.
 
+### Examples
+**See a working example for every type of schema in this tutorial**:
+
+- [Schema Examples](../tutorials/beginner/data-formats.md)
+
 ### Local Files vs. Schema Registry
 
 **Local Schema Files:**
@@ -585,23 +621,28 @@ KSML automatically performs type conversion wherever required and possible. This
 - **Schema-based conversions**: automatic conversion using defined schemas
 
 **Example of automatic conversion:**
+
 ```yaml
 functions:
-  generate_message:
-    type: generator
-    globalCode: |
-      import random
-      sensorCounter = 0
+  uppercase_city:
+    type: valueTransformer
     code: |
-      global sensorCounter
-      key = "sensor"+str(sensorCounter)
-      sensorCounter = (sensorCounter+1) % 10
-      
-      # Generate temperature data as CSV string
-      value = "TEMPERATURE,C,"+str(random.randrange(-100, 100))
-    expression: (key, value)
-    resultType: (string, csv:Temperature)  # String automatically converted to CSV struct
+      # When using csv:SensorData, the data comes as a structured object (dict)
+      if value and isinstance(value, dict):
+        # Create a copy and uppercase the city
+        enriched = dict(value)
+        if "city" in enriched:
+          enriched["city"] = enriched["city"].upper()
+        result = enriched
+      else:
+        result = value
+    expression: result
+    resultType: csv:SensorData # String automatically converted to CSV struct
 ```
+
+**Full example**
+
+- [List example](../tutorials/beginner/data-formats.md#working-with-csv-data) - predicate functions for data filtering
 
 ### Implicit Format Conversion
 

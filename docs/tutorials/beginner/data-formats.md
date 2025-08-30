@@ -320,45 +320,9 @@ This processor demonstrates multiple format conversions (Avro → JSON → Strin
     %}
     ```
 
-### Format Conversion Requirements
+### Format Conversion and Multiple Formats
 
-KSML requires explicit format conversion when stream input/output types differ. Use the `convertValue` operation:
-
-```yaml
-pipelines:
-  format_conversion:
-    from: avro_input  # Stream with Avro format
-    via:
-      - type: convertValue
-        into: xml:OutputSchema  # Explicit conversion required
-    to: xml_output    # Stream with XML format
-```
-
-**Note:** Without explicit conversion, KSML will fail with a type mismatch error at the pipeline sink.
-
-## Working with Multiple Formats in a Single Pipeline
-
-Process different data formats within one KSML definition using separate pipelines.
-
-This producer generates both JSON config data and Avro sensor data:
-
-??? info "Producer definition (click to expand)"
-
-    ```yaml
-    {%
-      include "../../definitions/beginner-tutorial/different-data-formats/producer-multiple-formats.yaml"
-    %}
-    ```
-
-This processor shows two pipelines handling different formats (Avro and JSON) and combining results:
-
-??? info "Processor definition for working with multiple formats in a single pipeline (click to expand)"
-
-    ```yaml
-    {%
-      include "../../definitions/beginner-tutorial/different-data-formats/processor-multiple-formats.yaml"
-    %}
-    ```
+For comprehensive information on format conversion requirements, chaining conversions, and working with multiple formats in a single pipeline, see the [Data Types and Formats Reference - Type Conversion](../../reference/data-and-formats-reference.md#type-conversion) section.
 
 
 ## Conclusion

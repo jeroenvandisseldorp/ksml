@@ -375,6 +375,11 @@ The `any` type enables flexible data processing for functions that need to handl
 
 KSML uses _notations_ to allow reading/writing different message formats to Kafka topics. Notations are specified as a prefix to the schema name.
 
+### Examples
+**See a working example for every data format in this tutorial**:
+
+- [Data Format Examples](../tutorials/beginner/data-formats.md)
+
 ### Format Selection Guide
 
 The choice of notation depends on your specific requirements:
@@ -387,11 +392,6 @@ The choice of notation depends on your specific requirements:
 | Simple tabular data                         | CSV               |
 | Compact binary format                       | AVRO or Protobuf  |
 | Raw binary data handling                    | Binary            |
-
-### Examples
-**See a working example for every data format in this tutorial**:
-
-- [Data Format Examples](../tutorials/beginner/data-formats.md)
 
 ### AVRO
 
@@ -723,6 +723,30 @@ pipelines:
     ```
 
 **Key Takeaway:** Functions convert automatically, streams need explicit conversion.
+
+## Working with Multiple Formats in a Single Pipeline
+
+Process different data formats within one KSML definition using separate pipelines.
+
+This producer generates both JSON config data and Avro sensor data:
+
+??? info "Producer definition (click to expand)"
+
+    ```yaml
+    {%
+      include "../definitions/beginner-tutorial/different-data-formats/producer-multiple-formats.yaml"
+    %}
+    ```
+
+This processor shows two pipelines handling different formats (Avro and JSON) and combining results:
+
+??? info "Processor definition for working with multiple formats in a single pipeline (click to expand)"
+
+    ```yaml
+    {%
+      include "../definitions/beginner-tutorial/different-data-formats/processor-multiple-formats.yaml"
+    %}
+    ```
 
 ## Type Definition Quoting Rules
 

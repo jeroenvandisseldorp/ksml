@@ -246,25 +246,49 @@ functions:
 
 #### Windowed
 
-Some operations group messages on an input stream together in user-defined windows.
+Windowing operations in Kafka Streams group messages together in time-based windows. KSML provides the `windowed(<base_type>)` syntax to work with these windowed keys.
 
 **Syntax:**
 ```yaml
+# Without notation - requires manual transformation for Kafka output
 keyType: "windowed(<base_type>)"
+
+# With notation - automatically serializes to the specified format
+keyType: "<notation>:windowed(<base_type>)"  # e.g., json:windowed(string), avro:windowed(string)
 ```
 
-**Example:**
+**Understanding Windowed Keys:**
+
+After windowing operations (like `windowByTime`), Kafka Streams internally creates windowed keys that contain:
+
+- The original key value
+- Window start timestamp (milliseconds)
+- Window end timestamp (milliseconds)  
+- Human-readable start/end times
+
+**Two Approaches for Handling Windowed Keys:**
+
+**1. Without Notation (Manual Transformation Required):**
+
+When using plain `windowed(string)`, the windowed keys cannot be directly serialized to Kafka topics. You must manually transform them to a regular type:
+
 ```yaml
-streams:
-  windowed_counts:
-    topic: windowed-counts
-    keyType: "windowed(string)"
-    valueType: long
+--8<-- "definitions/reference/data-types/windowed-processor.yaml:51:52"
 ```
 
-Windowed types are most commonly used as output from windowing operations like count, aggregate, etc. The key contains both the original key value and window timing information.
+**2. With Notation Prefix (Automatic Serialization):**
 
-??? info "Producer - Windowed example (click to expand)"
+Using a notation prefix like `json:windowed(string)` or `avro:windowed(string)` enables automatic serialization of the windowed key structure:
+
+```yaml
+--8<-- "definitions/reference/data-types/windowed-processor-notation.yaml:59:60"
+```
+
+The notation automatically serializes the windowed key as a structured object with fields: `start`, `end`, `startTime`, `endTime`, and `key`.
+
+**Complete Examples:**
+
+??? info "Producer - Generates events for windowing (click to expand)"
 
     ```yaml
     {%
@@ -272,7 +296,9 @@ Windowed types are most commonly used as output from windowing operations like c
     %}
     ```
 
-??? info "Processor - Windowed example (click to expand)"
+??? info "Processor - Manual transformation approach (click to expand)"
+
+    This example shows how to manually transform windowed keys to regular strings when not using notation:
 
     ```yaml
     {%
@@ -280,8 +306,9 @@ Windowed types are most commonly used as output from windowing operations like c
     %}
     ```
 
+??? info "Processor - Automatic serialization with notation (click to expand)"
 
-??? info "Processor - Windowed example with notation syntax (click to expand)"
+    This example shows the simpler approach using notation for automatic serialization:
 
     ```yaml
     {%
@@ -289,9 +316,21 @@ Windowed types are most commonly used as output from windowing operations like c
     %}
     ```
 
-**What this example demonstrates:**
+**When to Use Each Approach:**
 
-This windowed processing example shows how to count events per user within time windows. It takes a stream of user events, groups them by user ID, applies a 10-second tumbling window, and counts events within each window. The result uses the `windowed(string)` key type, which contains both the original user key and window timing information (start/end times). This is essential for time-based analytics like counting user activity rates or detecting patterns over time intervals.
+- **Use notation prefix** (`json:windowed(string)`) when you want to:
+     - Write windowed keys directly to Kafka topics
+     - Preserve the complete window structure in a standard format
+     - Avoid manual transformation code
+
+- **Use plain windowed type** (`windowed(string)`) when you:
+     - Only need windowed keys for internal processing
+     - Want custom key formatting for output
+     - Need to extract specific window information
+
+**Key Takeaway:**
+
+Windowed types enable time-based analytics like counting events per time window, calculating moving averages, or detecting patterns over time intervals. The notation prefix approach simplifies working with windowed data by handling serialization automatically.
 
 ### The Any Type
 

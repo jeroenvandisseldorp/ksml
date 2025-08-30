@@ -613,86 +613,102 @@ streams:
 
 ## Type Conversion
 
-KSML automatically performs type conversion wherever required and possible. This includes:
+KSML handles type conversion differently depending on the context:
 
-- **Number conversions**: integer to long, float to double, etc.
-- **String conversions**: between strings and CSV, JSON, XML formats
-- **Complex type conversions**: between different notation formats
-- **Schema-based conversions**: automatic conversion using defined schemas
+| Context | Conversion Type | When to Use |
+|---------|----------------|-------------|
+| **Functions** | Automatic | When `resultType` differs from returned value |
+| **Streams** | Explicit | When input/output stream formats differ |
 
-**Example of automatic conversion:**
+### Function Type Conversion (Automatic)
+
+Functions automatically convert return values to match their declared `resultType`:
 
 ```yaml
 functions:
-  uppercase_city:
+  example_function:
     type: valueTransformer
     code: |
-      # When using csv:SensorData, the data comes as a structured object (dict)
-      if value and isinstance(value, dict):
-        # Create a copy and uppercase the city
-        enriched = dict(value)
-        if "city" in enriched:
-          enriched["city"] = enriched["city"].upper()
-        result = enriched
-      else:
-        result = value
+      result = {"city": "Amsterdam", "temp": 20}  # Returns dict
     expression: result
-    resultType: csv:SensorData # String automatically converted to CSV struct
+    resultType: string  # ← Automatically converts dict → JSON string
 ```
 
-**Full example**
+**Supported conversions:**
 
-- [List example](../tutorials/beginner/data-formats.md#working-with-csv-data) - predicate functions for data filtering
+- Numbers: `int` ↔ `long` ↔ `float` ↔ `double`
+- Strings: `string` ↔ `json` ↔ `xml` ↔ `csv`
+- Complex types: Lists, structs, tuples with matching schemas
 
-### Explicit Format Conversion
+??? info "Working example - Automatic type conversion in functions"
 
-KSML requires explicit format conversion when stream input/output types differ. Use the `convertValue` operation to transform between formats:
+    Producer:
+    ```yaml
+    --8<-- "definitions/reference/data-types/auto-conversion-producer.yaml"
+    ```
+
+    Processor:
+    ```yaml
+    --8<-- "definitions/reference/data-types/auto-conversion-processor.yaml"
+    ```
+
+### Stream Format Conversion (Explicit)
+
+Streams require explicit `convertValue` operations when formats differ:
 
 ```yaml
 pipelines:
-  format_conversion:
-    from: avro_input  # Stream with Avro format
+  example_pipeline:
+    from: json_input      # JSON format
     via:
       - type: convertValue
-        into: json  # Explicit conversion required
-    to: json_output   # Stream with JSON format
+        into: string      # Must explicitly convert
+    to: string_output     # String format
 ```
 
-**Important:** KSML performs type checking at the sink and will fail if the output stream type doesn't match the pipeline's data type. Always use explicit `convertValue` operations when converting between different formats.
+Without `convertValue`, KSML will fail with a type mismatch error.
 
-??? info "Producer - Format conversion data generator (click to expand)"
+??? info "Working example - Explicit stream conversion"
 
-    This example generates JSON messages for format conversion demonstrations.
-
+    Producer:
     ```yaml
     --8<-- "definitions/reference/data-types/explicit-conversion-producer.yaml"
     ```
 
-??? info "Processor - Explicit format conversion example (click to expand)"
-
-    This example demonstrates that explicit conversion is required when outputting to a different format.
-
+    Processor:
     ```yaml
     --8<-- "definitions/reference/data-types/explicit-conversion-processor.yaml"
     ```
 
-### Multiple Format Conversions
+### Chaining Multiple Conversions
 
-You can chain multiple `convertValue` operations to transform data through several formats:
+Chain `convertValue` operations for complex transformations:
 
 ```yaml
 pipelines:
   multi_conversion:
-    from: avro_stream
+    from: json_stream
     via:
       - type: convertValue
-        into: json
+        into: string      # JSON → String
       - type: convertValue  
-        into: string
-      - type: convertValue
-        into: xml:OutputSchema
-    to: xml_output
+        into: json        # String → JSON
+    to: json_output
 ```
+
+??? info "Working example - Chained conversions"
+
+    Producer:
+    ```yaml
+    --8<-- "definitions/reference/data-types/multi-conversion-producer.yaml"
+    ```
+
+    Processor:
+    ```yaml
+    --8<-- "definitions/reference/data-types/multi-conversion-processor.yaml"
+    ```
+
+**Key Takeaway:** Functions convert automatically, streams need explicit conversion.
 
 ## Type Definition Quoting Rules
 

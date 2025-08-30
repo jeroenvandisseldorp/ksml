@@ -30,33 +30,26 @@ functions:
       # Note: We return a dict, not a string
     expression: result
     resultType: string  # ← Automatic conversion: dict → JSON string
-  
-  # Example 2: Returns string, automatically converted to JSON
-  string_to_json_auto:
+
+  # Example 2: String parsing with valid numeric conversion
+  valid_string_to_int:
     type: valueTransformer
     code: |
-      import json
-      # Function returns a string (manually created JSON)
-      result = json.dumps({
-        "id": key,
-        "reading": value.get("temperature"),
-        "unit": "celsius"
-      })
-      # Note: We return a string, not a dict
+      # Extract temperature and convert to string representation
+      temp_str = str(int(value.get("temperature", 20)))
+      result = temp_str  # Return valid numeric string like "20"
     expression: result
-    resultType: json  # ← Automatic conversion: string → parsed JSON
-  
-  # Example 3: Returns float, automatically converted to int
-  calculate_average:
+    resultType: int  # ← Automatic conversion: "20" → 20
+
+  # Example 3: Integer to string conversion  
+  int_to_string:
     type: valueTransformer
     code: |
-      # Function returns a float
-      temp = value.get("temperature", 0)
-      humidity = value.get("humidity", 0)
-      result = (temp + humidity) / 2.0  # Float division
-      # Note: We return a float
+      # At this point, value is an integer from previous conversion
+      # We'll just multiply it by 2 to show we're working with an int
+      result = value * 2  # Return an integer
     expression: result
-    resultType: int  # ← Automatic conversion: float → int (truncates)
+    resultType: string  # ← Automatic conversion: 40 → "40"
 
 pipelines:
   demonstrate_auto_conversion:
@@ -65,36 +58,46 @@ pipelines:
       # Test automatic dict to string conversion
       - type: transformValue
         mapper: dict_to_string_auto
-      
+
       - type: peek
         forEach:
           code: |
             # Value is now a string (automatic conversion happened)
-            log.info("After auto dict→string: type={}, length={}", 
-                     type(value).__name__, len(value))
-      
-      # Test automatic string to JSON conversion
-      - type: transformValue
-        mapper: string_to_json_auto
-      
-      - type: peek
-        forEach:
-          code: |
-            # Value is now a dict/JSON (automatic parsing happened)
-            log.info("After auto string→json: type={}, id={}, reading={}", 
-                     type(value).__name__, value.get("id"), value.get("reading"))
-      
-      # Test automatic numeric conversion
-      - type: transformValue
-        mapper: calculate_average
-      
-      - type: peek
-        forEach:
-          code: |
-            # Value is now an integer (automatic conversion from float)
-            log.info("After auto float→int: type={}, average={}", 
+            log.info("After auto dict→string: type={}, content={}", 
                      type(value).__name__, value)
-      
+
+      # Parse the JSON string back to dict for next operations
+      - type: transformValue
+        mapper:
+          type: valueTransformer
+          code: |
+            import json
+            result = json.loads(value)  # Parse JSON string back to dict
+          expression: result
+          resultType: json
+
+      # Test valid string to int conversion
+      - type: transformValue
+        mapper: valid_string_to_int
+
+      - type: peek
+        forEach:
+          code: |
+            # Value is now an integer (automatic conversion happened)
+            log.info("After auto string→int: type={}, value={}", 
+                     type(value).__name__, value)
+
+      # Test int to string conversion
+      - type: transformValue
+        mapper: int_to_string
+
+      - type: peek
+        forEach:
+          code: |
+            # Value is now a string (automatic conversion happened)  
+            log.info("After auto int→string: type={}, value={}", 
+                     type(value).__name__, value)
+
       # Wrap in JSON for output
       - type: transformValue
         mapper:
@@ -102,10 +105,10 @@ pipelines:
           code: |
             result = {
               "sensor_id": key,
-              "average_reading": value,
+              "converted_value": value,
               "processed": True
             }
           expression: result
           resultType: json
-    
+
     to: processed_output

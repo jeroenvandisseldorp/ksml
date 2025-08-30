@@ -622,23 +622,37 @@ KSML handles type conversion differently depending on the context:
 
 ### Function Type Conversion (Automatic)
 
-Functions automatically convert return values to match their declared `resultType`:
+Functions automatically convert return values to match their declared `resultType` when possible:
 
+**Successful Conversions:**
+
+- Any type → string: Always works via automatic `.toString()` conversion
+- String → numeric types (int, long, float, double): Works only if string contains a valid numeric value (e.g., "123" → int)
+- Numeric conversions: Work between compatible numeric types (int ↔ long, float ↔ double)
+- Complex types: Dict → JSON, lists/structs/tuples with matching schemas
+
+**Failed Conversions:**
+
+- Invalid string → numeric: Throws exception and stops processing (e.g., "not_a_number" → int fails)
+- Incompatible complex types: Mismatched schemas or structures
+
+**Example:**
 ```yaml
 functions:
-  example_function:
+  string_to_int:
     type: valueTransformer
     code: |
-      result = {"city": "Amsterdam", "temp": 20}  # Returns dict
+      result = "123"        # Valid numeric string
     expression: result
-    resultType: string  # ← Automatically converts dict → JSON string
+    resultType: int         # ← Succeeds: converts "123" → 123
+
+  invalid_conversion:
+    type: valueTransformer
+    code: |
+      result = "not_a_number"  # Invalid numeric string
+    expression: result
+    resultType: int         # ← Fails: throws conversion exception
 ```
-
-**Supported conversions:**
-
-- Numbers: `int` ↔ `long` ↔ `float` ↔ `double`
-- Strings: `string` ↔ `json` ↔ `xml` ↔ `csv`
-- Complex types: Lists, structs, tuples with matching schemas
 
 ??? info "Working example - Automatic type conversion in functions"
 

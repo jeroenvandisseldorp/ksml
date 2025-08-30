@@ -644,25 +644,45 @@ functions:
 
 - [List example](../tutorials/beginner/data-formats.md#working-with-csv-data) - predicate functions for data filtering
 
-### Implicit Format Conversion
-
-KSML automatically converts between formats when stream input/output types differ:
-
-```yaml
-pipelines:
-  implicit_conversion:
-    from: avro_input  # Stream with Avro format
-    to: json_output   # Stream with JSON format
-    # Conversion happens automatically
-```
-
 ### Explicit Format Conversion
 
-Use the `convertValue` operation to explicitly transform data between formats:
+KSML requires explicit format conversion when stream input/output types differ. Use the `convertValue` operation to transform between formats:
 
 ```yaml
 pipelines:
-  explicit_conversion:
+  format_conversion:
+    from: avro_input  # Stream with Avro format
+    via:
+      - type: convertValue
+        into: json  # Explicit conversion required
+    to: json_output   # Stream with JSON format
+```
+
+**Important:** KSML performs type checking at the sink and will fail if the output stream type doesn't match the pipeline's data type. Always use explicit `convertValue` operations when converting between different formats.
+
+??? info "Producer - Format conversion data generator (click to expand)"
+
+    This example generates JSON messages for format conversion demonstrations.
+
+    ```yaml
+    --8<-- "definitions/reference/data-types/explicit-conversion-producer.yaml"
+    ```
+
+??? info "Processor - Explicit format conversion example (click to expand)"
+
+    This example demonstrates that explicit conversion is required when outputting to a different format.
+
+    ```yaml
+    --8<-- "definitions/reference/data-types/explicit-conversion-processor.yaml"
+    ```
+
+### Multiple Format Conversions
+
+You can chain multiple `convertValue` operations to transform data through several formats:
+
+```yaml
+pipelines:
+  multi_conversion:
     from: avro_stream
     via:
       - type: convertValue

@@ -320,17 +320,21 @@ This processor demonstrates multiple format conversions (Avro → JSON → Strin
     %}
     ```
 
-### Implicit Conversion
+### Format Conversion Requirements
 
-KSML automatically converts between formats when stream input/output types differ:
+KSML requires explicit format conversion when stream input/output types differ. Use the `convertValue` operation:
 
 ```yaml
 pipelines:
-  implicit_conversion:
+  format_conversion:
     from: avro_input  # Stream with Avro format
+    via:
+      - type: convertValue
+        into: xml:OutputSchema  # Explicit conversion required
     to: xml_output    # Stream with XML format
-    # The conversion happens automatically
 ```
+
+**Note:** Without explicit conversion, KSML will fail with a type mismatch error at the pipeline sink.
 
 ## Working with Multiple Formats in a Single Pipeline
 

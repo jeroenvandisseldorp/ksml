@@ -21,7 +21,7 @@ KSML supports three types of state stores, each optimized for specific use cases
 
 | Type | Description | Use Cases | Examples                                                                                                          |
 |------|-------------|-----------|-------------------------------------------------------------------------------------------------------------------|
-| `keyValue` | Simple key-value storage | General lookups, non-windowed aggregations, manual state management | [`keyValue` type state store](../tutorials/intermediate/state-stores.md#example-1-predefined-store-configuration) |
+| `keyValue` | Simple key-value storage | General lookups, non-windowed aggregations, manual state management | [`keyValue` type state store](../tutorials/intermediate/state-stores.md#1-predefined-store-configuration) |
 | `window` | Time-windowed storage with automatic expiry | Time-based aggregations, windowed joins, temporal analytics | [`window` type state store](../tutorials/intermediate/aggregations.md#windowed-aggregation-example)               |
 | `session` | Session-based storage with activity gaps | User session tracking, activity-based grouping | [`session` type state store](../tutorials/intermediate/windowing.md#session-window-user-activity-analysis)                                             |
 
@@ -53,7 +53,7 @@ Define directly within operations for custom configurations:
 
 **Full example:**
 
-- [Inline State Stores Tutorial](../tutorials/intermediate/state-stores.md#example-2-inline-store-configuration)
+- [Inline State Stores Tutorial](../tutorials/intermediate/state-stores.md#2-inline-store-configuration)
 
 ## Configuration Parameters
 

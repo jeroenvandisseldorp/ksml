@@ -173,9 +173,41 @@ This example demonstrates:
 - `store.get(key)` - Retrieve value from state store (returns None if not found)
 - `store.put(key, value)` - Store key-value pair in state store
 
+### With Session Operations
+
+Session stores track user activity with inactivity gaps and automatic timeout:
+```yaml
+pipelines:
+  user_session_analysis:
+    from: user_clicks
+    via:
+      - type: groupByKey
+      - type: windowBySession
+        inactivityGap: 2m  # Close session after 2 minutes of inactivity
+        grace: 30s
+      - type: count
+        store:
+          name: user_sessions
+          type: session
+          retention: 1h
+          caching: false
+```
+
+**Full example:**
+
+- [Session store type example](../tutorials/intermediate/windowing.md#session-window-user-activity-analysis)
+
+**Session store patterns:**
+
+- **Activity tracking**: Monitor user engagement and session duration
+- **Timeout detection**: Identify inactive sessions for cleanup
+- **State aggregation**: Accumulate metrics within session boundaries
+
 ### With Windowed Operations
 
-Window stores require specific configuration:
+Window stores require specific configuration that varies by operation type:
+
+#### For Aggregations (Count, Aggregate, etc.)
 
 ```yaml
 pipelines:
@@ -191,29 +223,49 @@ pipelines:
         store:
           name: click_counts_5min
           type: window
-          windowSize: 5m
-          retention: 30m
+          windowSize: 5m          # Must match window duration
+          retention: 35m          # windowSize + grace + buffer
           caching: false
+```
+
+#### For Stream-Stream Joins
+
+```yaml
+pipelines:
+  join_streams:
+    from: stream1
+    via:
+      - type: join
+        stream: stream2
+        timeDifference: 15m
+        grace: 5m
+        thisStore:
+          type: window
+          windowSize: 30m         # Must be 2 × timeDifference
+          retention: 35m          # 2 × timeDifference + grace
+          retainDuplicates: true
 ```
 
 ### Retention Guidelines
 
-For window stores, set retention based on:
+**For Window Aggregations:**
 ```
 retention = windowSize + gracePeriod + processingBuffer
 ```
 
-Example for 5-minute windows with 30-second grace:
-```yaml
-store:
-  type: window
-  windowSize: 5m
-  retention: 10m  # 5m window + 30s grace + buffer
+**For Stream-Stream Joins:**
+```
+windowSize = 2 × timeDifference
+retention = 2 × timeDifference + gracePeriod
 ```
 
-**Windowed State Stores(Tumbling Window) tutorial:**
+Examples:
+- **5-minute aggregation window** with 30s grace: `retention: 35m` (5m + 30s + 4.5m buffer)
+- **15-minute join window** with 5m grace: `windowSize: 30m`, `retention: 35m` (30m + 5m)
 
-- [Windowed State Stores examples: Tumbling Window](../tutorials/intermediate/windowing.md#tumbling-window-click-counting)
+**Full examples:**
+- [Windowed Aggregations](../tutorials/intermediate/windowing.md#tumbling-window-click-counting)
+- [Stream-Stream Joins](../tutorials/intermediate/joins.md#stream-stream-joins)
 
 ## Performance Considerations
 

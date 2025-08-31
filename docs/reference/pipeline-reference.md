@@ -73,12 +73,24 @@ A source can be:
 
 Sources must be defined elsewhere in your KSML file (in the `streams`, `tables`, or `globalTables` sections) or be the result of a previous pipeline.
 
+**Full example with `from`**
+
+- [Example with `from`](../tutorials/intermediate/aggregations.md#4-cogroup)
+
+**Note:** KSML does not support multiple sources in the `from` field. For joins, use a single source and specify the join target using the `table` parameter in join operations:
+
 ```yaml
-# Multiple sources (for joins)
-from:
-  - orders_stream
-  - customers_stream
+# Correct syntax for joins
+from: orders_stream
+via:
+  - type: join
+    table: customers_table  # Join target specified here
+    valueJoiner: join_function
 ```
+
+**Learn more about joins**
+
+- [Joins` tutorial](../tutorials/intermediate/joins.md)
 
 ### Operations: Transforming the Data
 
@@ -109,9 +121,9 @@ Operations are applied in sequence, creating a processing pipeline where data fl
 
 For a complete list of available operations, see the [Operation Reference](operation-reference.md).
 
-**Full example for `via`**
+**Full example with `via`**
 
-- [Example for `via`](../tutorials/intermediate/aggregations.md#4-cogroup)
+- [Example with `via`](../tutorials/intermediate/aggregations.md#4-cogroup)
 
 ### Sinks: Where Data Goes
 
@@ -346,6 +358,12 @@ This is useful for:
 - Partitioning data across multiple topics
 - Creating topic hierarchies
 - Implementing multi-tenant architectures
+
+**Full example with `toTopicNameExtractor`**
+
+- [Example with `toTopicNameExtractor`](../reference/operation-reference.md#totopicnameextractor)
+
+
 
 ## Input and Output Configurations
 

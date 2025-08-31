@@ -450,12 +450,66 @@ Durations are commonly used in windowing operations:
 - [Example with `duration`](../tutorials/intermediate/windowing.md#tumbling-window-click-counting)
 
 
-## State Store Specification in pipeline
+## State Store Specification in Pipelines
 
-Full examples for `state store` in a pipeline
+State stores maintain data across multiple messages, enabling stateful operations like aggregations, counts, and joins. They can be defined in two ways:
 
-- [Example with `state store` in a pipeline](../tutorials/intermediate/windowing.md#tumbling-window-click-counting)
+### 1. Inline State Store (Within Operations)
 
-For comprehensive documentation on state store
+Define directly in stateful operations when you need custom store configuration:
 
-- [State Stores reference](state-store-reference.md)
+```yaml
+pipelines:
+  count_clicks_5min:
+    from: user_clicks
+    via:
+      - type: groupByKey
+      - type: windowByTime
+        windowType: tumbling
+        duration: 5m
+        grace: 30s
+      - type: count
+        store:                    # Inline store definition
+          name: click_counts_5min
+          type: window            # Window store for windowed aggregations
+          windowSize: 5m          # Must match window duration
+          retention: 30m          # How long to keep window data
+          caching: false          # Disable caching for real-time updates
+
+```
+##### **See it in action**:
+
+- [Tutorial: Windowing](../tutorials/intermediate/windowing.md)
+
+### 2. Pre-defined State Store (In `stores` Section)
+
+Define once for reuse across multiple operations or direct access in functions:
+
+```yaml
+stores:
+  stats_store:
+    type: keyValue
+    keyType: string
+    valueType: string
+    persistent: true
+
+functions:
+  detect_anomalies:
+    type: valueTransformer
+    stores:
+      - stats_store
+```
+
+##### **See pre-defined state store in action**:
+
+- [Example for pre-defined state store: Anomaly Detection](../tutorials/advanced/complex-event-processing.md#anomaly-detection)
+
+### Examples
+
+**Full example with windowed state store:**
+
+- [Windowed Aggregations with State Stores](../tutorials/intermediate/windowing.md#tumbling-window-click-counting)
+
+**Comprehensive state store documentation:**
+
+- [State Stores Reference](state-store-reference.md)

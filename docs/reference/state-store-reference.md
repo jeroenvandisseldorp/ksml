@@ -260,10 +260,12 @@ retention = 2 × timeDifference + gracePeriod
 ```
 
 Examples:
+
 - **5-minute aggregation window** with 30s grace: `retention: 35m` (5m + 30s + 4.5m buffer)
 - **15-minute join window** with 5m grace: `windowSize: 30m`, `retention: 35m` (30m + 5m)
 
 **Full examples:**
+
 - [Windowed Aggregations](../tutorials/intermediate/windowing.md#tumbling-window-click-counting)
 - [Stream-Stream Joins](../tutorials/intermediate/joins.md#stream-stream-joins)
 

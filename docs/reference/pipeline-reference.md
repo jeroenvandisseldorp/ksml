@@ -363,52 +363,51 @@ This is useful for:
 
 - [Example with `toTopicNameExtractor`](../reference/operation-reference.md#totopicnameextractor)
 
+## Stream and Table Configuration
 
+Pipelines reference streams, tables, and globalTables that can be defined in two ways:
 
-## Input and Output Configurations
+### 1. Pre-defined (Referenced by Name)
 
-### Configuring Input Streams
-
-When defining input streams, you can configure various properties:
-
-```yaml
-streams:
-  orders_stream:
-    topic: orders
-    keyType: string
-    valueType: json
-    offsetResetPolicy: earliest  # Start from the beginning of the topic
-    timestampExtractor: order_timestamp_extractor  # Custom timestamp extraction
-```
-
-Important configuration options include:
-
-- `offsetResetPolicy`: Determines where to start consuming from when no offset is stored
-- `timestampExtractor`: Defines how to extract event timestamps from messages
-- `keyType` and `valueType`: Define the data types and formats
-
-### Configuring Output Streams
-
-Similarly, output streams can be configured:
+Define once, use multiple times:
 
 ```yaml
 streams:
-  processed_orders_stream:
-    topic: processed-orders
+  sensor_source:
+    topic: ksml_sensordata
     keyType: string
-    valueType: avro:ProcessedOrder
+    valueType: avro:SensorData
+    offsetResetPolicy: latest
+
+pipelines:
+  my_pipeline:
+    from: sensor_source  # Reference by name
+    to: processed_output
 ```
 
-For inline topic definitions in sinks:
+### 2. Inline Definition
+
+Define directly where needed:
 
 ```yaml
-to:
-  topic: dynamic-output-topic
-  keyType: string
-  valueType: json
+pipelines:
+  my_pipeline:
+    from:
+      topic: ksml_sensordata  # Inline definition
+      keyType: string
+      valueType: avro:SensorData
+      offsetResetPolicy: latest
+    to:
+      topic: processed_output
+      keyType: string
+      valueType: json
 ```
 
-## Duration Specification
+For comprehensive documentation on configuring streams, tables, and their properties (offsetResetPolicy, timestampExtractor, partitioner, etc.), see:
+
+→ [Data Sources and Targets - Complete Reference](definition-reference.md#data-sources-and-targets)
+
+## Duration Specification in pipeline
 
 Some pipeline operations require specifying time durations. In KSML, durations are expressed using a simple format:
 
@@ -445,3 +444,18 @@ Durations are commonly used in windowing operations:
   duration: 5m        # 5-minute windows
   advanceBy: 1m       # Advancing every minute (sliding window)
 ```
+
+**Full examples for `duration`**
+
+- [Example with `duration`](../tutorials/intermediate/windowing.md#tumbling-window-click-counting)
+
+
+## State Store Specification in pipeline
+
+Full examples for `state store` in a pipeline
+
+- [Example with `state store` in a pipeline](../tutorials/intermediate/windowing.md#tumbling-window-click-counting)
+
+For comprehensive documentation on state store
+
+- [State Stores reference](state-store-reference.md)

@@ -74,7 +74,7 @@ Let's start with a basic example that routes sensor data based on location.
 ??? info "Sensor Data Producer - click to expand"
 
     ```yaml
-    --8<-- "pipelines/intermediate/branching/producer-sensor-locations.yaml"
+    --8<-- "docs-examples/intermediate-tutorial/branching/producer-sensor-locations.yaml"
     ```
 
 ### Processor Definition  
@@ -82,7 +82,7 @@ Let's start with a basic example that routes sensor data based on location.
 ??? info "Location-Based Routing Processor - click to expand"
 
     ```yaml
-    --8<-- "pipelines/intermediate/branching/processor-location-routing.yaml"
+    --8<-- "docs-examples/intermediate-tutorial/branching/processor-location-routing.yaml"
     ```
 
 This example demonstrates:
@@ -108,7 +108,7 @@ This example shows more complex branching with data transformation and business 
 ??? info "Order Events Producer - click to expand"
 
     ```yaml
-    --8<-- "pipelines/intermediate/branching/producer-order-events.yaml"
+    --8<-- "docs-examples/intermediate-tutorial/branching/producer-order-events.yaml"
     ```
 
 ### Processor Definition
@@ -116,7 +116,7 @@ This example shows more complex branching with data transformation and business 
 ??? info "Order Processing Pipeline - click to expand"
 
     ```yaml
-    --8<-- "pipelines/intermediate/branching/processor-order-processing.yaml"
+    --8<-- "docs-examples/intermediate-tutorial/branching/processor-order-processing.yaml"
     ```
 
 This example demonstrates:

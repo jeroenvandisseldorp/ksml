@@ -2,8 +2,6 @@ ksml:
   definitions:
     jsonschema-producer: jsonschema-producer.yaml
     jsonschema-processor: jsonschema-processor.yaml
-#    avro-producer: avro-producer.yaml
-#    avro-processor: avro-processor.yaml
   schemaRegistries:
     my_confluent_registry:
       config:

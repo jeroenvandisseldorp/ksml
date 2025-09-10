@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "SensorData",
+  "properties": {
+    "name": {
+      "type": ["null", "string"],
+      "description": "The name of the sensor"
+    },
+    "timestamp": {
+      "type": ["null", "string"],
+      "description": "Timestamp of the measurement"
+    },
+    "type": {
+      "type": ["null", "string"],
+      "description": "Type of measurement (TEMPERATURE, HUMIDITY, PRESSURE)"
+    },
+    "unit": {
+      "type": ["null", "string"],
+      "description": "Unit of measurement"
+    },
+    "value": {
+      "type": ["null", "string"],
+      "description": "Measured value"
+    },
+    "color": {
+      "type": ["null", "string"],
+      "description": "Sensor color"
+    },
+    "owner": {
+      "type": ["null", "string"],
+      "description": "Owner of the sensor"
+    },
+    "city": {
+      "type": ["null", "string"],
+      "description": "City where sensor is located"
+    }
+  },
+  "additionalProperties": false
+}

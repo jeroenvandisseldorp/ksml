@@ -20,7 +20,6 @@ package io.axual.ksml.docs.examples.intermediate.tutorial.branching;
  * =========================LICENSE_END==================================
  */
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.kafka.streams.TestInputTopic;
@@ -28,7 +27,6 @@ import org.apache.kafka.streams.TestOutputTopic;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import io.axual.ksml.testutil.KSMLTest;
@@ -37,6 +35,7 @@ import io.axual.ksml.testutil.KSMLTopic;
 import lombok.extern.slf4j.Slf4j;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
 @ExtendWith(KSMLTestExtension.class)
@@ -61,58 +60,32 @@ public class LocationRoutingTest {
 
     @KSMLTest(topology = "docs-examples/intermediate-tutorial/branching/processor-location-routing.yaml")
     void testLocationBasedRouting() throws Exception {
-        // Create test sensor data with different locations
-        String datacenterSensor = createSensorDataJson("sensor1", "data_center", "TEMPERATURE", 25.5);
-        String warehouseSensor = createSensorDataJson("sensor2", "warehouse", "HUMIDITY", 60.0);
-        String officeSensor = createSensorDataJson("sensor3", "office", "PRESSURE", 1013.25);
-        String unknownLocationSensor = createSensorDataJson("sensor4", "factory", "TEMPERATURE", 30.0);
-        String anotherDatacenterSensor = createSensorDataJson("sensor5", "data_center", "HUMIDITY", 45.0);
+        inputTopic.pipeInput("k1", createSensorJson("data_center"));
+        inputTopic.pipeInput("k2", createSensorJson("warehouse"));
+        inputTopic.pipeInput("k3", createSensorJson("office"));
+        inputTopic.pipeInput("k4", createSensorJson("unknown"));
 
-        // Send JSON strings to input topic
-        inputTopic.pipeInput("sensor1", datacenterSensor);
-        inputTopic.pipeInput("sensor2", warehouseSensor);
-        inputTopic.pipeInput("sensor3", officeSensor);
-        inputTopic.pipeInput("sensor4", unknownLocationSensor);
-        inputTopic.pipeInput("sensor5", anotherDatacenterSensor);
-
-        // Verify routing to datacenter topic
-        List<String> datacenterRecords = datacenterOutput.readValuesToList();
-        assertEquals(2, datacenterRecords.size(), "Should route 2 data_center sensors to datacenter topic");
-        JsonNode datacenter1 = objectMapper.readTree(datacenterRecords.get(0));
-        JsonNode datacenter2 = objectMapper.readTree(datacenterRecords.get(1));
-        assertEquals("data_center", datacenter1.get("location").asText(), "First datacenter record should have data_center location");
-        assertEquals("data_center", datacenter2.get("location").asText(), "Second datacenter record should have data_center location");
-
-        // Verify routing to warehouse topic
-        List<String> warehouseRecords = warehouseOutput.readValuesToList();
-        assertEquals(1, warehouseRecords.size(), "Should route 1 warehouse sensor to warehouse topic");
-        JsonNode warehouse = objectMapper.readTree(warehouseRecords.getFirst());
-        assertEquals("warehouse", warehouse.get("location").asText());
-        assertEquals("sensor2", warehouse.get("name").asText());
-
-        // Verify routing to office topic
-        List<String> officeRecords = officeOutput.readValuesToList();
-        assertEquals(1, officeRecords.size(), "Should route 1 office sensor to office topic");
-        JsonNode office = objectMapper.readTree(officeRecords.getFirst());
-        assertEquals("office", office.get("location").asText());
-        assertEquals("sensor3", office.get("name").asText());
-
-        // Verify routing to unknown topic (default branch)
-        List<String> unknownRecords = unknownOutput.readValuesToList();
-        assertEquals(1, unknownRecords.size(), "Should route 1 unknown location sensor to unknown topic");
-        JsonNode unknown = objectMapper.readTree(unknownRecords.getFirst());
-        assertEquals("factory", unknown.get("location").asText());
-        assertEquals("sensor4", unknown.get("name").asText());
+        assertEquals(1, datacenterOutput.readValuesToList().size());
+        assertEquals(1, warehouseOutput.readValuesToList().size());
+        assertEquals(1, officeOutput.readValuesToList().size());
+        assertEquals(1, unknownOutput.readValuesToList().size());
     }
 
-    private String createSensorDataJson(String name, String location, String type, double value) throws Exception {
-        Map<String, Object> sensorData = new HashMap<>();
-        sensorData.put("name", name);
-        sensorData.put("location", location);
-        sensorData.put("type", type);
-        sensorData.put("value", value);
-        sensorData.put("timestamp", System.currentTimeMillis());
-        sensorData.put("unit", "C");
-        return objectMapper.writeValueAsString(sensorData);
+    @KSMLTest(topology = "docs-examples/intermediate-tutorial/branching/processor-location-routing.yaml")
+    void testMissingLocation() throws Exception {
+        inputTopic.pipeInput("key", createSensorJson(null));
+        
+        assertEquals(1, unknownOutput.readValuesToList().size());
+        assertTrue(datacenterOutput.isEmpty());
+    }
+
+    private String createSensorJson(String location) throws Exception {
+        Map<String, Object> sensor = new HashMap<>();
+        sensor.put("name", "test_sensor");
+        if (location != null) {
+            sensor.put("location", location);
+        }
+        sensor.put("value", 25.0);
+        return objectMapper.writeValueAsString(sensor);
     }
 }

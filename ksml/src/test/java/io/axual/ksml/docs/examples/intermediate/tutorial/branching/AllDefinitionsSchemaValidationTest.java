@@ -59,7 +59,7 @@ public class AllDefinitionsSchemaValidationTest {
         var testResourcesUri = AllDefinitionsSchemaValidationTest.class
             .getResource("/docs-examples/intermediate-tutorial/branching/").toURI();
         Path branchingDir = Paths.get(testResourcesUri);
-        
+
         // Find all .yaml files
         return Files.walk(branchingDir)
             .filter(Files::isRegularFile)
@@ -72,25 +72,10 @@ public class AllDefinitionsSchemaValidationTest {
      */
     private static Schema getKsmlSchema() throws Exception {
         if (ksmlSchema == null) {
-            InputStream schemaStream = null;
+            InputStream schemaStream = AllDefinitionsSchemaValidationTest.class
+                .getResourceAsStream("/ksml-language-spec.json");
             
-            try {
-                var testClassUri = AllDefinitionsSchemaValidationTest.class
-                    .getResource("/docs-examples/intermediate-tutorial/branching/").toURI();
-                var testPath = Paths.get(testClassUri);
-                
-                // Go up the directory tree to find the schema
-                // From: ksml/src/test/resources/docs-examples/intermediate-tutorial/branching/
-                // To:   docs/ksml-language-spec.json (from ksml root)
-                var schemaPath = testPath.resolve("../../../../../../docs/ksml-language-spec.json");
-                
-                if (Files.exists(schemaPath)) {
-                    schemaStream = Files.newInputStream(schemaPath);
-                }
-            } catch (Exception ignored) {
-            }
-            
-            assertNotNull(schemaStream, "Could not find KSML JSON schema file.");
+            assertNotNull(schemaStream, "Could not find KSML JSON schema file in test resources.");
             
             JSONObject rawSchema = new JSONObject(new JSONTokener(schemaStream));
             ksmlSchema = SchemaLoader.load(rawSchema);

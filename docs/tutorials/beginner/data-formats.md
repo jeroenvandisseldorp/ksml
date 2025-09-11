@@ -168,7 +168,7 @@ Configure KSML runner to work with both Avro and JsonSchema registries:
 
 **Important configuration details:**
 
-- Defines **two schema registries**: `my_confluent_registry` (for Avro) and `my_apicurio_registry` (for JsonSchema)
+- Defines **two schema registries**: `my_confluent_registry` (for the Confluent Avro notation) and `my_apicurio_registry` (for JsonSchema)
 - Shows how to configure **both `confluent_avro` and `apicurio_jsonschema`** notations in the same application
 - JsonSchema schemas must be **manually registered** with Apicurio (auto-registration not supported by Apicurio)
 

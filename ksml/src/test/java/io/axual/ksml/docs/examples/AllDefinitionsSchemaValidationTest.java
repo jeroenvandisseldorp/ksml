@@ -1,4 +1,4 @@
-package io.axual.ksml.docs.examples.intermediate.tutorial.branching;
+package io.axual.ksml.docs.examples;
 
 /*-
  * ========================LICENSE_START=================================
@@ -26,17 +26,20 @@ import org.everit.json.schema.Schema;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.StringReader;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Stream;
 
+import io.axual.ksml.data.notation.json.JsonSchemaMapper;
+import io.axual.ksml.definition.parser.TopologyDefinitionParser;
 import io.axual.ksml.generator.YAMLObjectMapper;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -45,19 +48,22 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * JSON Schema validation test for all YAML definition files
- * in the branching tutorial examples folder.
+ * in docs-examples and pipelines folders.
+ * The KSML JSON schema is generated dynamically using the same
+ * TopologyDefinitionParser and JsonSchemaMapper that the KSML
+ * runner uses when invoked with the --schema flag.
  */
 public class AllDefinitionsSchemaValidationTest {
 
     private static Schema ksmlSchema;
 
     /**
-     * Discovers all YAML files in the branching tutorial directory
+     * Discovers all YAML files in the resources directory
      */
     static Stream<Path> provideYamlFiles() throws URISyntaxException, IOException {
         // Get the directory containing the YAML files
         var testResourcesUri = AllDefinitionsSchemaValidationTest.class
-            .getResource("/docs-examples/intermediate-tutorial/branching/").toURI();
+            .getResource("/").toURI();
         Path branchingDir = Paths.get(testResourcesUri);
 
         // Find all .yaml files
@@ -68,19 +74,28 @@ public class AllDefinitionsSchemaValidationTest {
     }
 
     /**
-     * Loads the KSML JSON schema once for all tests
+     * Generates the KSML JSON schema dynamically using TopologyDefinitionParser
+     */
+    @BeforeAll
+    static void generateSchema() throws Exception {
+        // Generate the schema dynamically using the same approach as KSML runner
+        final var parser = new TopologyDefinitionParser("dummy");
+        final var schemaJson = new JsonSchemaMapper(true).fromDataSchema(parser.schema());
+        
+        // Write the generated schema to test resources for debugging purposes
+        Path schemaPath = Paths.get("src/test/resources/ksml-language-spec.json");
+        Files.writeString(schemaPath, schemaJson);
+        
+        // Load the schema for validation
+        JSONObject rawSchema = new JSONObject(new JSONTokener(new StringReader(schemaJson)));
+        ksmlSchema = SchemaLoader.load(rawSchema);
+    }
+    
+    /**
+     * Returns the generated KSML JSON schema
      */
     private static Schema getKsmlSchema() throws Exception {
-        if (ksmlSchema == null) {
-            InputStream schemaStream = AllDefinitionsSchemaValidationTest.class
-                .getResourceAsStream("/ksml-language-spec.json");
-            
-            assertNotNull(schemaStream, "Could not find KSML JSON schema file in test resources.");
-            
-            JSONObject rawSchema = new JSONObject(new JSONTokener(schemaStream));
-            ksmlSchema = SchemaLoader.load(rawSchema);
-            schemaStream.close();
-        }
+        assertNotNull(ksmlSchema, "Schema was not generated. Run generateSchema() first.");
         return ksmlSchema;
     }
 

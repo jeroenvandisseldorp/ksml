@@ -1,40 +1,51 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "type": "object",
+  "$id": "https://ksml.io/sensordata.json",
   "title": "SensorData",
+  "description": "Emulated sensor data with a few additional attributes",
+  "type": "object",
   "properties": {
     "name": {
-      "type": ["null", "string"],
-      "description": "The name of the sensor"
+      "description": "The name of the sensor",
+      "type": "string"
     },
     "timestamp": {
-      "type": ["null", "string"],
-      "description": "Timestamp of the measurement"
-    },
-    "type": {
-      "type": ["null", "string"],
-      "description": "Type of measurement (TEMPERATURE, HUMIDITY, PRESSURE)"
-    },
-    "unit": {
-      "type": ["null", "string"],
-      "description": "Unit of measurement"
+      "description": "The timestamp of the sensor reading",
+      "type": "number"
     },
     "value": {
-      "type": ["null", "string"],
-      "description": "Measured value"
+      "description": "The value of the sensor, represented as string",
+      "type": "string"
+    },
+    "type": {
+      "description": "The type of the sensor",
+      "type": "string",
+      "enum": [
+        "AREA",
+        "HUMIDITY",
+        "LENGTH",
+        "STATE",
+        "TEMPERATURE"
+      ]
+    },
+    "unit": {
+      "description": "The unit of the sensor",
+      "type": "string"
     },
     "color": {
-      "type": ["null", "string"],
-      "description": "Sensor color"
-    },
-    "owner": {
-      "type": ["null", "string"],
-      "description": "Owner of the sensor"
+      "description": "The color of the sensor",
+      "type": "string",
+      "default": null
     },
     "city": {
-      "type": ["null", "string"],
-      "description": "City where sensor is located"
+      "description": "The city of the sensor",
+      "type": "string",
+      "default": null
+    },
+    "owner": {
+      "description": "The owner of the sensor",
+      "type": "string",
+      "default": null
     }
-  },
-  "additionalProperties": false
+  }
 }

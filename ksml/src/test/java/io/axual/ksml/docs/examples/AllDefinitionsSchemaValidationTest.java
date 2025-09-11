@@ -82,12 +82,15 @@ public class AllDefinitionsSchemaValidationTest {
         final var parser = new TopologyDefinitionParser("dummy");
         final var schemaJson = new JsonSchemaMapper(true).fromDataSchema(parser.schema());
         
-        // Write the generated schema to test resources for debugging purposes
-        Path schemaPath = Paths.get("src/test/resources/ksml-language-spec.json");
-        Files.writeString(schemaPath, schemaJson);
-        
-        // Load the schema for validation
+        // Parse the schema to add strict validation at root level
         JSONObject rawSchema = new JSONObject(new JSONTokener(new StringReader(schemaJson)));
+        
+        // "additionalProperties": false at root level to ensure strict validation
+        // The generated schema by default allows additional properties, but for validation
+        // we want to catch typos like "functionss:" instead of "functions:"
+        rawSchema.put("additionalProperties", false);
+
+        // Load the corrected schema for validation
         ksmlSchema = SchemaLoader.load(rawSchema);
     }
     

@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.19">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.20">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.7e37652d.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.e53b48f4.min.css">
       
       
 
@@ -1466,7 +1466,7 @@
           <li class="md-nav__item">
   <a href="#avro" class="md-nav__link">
     <span class="md-ellipsis">
-      AVRO
+      Avro
     </span>
   </a>
   
@@ -1635,45 +1635,27 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#quotes-must-be-used-for" class="md-nav__link">
+  <a href="#all-type-expressions-work-without-quotes" class="md-nav__link">
     <span class="md-ellipsis">
-      Quotes MUST be used for:
+      All Type Expressions Work Without Quotes:
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#quotes-are-optional-for" class="md-nav__link">
+  <a href="#yaml-syntax-highlighting-note" class="md-nav__link">
     <span class="md-ellipsis">
-      Quotes are OPTIONAL for:
+      YAML Syntax Highlighting Note
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#why-these-rules-exist" class="md-nav__link">
+  <a href="#summary" class="md-nav__link">
     <span class="md-ellipsis">
-      Why These Rules Exist:
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#examples-from-real-ksml-code" class="md-nav__link">
-    <span class="md-ellipsis">
-      Examples from Real KSML Code:
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#quick-reference" class="md-nav__link">
-    <span class="md-ellipsis">
-      Quick Reference:
+      Summary:
     </span>
   </a>
   
@@ -1963,7 +1945,7 @@
           <li class="md-nav__item">
   <a href="#avro" class="md-nav__link">
     <span class="md-ellipsis">
-      AVRO
+      Avro
     </span>
   </a>
   
@@ -2132,45 +2114,27 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#quotes-must-be-used-for" class="md-nav__link">
+  <a href="#all-type-expressions-work-without-quotes" class="md-nav__link">
     <span class="md-ellipsis">
-      Quotes MUST be used for:
+      All Type Expressions Work Without Quotes:
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#quotes-are-optional-for" class="md-nav__link">
+  <a href="#yaml-syntax-highlighting-note" class="md-nav__link">
     <span class="md-ellipsis">
-      Quotes are OPTIONAL for:
+      YAML Syntax Highlighting Note
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#why-these-rules-exist" class="md-nav__link">
+  <a href="#summary" class="md-nav__link">
     <span class="md-ellipsis">
-      Why These Rules Exist:
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#examples-from-real-ksml-code" class="md-nav__link">
-    <span class="md-ellipsis">
-      Examples from Real KSML Code:
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#quick-reference" class="md-nav__link">
-    <span class="md-ellipsis">
-      Quick Reference:
+      Summary:
     </span>
   </a>
   
@@ -2279,14 +2243,15 @@
 <h4 id="enum">Enum</h4>
 <p>An enumeration defines a set of allowed values.</p>
 <p><strong>Syntax:</strong>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;enum(&lt;value1&gt;,</span><span class="nv"> </span><span class="s">&lt;value2&gt;,</span><span class="nv"> </span><span class="s">...)&quot;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enum(&lt;value1&gt;, &lt;value2&gt;, ...)</span><span class="w">   </span><span class="c1"># Quotes optional</span>
 </code></pre></div></p>
 <p><strong>Example:</strong>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">streams</span><span class="p">:</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">order_status_stream</span><span class="p">:</span>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="nt">topic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">order-statuses</span>
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="nt">keyType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">string</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">    </span><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;enum(PENDING,</span><span class="nv"> </span><span class="s">PROCESSING,</span><span class="nv"> </span><span class="s">SHIPPED,</span><span class="nv"> </span><span class="s">DELIVERED,</span><span class="nv"> </span><span class="s">CANCELLED)&quot;</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">    </span><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enum(PENDING, PROCESSING, SHIPPED, DELIVERED, CANCELLED)</span><span class="w">  </span><span class="c1"># Works without quotes</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="c1"># valueType: &quot;enum(PENDING, PROCESSING, SHIPPED, DELIVERED, CANCELLED)&quot;  # Also works with quotes</span>
 </code></pre></div></p>
 <p>In Python code, an enum value is always represented as a string:
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nt">functions</span><span class="p">:</span>
@@ -2525,14 +2490,14 @@
 <h4 id="map">Map</h4>
 <p>A map contains key-value pairs where keys are always strings and values are of a specified type.</p>
 <p><strong>Syntax:</strong>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;map(&lt;value_type&gt;)&quot;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">map(&lt;value_type&gt;)</span><span class="w">   </span><span class="c1"># Quotes optional</span>
 </code></pre></div></p>
 <p><strong>Example:</strong>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nt">streams</span><span class="p">:</span>
 <a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">  </span><span class="nt">user_preferences</span><span class="p">:</span>
 <a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">    </span><span class="nt">topic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">user-preferences</span>
 <a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">    </span><span class="nt">keyType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">string</span>
-<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">    </span><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;map(string)&quot;</span><span class="w">  </span><span class="c1"># Map with string keys and string values</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">    </span><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">map(string)</span><span class="w">  </span><span class="c1"># Map with string keys and string values (quotes optional)</span>
 <a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>
 <a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="w">  </span><span class="nt">scores</span><span class="p">:</span>
 <a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="w">    </span><span class="nt">topic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">scores</span>
@@ -2725,7 +2690,7 @@
 <li>Demonstrates how the <code>map(valuetype)</code> syntax ensures all values in a map conform to the specified type</li>
 </ul>
 <h4 id="struct">Struct</h4>
-<p>A struct is a key-value map where all keys are strings. This is the most common complex type and is used for JSON objects, AVRO records, etc.</p>
+<p>A struct is a key-value map where all keys are strings. This is the most common complex type and is used for JSON objects, Avro records, etc.</p>
 <p><strong>Syntax:</strong>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">struct</span>
 </code></pre></div></p>
@@ -3540,7 +3505,7 @@
 <tbody>
 <tr>
 <td>Schema evolution and backward compatibility</td>
-<td>AVRO or Protobuf</td>
+<td>Avro or Protobuf</td>
 </tr>
 <tr>
 <td>Human-readable data for debugging</td>
@@ -3556,7 +3521,7 @@
 </tr>
 <tr>
 <td>Compact binary format</td>
-<td>AVRO or Protobuf</td>
+<td>Avro or Protobuf</td>
 </tr>
 <tr>
 <td>Raw binary data handling</td>
@@ -3564,8 +3529,8 @@
 </tr>
 </tbody>
 </table>
-<h3 id="avro">AVRO</h3>
-<p>AVRO is a binary format that supports schema evolution.</p>
+<h3 id="avro">Avro</h3>
+<p>Avro is a binary format that supports schema evolution.</p>
 <p><strong>Syntax:</strong>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;avro:&lt;schema_name&gt;&quot;</span>
 <a id="__codelineno-42-2" name="__codelineno-42-2" href="#__codelineno-42-2"></a><span class="c1"># or for schema registry lookup</span>
@@ -3705,7 +3670,7 @@
 <p><strong>Local Schema Files:</strong>
 When a schema is specified, KSML loads the schema from a local file from the <code>schemaDirectory</code>. The notation determines the filename extension:</p>
 <ul>
-<li>AVRO schemas: <code>.avsc</code> extension</li>
+<li>Avro schemas: <code>.avsc</code> extension</li>
 <li>XML schemas: <code>.xsd</code> extension  </li>
 <li>CSV schemas: <code>.csv</code> extension</li>
 <li>JSON schemas: <code>.json</code> extension</li>
@@ -4217,7 +4182,7 @@ When no schema is specified, KSML assumes the schema is loadable from Schema Reg
 <a id="__codelineno-70-34" name="__codelineno-70-34" href="#__codelineno-70-34"></a><span class="w">      </span><span class="no">key = &quot;sensor&quot; + str(sensorCounter)</span>
 <a id="__codelineno-70-35" name="__codelineno-70-35" href="#__codelineno-70-35"></a><span class="w">      </span><span class="no">sensorCounter = (sensorCounter + 1) % 10</span>
 <a id="__codelineno-70-36" name="__codelineno-70-36" href="#__codelineno-70-36"></a>
-<a id="__codelineno-70-37" name="__codelineno-70-37" href="#__codelineno-70-37"></a><span class="w">      </span><span class="no"># Generate sensor reading data that will be output as AVRO</span>
+<a id="__codelineno-70-37" name="__codelineno-70-37" href="#__codelineno-70-37"></a><span class="w">      </span><span class="no"># Generate sensor reading data that will be output as Avro</span>
 <a id="__codelineno-70-38" name="__codelineno-70-38" href="#__codelineno-70-38"></a><span class="w">      </span><span class="no">reading = {</span>
 <a id="__codelineno-70-39" name="__codelineno-70-39" href="#__codelineno-70-39"></a><span class="w">        </span><span class="no">&quot;name&quot;: key,</span>
 <a id="__codelineno-70-40" name="__codelineno-70-40" href="#__codelineno-70-40"></a><span class="w">        </span><span class="no">&quot;timestamp&quot;: str(round(time.time() * 1000)),</span>
@@ -4229,7 +4194,7 @@ When no schema is specified, KSML assumes the schema is loadable from Schema Reg
 <a id="__codelineno-70-46" name="__codelineno-70-46" href="#__codelineno-70-46"></a><span class="w">        </span><span class="no">&quot;city&quot;: random.choice([&quot;Amsterdam&quot;, &quot;Utrecht&quot;, &quot;Rotterdam&quot;, &quot;The Hague&quot;, &quot;Eindhoven&quot;])</span>
 <a id="__codelineno-70-47" name="__codelineno-70-47" href="#__codelineno-70-47"></a><span class="w">      </span><span class="no">}</span>
 <a id="__codelineno-70-48" name="__codelineno-70-48" href="#__codelineno-70-48"></a><span class="w">    </span><span class="nt">expression</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(key, reading)</span>
-<a id="__codelineno-70-49" name="__codelineno-70-49" href="#__codelineno-70-49"></a><span class="w">    </span><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(string, json)</span><span class="w">  </span><span class="c1"># Generate as JSON, output as AVRO</span>
+<a id="__codelineno-70-49" name="__codelineno-70-49" href="#__codelineno-70-49"></a><span class="w">    </span><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(string, json)</span><span class="w">  </span><span class="c1"># Generate as JSON, output as Avro</span>
 <a id="__codelineno-70-50" name="__codelineno-70-50" href="#__codelineno-70-50"></a>
 <a id="__codelineno-70-51" name="__codelineno-70-51" href="#__codelineno-70-51"></a><span class="nt">producers</span><span class="p">:</span>
 <a id="__codelineno-70-52" name="__codelineno-70-52" href="#__codelineno-70-52"></a><span class="w">  </span><span class="c1"># Produce JSON device configuration every 10 seconds</span>
@@ -4241,14 +4206,14 @@ When no schema is specified, KSML assumes the schema is loadable from Schema Reg
 <a id="__codelineno-70-58" name="__codelineno-70-58" href="#__codelineno-70-58"></a><span class="w">      </span><span class="nt">keyType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">string</span>
 <a id="__codelineno-70-59" name="__codelineno-70-59" href="#__codelineno-70-59"></a><span class="w">      </span><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">json</span>
 <a id="__codelineno-70-60" name="__codelineno-70-60" href="#__codelineno-70-60"></a>
-<a id="__codelineno-70-61" name="__codelineno-70-61" href="#__codelineno-70-61"></a><span class="w">  </span><span class="c1"># Produce AVRO sensor readings every 3 seconds</span>
+<a id="__codelineno-70-61" name="__codelineno-70-61" href="#__codelineno-70-61"></a><span class="w">  </span><span class="c1"># Produce Avro sensor readings every 3 seconds</span>
 <a id="__codelineno-70-62" name="__codelineno-70-62" href="#__codelineno-70-62"></a><span class="w">  </span><span class="nt">sensor_reading_producer</span><span class="p">:</span>
 <a id="__codelineno-70-63" name="__codelineno-70-63" href="#__codelineno-70-63"></a><span class="w">    </span><span class="nt">generator</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">generate_sensor_reading</span>
 <a id="__codelineno-70-64" name="__codelineno-70-64" href="#__codelineno-70-64"></a><span class="w">    </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3s</span>
 <a id="__codelineno-70-65" name="__codelineno-70-65" href="#__codelineno-70-65"></a><span class="w">    </span><span class="nt">to</span><span class="p">:</span>
 <a id="__codelineno-70-66" name="__codelineno-70-66" href="#__codelineno-70-66"></a><span class="w">      </span><span class="nt">topic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sensor_readings</span>
 <a id="__codelineno-70-67" name="__codelineno-70-67" href="#__codelineno-70-67"></a><span class="w">      </span><span class="nt">keyType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">string</span>
-<a id="__codelineno-70-68" name="__codelineno-70-68" href="#__codelineno-70-68"></a><span class="w">      </span><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">avro:SensorData%</span>
+<a id="__codelineno-70-68" name="__codelineno-70-68" href="#__codelineno-70-68"></a><span class="w">      </span><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">avro:SensorData</span>
 </code></pre></div>
 </details>
 <p>This processor shows two pipelines handling different formats (Avro and JSON) and combining results:</p>
@@ -4273,15 +4238,15 @@ When no schema is specified, KSML assumes the schema is loadable from Schema Reg
 <a id="__codelineno-71-17" name="__codelineno-71-17" href="#__codelineno-71-17"></a><span class="w">    </span><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">json</span>
 <a id="__codelineno-71-18" name="__codelineno-71-18" href="#__codelineno-71-18"></a>
 <a id="__codelineno-71-19" name="__codelineno-71-19" href="#__codelineno-71-19"></a><span class="nt">pipelines</span><span class="p">:</span>
-<a id="__codelineno-71-20" name="__codelineno-71-20" href="#__codelineno-71-20"></a><span class="w">  </span><span class="c1"># Pipeline 1: Process AVRO data and convert to JSON</span>
+<a id="__codelineno-71-20" name="__codelineno-71-20" href="#__codelineno-71-20"></a><span class="w">  </span><span class="c1"># Pipeline 1: Process Avro data and convert to JSON</span>
 <a id="__codelineno-71-21" name="__codelineno-71-21" href="#__codelineno-71-21"></a><span class="w">  </span><span class="nt">avro_processing</span><span class="p">:</span>
 <a id="__codelineno-71-22" name="__codelineno-71-22" href="#__codelineno-71-22"></a><span class="w">    </span><span class="nt">from</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">avro_sensor_stream</span>
 <a id="__codelineno-71-23" name="__codelineno-71-23" href="#__codelineno-71-23"></a><span class="w">    </span><span class="nt">via</span><span class="p">:</span>
-<a id="__codelineno-71-24" name="__codelineno-71-24" href="#__codelineno-71-24"></a><span class="w">      </span><span class="c1"># Log AVRO input</span>
+<a id="__codelineno-71-24" name="__codelineno-71-24" href="#__codelineno-71-24"></a><span class="w">      </span><span class="c1"># Log Avro input</span>
 <a id="__codelineno-71-25" name="__codelineno-71-25" href="#__codelineno-71-25"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">peek</span>
 <a id="__codelineno-71-26" name="__codelineno-71-26" href="#__codelineno-71-26"></a><span class="w">        </span><span class="nt">forEach</span><span class="p">:</span>
 <a id="__codelineno-71-27" name="__codelineno-71-27" href="#__codelineno-71-27"></a><span class="w">          </span><span class="nt">code</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
-<a id="__codelineno-71-28" name="__codelineno-71-28" href="#__codelineno-71-28"></a><span class="w">            </span><span class="no">log.info(&quot;AVRO sensor: name={}, type={}, value={}{}&quot;,</span>
+<a id="__codelineno-71-28" name="__codelineno-71-28" href="#__codelineno-71-28"></a><span class="w">            </span><span class="no">log.info(&quot;Avro sensor: name={}, type={}, value={}{}&quot;,</span>
 <a id="__codelineno-71-29" name="__codelineno-71-29" href="#__codelineno-71-29"></a><span class="w">                    </span><span class="no">value.get(&quot;name&quot;), value.get(&quot;type&quot;),</span>
 <a id="__codelineno-71-30" name="__codelineno-71-30" href="#__codelineno-71-30"></a><span class="w">                    </span><span class="no">value.get(&quot;value&quot;), value.get(&quot;unit&quot;))</span>
 <a id="__codelineno-71-31" name="__codelineno-71-31" href="#__codelineno-71-31"></a>
@@ -4291,7 +4256,7 @@ When no schema is specified, KSML assumes the schema is loadable from Schema Reg
 <a id="__codelineno-71-35" name="__codelineno-71-35" href="#__codelineno-71-35"></a><span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">valueTransformer</span>
 <a id="__codelineno-71-36" name="__codelineno-71-36" href="#__codelineno-71-36"></a><span class="w">          </span><span class="nt">code</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
 <a id="__codelineno-71-37" name="__codelineno-71-37" href="#__codelineno-71-37"></a><span class="w">            </span><span class="no">result = dict(value) if value else {}</span>
-<a id="__codelineno-71-38" name="__codelineno-71-38" href="#__codelineno-71-38"></a><span class="w">            </span><span class="no">result[&quot;source_format&quot;] = &quot;AVRO&quot;</span>
+<a id="__codelineno-71-38" name="__codelineno-71-38" href="#__codelineno-71-38"></a><span class="w">            </span><span class="no">result[&quot;source_format&quot;] = &quot;Avro&quot;</span>
 <a id="__codelineno-71-39" name="__codelineno-71-39" href="#__codelineno-71-39"></a><span class="w">          </span><span class="nt">expression</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">result</span>
 <a id="__codelineno-71-40" name="__codelineno-71-40" href="#__codelineno-71-40"></a><span class="w">          </span><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">json</span>
 <a id="__codelineno-71-41" name="__codelineno-71-41" href="#__codelineno-71-41"></a>
@@ -4327,178 +4292,38 @@ When no schema is specified, KSML assumes the schema is loadable from Schema Reg
 </code></pre></div>
 </details>
 <h2 id="type-definition-quoting-rules">Type Definition Quoting Rules</h2>
-<p>When defining types in KSML (for <code>keyType</code>, <code>valueType</code>, <code>resultType</code>, or any other type field), quotes around type expressions follow specific rules based on YAML parsing requirements:</p>
-<h3 id="quotes-must-be-used-for">Quotes MUST be used for:</h3>
-<ol>
-<li>
-<p><strong>Special type functions (these will fail without quotes):</strong>
-   <div class="highlight"><pre><span></span><code><a id="__codelineno-72-1" name="__codelineno-72-1" href="#__codelineno-72-1"></a><span class="c1"># enum types - MUST have quotes</span>
-<a id="__codelineno-72-2" name="__codelineno-72-2" href="#__codelineno-72-2"></a><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;enum(PENDING,</span><span class="nv"> </span><span class="s">PROCESSING,</span><span class="nv"> </span><span class="s">SHIPPED)&quot;</span>
-<a id="__codelineno-72-3" name="__codelineno-72-3" href="#__codelineno-72-3"></a>
-<a id="__codelineno-72-4" name="__codelineno-72-4" href="#__codelineno-72-4"></a><span class="c1"># map types - MUST have quotes</span>
-<a id="__codelineno-72-5" name="__codelineno-72-5" href="#__codelineno-72-5"></a><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;map(string)&quot;</span>
-<a id="__codelineno-72-6" name="__codelineno-72-6" href="#__codelineno-72-6"></a>
-<a id="__codelineno-72-7" name="__codelineno-72-7" href="#__codelineno-72-7"></a><span class="c1"># windowed types without notation prefix - MUST have quotes  </span>
-<a id="__codelineno-72-8" name="__codelineno-72-8" href="#__codelineno-72-8"></a><span class="nt">keyType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;windowed(string)&quot;</span>
-<a id="__codelineno-72-9" name="__codelineno-72-9" href="#__codelineno-72-9"></a>
-<a id="__codelineno-72-10" name="__codelineno-72-10" href="#__codelineno-72-10"></a><span class="c1"># union types - MUST have quotes</span>
-<a id="__codelineno-72-11" name="__codelineno-72-11" href="#__codelineno-72-11"></a><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;union(null,</span><span class="nv"> </span><span class="s">string)&quot;</span>
+<p>In KSML, quotes around type definitions are <strong>always optional</strong>. KSML can parse all type expressions correctly whether they have quotes or not. The choice to use quotes is purely a matter of style and preference.</p>
+<h3 id="all-type-expressions-work-without-quotes">All Type Expressions Work Without Quotes:</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-72-1" name="__codelineno-72-1" href="#__codelineno-72-1"></a><span class="c1"># Basic types</span>
+<a id="__codelineno-72-2" name="__codelineno-72-2" href="#__codelineno-72-2"></a><span class="nt">keyType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">string</span>
+<a id="__codelineno-72-3" name="__codelineno-72-3" href="#__codelineno-72-3"></a><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">json</span>
+<a id="__codelineno-72-4" name="__codelineno-72-4" href="#__codelineno-72-4"></a><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">int</span>
+<a id="__codelineno-72-5" name="__codelineno-72-5" href="#__codelineno-72-5"></a>
+<a id="__codelineno-72-6" name="__codelineno-72-6" href="#__codelineno-72-6"></a><span class="c1"># Function-style types</span>
+<a id="__codelineno-72-7" name="__codelineno-72-7" href="#__codelineno-72-7"></a><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enum(PENDING, PROCESSING, SHIPPED)</span>
+<a id="__codelineno-72-8" name="__codelineno-72-8" href="#__codelineno-72-8"></a><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">map(string)</span>
+<a id="__codelineno-72-9" name="__codelineno-72-9" href="#__codelineno-72-9"></a><span class="nt">keyType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">windowed(string)</span>
+<a id="__codelineno-72-10" name="__codelineno-72-10" href="#__codelineno-72-10"></a><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">list(int)</span>
+<a id="__codelineno-72-11" name="__codelineno-72-11" href="#__codelineno-72-11"></a><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tuple(string, json)</span>
 <a id="__codelineno-72-12" name="__codelineno-72-12" href="#__codelineno-72-12"></a>
-<a id="__codelineno-72-13" name="__codelineno-72-13" href="#__codelineno-72-13"></a><span class="c1"># List of tuples - MUST have quotes</span>
-<a id="__codelineno-72-14" name="__codelineno-72-14" href="#__codelineno-72-14"></a><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;[(string,</span><span class="nv"> </span><span class="s">json)]&quot;</span>
-</code></pre></div></p>
-</li>
-<li>
-<p><strong>Complex type expressions with special characters:</strong>
-   <div class="highlight"><pre><span></span><code><a id="__codelineno-73-1" name="__codelineno-73-1" href="#__codelineno-73-1"></a><span class="c1"># Types with spaces or special chars - MUST have quotes</span>
-<a id="__codelineno-73-2" name="__codelineno-73-2" href="#__codelineno-73-2"></a><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;(string,</span><span class="nv"> </span><span class="s">avro:SensorData)&quot;</span>
-<a id="__codelineno-73-3" name="__codelineno-73-3" href="#__codelineno-73-3"></a><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;list&lt;string&gt;&quot;</span>
-</code></pre></div></p>
-</li>
-</ol>
-<h3 id="quotes-are-optional-for">Quotes are OPTIONAL for:</h3>
-<ol>
-<li>
-<p><strong>Simple basic types (work with or without quotes):</strong>
-   <div class="highlight"><pre><span></span><code><a id="__codelineno-74-1" name="__codelineno-74-1" href="#__codelineno-74-1"></a><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">string</span><span class="w">       </span><span class="c1"># Works</span>
-<a id="__codelineno-74-2" name="__codelineno-74-2" href="#__codelineno-74-2"></a><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;string&quot;</span><span class="w">     </span><span class="c1"># Also works</span>
-<a id="__codelineno-74-3" name="__codelineno-74-3" href="#__codelineno-74-3"></a><span class="nt">keyType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">json</span><span class="w">          </span><span class="c1"># Works</span>
-<a id="__codelineno-74-4" name="__codelineno-74-4" href="#__codelineno-74-4"></a><span class="nt">keyType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;json&quot;</span><span class="w">        </span><span class="c1"># Also works</span>
-<a id="__codelineno-74-5" name="__codelineno-74-5" href="#__codelineno-74-5"></a><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">struct</span><span class="w">      </span><span class="c1"># Works</span>
-<a id="__codelineno-74-6" name="__codelineno-74-6" href="#__codelineno-74-6"></a><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bytes</span><span class="w">      </span><span class="c1"># Works</span>
-</code></pre></div></p>
-</li>
-<li>
-<p><strong>Simple tuples (both forms are valid):</strong>
-   <div class="highlight"><pre><span></span><code><a id="__codelineno-75-1" name="__codelineno-75-1" href="#__codelineno-75-1"></a><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(string, json)</span><span class="w">      </span><span class="c1"># Works without quotes</span>
-<a id="__codelineno-75-2" name="__codelineno-75-2" href="#__codelineno-75-2"></a><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;(string,</span><span class="nv"> </span><span class="s">json)&quot;</span><span class="w">    </span><span class="c1"># Also works with quotes</span>
-</code></pre></div></p>
-</li>
-<li>
-<p><strong>Function-style type declarations (avoid YAML validation warnings):</strong>
-   <div class="highlight"><pre><span></span><code><a id="__codelineno-76-1" name="__codelineno-76-1" href="#__codelineno-76-1"></a><span class="c1"># list() syntax - no quotes needed</span>
-<a id="__codelineno-76-2" name="__codelineno-76-2" href="#__codelineno-76-2"></a><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">list(string)</span><span class="w">         </span><span class="c1"># Alternative to &quot;[string]&quot;</span>
-<a id="__codelineno-76-3" name="__codelineno-76-3" href="#__codelineno-76-3"></a><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">list(tuple(string, int))</span><span class="w">  </span><span class="c1"># Alternative to &quot;[(string, int)]&quot;</span>
-<a id="__codelineno-76-4" name="__codelineno-76-4" href="#__codelineno-76-4"></a>
-<a id="__codelineno-76-5" name="__codelineno-76-5" href="#__codelineno-76-5"></a><span class="c1"># tuple() syntax - no quotes needed  </span>
-<a id="__codelineno-76-6" name="__codelineno-76-6" href="#__codelineno-76-6"></a><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tuple(string, int)</span><span class="w">   </span><span class="c1"># Alternative to &quot;(string, int)&quot;</span>
-<a id="__codelineno-76-7" name="__codelineno-76-7" href="#__codelineno-76-7"></a><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tuple(double, double, string)</span><span class="w">  </span><span class="c1"># Alternative to &quot;(double, double, string)&quot;</span>
-</code></pre></div></p>
-</li>
-<li>
-<p><strong>Notation:schema combinations (notation prefix makes quotes unnecessary):</strong>
-   <div class="highlight"><pre><span></span><code><a id="__codelineno-77-1" name="__codelineno-77-1" href="#__codelineno-77-1"></a><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">avro:SensorData</span><span class="w">         </span><span class="c1"># Works without quotes</span>
-<a id="__codelineno-77-2" name="__codelineno-77-2" href="#__codelineno-77-2"></a><span class="nt">keyType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">json:windowed(string)</span><span class="w">     </span><span class="c1"># Notation prefix handles complexity</span>
-<a id="__codelineno-77-3" name="__codelineno-77-3" href="#__codelineno-77-3"></a><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jsonschema:UserProfile</span><span class="w">  </span><span class="c1"># Works without quotes</span>
-<a id="__codelineno-77-4" name="__codelineno-77-4" href="#__codelineno-77-4"></a><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">csv:Temperature</span><span class="w">         </span><span class="c1"># Works without quotes</span>
-</code></pre></div></p>
-</li>
-</ol>
-<h3 id="why-these-rules-exist">Why These Rules Exist:</h3>
-<ul>
-<li><strong>YAML parsing</strong>: Without quotes, YAML interprets <code>enum(A,B,C)</code> as a function call, causing parsing errors. The quotes tell YAML to treat it as a string literal.</li>
-<li><strong>KSML parsing</strong>: The UserTypeParser in KSML specifically looks for patterns like <code>enum(</code>, <code>windowed(</code>, <code>union(</code>, <code>list(</code>, <code>tuple(</code> at the start of strings to determine the type.</li>
-<li><strong>Notation prefix</strong>: When using <code>json:windowed(string)</code>, the colon acts as a delimiter that YAML handles correctly without quotes.</li>
-<li><strong>Function syntax alternatives</strong>: The <code>list()</code> and <code>tuple()</code> syntax provides YAML-friendly alternatives that don't trigger validation warnings, unlike bracket notation which YAML interprets as list/tuple literals.</li>
-</ul>
-<h3 id="examples-from-real-ksml-code">Examples from Real KSML Code:</h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-78-1" name="__codelineno-78-1" href="#__codelineno-78-1"></a><span class="c1"># Stream definitions</span>
-<a id="__codelineno-78-2" name="__codelineno-78-2" href="#__codelineno-78-2"></a><span class="nt">streams</span><span class="p">:</span>
-<a id="__codelineno-78-3" name="__codelineno-78-3" href="#__codelineno-78-3"></a><span class="w">  </span><span class="nt">sensor_data</span><span class="p">:</span>
-<a id="__codelineno-78-4" name="__codelineno-78-4" href="#__codelineno-78-4"></a><span class="w">    </span><span class="nt">topic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sensor-readings</span>
-<a id="__codelineno-78-5" name="__codelineno-78-5" href="#__codelineno-78-5"></a><span class="w">    </span><span class="nt">keyType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">string</span><span class="w">                          </span><span class="c1"># Simple type - no quotes needed</span>
-<a id="__codelineno-78-6" name="__codelineno-78-6" href="#__codelineno-78-6"></a><span class="w">    </span><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">avro:SensorData</span><span class="w">               </span><span class="c1"># Notation:schema - no quotes needed</span>
-<a id="__codelineno-78-7" name="__codelineno-78-7" href="#__codelineno-78-7"></a>
-<a id="__codelineno-78-8" name="__codelineno-78-8" href="#__codelineno-78-8"></a><span class="w">  </span><span class="nt">windowed_data</span><span class="p">:</span>
-<a id="__codelineno-78-9" name="__codelineno-78-9" href="#__codelineno-78-9"></a><span class="w">    </span><span class="nt">topic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">windowed-counts</span>
-<a id="__codelineno-78-10" name="__codelineno-78-10" href="#__codelineno-78-10"></a><span class="w">    </span><span class="nt">keyType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;windowed(string)&quot;</span><span class="w">              </span><span class="c1"># Complex type - quotes required</span>
-<a id="__codelineno-78-11" name="__codelineno-78-11" href="#__codelineno-78-11"></a><span class="w">    </span><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">long</span><span class="w">                          </span><span class="c1"># Simple type - no quotes needed</span>
-<a id="__codelineno-78-12" name="__codelineno-78-12" href="#__codelineno-78-12"></a>
-<a id="__codelineno-78-13" name="__codelineno-78-13" href="#__codelineno-78-13"></a><span class="c1"># Function definitions</span>
-<a id="__codelineno-78-14" name="__codelineno-78-14" href="#__codelineno-78-14"></a><span class="nt">functions</span><span class="p">:</span>
-<a id="__codelineno-78-15" name="__codelineno-78-15" href="#__codelineno-78-15"></a><span class="w">  </span><span class="nt">my_generator</span><span class="p">:</span>
-<a id="__codelineno-78-16" name="__codelineno-78-16" href="#__codelineno-78-16"></a><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">generator</span>
-<a id="__codelineno-78-17" name="__codelineno-78-17" href="#__codelineno-78-17"></a><span class="w">    </span><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(string, json)</span><span class="w">               </span><span class="c1"># Simple tuple - quotes optional</span>
-<a id="__codelineno-78-18" name="__codelineno-78-18" href="#__codelineno-78-18"></a>
-<a id="__codelineno-78-19" name="__codelineno-78-19" href="#__codelineno-78-19"></a><span class="w">  </span><span class="nt">my_transformer</span><span class="p">:</span>
-<a id="__codelineno-78-20" name="__codelineno-78-20" href="#__codelineno-78-20"></a><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">valueTransformer</span><span class="w">  </span>
-<a id="__codelineno-78-21" name="__codelineno-78-21" href="#__codelineno-78-21"></a><span class="w">    </span><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;enum(SUCCESS,</span><span class="nv"> </span><span class="s">FAILURE)&quot;</span><span class="w">     </span><span class="c1"># Enum type - quotes required</span>
-<a id="__codelineno-78-22" name="__codelineno-78-22" href="#__codelineno-78-22"></a>
-<a id="__codelineno-78-23" name="__codelineno-78-23" href="#__codelineno-78-23"></a><span class="w">  </span><span class="nt">my_list_transformer</span><span class="p">:</span>
-<a id="__codelineno-78-24" name="__codelineno-78-24" href="#__codelineno-78-24"></a><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">valueTransformer</span>
-<a id="__codelineno-78-25" name="__codelineno-78-25" href="#__codelineno-78-25"></a><span class="w">    </span><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">list(string)</span><span class="w">                 </span><span class="c1"># Alternative list syntax - no quotes needed</span>
-<a id="__codelineno-78-26" name="__codelineno-78-26" href="#__codelineno-78-26"></a>
-<a id="__codelineno-78-27" name="__codelineno-78-27" href="#__codelineno-78-27"></a><span class="w">  </span><span class="nt">my_tuple_transformer</span><span class="p">:</span>
-<a id="__codelineno-78-28" name="__codelineno-78-28" href="#__codelineno-78-28"></a><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">valueTransformer</span>
-<a id="__codelineno-78-29" name="__codelineno-78-29" href="#__codelineno-78-29"></a><span class="w">    </span><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tuple(string, int, double)</span><span class="w">   </span><span class="c1"># Alternative tuple syntax - no quotes needed</span>
+<a id="__codelineno-72-13" name="__codelineno-72-13" href="#__codelineno-72-13"></a><span class="c1"># Complex expressions</span>
+<a id="__codelineno-72-14" name="__codelineno-72-14" href="#__codelineno-72-14"></a><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">union(null, string)</span>
+<a id="__codelineno-72-15" name="__codelineno-72-15" href="#__codelineno-72-15"></a><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">(string</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">json)</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-72-16" name="__codelineno-72-16" href="#__codelineno-72-16"></a><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(string, json)</span>
+<a id="__codelineno-72-17" name="__codelineno-72-17" href="#__codelineno-72-17"></a>
+<a id="__codelineno-72-18" name="__codelineno-72-18" href="#__codelineno-72-18"></a><span class="c1"># Notation prefixes (with colons)</span>
+<a id="__codelineno-72-19" name="__codelineno-72-19" href="#__codelineno-72-19"></a><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">avro:SensorData</span>
+<a id="__codelineno-72-20" name="__codelineno-72-20" href="#__codelineno-72-20"></a><span class="nt">keyType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">protobuf:UserProfile</span>
+<a id="__codelineno-72-21" name="__codelineno-72-21" href="#__codelineno-72-21"></a>
+<a id="__codelineno-72-22" name="__codelineno-72-22" href="#__codelineno-72-22"></a><span class="c1"># With quotes (also valid)</span>
+<a id="__codelineno-72-23" name="__codelineno-72-23" href="#__codelineno-72-23"></a><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;[(string,</span><span class="nv"> </span><span class="s">json)]&quot;</span>
+<a id="__codelineno-72-24" name="__codelineno-72-24" href="#__codelineno-72-24"></a><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;enum(PENDING,</span><span class="nv"> </span><span class="s">SHIPPED)&quot;</span>
 </code></pre></div>
-<h3 id="quick-reference">Quick Reference:</h3>
-<table>
-<thead>
-<tr>
-<th>Type Pattern</th>
-<th>Quotes Required?</th>
-<th>Example</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>enum(...)</code></td>
-<td><strong>Yes</strong></td>
-<td><code>"enum(ACTIVE, INACTIVE)"</code></td>
-</tr>
-<tr>
-<td><code>map(...)</code></td>
-<td><strong>Yes</strong></td>
-<td><code>"map(string)"</code></td>
-</tr>
-<tr>
-<td><code>windowed(...)</code></td>
-<td><strong>Yes</strong> (without notation)</td>
-<td><code>"windowed(string)"</code></td>
-</tr>
-<tr>
-<td><code>union(...)</code></td>
-<td><strong>Yes</strong></td>
-<td><code>"union(null, string)"</code></td>
-</tr>
-<tr>
-<td><code>[(...)]</code></td>
-<td><strong>Yes</strong></td>
-<td><code>"[(string, json)]"</code></td>
-</tr>
-<tr>
-<td><code>list(...)</code></td>
-<td><strong>No</strong></td>
-<td><code>list(string)</code></td>
-</tr>
-<tr>
-<td><code>tuple(...)</code></td>
-<td><strong>No</strong></td>
-<td><code>tuple(string, int)</code></td>
-</tr>
-<tr>
-<td><code>(type1, type2)</code></td>
-<td><strong>Optional</strong></td>
-<td><code>(string, json)</code> or <code>"(string, json)"</code></td>
-</tr>
-<tr>
-<td><code>notation:type</code></td>
-<td><strong>Optional</strong></td>
-<td><code>avro:SensorData</code></td>
-</tr>
-<tr>
-<td><code>notation:windowed(...)</code></td>
-<td><strong>Optional</strong></td>
-<td><code>json:windowed(string)</code></td>
-</tr>
-<tr>
-<td>Simple types</td>
-<td><strong>Optional</strong></td>
-<td><code>string</code>, <code>json</code>, <code>struct</code></td>
-</tr>
-</tbody>
-</table>
+<h3 id="yaml-syntax-highlighting-note">YAML Syntax Highlighting Note</h3>
+<p>Some YAML syntax highlighters may incorrectly interpret bracket notation like <code>[(string, json)]</code>, expecting proper array syntax.</p>
+<p>For better highlighting, use quotes <code>"[(string, json)]"</code> or the cleaner <code>list(tuple(string, json))</code> syntax.</p>
+<h3 id="summary">Summary:</h3>
+<p><strong>All type expressions work without quotes in KSML.</strong> Use quotes only if you prefer them for style, but they are never functionally required. For bracket notation, consider using the <code>list()</code> function syntax for cleaner, more readable code.</p>
 
 
 
@@ -4550,7 +4375,7 @@ When no schema is specified, KSML assumes the schema is loadable from Schema Reg
       <script id="__config" type="application/json">{"base": "../..", "features": ["content.code.copy"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.92b07e13.min.js"></script>
+      <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
       
     
   </body>

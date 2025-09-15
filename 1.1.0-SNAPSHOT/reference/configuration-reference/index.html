@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.19">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.20">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.7e37652d.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.e53b48f4.min.css">
       
       
 
@@ -2093,7 +2093,7 @@
 <a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">        </span><span class="nt">schema.registry.url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://schema-registry:8081/apis/ccompat/v7</span>
 <a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">  </span><span class="nt">notations</span><span class="p">:</span>
 <a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">    </span><span class="nt">avro</span><span class="p">:</span><span class="w">  </span>
-<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">confluent_avro</span><span class="w">         </span><span class="c1"># For AVRO there are two implementations: apicurio_avro and confluent_avro</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">confluent_avro</span><span class="w">         </span><span class="c1"># For Avro there are two implementations: apicurio_avro and confluent_avro</span>
 <a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">      </span><span class="nt">schemaRegistry</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_schema_registry</span>
 <a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">      </span><span class="c1">## Below this line, specify properties to be passed into Confluent&#39;s KafkaAvroSerializer and KafkaAvroDeserializer</span>
 <a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">      </span><span class="nt">config</span><span class="p">:</span>
@@ -2447,7 +2447,7 @@
 </table>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nt">ksml</span><span class="p">:</span>
 <a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">  </span><span class="nt">notations</span><span class="p">:</span>
-<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">    </span><span class="c1"># AVRO with Confluent</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">    </span><span class="c1"># Avro with Confluent</span>
 <a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">    </span><span class="nt">avro</span><span class="p">:</span>
 <a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">confluent_avro</span>
 <a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="w">      </span><span class="nt">schemaRegistry</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">confluent</span>
@@ -2455,7 +2455,7 @@
 <a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="w">        </span><span class="nt">normalize.schemas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="w">        </span><span class="nt">auto.register.schemas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 <a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>
-<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="w">    </span><span class="c1"># AVRO with Apicurio</span>
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="w">    </span><span class="c1"># Avro with Apicurio</span>
 <a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a><span class="w">    </span><span class="nt">apicurio_avro</span><span class="p">:</span>
 <a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apicurio_avro</span>
 <a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a><span class="w">      </span><span class="nt">schemaRegistry</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apicurio</span>
@@ -2491,13 +2491,13 @@
 <td><code>confluent_avro</code></td>
 <td>avro</td>
 <td>Confluent</td>
-<td>AVRO with Confluent SR</td>
+<td>Avro with Confluent SR</td>
 </tr>
 <tr>
 <td><code>apicurio_avro</code></td>
 <td>avro</td>
 <td>Apicurio</td>
-<td>AVRO with Apicurio SR</td>
+<td>Avro with Apicurio SR</td>
 </tr>
 <tr>
 <td><code>confluent_jsonschema</code></td>
@@ -2542,7 +2542,7 @@
 <a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="w">    </span><span class="nt">order_pipeline</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">order-processing.yaml</span>
 </code></pre></div>
 <h3 id="schema-file-loading">Schema File Loading</h3>
-<p>Specify schema files to load (AVRO, JSON Schema, XSD, CSV schemas):</p>
+<p>Specify schema files to load (Avro, JSON Schema, XSD, CSV schemas):</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nt">ksml</span><span class="p">:</span>
 <a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="w">  </span><span class="nt">schemas</span><span class="p">:</span>
 <a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="w">    </span><span class="c1"># Format: &lt;name&gt;: &lt;filename&gt;</span>
@@ -2851,7 +2851,7 @@
       <script id="__config" type="application/json">{"base": "../..", "features": ["content.code.copy"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.92b07e13.min.js"></script>
+      <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
       
     
   </body>

@@ -4338,7 +4338,7 @@ repartitioning.</p>
 <a id="__codelineno-11-28" name="__codelineno-11-28" href="#__codelineno-11-28"></a>
 <a id="__codelineno-11-29" name="__codelineno-11-29" href="#__codelineno-11-29"></a><span class="w">      </span><span class="no">log.info(&quot;Split batch {} into {} individual orders&quot;, batch_id, len(individual_records))</span>
 <a id="__codelineno-11-30" name="__codelineno-11-30" href="#__codelineno-11-30"></a><span class="w">      </span><span class="no">return individual_records</span>
-<a id="__codelineno-11-31" name="__codelineno-11-31" href="#__codelineno-11-31"></a><span class="w">    </span><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;[(string,</span><span class="nv"> </span><span class="s">json)]&quot;</span>
+<a id="__codelineno-11-31" name="__codelineno-11-31" href="#__codelineno-11-31"></a><span class="w">    </span><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">list(tuple(string, json))</span>
 </code></pre></div>
 <p>This example demonstrates splitting batch orders into individual orders with unique keys, useful for processing bulk
 data into individual records.</p>
@@ -4414,7 +4414,7 @@ data into individual records.</p>
 <a id="__codelineno-13-39" name="__codelineno-13-39" href="#__codelineno-13-39"></a>
 <a id="__codelineno-13-40" name="__codelineno-13-40" href="#__codelineno-13-40"></a><span class="w">      </span><span class="no">log.info(&quot;Split batch {} into {} individual orders&quot;, batch_id, len(individual_records))</span>
 <a id="__codelineno-13-41" name="__codelineno-13-41" href="#__codelineno-13-41"></a><span class="w">      </span><span class="no">return individual_records</span>
-<a id="__codelineno-13-42" name="__codelineno-13-42" href="#__codelineno-13-42"></a><span class="w">    </span><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;[(string,</span><span class="nv"> </span><span class="s">json)]&quot;</span>
+<a id="__codelineno-13-42" name="__codelineno-13-42" href="#__codelineno-13-42"></a><span class="w">    </span><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">list(tuple(string, json))</span>
 <a id="__codelineno-13-43" name="__codelineno-13-43" href="#__codelineno-13-43"></a>
 <a id="__codelineno-13-44" name="__codelineno-13-44" href="#__codelineno-13-44"></a><span class="nt">pipelines</span><span class="p">:</span>
 <a id="__codelineno-13-45" name="__codelineno-13-45" href="#__codelineno-13-45"></a><span class="w">  </span><span class="nt">split_batch_processing</span><span class="p">:</span>
@@ -4481,7 +4481,7 @@ to the output stream.</p>
 <a id="__codelineno-14-26" name="__codelineno-14-26" href="#__codelineno-14-26"></a><span class="w">               </span><span class="no">value.get(&quot;order_id&quot;), len(item_records))</span>
 <a id="__codelineno-14-27" name="__codelineno-14-27" href="#__codelineno-14-27"></a>
 <a id="__codelineno-14-28" name="__codelineno-14-28" href="#__codelineno-14-28"></a><span class="w">      </span><span class="no">return item_records</span>
-<a id="__codelineno-14-29" name="__codelineno-14-29" href="#__codelineno-14-29"></a><span class="w">    </span><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;[json]&quot;</span>
+<a id="__codelineno-14-29" name="__codelineno-14-29" href="#__codelineno-14-29"></a><span class="w">    </span><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">list(json)</span>
 </code></pre></div>
 <details class="info">
 <summary>Producer - <code>keyValueToValueListTransformer</code> example (click to expand)</summary>
@@ -4573,7 +4573,7 @@ to the output stream.</p>
 <a id="__codelineno-16-37" name="__codelineno-16-37" href="#__codelineno-16-37"></a><span class="w">               </span><span class="no">value.get(&quot;order_id&quot;), len(item_records))</span>
 <a id="__codelineno-16-38" name="__codelineno-16-38" href="#__codelineno-16-38"></a>
 <a id="__codelineno-16-39" name="__codelineno-16-39" href="#__codelineno-16-39"></a><span class="w">      </span><span class="no">return item_records</span>
-<a id="__codelineno-16-40" name="__codelineno-16-40" href="#__codelineno-16-40"></a><span class="w">    </span><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;[json]&quot;</span>
+<a id="__codelineno-16-40" name="__codelineno-16-40" href="#__codelineno-16-40"></a><span class="w">    </span><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">list(json)</span>
 <a id="__codelineno-16-41" name="__codelineno-16-41" href="#__codelineno-16-41"></a>
 <a id="__codelineno-16-42" name="__codelineno-16-42" href="#__codelineno-16-42"></a><span class="nt">pipelines</span><span class="p">:</span>
 <a id="__codelineno-16-43" name="__codelineno-16-43" href="#__codelineno-16-43"></a><span class="w">  </span><span class="nt">explode_orders</span><span class="p">:</span>

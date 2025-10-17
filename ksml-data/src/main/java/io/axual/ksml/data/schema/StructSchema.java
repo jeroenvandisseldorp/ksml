@@ -225,6 +225,11 @@ public class StructSchema extends NamedSchema {
         if (superAssignable.isNotAssignable()) return superAssignable;
         if (!(otherSchema instanceof StructSchema that))
             return schemaMismatch(this, otherSchema);
+
+        // Collect ALL field validation errors instead of returning on the first one
+        Assignable result = Assignable.ok();
+        final var thatSchemaName = that.name() != null ? that.name() : "source schema";
+
         // Ensure the other schema has the same fields with compatible types
         for (final var field : fields) {
             // Get the field with the same name from the other schema
@@ -232,16 +237,26 @@ public class StructSchema extends NamedSchema {
             // If the field exists in the other schema, then validate its compatibility
             if (thatField != null) {
                 final var fieldAssignable = field.isAssignableFrom(thatField);
-                if (fieldAssignable.isNotAssignable())
-                    return fieldNotAssignable(field.name(), this, field, that, thatField, fieldAssignable);
+                if (fieldAssignable.isNotAssignable()) {
+                    // Chain this error with previous errors
+                    result = Assignable.notAssignable(
+                        "Field '" + field.name() + "' is not assignable",
+                        result.isNotAssignable() ? result : fieldAssignable
+                    );
+                }
             }
             // If this field has no default value, then the field should exist in the other schema
             if (field.defaultValue() == null && thatField == null) {
-                return Assignable.notAssignable("Other schema does not contain required field \"" + field.name() + "\"");
+                // Use specific schema name instead of "Other schema"
+                result = Assignable.notAssignable(
+                    thatSchemaName + " does not contain required field \"" + field.name() + "\"",
+                    result
+                );
             }
         }
-        // All fields are assignable, so return no error
-        return Assignable.ok();
+
+        // Return accumulated errors, or OK if none
+        return result;
     }
 
     /**

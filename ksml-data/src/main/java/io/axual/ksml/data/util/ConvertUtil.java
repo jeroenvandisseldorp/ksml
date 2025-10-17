@@ -20,6 +20,7 @@ package io.axual.ksml.data.util;
  * =========================LICENSE_END==================================
  */
 
+import io.axual.ksml.data.compare.Assignable;
 import io.axual.ksml.data.exception.DataException;
 import io.axual.ksml.data.mapper.DataTypeDataSchemaMapper;
 import io.axual.ksml.data.mapper.NativeDataObjectMapper;
@@ -40,6 +41,8 @@ import io.axual.ksml.data.object.DataShort;
 import io.axual.ksml.data.object.DataString;
 import io.axual.ksml.data.object.DataStruct;
 import io.axual.ksml.data.object.DataTuple;
+import io.axual.ksml.data.schema.DataField;
+import io.axual.ksml.data.schema.StructSchema;
 import io.axual.ksml.data.type.DataType;
 import io.axual.ksml.data.type.EnumType;
 import io.axual.ksml.data.type.ListType;
@@ -49,6 +52,7 @@ import io.axual.ksml.data.type.TupleType;
 import io.axual.ksml.data.type.UnionType;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
@@ -436,6 +440,24 @@ public class ConvertUtil {
         final var result = new DataStruct(expected.schema(), value.isNull());
         // Copy all struct fields into the new struct, possibly making sub-elements compatible
         value.forEach(structFiller(expected, result, allowFail));
+
+        // Validate the conversion - check if source type is assignable to target type
+        // If the source has no schema (schemaless struct), create a synthetic schema for detailed error messages
+        if (expected.schema() != null && value.type().schema() == null) {
+            final var syntheticSourceSchema = createSyntheticSchema(value);
+            final var assignable = expected.schema().isAssignableFrom(syntheticSourceSchema);
+            if (assignable.isNotAssignable()) {
+                if (allowFail) return null;
+                throw convertError(new StructType(syntheticSourceSchema), expected, value);
+            }
+        } else {
+            final var assignable = expected.isAssignableFrom(value.type());
+            if (assignable.isNotAssignable()) {
+                if (allowFail) return null;
+                throw convertError(value.type(), expected, value);
+            }
+        }
+
         // Return the Struct with compatible fields
         return result;
     }
@@ -467,10 +489,42 @@ public class ConvertUtil {
         return new DataTuple(convertedDataObjects);
     }
 
+    /**
+     * Creates a synthetic schema from a DataStruct for validation purposes.
+     * <p>
+     * When a source struct doesn't have a schema (schemaless), we need to create a temporary
+     * schema that represents the actual runtime structure so we can perform detailed field-level
+     * validation and provide meaningful error messages.
+     *
+     * @param value the DataStruct to create a synthetic schema from
+     * @return a StructSchema representing the runtime structure of the DataStruct
+     */
+    private StructSchema createSyntheticSchema(DataStruct value) {
+        final var fields = new ArrayList<DataField>();
+        value.forEach((key, val) -> {
+            final var dataObject = (DataObject) val;
+            final var dataType = dataObject != null ? dataObject.type() : DataNull.DATATYPE;
+            final var dataSchema = dataSchemaMapper.toDataSchema(dataType);
+            // Create optional fields (required=false) since we're inferring from actual data
+            fields.add(new DataField(key, dataSchema, null, 0, false));
+        });
+        return new StructSchema(null, "InferredStruct", "Auto-generated schema from runtime struct data", fields);
+    }
+
     private DataException convertError(DataType sourceType, DataType targetType, DataObject value) {
         final var sourceTypeStr = sourceType != null ? sourceType.toString() : "null type";
         final var targetTypeStr = targetType != null ? targetType.toString() : "null type";
         final var valueStr = value != null ? value.toString(DataObject.Printer.EXTERNAL_NO_SCHEMA) : DataNull.INSTANCE.toString();
-        return new DataException("Can not convert " + sourceTypeStr + " to " + targetTypeStr + ": value=" + valueStr);
+
+        // Get the enhanced error message from PR #375
+        final var assignable = targetType != null && sourceType != null
+            ? targetType.isAssignableFrom(sourceType)
+            : Assignable.ok();
+
+        final var enhancedMessage = assignable.isNotAssignable()
+            ? "\nDetailed reason:\n" + assignable.toString("  ", true)
+            : "";
+
+        return new DataException("Can not convert " + sourceTypeStr + " to " + targetTypeStr + ": value=" + valueStr + enhancedMessage);
     }
 }

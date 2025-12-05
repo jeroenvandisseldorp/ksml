@@ -21,11 +21,11 @@ package io.axual.ksml.dsl;
  */
 
 import io.axual.ksml.data.notation.Notation;
-import io.axual.ksml.definition.StreamDefinition;
+import io.axual.ksml.topic.StreamDefinition;
 import io.axual.ksml.execution.ExecutionContext;
 import io.axual.ksml.generator.TopologyBuildContext;
-import io.axual.ksml.generator.TopologyResources;
 import io.axual.ksml.parser.UserTypeParser;
+import io.axual.ksml.resource.TopologyResources;
 import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.type.UserType;
 import org.apache.kafka.streams.StreamsBuilder;

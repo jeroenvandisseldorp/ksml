@@ -25,7 +25,7 @@ import io.axual.ksml.data.mapper.DataObjectFlattener;
 import io.axual.ksml.data.mapper.NativeDataObjectMapper;
 import io.axual.ksml.data.mapper.RecordContextDataObjectMapper;
 import io.axual.ksml.data.object.DataString;
-import io.axual.ksml.data.type.DataType;
+import io.axual.ksml.function.TopicNameExtractorDefinition;
 import io.axual.ksml.dsl.KSMLDSL;
 import io.axual.ksml.exception.ExecutionException;
 import io.axual.ksml.metric.MetricTags;
@@ -36,14 +36,13 @@ import org.apache.kafka.streams.processor.TopicNameExtractor;
 
 @Slf4j
 public class UserTopicNameExtractor extends Invoker implements TopicNameExtractor<Object, Object> {
-    public static final DataType EXPECTED_RESULT_TYPE = DataString.DATATYPE;
     private static final NativeDataObjectMapper NATIVE_MAPPER = new DataObjectFlattener();
     private static final RecordContextDataObjectMapper RECORD_CONTEXT_MAPPER = new RecordContextDataObjectMapper();
 
     public UserTopicNameExtractor(UserFunction function, MetricTags tags) {
         super(function, tags, KSMLDSL.Functions.TYPE_TOPICNAMEEXTRACTOR);
         verifyParameterCount(3);
-        verifyResultType(EXPECTED_RESULT_TYPE);
+        verifyResultType(TopicNameExtractorDefinition.EXPECTED_RESULT_TYPE);
     }
 
     @Override

@@ -28,7 +28,7 @@ import io.axual.ksml.data.notation.binary.BinaryNotation;
 import io.axual.ksml.data.notation.json.JsonNotation;
 import io.axual.ksml.definition.parser.TopologyDefinitionParser;
 import io.axual.ksml.execution.ExecutionContext;
-import io.axual.ksml.generator.TopologyDefinition;
+import io.axual.ksml.topology.TopologyDefinition;
 import io.axual.ksml.generator.YAMLObjectMapper;
 import io.axual.ksml.metric.Metrics;
 import io.axual.ksml.parser.ParseNode;

@@ -23,7 +23,7 @@ package io.axual.ksml.user;
 import io.axual.ksml.data.mapper.DataObjectFlattener;
 import io.axual.ksml.data.mapper.NativeDataObjectMapper;
 import io.axual.ksml.data.object.DataBoolean;
-import io.axual.ksml.data.type.DataType;
+import io.axual.ksml.function.PredicateDefinition;
 import io.axual.ksml.dsl.KSMLDSL;
 import io.axual.ksml.exception.ExecutionException;
 import io.axual.ksml.metric.MetricTags;
@@ -32,13 +32,12 @@ import io.axual.ksml.store.StateStores;
 import org.apache.kafka.streams.kstream.Predicate;
 
 public class UserPredicate extends Invoker implements Predicate<Object, Object> {
-    public static final DataType EXPECTED_RESULT_TYPE = DataBoolean.DATATYPE;
     private static final NativeDataObjectMapper NATIVE_MAPPER = new DataObjectFlattener();
 
     public UserPredicate(UserFunction function, MetricTags tags) {
         super(function, tags, KSMLDSL.Functions.TYPE_PREDICATE);
         verifyParameterCount(2);
-        verifyResultType(EXPECTED_RESULT_TYPE);
+        verifyResultType(PredicateDefinition.EXPECTED_RESULT_TYPE);
     }
 
     @Override

@@ -38,9 +38,9 @@ import org.apache.kafka.streams.state.KeyValueStore;
 import org.apache.kafka.streams.state.SessionStore;
 import org.apache.kafka.streams.state.WindowStore;
 
-public class CountOperation extends StoreOperation {
-    public CountOperation(StoreOperationConfig config) {
-        super(config);
+public class CountOperation extends StoreOperation<CountOperationDefinition> {
+    public CountOperation(CountOperationDefinition definition) {
+        super(definition);
     }
 
     @Override

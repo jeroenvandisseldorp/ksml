@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.axual.ksml</groupId>
+        <artifactId>ksml-parent</artifactId>
+        <version>1.2.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>ksml-parser</artifactId>
+    <name>KSML</name>
+    <description>The core components for parsing KSML definitions</description>
+
+    <properties>
+        <sonar.coverage.jacoco.xmlReportPaths>../ksml-reporting/target/site/jacoco-aggregate/jacoco.xml
+        </sonar.coverage.jacoco.xmlReportPaths>
+    </properties>
+
+    <dependencies>
+        <!-- project dependencies -->
+        <dependency>
+            <groupId>io.axual.ksml</groupId>
+            <artifactId>ksml-data</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.axual.ksml</groupId>
+            <artifactId>ksml-definition</artifactId>
+        </dependency>
+
+        <!-- Notation dependencies -->
+        <dependency>
+            <groupId>io.axual.ksml</groupId>
+            <artifactId>ksml-data-avro</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.axual.ksml</groupId>
+            <artifactId>ksml-data-avro-apicurio</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.axual.ksml</groupId>
+            <artifactId>ksml-data-avro-confluent</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.axual.ksml</groupId>
+            <artifactId>ksml-data-binary</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.axual.ksml</groupId>
+            <artifactId>ksml-data-csv</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.axual.ksml</groupId>
+            <artifactId>ksml-data-json</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.axual.ksml</groupId>
+            <artifactId>ksml-data-jsonschema</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.axual.ksml</groupId>
+            <artifactId>ksml-data-jsonschema-apicurio</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.axual.ksml</groupId>
+            <artifactId>ksml-data-jsonschema-confluent</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.axual.ksml</groupId>
+            <artifactId>ksml-data-protobuf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.axual.ksml</groupId>
+            <artifactId>ksml-data-protobuf-apicurio</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.axual.ksml</groupId>
+            <artifactId>ksml-data-protobuf-confluent</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.axual.ksml</groupId>
+            <artifactId>ksml-data-soap</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.axual.ksml</groupId>
+            <artifactId>ksml-data-xml</artifactId>
+        </dependency>
+
+        <!-- Dependencies for GraalVM polyglot and truffle -->
+        <dependency>
+            <groupId>org.graalvm.polyglot</groupId>
+            <artifactId>polyglot</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.graalvm.truffle</groupId>
+            <artifactId>truffle-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.graalvm.truffle</groupId>
+            <artifactId>truffle-runtime</artifactId>
+        </dependency>
+
+        <!-- Dependencies for GraalVM Python -->
+        <dependency>
+            <groupId>org.graalvm.python</groupId>
+            <artifactId>python-language</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.graalvm.python</groupId>
+            <artifactId>python-resources</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-streams</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.osgi</groupId>
+                    <artifactId>org.osgi.core</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.dataformat</groupId>
+                    <artifactId>jackson-dataformat-yaml</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.jakarta.rs</groupId>
+                    <artifactId>jackson-jakarta-rs-json-provider</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-databind</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-annotations</artifactId>
+                </exclusion>
+
+            </exclusions>
+        </dependency>
+
+        <!-- Metrics -->
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-jmx</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-library</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-streams-test-utils</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+            <version>3.1.1</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

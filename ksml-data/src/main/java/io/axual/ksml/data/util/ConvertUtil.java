@@ -27,6 +27,7 @@ import io.axual.ksml.data.notation.Notation;
 import io.axual.ksml.data.object.DataBoolean;
 import io.axual.ksml.data.object.DataByte;
 import io.axual.ksml.data.object.DataBytes;
+import io.axual.ksml.data.object.DataDecimal;
 import io.axual.ksml.data.object.DataDouble;
 import io.axual.ksml.data.object.DataEnum;
 import io.axual.ksml.data.object.DataFloat;
@@ -41,6 +42,7 @@ import io.axual.ksml.data.object.DataString;
 import io.axual.ksml.data.object.DataStruct;
 import io.axual.ksml.data.object.DataTuple;
 import io.axual.ksml.data.type.DataType;
+import io.axual.ksml.data.type.DecimalType;
 import io.axual.ksml.data.type.EnumType;
 import io.axual.ksml.data.type.ListType;
 import io.axual.ksml.data.type.MapType;
@@ -49,6 +51,7 @@ import io.axual.ksml.data.type.TupleType;
 import io.axual.ksml.data.type.UnionType;
 
 import javax.annotation.Nullable;
+import java.math.BigDecimal;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
@@ -229,12 +232,22 @@ public class ConvertUtil {
             }
             case DataDouble val -> {
                 if (targetType == DataFloat.DATATYPE) yield new DataFloat(val.value().floatValue());
+                if (targetType instanceof DecimalType decimalType)
+                    yield new DataDecimal(decimalType, new BigDecimal(val.value().toString()));
                 yield val;
             }
             case DataFloat val -> {
                 if (targetType == DataDouble.DATATYPE) yield new DataDouble(val.value().doubleValue());
+                if (targetType instanceof DecimalType decimalType)
+                    yield new DataDecimal(decimalType, new BigDecimal(val.value().toString()));
                 yield val;
             }
+            case DataDecimal val -> {
+                if (targetType == DataFloat.DATATYPE) yield new DataFloat(val.value().floatValue());
+                if (targetType == DataDouble.DATATYPE) yield new DataDouble(val.value().doubleValue());
+                yield val;
+            }
+            case DataBytes val -> convertBytesToDataObject(targetType, val.value(), allowFail);
             // Convert from String to anything through recursion using the same target type
             case DataString stringValue -> convertStringToDataObject(targetType, stringValue.value(), allowFail);
             // Convert a list without a value type to a list with a specific value type
@@ -264,6 +277,12 @@ public class ConvertUtil {
     }
 
     @Nullable
+    public DataObject convertBytesToDataObject(DataType expected, byte[] value, boolean allowFail) {
+        if (expected == null) return new DataBytes(value);
+        return convertStringToDataObject(expected, new String(value), allowFail);
+    }
+
+    @Nullable
     public DataObject convertStringToDataObject(DataType expected, String value, boolean allowFail) {
         if (expected == null) return new DataString(value);
         if (expected == DataNull.DATATYPE || value == null) return DataNull.INSTANCE;
@@ -273,6 +292,8 @@ public class ConvertUtil {
         if (expected == DataLong.DATATYPE) return parseOrNull(() -> new DataLong(Long.parseLong(value)));
         if (expected == DataFloat.DATATYPE) return parseOrNull(() -> new DataFloat(Float.parseFloat(value)));
         if (expected == DataDouble.DATATYPE) return parseOrNull(() -> new DataDouble(Double.parseDouble(value)));
+        if (expected instanceof DecimalType decimalType) return new DataDecimal(decimalType, new BigDecimal(value));
+        if (expected == DataBytes.DATATYPE) return new DataBytes(value.getBytes());
         if (expected == DataString.DATATYPE) return new DataString(value);
         return switch (expected) {
             case EnumType enumType -> new DataEnum(enumType, value);

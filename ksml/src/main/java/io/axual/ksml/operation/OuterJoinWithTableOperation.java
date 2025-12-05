@@ -21,22 +21,16 @@ package io.axual.ksml.operation;
  */
 
 
-import io.axual.ksml.definition.FunctionDefinition;
-import io.axual.ksml.definition.TableDefinition;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.KTableWrapper;
 import io.axual.ksml.stream.StreamWrapper;
 import org.apache.kafka.streams.kstream.KTable;
 
-public class OuterJoinWithTableOperation extends StoreOperation {
+public class OuterJoinWithTableOperation extends StoreOperation<OuterJoinWithTableOperationDefinition> {
     private static final String VALUEJOINER_NAME = "ValueJoiner";
-    private final TableDefinition joinTable;
-    private final FunctionDefinition valueJoiner;
 
-    public OuterJoinWithTableOperation(StoreOperationConfig config, TableDefinition joinTable, FunctionDefinition valueJoiner) {
-        super(config);
-        this.joinTable = joinTable;
-        this.valueJoiner = valueJoiner;
+    public OuterJoinWithTableOperation(OuterJoinWithTableOperationDefinition definition) {
+        super(definition);
     }
 
     @Override
@@ -49,16 +43,16 @@ public class OuterJoinWithTableOperation extends StoreOperation {
          *          final Materialized<K, VR, KeyValueStore<Bytes, byte[]>> materialized)
          */
 
-        checkNotNull(valueJoiner, VALUEJOINER_NAME.toLowerCase());
+        checkNotNull(def.valueJoiner(), VALUEJOINER_NAME.toLowerCase());
         final var k = input.keyType();
         final var v = input.valueType();
-        final var otherTable = context.getStreamWrapper(joinTable);
-        checkNotNull(valueJoiner, VALUEJOINER_NAME.toLowerCase());
+        final var otherTable = context.getStreamWrapper(def.joinTable());
+        checkNotNull(def.valueJoiner(), VALUEJOINER_NAME.toLowerCase());
         final var ko = otherTable.keyType();
         final var vo = otherTable.valueType();
-        final var vr = streamDataTypeOf(firstSpecificType(valueJoiner, vo, v), false);
+        final var vr = streamDataTypeOf(firstSpecificType(def.valueJoiner(), vo, v), false);
         checkType("Join table keyType", ko, equalTo(k));
-        final var joiner = userFunctionOf(context, VALUEJOINER_NAME, valueJoiner, vr, superOf(k), superOf(v), superOf(vo));
+        final var joiner = userFunctionOf(context, VALUEJOINER_NAME, def.valueJoiner(), vr, superOf(k), superOf(v), superOf(vo));
         final var userJoiner = valueJoiner(joiner, tags);
         final var kvStore = validateKeyValueStore(store(), k, vr);
         final var mat = materializedOf(context, kvStore);

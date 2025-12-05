@@ -24,7 +24,7 @@ package io.axual.ksml.operation;
 import io.axual.ksml.data.object.DataInteger;
 import io.axual.ksml.data.object.DataString;
 import io.axual.ksml.data.type.StructType;
-import io.axual.ksml.definition.FunctionDefinition;
+import io.axual.ksml.function.StreamPartitionerDefinition;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.stream.StreamWrapper;
@@ -34,16 +34,12 @@ import io.axual.ksml.user.UserTopicNameExtractor;
 
 import static io.axual.ksml.dsl.RecordContextSchema.RECORD_CONTEXT_SCHEMA;
 
-public class ToTopicNameExtractorOperation extends BaseOperation {
+public class ToTopicNameExtractorOperation extends BaseOperation<ToTopicNameExtractorOperationDefinition> {
     private static final String PARTITIONER_NAME = "Partitioner";
     private static final String TOPIC_NAME_EXTRACTOR_NAME = "TopicNameExtractor";
-    private final FunctionDefinition topicNameExtractor;
-    private final FunctionDefinition partitioner;
 
-    public ToTopicNameExtractorOperation(OperationConfig config, FunctionDefinition topicNameExtractor, FunctionDefinition partitioner) {
-        super(config);
-        this.topicNameExtractor = topicNameExtractor;
-        this.partitioner = partitioner;
+    public ToTopicNameExtractorOperation(ToTopicNameExtractorOperationDefinition definition) {
+        super(definition);
     }
 
     @Override
@@ -58,9 +54,9 @@ public class ToTopicNameExtractorOperation extends BaseOperation {
         final var v = input.valueType();
         final var topicNameType = new UserType(DataString.DATATYPE);
         final var recordContextType = new UserType(new StructType(RECORD_CONTEXT_SCHEMA));
-        final var extract = userFunctionOf(context, TOPIC_NAME_EXTRACTOR_NAME, topicNameExtractor, topicNameType, superOf(k), superOf(v), superOf(recordContextType));
+        final var extract = userFunctionOf(context, TOPIC_NAME_EXTRACTOR_NAME, def.topicNameExtractor(), topicNameType, superOf(k), superOf(v), superOf(recordContextType));
         final var userExtract = new UserTopicNameExtractor(extract, tags);
-        final var part = userFunctionOf(context, PARTITIONER_NAME, partitioner, UserStreamPartitioner.EXPECTED_RESULT_TYPE, equalTo(DataString.DATATYPE), superOf(k), superOf(v), equalTo(DataInteger.DATATYPE));
+        final var part = userFunctionOf(context, PARTITIONER_NAME, def.partitioner(), StreamPartitionerDefinition.EXPECTED_RESULT_TYPE, equalTo(DataString.DATATYPE), superOf(k), superOf(v), equalTo(DataInteger.DATATYPE));
         final var userPart = part != null ? new UserStreamPartitioner(part, tags) : null;
         final var produced = producedOf(k, v, userPart);
         if (produced != null)

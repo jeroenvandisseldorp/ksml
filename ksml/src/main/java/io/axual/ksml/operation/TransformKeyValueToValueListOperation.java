@@ -23,7 +23,6 @@ package io.axual.ksml.operation;
 
 import io.axual.ksml.data.type.DataType;
 import io.axual.ksml.data.type.ListType;
-import io.axual.ksml.definition.FunctionDefinition;
 import io.axual.ksml.exception.TopologyException;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.operation.processor.FixedKeyOperationProcessorSupplier;
@@ -33,13 +32,11 @@ import io.axual.ksml.stream.StreamWrapper;
 import io.axual.ksml.type.UserType;
 import io.axual.ksml.user.UserKeyValueToValueListTransformer;
 
-public class TransformKeyValueToValueListOperation extends BaseOperation {
+public class TransformKeyValueToValueListOperation extends BaseOperation<TransformKeyValueToValueListOperationDefinition> {
     private static final String MAPPER_NAME = "Mapper";
-    private final FunctionDefinition mapper;
 
-    public TransformKeyValueToValueListOperation(OperationConfig config, FunctionDefinition mapper) {
-        super(config);
-        this.mapper = mapper;
+    public TransformKeyValueToValueListOperation(TransformKeyValueToValueListOperationDefinition definition) {
+        super(definition);
     }
 
     @Override
@@ -50,17 +47,17 @@ public class TransformKeyValueToValueListOperation extends BaseOperation {
          *          final Named named)
          */
 
-        checkNotNull(mapper, MAPPER_NAME.toLowerCase());
+        checkNotNull(def.mapper(), MAPPER_NAME.toLowerCase());
         final var k = input.keyType();
         final var v = input.valueType();
-        final var vrs = streamDataTypeOf(firstSpecificType(mapper, new UserType(new ListType(DataType.UNKNOWN))), false);
+        final var vrs = streamDataTypeOf(firstSpecificType(def.mapper(), new UserType(new ListType(DataType.UNKNOWN))), false);
         if (!(vrs.userType().dataType() instanceof ListType vrList)) {
             throw new TopologyException("Function should return a list of values, but currently returns " + vrs);
         }
         final var vr = streamDataTypeOf(vrList.valueType(), false);
-        final var map = userFunctionOf(context, MAPPER_NAME, mapper, vrs, superOf(k.flatten()), superOf(v.flatten()));
+        final var map = userFunctionOf(context, MAPPER_NAME, def.mapper(), vrs, superOf(k.flatten()), superOf(v.flatten()));
         final var userMap = new UserKeyValueToValueListTransformer(map, tags);
-        final var storeNames = mapper.storeNames().toArray(String[]::new);
+        final var storeNames = def.mapper().storeNames().toArray(String[]::new);
         final var supplier = new FixedKeyOperationProcessorSupplier<>(
                 name,
                 TransformKeyValueToValueListProcessor::new,

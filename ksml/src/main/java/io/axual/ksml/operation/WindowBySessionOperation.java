@@ -27,14 +27,10 @@ import io.axual.ksml.stream.KGroupedStreamWrapper;
 import io.axual.ksml.stream.SessionWindowedCogroupedKStreamWrapper;
 import io.axual.ksml.stream.SessionWindowedKStreamWrapper;
 import io.axual.ksml.stream.StreamWrapper;
-import org.apache.kafka.streams.kstream.SessionWindows;
 
-public class WindowBySessionOperation extends BaseOperation {
-    private final SessionWindows sessionWindows;
-
-    public WindowBySessionOperation(OperationConfig config, SessionWindows sessionWindows) {
-        super(config);
-        this.sessionWindows = sessionWindows;
+public class WindowBySessionOperation extends BaseOperation<WindowBySessionOperationDefinition> {
+    public WindowBySessionOperation(WindowBySessionOperationDefinition definition) {
+        super(definition);
     }
 
     @Override
@@ -47,7 +43,7 @@ public class WindowBySessionOperation extends BaseOperation {
          *          final SessionWindows windows)
          */
 
-        return new SessionWindowedKStreamWrapper(input.groupedStream.windowedBy(sessionWindows), k, v);
+        return new SessionWindowedKStreamWrapper(input.groupedStream.windowedBy(def.sessionWindows()), k, v);
     }
 
     @Override
@@ -60,6 +56,6 @@ public class WindowBySessionOperation extends BaseOperation {
          *          final SessionWindows windows)
          */
 
-        return new SessionWindowedCogroupedKStreamWrapper(input.cogroupedStream.windowedBy(sessionWindows), k, v);
+        return new SessionWindowedCogroupedKStreamWrapper(input.cogroupedStream.windowedBy(def.sessionWindows()), k, v);
     }
 }

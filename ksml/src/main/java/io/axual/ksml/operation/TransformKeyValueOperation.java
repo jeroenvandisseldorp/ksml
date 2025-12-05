@@ -22,7 +22,6 @@ package io.axual.ksml.operation;
 
 
 import io.axual.ksml.data.type.DataType;
-import io.axual.ksml.definition.FunctionDefinition;
 import io.axual.ksml.exception.ExecutionException;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.operation.processor.OperationProcessorSupplier;
@@ -34,13 +33,11 @@ import io.axual.ksml.type.UserType;
 import io.axual.ksml.user.UserKeyValueTransformer;
 import org.apache.kafka.streams.kstream.KStream;
 
-public class TransformKeyValueOperation extends BaseOperation {
+public class TransformKeyValueOperation extends BaseOperation<TransformKeyValueOperationDefinition> {
     private static final String MAPPER_NAME = "Mapper";
-    private final FunctionDefinition mapper;
 
-    public TransformKeyValueOperation(OperationConfig config, FunctionDefinition mapper) {
-        super(config);
-        this.mapper = mapper;
+    public TransformKeyValueOperation(TransformKeyValueOperationDefinition definition) {
+        super(definition);
     }
 
     @Override
@@ -51,18 +48,18 @@ public class TransformKeyValueOperation extends BaseOperation {
          *          final Named named)
          */
 
-        checkNotNull(mapper, MAPPER_NAME.toLowerCase());
+        checkNotNull(def.mapper(), MAPPER_NAME.toLowerCase());
         final var k = input.keyType().flatten();
         final var v = input.valueType().flatten();
-        final var kvTuple = firstSpecificType(mapper, new UserType(new UserTupleType(k.userType(), v.userType())));
+        final var kvTuple = firstSpecificType(def.mapper(), new UserType(new UserTupleType(k.userType(), v.userType())));
         checkTuple(MAPPER_NAME + " resultType", kvTuple, DataType.UNKNOWN, DataType.UNKNOWN);
-        final var map = userFunctionOf(context, MAPPER_NAME, mapper, kvTuple, superOf(k), superOf(v));
+        final var map = userFunctionOf(context, MAPPER_NAME, def.mapper(), kvTuple, superOf(k), superOf(v));
 
         if (kvTuple.dataType() instanceof UserTupleType userTupleType && userTupleType.subTypeCount() == 2) {
             final var kr = streamDataTypeOf(userTupleType.getUserType(0), true);
             final var vr = streamDataTypeOf(userTupleType.getUserType(1), false);
             final var userMap = new UserKeyValueTransformer(map, tags);
-            final var storeNames = mapper.storeNames().toArray(String[]::new);
+            final var storeNames = def.mapper().storeNames().toArray(String[]::new);
             final var supplier = new OperationProcessorSupplier<>(
                     name,
                     TransformKeyValueProcessor::new,

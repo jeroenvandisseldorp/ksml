@@ -21,7 +21,6 @@ package io.axual.ksml.operation;
  */
 
 
-import io.axual.ksml.definition.FunctionDefinition;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.stream.KTableWrapper;
@@ -29,21 +28,19 @@ import io.axual.ksml.stream.StreamWrapper;
 import io.axual.ksml.user.UserKeyTransformer;
 import org.apache.kafka.streams.kstream.KStream;
 
-public class ToStreamOperation extends BaseOperation {
+public class ToStreamOperation extends BaseOperation<ToStreamOperationDefinition> {
     private static final String MAPPER_NAME = "Mapper";
-    private final FunctionDefinition mapper;
 
-    public ToStreamOperation(OperationConfig config, FunctionDefinition mapper) {
-        super(config);
-        this.mapper = mapper;
+    public ToStreamOperation(ToStreamOperationDefinition definition) {
+        super(definition);
     }
 
     @Override
     public StreamWrapper apply(KTableWrapper input, TopologyBuildContext context) {
         final var k = input.keyType();
         final var v = input.valueType();
-        final var kr = mapper != null ? streamDataTypeOf(firstSpecificType(mapper, k), true) : k;
-        final var map = mapper != null ? userFunctionOf(context, MAPPER_NAME, mapper, kr, superOf(k), superOf(v)) : null;
+        final var kr = def.mapper() != null ? streamDataTypeOf(firstSpecificType(def.mapper(), k), true) : k;
+        final var map = def.mapper() != null ? userFunctionOf(context, MAPPER_NAME, def.mapper(), kr, superOf(k), superOf(v)) : null;
         final var userMap = map != null ? new UserKeyTransformer(map, tags) : null;
         final var named = namedOf();
         final KStream<Object, Object> output = userMap != null

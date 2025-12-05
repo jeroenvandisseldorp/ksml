@@ -32,6 +32,7 @@ import io.axual.ksml.data.object.DataNull;
 import io.axual.ksml.data.object.DataShort;
 import io.axual.ksml.data.object.DataString;
 import io.axual.ksml.data.schema.DataSchema;
+import io.axual.ksml.data.schema.DecimalSchema;
 import io.axual.ksml.data.schema.EnumSchema;
 import io.axual.ksml.data.schema.ListSchema;
 import io.axual.ksml.data.schema.MapSchema;
@@ -39,6 +40,7 @@ import io.axual.ksml.data.schema.StructSchema;
 import io.axual.ksml.data.schema.TupleSchema;
 import io.axual.ksml.data.schema.UnionSchema;
 import io.axual.ksml.data.type.DataType;
+import io.axual.ksml.data.type.DecimalType;
 import io.axual.ksml.data.type.EnumType;
 import io.axual.ksml.data.type.ListType;
 import io.axual.ksml.data.type.MapType;
@@ -73,6 +75,8 @@ public class DataTypeDataSchemaMapper implements DataSchemaMapper<DataType> {
         if (type == DataLong.DATATYPE) return DataSchema.LONG_SCHEMA;
         if (type == DataFloat.DATATYPE) return DataSchema.FLOAT_SCHEMA;
         if (type == DataDouble.DATATYPE) return DataSchema.DOUBLE_SCHEMA;
+        if (type instanceof DecimalType decimalType)
+            return new DecimalSchema(decimalType.scale(), decimalType.precision());
         if (type == DataBytes.DATATYPE) return DataSchema.BYTES_SCHEMA;
         if (type == DataString.DATATYPE) return DataSchema.STRING_SCHEMA;
 
@@ -114,6 +118,8 @@ public class DataTypeDataSchemaMapper implements DataSchemaMapper<DataType> {
         if (schema == DataSchema.LONG_SCHEMA) return DataLong.DATATYPE;
         if (schema == DataSchema.FLOAT_SCHEMA) return DataFloat.DATATYPE;
         if (schema == DataSchema.DOUBLE_SCHEMA) return DataDouble.DATATYPE;
+        if (schema instanceof DecimalSchema decimalSchema)
+            return new DecimalType(decimalSchema.scale(), decimalSchema.precision());
         if (schema == DataSchema.BYTES_SCHEMA) return DataBytes.DATATYPE;
         if (schema == DataSchema.STRING_SCHEMA) return DataString.DATATYPE;
         return switch (schema) {

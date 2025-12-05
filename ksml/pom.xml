@@ -84,6 +84,14 @@
             <groupId>io.axual.ksml</groupId>
             <artifactId>ksml-data-xml</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.axual.ksml</groupId>
+            <artifactId>ksml-definition</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.axual.ksml</groupId>
+            <artifactId>ksml-parser</artifactId>
+        </dependency>
 
         <!-- Dependencies for GraalVM polyglot and truffle -->
         <dependency>

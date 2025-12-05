@@ -23,27 +23,21 @@ package io.axual.ksml.operation;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.stream.StreamWrapper;
-import io.axual.ksml.type.UserType;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.KeyValueMapper;
 import org.apache.kafka.streams.kstream.Named;
 
-public class ConvertKeyValueOperation extends BaseOperation {
-    private final UserType targetKeyType;
-    private final UserType targetValueType;
-
-    public ConvertKeyValueOperation(OperationConfig config, UserType targetKeyType, UserType targetValueType) {
-        super(config);
-        this.targetKeyType = targetKeyType;
-        this.targetValueType = targetValueType;
+public class ConvertKeyValueOperation extends BaseOperation<ConvertKeyValueOperationDefinition> {
+    public ConvertKeyValueOperation(ConvertKeyValueOperationDefinition definition) {
+        super(definition);
     }
 
     @Override
     public StreamWrapper apply(KStreamWrapper input, TopologyBuildContext context) {
         final var k = input.keyType().flatten();
         final var v = input.valueType().flatten();
-        final var kr = streamDataTypeOf(targetKeyType, true).flatten();
-        final var vr = streamDataTypeOf(targetValueType, false).flatten();
+        final var kr = streamDataTypeOf(def.targetKeyType(), true).flatten();
+        final var vr = streamDataTypeOf(def.targetValueType(), false).flatten();
         final var mapper = context.converter();
 
         // Set up the mapping function to convert the key and value

@@ -26,12 +26,12 @@ import io.axual.ksml.data.object.DataObject;
 import io.axual.ksml.data.type.DataType;
 import io.axual.ksml.data.type.TupleType;
 import io.axual.ksml.data.type.WindowedType;
-import io.axual.ksml.definition.FunctionDefinition;
-import io.axual.ksml.definition.KeyValueStateStoreDefinition;
-import io.axual.ksml.definition.ParameterDefinition;
-import io.axual.ksml.definition.SessionStateStoreDefinition;
-import io.axual.ksml.definition.StateStoreDefinition;
-import io.axual.ksml.definition.WindowStateStoreDefinition;
+import io.axual.ksml.function.FunctionDefinition;
+import io.axual.ksml.store.KeyValueStateStoreDefinition;
+import io.axual.ksml.function.ParameterDefinition;
+import io.axual.ksml.store.SessionStateStoreDefinition;
+import io.axual.ksml.store.StateStoreDefinition;
+import io.axual.ksml.store.WindowStateStoreDefinition;
 import io.axual.ksml.exception.ExecutionException;
 import io.axual.ksml.exception.TopologyException;
 import io.axual.ksml.generator.StreamDataType;
@@ -69,8 +69,9 @@ import java.util.Optional;
 import java.util.Set;
 
 @Slf4j
-public abstract class BaseOperation implements StreamOperation {
+public abstract class BaseOperation<DEF extends OperationDefinition> implements StreamOperation {
     private static final String ERROR_IN_TOPOLOGY = "Error in topology";
+    protected final DEF def;
 
     private static class NameValidator extends Named {
         // Satisfy compiler with dummy constructor
@@ -93,15 +94,16 @@ public abstract class BaseOperation implements StreamOperation {
     protected final String name;
     protected final MetricTags tags;
 
-    protected BaseOperation(OperationConfig config) {
-        var error = NameValidator.validateNameAndReturnError(config.name());
+    protected BaseOperation(DEF definition) {
+        this.def = definition;
+        var error = NameValidator.validateNameAndReturnError(definition.operationConfig().name());
         if (error != null) {
-            log.warn("Ignoring name with error '" + config.name() + "': " + error);
+            log.warn("Ignoring name with error '" + definition.operationConfig().name() + "': " + error);
             name = null;
         } else {
-            name = config.name();
+            name = definition.operationConfig().name();
         }
-        tags = config.tags().append("operation-name", name);
+        tags = definition.operationConfig().tags().append("operation-name", name);
     }
 
     @Override
@@ -215,14 +217,6 @@ public abstract class BaseOperation implements StreamOperation {
                     return myDataType.isAssignableFrom(compareType);
                 },
                 "of type " + compareType);
-    }
-
-    protected TypeComparator assignableTo(StreamDataType compareType) {
-        return assignableTo(compareType.userType());
-    }
-
-    protected TypeComparator assignableTo(UserType compareType) {
-        return assignableTo(compareType.dataType());
     }
 
     protected TypeComparator assignableTo(DataType compareType) {

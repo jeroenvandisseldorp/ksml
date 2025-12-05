@@ -21,7 +21,6 @@ package io.axual.ksml.operation;
  */
 
 
-import io.axual.ksml.definition.FunctionDefinition;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.KGroupedStreamWrapper;
 import io.axual.ksml.stream.KGroupedTableWrapper;
@@ -33,33 +32,20 @@ import io.axual.ksml.user.UserReducer;
 import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.Windowed;
 
-public class ReduceOperation extends StoreOperation {
+public class ReduceOperation extends StoreOperation<ReduceOperationDefinition> {
     private static final String ADDER_NAME = "Adder";
     private static final String REDUCER_NAME = "Reducer";
     private static final String SUBTRACTOR_NAME = "Subtractor";
-    private final FunctionDefinition reducer;
-    private final FunctionDefinition adder;
-    private final FunctionDefinition subtractor;
 
-    public ReduceOperation(StoreOperationConfig config, FunctionDefinition reducer) {
-        super(config);
-        this.reducer = reducer;
-        this.adder = null;
-        this.subtractor = null;
-    }
-
-    public ReduceOperation(StoreOperationConfig config, FunctionDefinition adder, FunctionDefinition subtractor) {
-        super(config);
-        this.reducer = null;
-        this.adder = adder;
-        this.subtractor = subtractor;
+    public ReduceOperation(ReduceOperationDefinition definition) {
+        super(definition);
     }
 
     @Override
     public StreamWrapper apply(KGroupedStreamWrapper input, TopologyBuildContext context) {
         final var k = input.keyType();
         final var v = input.valueType();
-        final var red = userFunctionOf(context, REDUCER_NAME, reducer, v, equalTo(v), equalTo(v));
+        final var red = userFunctionOf(context, REDUCER_NAME, def.reducer(), v, equalTo(v), equalTo(v));
         final var userRed = new UserReducer(red, tags);
         final var kvStore = validateKeyValueStore(store(), k, v);
         final var mat = materializedOf(context, kvStore);
@@ -84,9 +70,9 @@ public class ReduceOperation extends StoreOperation {
 
         final var k = input.keyType();
         final var v = input.valueType();
-        final var add = userFunctionOf(context, ADDER_NAME, adder, v, equalTo(v), equalTo(v));
+        final var add = userFunctionOf(context, ADDER_NAME, def.adder(), v, equalTo(v), equalTo(v));
         final var userAdd = new UserReducer(add, tags);
-        final var sub = userFunctionOf(context, SUBTRACTOR_NAME, subtractor, v, equalTo(v), equalTo(v));
+        final var sub = userFunctionOf(context, SUBTRACTOR_NAME, def.subtractor(), v, equalTo(v), equalTo(v));
         final var userSub = new UserReducer(sub, tags);
         final var kvStore = validateKeyValueStore(store(), k, v);
         final var mat = materializedOf(context, kvStore);
@@ -110,7 +96,7 @@ public class ReduceOperation extends StoreOperation {
 
         final var k = input.keyType();
         final var v = input.valueType();
-        final var red = userFunctionOf(context, REDUCER_NAME, reducer, v, equalTo(v), equalTo(v));
+        final var red = userFunctionOf(context, REDUCER_NAME, def.reducer(), v, equalTo(v), equalTo(v));
         final var userRed = new UserReducer(red, tags);
         final var sessionStore = validateSessionStore(store(), k, v);
         final var mat = materializedOf(context, sessionStore);
@@ -134,7 +120,7 @@ public class ReduceOperation extends StoreOperation {
 
         final var k = input.keyType();
         final var v = input.valueType();
-        final var red = userFunctionOf(context, REDUCER_NAME, reducer, v, equalTo(v), equalTo(v));
+        final var red = userFunctionOf(context, REDUCER_NAME, def.reducer(), v, equalTo(v), equalTo(v));
         final var userRed = new UserReducer(red, tags);
         final var windowStore = validateWindowStore(store(), k, v);
         final var mat = materializedOf(context, windowStore);

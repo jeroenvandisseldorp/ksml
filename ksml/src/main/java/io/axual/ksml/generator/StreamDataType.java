@@ -39,8 +39,7 @@ public record StreamDataType(UserType userType, boolean isKey) {
     @NotNull
     @Override
     public String toString() {
-        var schemaName = userType.dataType().name();
-        return (userType.notation() != null ? userType.notation().toLowerCase() : "unknown notation") + (schemaName != null && !schemaName.isEmpty() ? ":" : "") + schemaName;
+        return userType.toString() + " (" + (isKey ? "key" : "value") + ")";
     }
 
     public Serde<Object> serde() {

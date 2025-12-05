@@ -22,29 +22,16 @@ package io.axual.ksml.operation;
 
 
 import io.axual.ksml.data.type.WindowedType;
+import io.axual.ksml.dsl.KSMLDSL;
 import io.axual.ksml.exception.TopologyException;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.KTableWrapper;
 import io.axual.ksml.stream.StreamWrapper;
 import org.apache.kafka.streams.kstream.Suppressed;
-import org.apache.kafka.streams.kstream.Windowed;
 
-public class SuppressOperation extends BaseOperation {
-    private final Suppressed<Windowed<?>> suppressedWindowed;
-    private final Suppressed<Object> suppressed;
-
-    private SuppressOperation(OperationConfig config, Suppressed<Object> suppressed, Suppressed<Windowed<?>> suppressedWindowed) {
-        super(config);
-        this.suppressed = suppressed != null ? suppressed.withName(name) : null;
-        this.suppressedWindowed = suppressedWindowed != null ? suppressedWindowed.withName(name) : null;
-    }
-
-    public static SuppressOperation create(OperationConfig config, Suppressed<Object> suppressed) {
-        return new SuppressOperation(config, suppressed, null);
-    }
-
-    public static SuppressOperation createWindowed(OperationConfig config, Suppressed<Windowed<?>> suppressed) {
-        return new SuppressOperation(config, null, suppressed);
+public class SuppressOperation extends BaseOperation<SuppressOperationDefinition> {
+    public SuppressOperation(SuppressOperationDefinition definition) {
+        super(definition);
     }
 
     @Override
@@ -57,20 +44,61 @@ public class SuppressOperation extends BaseOperation {
         final var k = input.keyType();
         final var v = input.valueType();
 
+        final var bufferConfig = bufferConfig(def.maxBytes(), def.maxRecords(), def.bufferFullStrategy());
+
         // Handle "untilTimeLimit" case
-        if (suppressed != null) {
+        if (def.timeToWaitForMoreEvents() != null) {
+            final var suppressed = Suppressed.untilTimeLimit(def.timeToWaitForMoreEvents(), bufferConfig);
             return new KTableWrapper(input.table.suppress(suppressed), k, v);
         }
 
-        // Because of dataType erasure, we can not rely on Java to perform dataType checking the key
+        // Because of dataType erasure, we cannot rely on Java to perform dataType checking the key
         // for us. Therefore, we check the dataType manually to ensure the user is applying the
         // "untilWindowCloses" suppression on the right KTable key dataType.
 
-        // Validate that the key dataType is windowed, or can be converted to windowed
+        // Validate that the key dataType is windowed or can be converted to windowed
+        final var suppressedWindowed = Suppressed.untilWindowCloses(strictBufferConfig(bufferConfig));
         if (k.userType().dataType() instanceof WindowedType) {
             return new KTableWrapper(input.table.suppress((Suppressed) suppressedWindowed), k, v);
         }
         // Throw an exception if the stream key dataType is not Windowed
         throw new TopologyException("Can not apply suppress operation to a KTable with key dataType " + input.keyType().userType());
+    }
+
+    private Suppressed.EagerBufferConfig bufferConfig(String maxBytes, String maxRecords, String bufferFullStrategy) {
+        Suppressed.EagerBufferConfig result = null;
+
+        // Check for a maxBytes setting
+        if (maxBytes != null) {
+            result = Suppressed.BufferConfig.maxBytes(Long.parseLong(maxBytes));
+        }
+
+        // Check for a maxRecords setting
+        if (maxRecords != null) {
+            if (result == null) {
+                result = Suppressed.BufferConfig.maxRecords(Long.parseLong(maxRecords));
+            } else {
+                result = result.withMaxRecords(Long.parseLong(maxRecords));
+            }
+        }
+
+        // Check for a bufferFull strategy
+        if (KSMLDSL.Operations.Suppress.BUFFER_FULL_STRATEGY_EMIT.equals(bufferFullStrategy)) {
+            if (result == null) {
+                throw new TopologyException("Can not instantiate BufferConfig without maxBytes and/or maxRecords setting");
+            }
+            result = result.emitEarlyWhenFull();
+        }
+
+        return result;
+    }
+
+    private Suppressed.StrictBufferConfig strictBufferConfig(Suppressed.EagerBufferConfig config) {
+        // Assume the BufferFullStrategy is SHUT_DOWN from here on
+        if (config == null) {
+            return Suppressed.BufferConfig.unbounded();
+        }
+
+        return config.shutDownWhenFull();
     }
 }

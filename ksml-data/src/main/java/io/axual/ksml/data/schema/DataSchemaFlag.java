@@ -32,6 +32,10 @@ import io.axual.ksml.data.compare.EqualityFlags;
 public enum DataSchemaFlag implements EqualityFlag {
     // Ignore the top-level DataSchema type
     IGNORE_DATA_SCHEMA_TYPE,
+    // Ignore a DecimalSchema's precision
+    IGNORE_DECIMAL_SCHEMA_PRECISION,
+    // Ignore a DecimalSchema's scale
+    IGNORE_DECIMAL_SCHEMA_SCALE,
     // Ignore an EnumSchema's default value
     IGNORE_ENUM_SCHEMA_DEFAULT_VALUE,
     // Ignore an EnumSchema's namespace
@@ -82,6 +86,12 @@ public enum DataSchemaFlag implements EqualityFlag {
     IGNORE_STRUCT_SCHEMA_DOC,
     // Ignore StructSchema's defined fields
     IGNORE_STRUCT_SCHEMA_FIELDS,
+    // Ignore TimeSchema's unit
+    IGNORE_TIME_SCHEMA_UNIT,
+    // Ignore TimestampSchema's locality
+    IGNORE_TIMESTAMP_SCHEMA_LOCAL,
+    // Ignore TimestampSchema's unit
+    IGNORE_TIMESTAMP_SCHEMA_UNIT,
     // Ignore UnionSchema's members
     IGNORE_UNION_SCHEMA_MEMBERS,
     // Ignore a UnionSchema member's doc

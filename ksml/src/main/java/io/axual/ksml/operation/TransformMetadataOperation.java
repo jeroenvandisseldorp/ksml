@@ -21,8 +21,7 @@ package io.axual.ksml.operation;
  */
 
 import io.axual.ksml.data.type.RecordMetadata;
-import io.axual.ksml.definition.DefinitionConstants;
-import io.axual.ksml.definition.FunctionDefinition;
+import io.axual.ksml.function.FunctionDefinitionDSL;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.operation.processor.FixedKeyOperationProcessorSupplier;
 import io.axual.ksml.operation.processor.TransformMetadataProcessor;
@@ -31,13 +30,11 @@ import io.axual.ksml.stream.StreamWrapper;
 import io.axual.ksml.user.UserMetadataTransformer;
 import org.apache.kafka.streams.kstream.KStream;
 
-public class TransformMetadataOperation extends BaseOperation {
+public class TransformMetadataOperation extends BaseOperation<TransformMetadataOperationDefinition> {
     private static final String MAPPER_NAME = "Mapper";
-    private final FunctionDefinition mapper;
 
-    public TransformMetadataOperation(OperationConfig config, FunctionDefinition mapper) {
-        super(config);
-        this.mapper = mapper;
+    public TransformMetadataOperation(TransformMetadataOperationDefinition definition) {
+        super(definition);
     }
 
     @Override
@@ -48,13 +45,13 @@ public class TransformMetadataOperation extends BaseOperation {
          *          final Named named)
          */
 
-        checkNotNull(mapper, MAPPER_NAME.toLowerCase());
+        checkNotNull(def.mapper(), MAPPER_NAME.toLowerCase());
         final var k = input.keyType();
         final var v = input.valueType();
-        final var meta = DefinitionConstants.METADATA_TYPE;
-        final var map = userFunctionOf(context, MAPPER_NAME, mapper, meta, superOf(k.flatten()), superOf(v.flatten()), superOf(meta));
+        final var meta = FunctionDefinitionDSL.METADATA_TYPE;
+        final var map = userFunctionOf(context, MAPPER_NAME, def.mapper(), meta, superOf(k.flatten()), superOf(v.flatten()), superOf(meta));
         final var userMap = new UserMetadataTransformer(map, tags);
-        final var storeNames = mapper.storeNames().toArray(String[]::new);
+        final var storeNames = def.mapper().storeNames().toArray(String[]::new);
         final var supplier = new FixedKeyOperationProcessorSupplier<>(
                 name,
                 TransformMetadataProcessor::new,

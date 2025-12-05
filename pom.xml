@@ -62,6 +62,8 @@
         <module>ksml-data-protobuf-confluent</module>
         <module>ksml-data-soap</module>
         <module>ksml-data-xml</module>
+        <module>ksml-definition</module>
+        <module>ksml-parser</module>
         <module>ksml</module>
         <module>ksml-query</module>
         <module>ksml-kafka-clients</module>
@@ -93,6 +95,7 @@
         <prometheus.version>1.0.1</prometheus.version>
         <prometheus-instrumentation.version>1.4.1</prometheus-instrumentation.version>
         <protobuf.version>3.25.8</protobuf.version>
+        <three.ten.extra.version>1.8.0</three.ten.extra.version>
         <saaj.version>3.0.4</saaj.version>
         <slf4j.version>2.1.0-alpha1</slf4j.version>
         <wire.version>5.2.0</wire.version>
@@ -229,6 +232,16 @@
             </dependency>
             <dependency>
                 <groupId>io.axual.ksml</groupId>
+                <artifactId>ksml-definition</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.axual.ksml</groupId>
+                <artifactId>ksml-parser</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.axual.ksml</groupId>
                 <artifactId>ksml</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -282,6 +295,11 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-compress</artifactId>
                 <version>${apache.commons.compress.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.threeten</groupId>
+                <artifactId>threeten-extra</artifactId>
+                <version>${three.ten.extra.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.avro</groupId>

@@ -27,9 +27,9 @@ import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.stream.StreamWrapper;
 import org.apache.kafka.streams.kstream.KGroupedStream;
 
-public class GroupByKeyOperation extends StoreOperation {
-    public GroupByKeyOperation(StoreOperationConfig config) {
-        super(config);
+public class GroupByKeyOperation extends StoreOperation<GroupByKeyDefinition> {
+    public GroupByKeyOperation(GroupByKeyDefinition definition) {
+        super(definition);
     }
 
     @Override

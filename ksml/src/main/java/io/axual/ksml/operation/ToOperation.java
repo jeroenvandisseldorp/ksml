@@ -23,24 +23,19 @@ package io.axual.ksml.operation;
 
 import io.axual.ksml.data.object.DataInteger;
 import io.axual.ksml.data.object.DataString;
-import io.axual.ksml.definition.FunctionDefinition;
-import io.axual.ksml.definition.TopicDefinition;
+import io.axual.ksml.function.StreamPartitionerDefinition;
 import io.axual.ksml.exception.ExecutionException;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.stream.StreamWrapper;
 import io.axual.ksml.user.UserStreamPartitioner;
 
-public class ToOperation extends BaseOperation {
+public class ToOperation extends BaseOperation<ToOperationDefinition> {
     private static final String PARTITIONER_NAME = "Partitioner";
-    public final TopicDefinition topic;
-    private final FunctionDefinition partitioner;
 
-    public ToOperation(OperationConfig config, TopicDefinition topic, FunctionDefinition partitioner) {
-        super(config);
-        this.topic = topic;
-        this.partitioner = partitioner;
-        if (topic.topic() == null) {
+    public ToOperation(ToOperationDefinition definition) {
+        super(definition);
+        if (def.topic().topic() == null) {
             throw new ExecutionException("Can not produce to NULL target");
         }
     }
@@ -55,18 +50,18 @@ public class ToOperation extends BaseOperation {
 
         final var k = input.keyType().flatten();
         final var v = input.valueType().flatten();
-        final var kt = streamDataTypeOf(firstSpecificType(topic.keyType(), k.userType()), true).flatten();
-        final var vt = streamDataTypeOf(firstSpecificType(topic.valueType(), v.userType()), false).flatten();
+        final var kt = streamDataTypeOf(firstSpecificType(def.topic().keyType(), k.userType()), true).flatten();
+        final var vt = streamDataTypeOf(firstSpecificType(def.topic().valueType(), v.userType()), false).flatten();
         // Perform a dataType check to see if the key/value data types received matches the stream definition's types
         checkType("Target topic keyType", kt, superOf(k));
         checkType("Target topic valueType", vt, superOf(v));
-        final var part = userFunctionOf(context, PARTITIONER_NAME, partitioner, UserStreamPartitioner.EXPECTED_RESULT_TYPE, equalTo(DataString.DATATYPE), superOf(k), superOf(v), equalTo(DataInteger.DATATYPE));
+        final var part = userFunctionOf(context, PARTITIONER_NAME, def.partitioner(), StreamPartitionerDefinition.EXPECTED_RESULT_TYPE, equalTo(DataString.DATATYPE), superOf(k), superOf(v), equalTo(DataInteger.DATATYPE));
         final var userPart = part != null ? new UserStreamPartitioner(part, tags) : null;
         final var produced = producedOf(kt, vt, userPart);
         if (produced != null)
-            input.stream.to(topic.topic(), produced);
+            input.stream.to(def.topic().topic(), produced);
         else
-            input.stream.to(topic.topic());
+            input.stream.to(def.topic().topic());
         return null;
     }
 }

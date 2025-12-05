@@ -21,7 +21,8 @@ package io.axual.ksml.operation;
  */
 
 
-import io.axual.ksml.definition.BranchDefinition;
+import io.axual.ksml.topology.BranchDefinition;
+import io.axual.ksml.function.PredicateDefinition;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.stream.StreamWrapper;
@@ -32,15 +33,12 @@ import org.apache.kafka.streams.kstream.Named;
 import org.apache.kafka.streams.kstream.Predicate;
 
 import java.util.ArrayList;
-import java.util.List;
 
-public class BranchOperation extends BaseOperation {
+public class BranchOperation extends BaseOperation<BranchOperationDefinition> {
     private static final String PREDICATE_NAME = "Predicate";
-    private final List<BranchDefinition> branches;
 
-    public BranchOperation(OperationConfig config, List<BranchDefinition> branches) {
-        super(config);
-        this.branches = branches;
+    public BranchOperation(BranchOperationDefinition definition) {
+        super(definition);
     }
 
     @Override
@@ -49,10 +47,10 @@ public class BranchOperation extends BaseOperation {
         final var v = input.valueType();
 
         // Prepare the branch predicates to pass into the KStream
-        final var predicates = new ArrayList<Predicate<Object, Object>>(branches.size());
-        for (final BranchDefinition branch : branches) {
+        final var predicates = new ArrayList<Predicate<Object, Object>>(def.branches().size());
+        for (final BranchDefinition branch : def.branches()) {
             if (branch.predicate() != null) {
-                final var pred = userFunctionOf(context, PREDICATE_NAME, branch.predicate(), UserPredicate.EXPECTED_RESULT_TYPE, superOf(k), superOf(v));
+                final var pred = userFunctionOf(context, PREDICATE_NAME, branch.predicate(), PredicateDefinition.EXPECTED_RESULT_TYPE, superOf(k), superOf(v));
                 predicates.add(new UserPredicate(pred, tags));
             } else {
                 predicates.add((key, value) -> true);
@@ -71,11 +69,13 @@ public class BranchOperation extends BaseOperation {
         // For every branch, generate a separate pipeline
         for (var index = 0; index < predicates.size(); index++) {
             StreamWrapper branchCursor = new KStreamWrapper(output.get(name + index), k, v);
-            for (StreamOperation operation : branches.get(index).pipeline().chain()) {
+            for (final var definition : def.branches().get(index).pipeline().chain()) {
+                final var operation = OperationFactory.createOperation(definition);
                 branchCursor = branchCursor.apply(operation, context);
             }
-            if (branches.get(index).pipeline().sink() != null) {
-                branchCursor.apply(branches.get(index).pipeline().sink(), context);
+            if (def.branches().get(index).pipeline().sink() != null) {
+                final var sinkOperation = OperationFactory.createOperation(def.branches().get(index).pipeline().sink());
+                branchCursor.apply(sinkOperation, context);
             }
         }
 

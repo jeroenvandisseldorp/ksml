@@ -62,9 +62,15 @@ public class DataSchemaConstants {
     public static final String LONG_TYPE = "long";
     public static final String FLOAT_TYPE = "float";
     public static final String DOUBLE_TYPE = "double";
+    public static final String DECIMAL_TYPE = "decimal";
     public static final String BYTES_TYPE = "bytes";
     public static final String FIXED_TYPE = "fixed";
     public static final String STRING_TYPE = "string";
+    public static final String DATE_TYPE = "date";
+    public static final String TIME_TYPE = "time";
+    public static final String TIMESTAMP_TYPE = "timestamp";
+    public static final String DURATION_TYPE = "duration";
+    public static final String UUID_TYPE = "uuid";
     public static final String ENUM_TYPE = "enum";
     public static final String LIST_TYPE = "list";
     public static final String MAP_TYPE = "map";

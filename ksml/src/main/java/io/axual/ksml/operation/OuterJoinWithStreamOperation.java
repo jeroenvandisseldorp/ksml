@@ -21,27 +21,17 @@ package io.axual.ksml.operation;
  */
 
 
-import io.axual.ksml.definition.FunctionDefinition;
-import io.axual.ksml.definition.StreamDefinition;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.stream.StreamWrapper;
 import org.apache.kafka.streams.kstream.JoinWindows;
 import org.apache.kafka.streams.kstream.KStream;
 
-import java.time.Duration;
-
-public class OuterJoinWithStreamOperation extends DualStoreOperation {
+public class OuterJoinWithStreamOperation extends DualStoreOperation<OuterJoinWithStreamOperationDefinition> {
     private static final String VALUEJOINER_NAME = "ValueJoiner";
-    private final StreamDefinition joinStream;
-    private final FunctionDefinition valueJoiner;
-    private final JoinWindows joinWindows;
 
-    public OuterJoinWithStreamOperation(DualStoreOperationConfig config, StreamDefinition joinStream, FunctionDefinition valueJoiner, Duration timeDifference, Duration gracePeriod) {
-        super(config);
-        this.joinStream = joinStream;
-        this.valueJoiner = valueJoiner;
-        this.joinWindows = joinWindowsOf(timeDifference, gracePeriod);
+    public OuterJoinWithStreamOperation(OuterJoinWithStreamOperationDefinition definition) {
+        super(definition);
     }
 
     @Override
@@ -54,17 +44,18 @@ public class OuterJoinWithStreamOperation extends DualStoreOperation {
          *          final StreamJoined<K, V, VO> streamJoined)
          */
 
-        checkNotNull(valueJoiner, VALUEJOINER_NAME.toLowerCase());
+        checkNotNull(def.valueJoiner(), VALUEJOINER_NAME.toLowerCase());
         final var k = input.keyType();
         final var v = input.valueType();
-        final var otherStream = context.getStreamWrapper(joinStream);
+        final var otherStream = context.getStreamWrapper(def.joinStream());
         final var ko = otherStream.keyType();
         final var vo = otherStream.valueType();
-        final var vr = streamDataTypeOf(firstSpecificType(valueJoiner, vo, v), false);
+        final var vr = streamDataTypeOf(firstSpecificType(def.valueJoiner(), vo, v), false);
         checkType("Join stream keyType", ko, equalTo(k));
-        final var joiner = userFunctionOf(context, VALUEJOINER_NAME, valueJoiner, vr, superOf(k), superOf(v), superOf(vo));
+        final var joiner = userFunctionOf(context, VALUEJOINER_NAME, def.valueJoiner(), vr, superOf(k), superOf(v), superOf(vo));
         final var thisStore = validateWindowStore(thisStore(), k, vr);
         final var otherStore = validateWindowStore(otherStore(), k, vr);
+        final var joinWindows = JoinWindows.ofTimeDifferenceAndGrace(def.timeDifference(), def.gracePeriod());
         final var streamJoined = streamJoinedOf(thisStore, otherStore, k, v, vo, joinWindows);
         final var userJoiner = valueJoiner(joiner, tags);
         final KStream<Object, Object> output = streamJoined != null

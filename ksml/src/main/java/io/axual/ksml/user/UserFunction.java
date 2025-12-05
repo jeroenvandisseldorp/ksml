@@ -26,7 +26,7 @@ import io.axual.ksml.data.object.DataNull;
 import io.axual.ksml.data.object.DataObject;
 import io.axual.ksml.data.object.DataTuple;
 import io.axual.ksml.data.type.DataType;
-import io.axual.ksml.definition.ParameterDefinition;
+import io.axual.ksml.function.ParameterDefinition;
 import io.axual.ksml.exception.ExecutionException;
 import io.axual.ksml.exception.TopologyException;
 import io.axual.ksml.store.StateStores;

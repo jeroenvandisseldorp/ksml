@@ -24,7 +24,6 @@ package io.axual.ksml.operation;
 import io.axual.ksml.data.type.DataType;
 import io.axual.ksml.data.type.ListType;
 import io.axual.ksml.data.type.TupleType;
-import io.axual.ksml.definition.FunctionDefinition;
 import io.axual.ksml.exception.ExecutionException;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.operation.processor.OperationProcessorSupplier;
@@ -35,13 +34,11 @@ import io.axual.ksml.type.UserTupleType;
 import io.axual.ksml.type.UserType;
 import io.axual.ksml.user.UserKeyValueToKeyValueListTransformer;
 
-public class TransformKeyValueToKeyValueListOperation extends BaseOperation {
+public class TransformKeyValueToKeyValueListOperation extends BaseOperation<TransformKeyValueToKeyValueListOperationDefinition> {
     private static final String MAPPER_NAME = "Mapper";
-    private final FunctionDefinition mapper;
 
-    public TransformKeyValueToKeyValueListOperation(OperationConfig config, FunctionDefinition mapper) {
-        super(config);
-        this.mapper = mapper;
+    public TransformKeyValueToKeyValueListOperation(TransformKeyValueToKeyValueListOperationDefinition definition) {
+        super(definition);
     }
 
     @Override
@@ -52,11 +49,11 @@ public class TransformKeyValueToKeyValueListOperation extends BaseOperation {
          *          final Named named)
          */
 
-        checkNotNull(mapper, MAPPER_NAME.toLowerCase());
+        checkNotNull(def.mapper(), MAPPER_NAME.toLowerCase());
         final var k = input.keyType();
         final var v = input.valueType();
-        final var mapperResultType = firstSpecificType(mapper, new UserType(new ListType(new TupleType(DataType.UNKNOWN, DataType.UNKNOWN))));
-        final var map = userFunctionOf(context, MAPPER_NAME, mapper, mapperResultType, superOf(k), superOf(v));
+        final var mapperResultType = firstSpecificType(def.mapper(), new UserType(new ListType(new TupleType(DataType.UNKNOWN, DataType.UNKNOWN))));
+        final var map = userFunctionOf(context, MAPPER_NAME, def.mapper(), mapperResultType, superOf(k), superOf(v));
 
         if (mapperResultType.dataType() instanceof ListType mapperResultListType &&
                 mapperResultListType.valueType() instanceof UserTupleType mapperResultListTupleValueType &&
@@ -64,7 +61,7 @@ public class TransformKeyValueToKeyValueListOperation extends BaseOperation {
             final var kr = streamDataTypeOf(mapperResultListTupleValueType.getUserType(0), true);
             final var vr = streamDataTypeOf(mapperResultListTupleValueType.getUserType(1), false);
             final var userMap = new UserKeyValueToKeyValueListTransformer(map, tags);
-            final var storeNames = mapper.storeNames().toArray(String[]::new);
+            final var storeNames = def.mapper().storeNames().toArray(String[]::new);
             final var supplier = new OperationProcessorSupplier<>(
                     name,
                     TransformKeyValueToKeyValueListProcessor::new,

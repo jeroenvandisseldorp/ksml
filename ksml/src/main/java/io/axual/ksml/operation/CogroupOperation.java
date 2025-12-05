@@ -21,7 +21,6 @@ package io.axual.ksml.operation;
  */
 
 
-import io.axual.ksml.definition.FunctionDefinition;
 import io.axual.ksml.exception.TopologyException;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.CogroupedKStreamWrapper;
@@ -30,13 +29,11 @@ import io.axual.ksml.stream.StreamWrapper;
 import io.axual.ksml.user.UserAggregator;
 import org.apache.kafka.streams.kstream.CogroupedKStream;
 
-public class CogroupOperation extends BaseOperation {
+public class CogroupOperation extends BaseOperation<CogroupOperationDefinition> {
     private static final String AGGREGATOR_NAME = "Aggregator";
-    private final FunctionDefinition aggregator;
 
-    public CogroupOperation(OperationConfig config, FunctionDefinition aggregator) {
-        super(config);
-        this.aggregator = aggregator;
+    public CogroupOperation(CogroupOperationDefinition definition) {
+        super(definition);
     }
 
     @Override
@@ -46,11 +43,11 @@ public class CogroupOperation extends BaseOperation {
          *          final Aggregator<? super K, ? super V, VOut> aggregator)
          */
 
-        checkNotNull(aggregator, AGGREGATOR_NAME.toLowerCase());
+        checkNotNull(def.aggregator(), AGGREGATOR_NAME.toLowerCase());
         final var k = input.keyType();
         final var v = input.valueType();
-        final var vOut = streamDataTypeOf(aggregator.resultType(), false);
-        final var aggr = userFunctionOf(context, AGGREGATOR_NAME, aggregator, vOut, superOf(k), superOf(v), equalTo(vOut));
+        final var vOut = streamDataTypeOf(def.aggregator().resultType(), false);
+        final var aggr = userFunctionOf(context, AGGREGATOR_NAME, def.aggregator(), vOut, superOf(k), superOf(v), equalTo(vOut));
         final var userAggr = new UserAggregator(aggr, tags);
         final CogroupedKStream<Object, Object> output = input.groupedStream.cogroup(userAggr);
         return new CogroupedKStreamWrapper(output, k, vOut);

@@ -21,7 +21,6 @@ package io.axual.ksml.operation;
  */
 
 import io.axual.ksml.data.object.DataObject;
-import io.axual.ksml.definition.FunctionDefinition;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.operation.processor.FixedKeyOperationProcessorSupplier;
 import io.axual.ksml.operation.processor.TransformValueProcessor;
@@ -34,13 +33,11 @@ import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.ValueTransformerWithKeySupplier;
 
-public class TransformValueOperation extends StoreOperation {
+public class TransformValueOperation extends StoreOperation<TransformValueOperationDefinition> {
     private static final String MAPPER_NAME = "Mapper";
-    private final FunctionDefinition mapper;
 
-    public TransformValueOperation(StoreOperationConfig config, FunctionDefinition mapper) {
-        super(config);
-        this.mapper = mapper;
+    public TransformValueOperation(TransformValueOperationDefinition definition) {
+        super(definition);
     }
 
     @Override
@@ -52,13 +49,13 @@ public class TransformValueOperation extends StoreOperation {
          *          final String... stateStoreNames
          */
 
-        checkNotNull(mapper, MAPPER_NAME.toLowerCase());
+        checkNotNull(def.mapper(), MAPPER_NAME.toLowerCase());
         final var k = input.keyType();
         final var v = input.valueType().flatten();
-        final var vr = streamDataTypeOf(firstSpecificType(mapper, v.userType()), false);
-        final var map = userFunctionOf(context, MAPPER_NAME, mapper, vr, superOf(k.flatten()), superOf(v));
+        final var vr = streamDataTypeOf(firstSpecificType(def.mapper(), v.userType()), false);
+        final var map = userFunctionOf(context, MAPPER_NAME, def.mapper(), vr, superOf(k.flatten()), superOf(v));
         final var userMap = new UserValueTransformer(map, tags);
-        final var storeNames = mapper.storeNames().toArray(String[]::new);
+        final var storeNames = def.mapper().storeNames().toArray(String[]::new);
         final var supplier = new FixedKeyOperationProcessorSupplier<>(
                 name,
                 TransformValueProcessor::new,
@@ -80,17 +77,17 @@ public class TransformValueOperation extends StoreOperation {
          *          final String... stateStoreNames);
          */
 
-        checkNotNull(mapper, MAPPER_NAME.toLowerCase());
+        checkNotNull(def.mapper(), MAPPER_NAME.toLowerCase());
         final var k = input.keyType();
         final var v = input.valueType();
-        final var vr = streamDataTypeOf(firstSpecificType(mapper, v.userType()), false);
-        final var map = userFunctionOf(context, MAPPER_NAME, mapper, vr, superOf(k), superOf(v));
+        final var vr = streamDataTypeOf(firstSpecificType(def.mapper(), v.userType()), false);
+        final var map = userFunctionOf(context, MAPPER_NAME, def.mapper(), vr, superOf(k), superOf(v));
         final var userMap = new UserValueTransformerWithKey(map, tags);
         final var kvStore = validateKeyValueStore(store(), k, vr);
         final ValueTransformerWithKeySupplier<Object, Object, DataObject> supplier = () -> userMap;
         final var named = namedOf();
         final var mat = materializedOf(context, kvStore);
-        final var storeNames = mapper.storeNames().toArray(String[]::new);
+        final var storeNames = def.mapper().storeNames().toArray(String[]::new);
         final KTable<Object, Object> output = named != null
                 ? mat != null
                 ? input.table.transformValues(supplier, mat, named, storeNames)

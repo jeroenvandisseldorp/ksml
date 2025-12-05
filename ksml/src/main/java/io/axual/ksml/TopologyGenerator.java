@@ -21,18 +21,18 @@ package io.axual.ksml;
  */
 
 
-import io.axual.ksml.definition.GlobalTableDefinition;
-import io.axual.ksml.definition.StateStoreDefinition;
-import io.axual.ksml.definition.TableDefinition;
+import io.axual.ksml.topic.GlobalTableDefinition;
+import io.axual.ksml.store.StateStoreDefinition;
+import io.axual.ksml.topic.TableDefinition;
 import io.axual.ksml.exception.TopologyException;
 import io.axual.ksml.generator.TopologyAnalyzer;
 import io.axual.ksml.generator.TopologyBuildContext;
-import io.axual.ksml.generator.TopologyDefinition;
-import io.axual.ksml.operation.DualStoreOperation;
-import io.axual.ksml.operation.StoreOperation;
-import io.axual.ksml.operation.StreamOperation;
+import io.axual.ksml.operation.DualStoreOperationDefinition;
+import io.axual.ksml.operation.OperationFactory;
+import io.axual.ksml.operation.StoreOperationDefinition;
 import io.axual.ksml.python.PythonContextConfig;
 import io.axual.ksml.stream.StreamWrapper;
+import io.axual.ksml.topology.TopologyDefinition;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
@@ -169,13 +169,13 @@ public class TopologyGenerator {
 
         // Filter out all state stores that Kafka Streams will set up later as part of the topology
         definition.pipelines().forEach((name, pipeline) -> pipeline.chain().forEach(operation -> {
-            if (operation instanceof StoreOperation storeOperation && storeOperation.store() != null)
-                kafkaStreamsCreatedStores.add(storeOperation.store().name());
-            if (operation instanceof DualStoreOperation dualStoreOperation) {
-                if (dualStoreOperation.thisStore() != null)
-                    kafkaStreamsCreatedStores.add(dualStoreOperation.thisStore().name());
-                if (dualStoreOperation.otherStore() != null)
-                    kafkaStreamsCreatedStores.add(dualStoreOperation.otherStore().name());
+            if (operation instanceof StoreOperationDefinition storeOperation && storeOperation.storeOperationConfig().store() != null)
+                kafkaStreamsCreatedStores.add(storeOperation.storeOperationConfig().name());
+            if (operation instanceof DualStoreOperationDefinition dualStoreOperation) {
+                if (dualStoreOperation.dualStoreOperationConfig().thisStore() != null)
+                    kafkaStreamsCreatedStores.add(dualStoreOperation.dualStoreOperationConfig().thisStore().name());
+                if (dualStoreOperation.dualStoreOperationConfig().otherStore() != null)
+                    kafkaStreamsCreatedStores.add(dualStoreOperation.dualStoreOperationConfig().otherStore().name());
             }
         }));
 
@@ -194,15 +194,17 @@ public class TopologyGenerator {
                 StreamWrapper cursor = context.getStreamWrapper(pipeline.source());
                 tsBuilder.append("%n  %s".formatted(cursor));
                 // For each operation, advance the cursor by applying the operation
-                for (StreamOperation operation : pipeline.chain()) {
+                for (final var opDef : pipeline.chain()) {
+                    final var operation = OperationFactory.createOperation(opDef);
                     tsBuilder.append("%n    ==> %s".formatted(operation));
                     cursor = cursor.apply(operation, context);
                     tsBuilder.append("%n  %s".formatted(cursor));
                 }
                 // Finally, at the end, apply the sink operation
                 if (pipeline.sink() != null) {
-                    tsBuilder.append("%n    ==> %s".formatted(pipeline.sink()));
-                    cursor.apply(pipeline.sink(), context);
+                    final var sink = OperationFactory.createOperation(pipeline.sink());
+                    tsBuilder.append("%n    ==> %s".formatted(sink));
+                    cursor.apply(sink, context);
                 }
                 log.info("""
                         Generating Kafka Streams topology for pipeline {}:

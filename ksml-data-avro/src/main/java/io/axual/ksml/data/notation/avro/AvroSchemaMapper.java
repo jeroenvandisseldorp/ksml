@@ -26,15 +26,18 @@ import io.axual.ksml.data.mapper.DataTypeDataSchemaMapper;
 import io.axual.ksml.data.object.DataNull;
 import io.axual.ksml.data.object.DataObject;
 import io.axual.ksml.data.schema.DataSchema;
-import io.axual.ksml.data.schema.DataSchemaConstants;
+import io.axual.ksml.data.schema.DecimalSchema;
 import io.axual.ksml.data.schema.EnumSchema;
 import io.axual.ksml.data.schema.FixedSchema;
 import io.axual.ksml.data.schema.ListSchema;
 import io.axual.ksml.data.schema.MapSchema;
 import io.axual.ksml.data.schema.StructSchema;
+import io.axual.ksml.data.schema.TimeSchema;
+import io.axual.ksml.data.schema.TimestampSchema;
 import io.axual.ksml.data.schema.UnionSchema;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.JsonProperties;
+import org.apache.avro.LogicalTypes;
 import org.apache.avro.Schema;
 
 import java.util.ArrayList;
@@ -72,166 +75,79 @@ public class AvroSchemaMapper implements DataSchemaMapper<Schema> {
      */
     @Override
     public DataSchema toDataSchema(String namespace, String name, Schema schema) {
-        if (schema == null) {
-            return DataSchema.NULL_SCHEMA;
-        }
-
-        return switch (schema.getType()) {
-            case STRING -> DataSchema.STRING_SCHEMA;
-            case BYTES -> DataSchema.BYTES_SCHEMA;
-            case INT -> DataSchema.INTEGER_SCHEMA;
-            case LONG -> DataSchema.LONG_SCHEMA;
-            case FLOAT -> DataSchema.FLOAT_SCHEMA;
-            case DOUBLE -> DataSchema.DOUBLE_SCHEMA;
-            case BOOLEAN -> DataSchema.BOOLEAN_SCHEMA;
-            case NULL -> DataSchema.NULL_SCHEMA;
-            case ENUM -> {
-                final var enumDefault = schema.getEnumDefault();
-                final var defaultSymbol = enumDefault == null ? null : new EnumSchema.Symbol(enumDefault);
-                final var symbols = schema.getEnumSymbols().stream().map(EnumSchema.Symbol::new).toList();
-
-                yield new EnumSchema(schema.getNamespace(), schema.getName(), schema.getDoc(), symbols, defaultSymbol);
-            }
-            case ARRAY -> {
-                final var elementSchema = schema.getElementType();
-                final var elementDataSchema = toDataSchema(elementSchema);
-                yield new ListSchema(elementDataSchema);
-            }
-            case MAP -> {
-                final var valueSchema = schema.getValueType();
-                final var valueDataSchema = toDataSchema(valueSchema);
-                yield new MapSchema(valueDataSchema);
-            }
-            case UNION -> {
-                final var unionSchemas = schema.getTypes();
-                final var unionMembers = new UnionSchema.Member[unionSchemas.size()];
-                for (var i = 0; i < unionSchemas.size(); i++) {
-                    final var memberSchema = unionSchemas.get(i);
-                    final var memberDataSchema = switch (memberSchema.getType()) {
-                        case ENUM, RECORD, FIXED ->
-                                toDataSchema(memberSchema.getNamespace(), memberSchema.getName(), memberSchema);
-                        default -> toDataSchema(memberSchema);
-                    };
-                    unionMembers[i] = new UnionSchema.Member(memberDataSchema);
-                }
-                yield new UnionSchema(unionMembers);
-            }
-            case FIXED ->
-                    new FixedSchema(schema.getNamespace(), schema.getName(), schema.getDoc(), schema.getFixedSize());
-            case RECORD ->
-                    new StructSchema(schema.getNamespace(), schema.getName(), schema.getDoc(), convertAvroFieldsToStructFields(schema.getFields()), false);
-        };
-    }
-
-    /**
-     * Convert a KSML DataSchema into an Avro Schema.
-     *
-     * <p>Only StructSchema and other concrete schema types are supported; returns null for unsupported inputs.</p>
-     *
-     * @param schema the KSML schema to convert
-     * @return the corresponding Avro Schema, or null when not representable
-     */
-    @Override
-    public Schema fromDataSchema(DataSchema schema) {
-        if (schema == null) {
-            return AVRO_NULL_TYPE;
-        }
-        if (schema instanceof StructSchema structSchema) {
-            final var fields = convertFieldsToAvroFields(structSchema.fields());
-            return Schema.createRecord(structSchema.name(), structSchema.doc(), structSchema.namespace(), false, fields);
-        }
-        if (schema instanceof MapSchema mapSchema) {
-            var avroMapValueSchema = fromDataSchema(mapSchema.valueSchema());
-            return Schema.createMap(avroMapValueSchema);
-        }
-        if (schema instanceof ListSchema listSchema) {
-            var avroListValueSchema = fromDataSchema(listSchema.valueSchema());
-            return Schema.createArray(avroListValueSchema);
-        }
-        if (schema instanceof EnumSchema enumSchema) {
-            var symbols = enumSchema.symbols().stream()
-                    .map(EnumSchema.Symbol::name)
-                    .toList();
-            var enumDefault = enumSchema.defaultValue();
-
-            return Schema.createEnum(enumSchema.name(), enumSchema.doc(), enumSchema.namespace(), symbols, enumDefault == null ? null : enumDefault.name());
-        }
-        if (schema instanceof FixedSchema fixedSchema) {
-            return Schema.createFixed(fixedSchema.name(), fixedSchema.doc(), fixedSchema.namespace(), fixedSchema.size());
-        }
-        if (schema instanceof UnionSchema unionSchema) {
-            var members = unionSchema.members();
-            var avroMembers = new Schema[members.length];
-            for (var i = 0; i < members.length; i++) {
-                avroMembers[i] = fromDataSchema(members[i].schema());
-            }
-            return Schema.createUnion(avroMembers);
-        }
-
-        return switch (schema.type()) {
-            case DataSchemaConstants.NULL_TYPE -> AVRO_NULL_TYPE;
-            case DataSchemaConstants.BOOLEAN_TYPE -> Schema.create(Schema.Type.BOOLEAN);
-            case DataSchemaConstants.STRING_TYPE -> Schema.create(Schema.Type.STRING);
-            case DataSchemaConstants.DOUBLE_TYPE -> Schema.create(Schema.Type.DOUBLE);
-            case DataSchemaConstants.FLOAT_TYPE -> Schema.create(Schema.Type.FLOAT);
-            case DataSchemaConstants.BYTES_TYPE -> Schema.create(Schema.Type.BYTES);
-            case DataSchemaConstants.BYTE_TYPE, DataSchemaConstants.SHORT_TYPE,
-                 DataSchemaConstants.INTEGER_TYPE -> Schema.create(Schema.Type.INT);
-            case DataSchemaConstants.LONG_TYPE -> Schema.create(Schema.Type.LONG);
-            case null, default -> {
-                log.error("Schema type {} is not supported, ignoring schema", schema);
-                yield null;
-            }
-        };
+        if (schema == null) return DataSchema.NULL_SCHEMA;
+        return convertAvroSchemaToDataSchemaAndRequired(schema).schema();
     }
 
     private record SchemaAndRequired(DataSchema schema, boolean required) {
     }
 
-    private record AvroSchemaAndDefaultValue(Schema schema, DataObject defaultValue) {
-    }
-
     private SchemaAndRequired convertAvroSchemaToDataSchemaAndRequired(Schema schema) {
         // Returns a record with
-        //   1. the DataSchema representation of the schema parameter
-        //   2. a boolean indicating whether the field is required
+        //   1. The DataSchema representation of schema parameter
+        //   2. A boolean indicating whether the field is required
         return switch (schema.getType()) {
             case NULL -> new SchemaAndRequired(DataSchema.NULL_SCHEMA, false);
-
-            case BOOLEAN -> new SchemaAndRequired(DataSchema.BOOLEAN_SCHEMA, true);
-
-            case INT -> new SchemaAndRequired(DataSchema.INTEGER_SCHEMA, true);
-            case LONG -> new SchemaAndRequired(DataSchema.LONG_SCHEMA, true);
-
-            case FLOAT -> new SchemaAndRequired(DataSchema.FLOAT_SCHEMA, true);
-            case DOUBLE -> new SchemaAndRequired(DataSchema.DOUBLE_SCHEMA, true);
-
-            case BYTES -> new SchemaAndRequired(DataSchema.BYTES_SCHEMA, true);
-            case FIXED -> new SchemaAndRequired(
-                    new FixedSchema(schema.getNamespace(), schema.getName(), schema.getDoc(), schema.getFixedSize()),
-                    true);
-
-            case STRING -> new SchemaAndRequired(DataSchema.STRING_SCHEMA, true);
-
-            case ARRAY ->
-                    new SchemaAndRequired(new ListSchema(convertAvroSchemaToDataSchemaAndRequired(schema.getElementType()).schema()), true);
+            case ARRAY -> new SchemaAndRequired(new ListSchema(toDataSchema(schema.getElementType())), true);
             case ENUM -> new SchemaAndRequired(
                     new EnumSchema(schema.getNamespace(), schema.getName(), schema.getDoc(), schema.getEnumSymbols().stream().map(EnumSchema.Symbol::new).toList(), schema.getEnumDefault() == null ? null : new EnumSchema.Symbol(schema.getEnumDefault())),
                     true);
-            case MAP ->
-                    new SchemaAndRequired(new MapSchema(convertAvroSchemaToDataSchemaAndRequired(schema.getValueType()).schema()), true);
-            case RECORD -> new SchemaAndRequired(toDataSchema(schema.getName(), schema), true);
-            case UNION -> convertMemberSchemasToToDataUnionAndRequired(schema.getTypes());
+            case FIXED ->
+                    new SchemaAndRequired(new FixedSchema(schema.getNamespace(), schema.getName(), schema.getDoc(), schema.getFixedSize()), true);
+            case MAP -> new SchemaAndRequired(new MapSchema(toDataSchema(schema.getValueType())), true);
+            case RECORD ->
+                    new SchemaAndRequired(new StructSchema(schema.getNamespace(), schema.getName(), schema.getDoc(), convertAvroFieldsToStructFields(schema.getFields()), false), true);
+            case UNION -> convertAvroUnionMembersToToUnionSchemaAndRequired(schema.getTypes());
+            default -> new SchemaAndRequired(convertSingularAvroTypeToDataSchema(schema), true);
         };
     }
 
-    private SchemaAndRequired convertMemberSchemasToToDataUnionAndRequired(List<Schema> unionTypes) {
+    private DataSchema convertSingularAvroTypeToDataSchema(Schema schema) {
+        if (schema.getLogicalType() != null) {
+            return switch (schema.getLogicalType()) {
+                case LogicalTypes.Decimal val -> new DecimalSchema(val.getScale(), val.getPrecision());
+                case LogicalTypes.BigDecimal ignored -> new DecimalSchema(null, null);
+                case LogicalTypes.Date ignored -> DataSchema.DATE_SCHEMA;
+                case LogicalTypes.Duration ignored -> DataSchema.DURATION_SCHEMA;
+                case LogicalTypes.LocalTimestampMicros ignored ->
+                        new TimestampSchema(TimestampSchema.Unit.MICROSECONDS, true);
+                case LogicalTypes.LocalTimestampMillis ignored ->
+                        new TimestampSchema(TimestampSchema.Unit.MILLISECONDS, true);
+                case LogicalTypes.LocalTimestampNanos ignored ->
+                        new TimestampSchema(TimestampSchema.Unit.NANOSECONDS, true);
+                case LogicalTypes.TimeMicros ignored -> new TimeSchema(TimeSchema.Unit.MICROSECONDS);
+                case LogicalTypes.TimeMillis ignored -> new TimeSchema(TimeSchema.Unit.MILLISECONDS);
+                case LogicalTypes.TimestampMicros ignored ->
+                        new TimestampSchema(TimestampSchema.Unit.MICROSECONDS, false);
+                case LogicalTypes.TimestampMillis ignored ->
+                        new TimestampSchema(TimestampSchema.Unit.MILLISECONDS, false);
+                case LogicalTypes.TimestampNanos ignored ->
+                        new TimestampSchema(TimestampSchema.Unit.NANOSECONDS, false);
+                case LogicalTypes.Uuid ignored -> DataSchema.UUID_SCHEMA;
+                default -> throw new IllegalStateException("Unexpected logical type: " + schema.getLogicalType());
+            };
+        }
+        return switch (schema.getType()) {
+            case BOOLEAN -> DataSchema.BOOLEAN_SCHEMA;
+            case INT -> DataSchema.INTEGER_SCHEMA;
+            case LONG -> DataSchema.LONG_SCHEMA;
+            case FLOAT -> DataSchema.FLOAT_SCHEMA;
+            case DOUBLE -> DataSchema.DOUBLE_SCHEMA;
+            case BYTES -> DataSchema.BYTES_SCHEMA;
+            case FIXED ->
+                    new FixedSchema(schema.getNamespace(), schema.getName(), schema.getDoc(), schema.getFixedSize());
+            case STRING -> DataSchema.STRING_SCHEMA;
+            default -> throw new SchemaException("Can not convert Avro schema to DataSchema: " + schema);
+        };
+    }
+
+    private SchemaAndRequired convertAvroUnionMembersToToUnionSchemaAndRequired(List<Schema> members) {
         // Determine required based on the first member of the union: required when the first is not NULL
-        final var firstIsNull = !unionTypes.isEmpty() && unionTypes.getFirst().getType() == Schema.Type.NULL;
+        final var firstIsNull = !members.isEmpty() && members.getFirst().getType() == Schema.Type.NULL;
         final var isRequired = !firstIsNull;
 
         // If the first schema is NULL, remove only that leading NULL from the member types; keep other NULLs intact
-        final var memberSchemas = firstIsNull ? unionTypes.subList(1, unionTypes.size()) : unionTypes;
+        final var memberSchemas = firstIsNull ? members.subList(1, members.size()) : members;
 
         if (memberSchemas.isEmpty()) {
             // Apparently only null was supplied, technically possible. Return optional null schema
@@ -244,13 +160,13 @@ public class AvroSchemaMapper implements DataSchemaMapper<Schema> {
         }
 
         // Create a new union schema with the potentially adjusted member list
-        return new SchemaAndRequired(new UnionSchema(convertAvroSchemaToUnionMembers(memberSchemas).toArray(UnionSchema.Member[]::new)), isRequired);
+        return new SchemaAndRequired(new UnionSchema(convertAvroUnionMembersToUnionSchemaMembers(memberSchemas).toArray(UnionSchema.Member[]::new)), isRequired);
     }
 
-    private List<UnionSchema.Member> convertAvroSchemaToUnionMembers(List<Schema> schemas) {
+    private List<UnionSchema.Member> convertAvroUnionMembersToUnionSchemaMembers(List<Schema> members) {
         final var result = new ArrayList<UnionSchema.Member>();
-        for (var schema : schemas) {
-            result.add(new UnionSchema.Member(convertAvroSchemaToDataSchemaAndRequired(schema).schema()));
+        for (var member : members) {
+            result.add(new UnionSchema.Member(convertAvroSchemaToDataSchemaAndRequired(member).schema()));
         }
         return result;
     }
@@ -275,9 +191,17 @@ public class AvroSchemaMapper implements DataSchemaMapper<Schema> {
         };
     }
 
-    private Schema convertDataSchemaToAvroSchema(DataSchema schema) {
-        if (schema == DataSchema.ANY_SCHEMA) throw new SchemaException("AVRO schema do not support ANY types");
-        if (schema == DataSchema.NULL_SCHEMA) return Schema.create(Schema.Type.NULL);
+    /**
+     * Convert a KSML DataSchema into an Avro Schema.
+     *
+     * <p>Only StructSchema and other concrete schema types are supported; returns null for unsupported inputs.</p>
+     *
+     * @param schema the KSML schema to convert
+     * @return the corresponding Avro Schema, or null when not representable
+     */
+    @Override
+    public Schema fromDataSchema(DataSchema schema) {
+        if (schema == null || schema == DataSchema.NULL_SCHEMA) return Schema.create(Schema.Type.NULL);
         if (schema == DataSchema.BOOLEAN_SCHEMA) return Schema.create(Schema.Type.BOOLEAN);
         if (schema == DataSchema.BYTE_SCHEMA || schema == DataSchema.SHORT_SCHEMA || schema == DataSchema.INTEGER_SCHEMA)
             return Schema.create(Schema.Type.INT);
@@ -285,24 +209,26 @@ public class AvroSchemaMapper implements DataSchemaMapper<Schema> {
         if (schema == DataSchema.FLOAT_SCHEMA) return Schema.create(Schema.Type.FLOAT);
         if (schema == DataSchema.DOUBLE_SCHEMA) return Schema.create(Schema.Type.DOUBLE);
         if (schema == DataSchema.BYTES_SCHEMA) return Schema.create(Schema.Type.BYTES);
-        if (schema instanceof FixedSchema fixedSchema)
-            return Schema.createFixed(fixedSchema.name(), fixedSchema.doc(), fixedSchema.namespace(), fixedSchema.size());
         if (schema == DataSchema.STRING_SCHEMA) return Schema.create(Schema.Type.STRING);
-        if (schema instanceof EnumSchema enumSchema)
-            return Schema.createEnum(enumSchema.name(), enumSchema.doc(), enumSchema.namespace(), enumSchema.symbols().stream().map(EnumSchema.Symbol::name).toList(), enumSchema.defaultValue() == null ? null : enumSchema.defaultValue().name());
-        if (schema instanceof ListSchema listSchema)
-            return Schema.createArray(convertDataSchemaToAvroSchema(listSchema.valueSchema(), true).schema());
-        if (schema instanceof MapSchema mapSchema)
-            return Schema.createMap(convertDataSchemaToAvroSchema(mapSchema.valueSchema(), true).schema());
-        if (schema instanceof StructSchema structSchema)
-            return Schema.createRecord(structSchema.name(), structSchema.doc(), structSchema.namespace(), false, convertFieldsToAvroFields(structSchema.fields()));
-        if (schema instanceof UnionSchema unionSchema)
-            return Schema.createUnion(convertUnionMemberSchemasToAvro(Arrays.stream(unionSchema.members()).map(UnionSchema.Member::schema).toArray(DataSchema[]::new)));
-        throw new SchemaException("Can not convert schema to AVRO: " + schema);
+        return switch (schema) {
+            case EnumSchema es ->
+                    Schema.createEnum(es.name(), es.doc(), es.namespace(), es.symbols().stream().map(EnumSchema.Symbol::name).toList(), es.defaultValue() == null ? null : es.defaultValue().name());
+            case FixedSchema fs -> Schema.createFixed(fs.name(), fs.doc(), fs.namespace(), fs.size());
+            case ListSchema ls -> Schema.createArray(fromDataSchema(ls.valueSchema()));
+            case MapSchema ms -> Schema.createMap(fromDataSchema(ms.valueSchema()));
+            case StructSchema ss ->
+                    Schema.createRecord(ss.name(), ss.doc(), ss.namespace(), false, convertFieldsToAvroFields(ss.fields()));
+            case UnionSchema us ->
+                    Schema.createUnion(convertUnionMemberSchemasToAvro(Arrays.stream(us.members()).map(UnionSchema.Member::schema).toArray(DataSchema[]::new)));
+            default -> throw new SchemaException("Can not convert schema to AVRO: " + schema);
+        };
+    }
+
+    private record AvroSchemaAndDefaultValue(Schema schema, DataObject defaultValue) {
     }
 
     private AvroSchemaAndDefaultValue convertDataSchemaToAvroSchema(DataSchema schema, boolean required) {
-        final var result = convertDataSchemaToAvroSchema(schema);
+        final var result = fromDataSchema(schema);
 
         // If the field is required, then return it
         if (required) return new AvroSchemaAndDefaultValue(result, null);

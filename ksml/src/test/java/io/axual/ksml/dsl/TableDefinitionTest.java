@@ -21,12 +21,12 @@ package io.axual.ksml.dsl;
  */
 
 import io.axual.ksml.data.notation.Notation;
-import io.axual.ksml.definition.KeyValueStateStoreDefinition;
-import io.axual.ksml.definition.TableDefinition;
+import io.axual.ksml.store.KeyValueStateStoreDefinition;
+import io.axual.ksml.topic.TableDefinition;
 import io.axual.ksml.execution.ExecutionContext;
 import io.axual.ksml.generator.TopologyBuildContext;
-import io.axual.ksml.generator.TopologyResources;
 import io.axual.ksml.parser.UserTypeParser;
+import io.axual.ksml.resource.TopologyResources;
 import io.axual.ksml.stream.KTableWrapper;
 import io.axual.ksml.type.UserType;
 import org.apache.kafka.streams.StreamsBuilder;

@@ -21,8 +21,8 @@ package io.axual.ksml.runner.producer;
  */
 
 import io.axual.ksml.data.object.DataObject;
-import io.axual.ksml.definition.FunctionDefinition;
-import io.axual.ksml.definition.ProducerDefinition;
+import io.axual.ksml.function.FunctionDefinition;
+import io.axual.ksml.topology.ProducerDefinition;
 import io.axual.ksml.metric.MetricTags;
 import io.axual.ksml.python.PythonContext;
 import io.axual.ksml.python.PythonFunction;

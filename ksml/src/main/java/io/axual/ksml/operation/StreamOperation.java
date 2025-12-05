@@ -36,7 +36,6 @@ import io.axual.ksml.stream.TimeWindowedCogroupedKStreamWrapper;
 import io.axual.ksml.stream.TimeWindowedKStreamWrapper;
 
 public interface StreamOperation {
-
     default StreamWrapper apply(KStreamWrapper stream, TopologyBuildContext context) {
         throw new TopologyException("Can not apply " + getClass().getSimpleName() + " to " + stream);
     }

@@ -37,15 +37,17 @@ import io.axual.ksml.client.serde.ResolvingDeserializer;
 import io.axual.ksml.client.serde.ResolvingSerializer;
 import io.axual.ksml.data.mapper.DataObjectFlattener;
 import io.axual.ksml.data.mapper.DataTypeFlattener;
+import io.axual.ksml.data.notation.Notation;
 import io.axual.ksml.data.notation.NotationContext;
 import io.axual.ksml.data.notation.avro.AvroNotation;
 import io.axual.ksml.data.notation.avro.confluent.ConfluentAvroNotationProvider;
 import io.axual.ksml.data.notation.json.JsonSchemaMapper;
+import io.axual.ksml.data.schema.DataSchema;
 import io.axual.ksml.definition.parser.TopologyDefinitionParser;
 import io.axual.ksml.execution.ErrorHandler;
 import io.axual.ksml.execution.ExecutionContext;
 import io.axual.ksml.execution.FatalError;
-import io.axual.ksml.generator.TopologyDefinition;
+import io.axual.ksml.parser.ParseContext;
 import io.axual.ksml.parser.ParseNode;
 import io.axual.ksml.rest.server.ComponentState;
 import io.axual.ksml.rest.server.KsmlQuerier;
@@ -61,6 +63,7 @@ import io.axual.ksml.runner.config.internal.StringMapDefinitionPropertiesResolve
 import io.axual.ksml.runner.exception.ConfigException;
 import io.axual.ksml.runner.notation.NotationFactories;
 import io.axual.ksml.runner.prometheus.PrometheusExport;
+import io.axual.ksml.topology.TopologyDefinition;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -196,15 +199,12 @@ public class KSMLRunner {
             // Start the appserver if needed
             final var appServer = ksmlConfig.applicationServerConfig();
             RestServer restServer = null;
-            // Start rest server to provide service endpoints
+            // Start a rest server to provide service endpoints
             if (appServer.enabled()) {
                 HostInfo hostInfo = new HostInfo(appServer.getHost(), appServer.getPort());
                 restServer = new RestServer(hostInfo);
                 restServer.start();
             }
-
-            // Set up the default schema directory
-            ExecutionContext.INSTANCE.schemaLibrary().schemaDirectory(ksmlConfig.schemaDirectory());
 
             // Set up all default notations and register them in the NotationLibrary
             final var notationFactories = new NotationFactories(config.getKafkaConfigMap());
@@ -263,10 +263,24 @@ public class KSMLRunner {
                             new ResolvingSerializer<>(serde.serializer(), config.getKafkaConfigMap()),
                             new ResolvingDeserializer<>(serde.deserializer(), config.getKafkaConfigMap())));
 
+            // Set up the default schema directory
+            ExecutionContext.INSTANCE.schemaLibrary().schemaDirectory(ksmlConfig.schemaDirectory());
+            final var parseContext = new ParseContext() {
+                @Override
+                public Notation notation(String notation) {
+                    return ExecutionContext.INSTANCE.notationLibrary().get(notation);
+                }
+
+                @Override
+                public DataSchema loadSchema(Notation notation, String schemaName, boolean allowNull) {
+                    return ExecutionContext.INSTANCE.schemaLibrary().getSchema(notation, schemaName, allowNull);
+                }
+            };
+
             final Map<String, TopologyDefinition> producerDefinitions = new HashMap<>();
             final Map<String, TopologyDefinition> pipelineDefinitions = new HashMap<>();
             definitions.forEach((name, definition) -> {
-                final var parser = new TopologyDefinitionParser(name);
+                final var parser = new TopologyDefinitionParser(parseContext, name);
                 final var topologyDefinition = parser.parse(ParseNode.fromRoot(definition, name));
                 if (!topologyDefinition.producers().isEmpty()) producerDefinitions.put(name, topologyDefinition);
                 if (!topologyDefinition.pipelines().isEmpty()) pipelineDefinitions.put(name, topologyDefinition);
@@ -501,7 +515,18 @@ public class KSMLRunner {
     private static void printKsmlDefinitionSchema(String filename) {
         // Check if the runner was started with "--schema". If so, then we output the JSON schema to validate the
         // KSML definitions with on stdout and exit
-        final var parser = new TopologyDefinitionParser("dummy");
+        final var parseContext = new ParseContext() {
+            @Override
+            public Notation notation(String notation) {
+                return null;
+            }
+
+            @Override
+            public DataSchema loadSchema(Notation notation, String schemaName, boolean allowNull) {
+                return null;
+            }
+        };
+        final var parser = new TopologyDefinitionParser(parseContext, "dummy");
         final var schema = new JsonSchemaMapper(true).fromDataSchema(parser.schema());
 
         if (filename != null) {

@@ -21,19 +21,8 @@ package io.axual.ksml.operation;
  */
 
 
-import io.axual.ksml.definition.FunctionDefinition;
-import io.axual.ksml.generator.TopologyBuildContext;
-import io.axual.ksml.stream.KStreamWrapper;
-import io.axual.ksml.stream.StreamWrapper;
-
-public class ForEachOperation extends PeekOperation {
-    public ForEachOperation(OperationConfig config, FunctionDefinition forEachAction) {
-        super(config, forEachAction);
-    }
-
-    @Override
-    public StreamWrapper apply(KStreamWrapper input, TopologyBuildContext context) {
-        super.apply(input, context);
-        return null;
+public class ForEachOperation extends BaseOperation<PeekOperationDefinition> {
+    public ForEachOperation(PeekOperationDefinition definition) {
+        super(definition);
     }
 }

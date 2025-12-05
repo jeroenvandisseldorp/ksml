@@ -24,8 +24,6 @@ package io.axual.ksml.type;
 import io.axual.ksml.data.type.DataType;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-
 public record UserType(String notation, DataType dataType) {
     public static final String DEFAULT_NOTATION = "default";
     public static final UserType UNKNOWN = new UserType(DataType.UNKNOWN);
@@ -34,18 +32,19 @@ public record UserType(String notation, DataType dataType) {
         this(DEFAULT_NOTATION, dataType);
     }
 
+    public UserType(String notation, DataType dataType) {
+        this.notation = notation != null ? notation : DEFAULT_NOTATION;
+        this.dataType = dataType;
+    }
+
     @NotNull
     @Override
     public String toString() {
-        final var notationName = notation != null ? notation.toLowerCase() : "";
+        final var notationName = !DEFAULT_NOTATION.equals(notation) ? notation.toLowerCase() : "";
         final var schemaName = dataType != null ? dataType.name() : "";
         if (notationName.isEmpty() && schemaName.isEmpty()) return "<unknown type>";
         if (notationName.isEmpty()) return schemaName;
         if (schemaName.isEmpty()) return notationName;
         return notationName + ":" + schemaName;
-    }
-
-    public static DataType[] userTypesToDataTypes(UserType[] types) {
-        return Arrays.stream(types).map(UserType::dataType).toArray(DataType[]::new);
     }
 }

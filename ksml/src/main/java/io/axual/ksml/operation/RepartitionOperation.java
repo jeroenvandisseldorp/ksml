@@ -22,22 +22,18 @@ package io.axual.ksml.operation;
 
 import io.axual.ksml.data.object.DataInteger;
 import io.axual.ksml.data.object.DataString;
-import io.axual.ksml.definition.FunctionDefinition;
+import io.axual.ksml.function.StreamPartitionerDefinition;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.stream.StreamWrapper;
 import io.axual.ksml.user.UserStreamPartitioner;
 import org.apache.kafka.streams.kstream.KStream;
 
-public class RepartitionOperation extends BaseOperation {
+public class RepartitionOperation extends BaseOperation<RepartitionOperationDefinition> {
     private static final String PARTITIONER_NAME = "Partitioner";
-    private final Integer numberOfPartitions;
-    private final FunctionDefinition partitioner;
 
-    public RepartitionOperation(OperationConfig config, Integer numberOfPartitions, FunctionDefinition partitioner) {
-        super(config);
-        this.numberOfPartitions = numberOfPartitions;
-        this.partitioner = partitioner;
+    public RepartitionOperation(RepartitionOperationDefinition definition) {
+        super(definition);
     }
 
     @Override
@@ -49,9 +45,9 @@ public class RepartitionOperation extends BaseOperation {
 
         final var k = input.keyType();
         final var v = input.valueType();
-        final var part = userFunctionOf(context, PARTITIONER_NAME, partitioner, UserStreamPartitioner.EXPECTED_RESULT_TYPE, equalTo(DataString.DATATYPE), superOf(k), superOf(v), equalTo(DataInteger.DATATYPE));
+        final var part = userFunctionOf(context, PARTITIONER_NAME, def.partitioner(), StreamPartitionerDefinition.EXPECTED_RESULT_TYPE, equalTo(DataString.DATATYPE), superOf(k), superOf(v), equalTo(DataInteger.DATATYPE));
         final var userPart = part != null ? new UserStreamPartitioner(part, tags) : null;
-        final var repartitioned = repartitionedOf(k, v, numberOfPartitions, userPart);
+        final var repartitioned = repartitionedOf(k, v, def.numberOfPartitions(), userPart);
         final KStream<Object, Object> output = repartitioned != null
                 ? input.stream.repartition(repartitioned)
                 : input.stream.repartition();

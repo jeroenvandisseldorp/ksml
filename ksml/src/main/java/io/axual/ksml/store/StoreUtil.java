@@ -20,10 +20,6 @@ package io.axual.ksml.store;
  * =========================LICENSE_END==================================
  */
 
-import io.axual.ksml.definition.KeyValueStateStoreDefinition;
-import io.axual.ksml.definition.SessionStateStoreDefinition;
-import io.axual.ksml.definition.StateStoreDefinition;
-import io.axual.ksml.definition.WindowStateStoreDefinition;
 import io.axual.ksml.generator.StreamDataType;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.utils.Bytes;

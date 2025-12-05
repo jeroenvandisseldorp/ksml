@@ -1,0 +1,40 @@
+AVRO: https://avro.apache.org/docs/1.12.0/specification/
+
+Decimal
+* type string or bytes
+
+- decimal --> precision & scale
+- big-decimal
+
+UUID --> string
+* type string or fixed(16)
+
+Date --> int
+
+* Type int
+
+Time (millisecond) --> int
+
+* Type int --> ms since midnight
+
+Time (microsecond) --> long
+
+* Type long --> microseconds since midnight
+
+Local Timestamps --> long
+
+* Type long --> number of xx seconds since 1-1-1970
+local-timestamp-millis
+local-timestamp-micros
+local-timestamp-nanos
+
+Duration
+
+The duration logical type represents an amount of time defined by a number of months, days and milliseconds.
+This is not equivalent to a number of milliseconds, because, depending on the moment in time from which the
+duration is measured, the number of days in the month and number of milliseconds in a day may differ. Other
+standard periods such as years, quarters, hours and minutes can be expressed through these basic periods.
+
+A duration logical type annotates Avro fixed type of size 12, which stores three little-endian unsigned
+integers that represent durations at different granularities of time. The first stores a number in months,
+the second stores a number in days, and the third stores a number in milliseconds.

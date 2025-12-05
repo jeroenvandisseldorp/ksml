@@ -21,7 +21,6 @@ package io.axual.ksml.operation;
  */
 
 
-import io.axual.ksml.definition.FunctionDefinition;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.CogroupedKStreamWrapper;
 import io.axual.ksml.stream.KGroupedStreamWrapper;
@@ -38,25 +37,15 @@ import io.axual.ksml.user.UserMerger;
 import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.Windowed;
 
-public class AggregateOperation extends StoreOperation {
+public class AggregateOperation extends StoreOperation<AggregateOperationDefinition> {
     private static final String ADDER_NAME = "Adder";
     private static final String AGGREGATOR_NAME = "Aggregator";
     private static final String INITIALIZER_NAME = "Initializer";
     private static final String MERGER_NAME = "Merger";
     private static final String SUBTRACTOR_NAME = "Subtractor";
-    private final FunctionDefinition initializer;
-    private final FunctionDefinition aggregator;
-    private final FunctionDefinition merger;
-    private final FunctionDefinition adder;
-    private final FunctionDefinition subtractor;
 
-    public AggregateOperation(StoreOperationConfig config, FunctionDefinition initializer, FunctionDefinition aggregator, FunctionDefinition merger, FunctionDefinition adder, FunctionDefinition subtractor) {
-        super(config);
-        this.initializer = initializer;
-        this.aggregator = aggregator;
-        this.merger = merger;
-        this.adder = adder;
-        this.subtractor = subtractor;
+    public AggregateOperation(AggregateOperationDefinition definition) {
+        super(definition);
     }
 
     @Override
@@ -69,14 +58,14 @@ public class AggregateOperation extends StoreOperation {
          *          final Materialized<K, VR, KeyValueStore<Bytes, byte[]>> materialized)
          */
 
-        checkNotNull(initializer, INITIALIZER_NAME.toLowerCase());
-        checkNotNull(aggregator, AGGREGATOR_NAME.toLowerCase());
+        checkNotNull(def.initializer(), INITIALIZER_NAME.toLowerCase());
+        checkNotNull(def.aggregator(), AGGREGATOR_NAME.toLowerCase());
         final var k = input.keyType();
         final var v = input.valueType();
-        final var vr = streamDataTypeOf(firstSpecificType(initializer, aggregator), false);
-        final var init = userFunctionOf(context, INITIALIZER_NAME, initializer, vr);
+        final var vr = streamDataTypeOf(firstSpecificType(def.initializer(), def.aggregator()), false);
+        final var init = userFunctionOf(context, INITIALIZER_NAME, def.initializer(), vr);
         final var userInit = new UserInitializer(init, tags);
-        final var aggr = userFunctionOf(context, AGGREGATOR_NAME, aggregator, vr, superOf(k), superOf(v), superOf(vr));
+        final var aggr = userFunctionOf(context, AGGREGATOR_NAME, def.aggregator(), vr, superOf(k), superOf(v), superOf(vr));
         final var userAggr = new UserAggregator(aggr, tags);
         final var kvStore = validateKeyValueStore(store(), k, vr);
         final var mat = materializedOf(context, kvStore);
@@ -100,17 +89,17 @@ public class AggregateOperation extends StoreOperation {
          *          final Materialized<K, VR, KeyValueStore<Bytes, byte[]>> materialized)
          */
 
-        checkNotNull(initializer, INITIALIZER_NAME.toLowerCase());
-        checkNotNull(adder, ADDER_NAME.toLowerCase());
-        checkNotNull(subtractor, SUBTRACTOR_NAME.toLowerCase());
+        checkNotNull(def.initializer(), INITIALIZER_NAME.toLowerCase());
+        checkNotNull(def.adder(), ADDER_NAME.toLowerCase());
+        checkNotNull(def.subtractor(), SUBTRACTOR_NAME.toLowerCase());
         final var k = input.keyType();
         final var v = input.valueType();
-        final var vr = streamDataTypeOf(firstSpecificType(initializer, adder, subtractor), false);
-        final var init = userFunctionOf(context, INITIALIZER_NAME, initializer, vr);
+        final var vr = streamDataTypeOf(firstSpecificType(def.initializer(), def.adder(), def.subtractor()), false);
+        final var init = userFunctionOf(context, INITIALIZER_NAME, def.initializer(), vr);
         final var userInit = new UserInitializer(init, tags);
-        final var add = userFunctionOf(context, ADDER_NAME, adder, vr, superOf(k), superOf(v), superOf(vr));
+        final var add = userFunctionOf(context, ADDER_NAME, def.adder(), vr, superOf(k), superOf(v), superOf(vr));
         final var userAdd = new UserAggregator(add, tags);
-        final var sub = userFunctionOf(context, SUBTRACTOR_NAME, subtractor, vr, superOf(k), superOf(vr), superOf(vr));
+        final var sub = userFunctionOf(context, SUBTRACTOR_NAME, def.subtractor(), vr, superOf(k), superOf(vr), superOf(vr));
         final var userSub = new UserAggregator(sub, tags);
         final var kvStore = validateKeyValueStore(store(), k, vr);
         final var mat = materializedOf(context, kvStore);
@@ -136,17 +125,17 @@ public class AggregateOperation extends StoreOperation {
          *          final Materialized<K, VR, SessionStore<Bytes, byte[]>> materialized)
          */
 
-        checkNotNull(initializer, INITIALIZER_NAME.toLowerCase());
-        checkNotNull(aggregator, AGGREGATOR_NAME.toLowerCase());
-        checkNotNull(merger, MERGER_NAME.toLowerCase());
+        checkNotNull(def.initializer(), INITIALIZER_NAME.toLowerCase());
+        checkNotNull(def.aggregator(), AGGREGATOR_NAME.toLowerCase());
+        checkNotNull(def.merger(), MERGER_NAME.toLowerCase());
         final var k = input.keyType();
         final var v = input.valueType();
-        final var vr = streamDataTypeOf(firstSpecificType(initializer, aggregator, merger), false);
-        final var init = userFunctionOf(context, INITIALIZER_NAME, initializer, vr);
+        final var vr = streamDataTypeOf(firstSpecificType(def.initializer(), def.aggregator(), def.merger()), false);
+        final var init = userFunctionOf(context, INITIALIZER_NAME, def.initializer(), vr);
         final var userInit = new UserInitializer(init, tags);
-        final var aggr = userFunctionOf(context, AGGREGATOR_NAME, aggregator, vr, superOf(k), superOf(v), superOf(vr));
+        final var aggr = userFunctionOf(context, AGGREGATOR_NAME, def.aggregator(), vr, superOf(k), superOf(v), superOf(vr));
         final var userAggr = new UserAggregator(aggr, tags);
-        final var merg = userFunctionOf(context, MERGER_NAME, merger, vr, superOf(k), equalTo(vr), superOf(vr));
+        final var merg = userFunctionOf(context, MERGER_NAME, def.merger(), vr, superOf(k), equalTo(vr), superOf(vr));
         final var userMerg = new UserMerger(merg, tags);
         final var sessionStore = validateSessionStore(store(), k, vr);
         final var mat = materializedOf(context, sessionStore);
@@ -172,14 +161,14 @@ public class AggregateOperation extends StoreOperation {
          *          final Materialized<K, VR, WindowStore<Bytes, byte[]>> materialized)
          */
 
-        checkNotNull(initializer, INITIALIZER_NAME.toLowerCase());
-        checkNotNull(aggregator, AGGREGATOR_NAME.toLowerCase());
+        checkNotNull(def.initializer(), INITIALIZER_NAME.toLowerCase());
+        checkNotNull(def.aggregator(), AGGREGATOR_NAME.toLowerCase());
         final var k = input.keyType();
         final var v = input.valueType();
-        final var vr = streamDataTypeOf(firstSpecificType(initializer, aggregator), false);
-        final var init = userFunctionOf(context, INITIALIZER_NAME, initializer, vr);
+        final var vr = streamDataTypeOf(firstSpecificType(def.initializer(), def.aggregator()), false);
+        final var init = userFunctionOf(context, INITIALIZER_NAME, def.initializer(), vr);
         final var userInit = new UserInitializer(init, tags);
-        final var aggr = userFunctionOf(context, AGGREGATOR_NAME, aggregator, vr, superOf(k), superOf(v), superOf(vr));
+        final var aggr = userFunctionOf(context, AGGREGATOR_NAME, def.aggregator(), vr, superOf(k), superOf(v), superOf(vr));
         final var userAggr = new UserAggregator(aggr, tags);
         final var windowStore = validateWindowStore(store(), k, vr);
         final var mat = materializedOf(context, windowStore);
@@ -204,10 +193,10 @@ public class AggregateOperation extends StoreOperation {
          *          final Materialized<K, VOut, KeyValueStore<Bytes, byte[]>> materialized)
          */
 
-        checkNotNull(initializer, INITIALIZER_NAME.toLowerCase());
+        checkNotNull(def.initializer(), INITIALIZER_NAME.toLowerCase());
         final var k = input.keyType();
         final var vout = input.valueType();
-        final var init = userFunctionOf(context, INITIALIZER_NAME, initializer, vout);
+        final var init = userFunctionOf(context, INITIALIZER_NAME, def.initializer(), vout);
         final var userInit = new UserInitializer(init, tags);
         final var kvStore = validateKeyValueStore(store(), k, vout);
         final var mat = materializedOf(context, kvStore);
@@ -233,13 +222,13 @@ public class AggregateOperation extends StoreOperation {
          *          final Materialized<K, V, SessionStore<Bytes, byte[]>> materialized)
          */
 
-        checkNotNull(initializer, INITIALIZER_NAME.toLowerCase());
-        checkNotNull(merger, MERGER_NAME.toLowerCase());
+        checkNotNull(def.initializer(), INITIALIZER_NAME.toLowerCase());
+        checkNotNull(def.merger(), MERGER_NAME.toLowerCase());
         final var k = input.keyType();
         final var v = input.valueType();
-        final var init = userFunctionOf(context, INITIALIZER_NAME, initializer, v);
+        final var init = userFunctionOf(context, INITIALIZER_NAME, def.initializer(), v);
         final var userInit = new UserInitializer(init, tags);
-        final var merg = userFunctionOf(context, MERGER_NAME, merger, v);
+        final var merg = userFunctionOf(context, MERGER_NAME, def.merger(), v);
         final var userMerg = new UserMerger(merg, tags);
         final var sessionStore = validateSessionStore(store(), k, v);
         final var mat = materializedOf(context, sessionStore);
@@ -264,10 +253,10 @@ public class AggregateOperation extends StoreOperation {
          *          final Materialized<K, V, WindowStore<Bytes, byte[]>> materialized)
          */
 
-        checkNotNull(initializer, INITIALIZER_NAME.toLowerCase());
+        checkNotNull(def.initializer(), INITIALIZER_NAME.toLowerCase());
         final var k = input.keyType();
         final var v = input.valueType();
-        final var init = userFunctionOf(context, INITIALIZER_NAME, initializer, v);
+        final var init = userFunctionOf(context, INITIALIZER_NAME, def.initializer(), v);
         final var userInit = new UserInitializer(init, tags);
         final var kvStore = validateWindowStore(store(), k, v);
         final var mat = materializedOf(context, kvStore);

@@ -21,20 +21,22 @@ package io.axual.ksml.operation;
  */
 
 
-import io.axual.ksml.definition.StateStoreDefinition;
+import io.axual.ksml.store.StateStoreDefinition;
 import lombok.Getter;
 
 @Getter
-public class StoreOperation extends BaseOperation {
-    private final StateStoreDefinition store;
+public class StoreOperation<DEF extends StoreOperationDefinition> extends BaseOperation<DEF> {
+    public StoreOperation(DEF definition) {
+        super(definition);
+    }
 
-    public StoreOperation(StoreOperationConfig config) {
-        super(config);
-        this.store = config.store;
+    public StateStoreDefinition store() {
+        return def.storeOperationConfig().store();
     }
 
     @Override
     public String toString() {
-        return super.toString() + (store != null && store.name() != null ? " [storeName=\"" + store.name() + "\"]" : "");
+        final var storeName = def.storeOperationConfig() != null && def.storeOperationConfig().store() != null ? def.storeOperationConfig().store().name() : null;
+        return super.toString() + (storeName != null ? " [storeName=\"" + storeName + "\"]" : "");
     }
 }

@@ -70,7 +70,16 @@ public class DataSchema implements DataEquals {
      */
     private static final Set<String> FLOATING_POINT_TYPES = Set.of(
             DataSchemaConstants.FLOAT_TYPE,
-            DataSchemaConstants.DOUBLE_TYPE);
+            DataSchemaConstants.DOUBLE_TYPE,
+            DataSchemaConstants.DECIMAL_TYPE);
+    /**
+     * The set of schema types that represent strings.
+     */
+    private static final Set<String> STRING_TYPES = Set.of(
+            DataSchemaConstants.BYTES_TYPE,
+            DataSchemaConstants.FIXED_TYPE,
+            DataSchemaConstants.STRING_TYPE,
+            DataSchemaConstants.UUID_TYPE);
     /**
      * The {@link DataSchema} instance representing ANY schema.
      */
@@ -168,6 +177,24 @@ public class DataSchema implements DataEquals {
             return super.isAssignableFrom(otherSchema);
         }
     };
+    /**
+     * The {@link DataSchema} instance representing a DATE schema.
+     */
+    public static final DataSchema DATE_SCHEMA = new DataSchema(DataSchemaConstants.DATE_TYPE) {
+        @Override
+        public Assignable isAssignableFrom(DataSchema otherSchema) {
+            Objects.requireNonNull(otherSchema, NO_SCHEMA_SPECIFIED);
+            return !INTEGER_TYPES.contains(otherSchema.type) ? schemaMismatch(this, otherSchema) : Assignable.assignable();
+        }
+    };
+    /**
+     * The {@link DataSchema} instance representing a DURATION schema.
+     */
+    public static final DataSchema DURATION_SCHEMA = new DataSchema(DataSchemaConstants.DURATION_TYPE);
+    /**
+     * The {@link DataSchema} instance representing a DURATION schema.
+     */
+    public static final DataSchema UUID_SCHEMA = new DataSchema(DataSchemaConstants.UUID_TYPE);
 
     public String type() {
         return type;

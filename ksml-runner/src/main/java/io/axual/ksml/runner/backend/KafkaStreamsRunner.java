@@ -25,7 +25,7 @@ import io.axual.ksml.TopologyGenerator;
 import io.axual.ksml.client.resolving.ResolvingClientConfig;
 import io.axual.ksml.execution.ExecutionContext;
 import io.axual.ksml.execution.ExecutionErrorHandler;
-import io.axual.ksml.generator.TopologyDefinition;
+import io.axual.ksml.topology.TopologyDefinition;
 import io.axual.ksml.metric.KsmlMetricsReporter;
 import io.axual.ksml.metric.KsmlTagEnricher;
 import io.axual.ksml.python.PythonContextConfig;

@@ -27,7 +27,7 @@ import io.axual.ksml.data.object.DataInteger;
 import io.axual.ksml.data.object.DataLong;
 import io.axual.ksml.data.object.DataString;
 import io.axual.ksml.data.object.DataStruct;
-import io.axual.ksml.data.type.DataType;
+import io.axual.ksml.function.TimestampExtractorDefinition;
 import io.axual.ksml.dsl.ConsumerRecordSchema;
 import io.axual.ksml.dsl.KSMLDSL;
 import io.axual.ksml.exception.ExecutionException;
@@ -39,13 +39,12 @@ import org.apache.kafka.streams.processor.TimestampExtractor;
 
 @Slf4j
 public class UserTimestampExtractor extends Invoker implements TimestampExtractor {
-    public static final DataType EXPECTED_RESULT_TYPE = DataLong.DATATYPE;
     private static final NativeDataObjectMapper NATIVE_MAPPER = new DataObjectFlattener();
 
     public UserTimestampExtractor(UserFunction function, MetricTags tags) {
         super(function, tags, KSMLDSL.Functions.TYPE_TIMESTAMPEXTRACTOR);
         verifyParameterCount(2);
-        verifyResultType(EXPECTED_RESULT_TYPE);
+        verifyResultType(TimestampExtractorDefinition.EXPECTED_RESULT_TYPE);
     }
 
     @Override

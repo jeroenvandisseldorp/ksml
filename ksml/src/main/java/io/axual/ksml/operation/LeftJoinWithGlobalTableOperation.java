@@ -21,26 +21,18 @@ package io.axual.ksml.operation;
  */
 
 
-import io.axual.ksml.definition.FunctionDefinition;
-import io.axual.ksml.definition.GlobalTableDefinition;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.stream.StreamWrapper;
 import io.axual.ksml.user.UserKeyTransformer;
 import org.apache.kafka.streams.kstream.KStream;
 
-public class LeftJoinWithGlobalTableOperation extends BaseOperation {
+public class LeftJoinWithGlobalTableOperation extends BaseOperation<LeftJoinWithGlobalTableOperationDefinition> {
     private static final String KEYSELECTOR_NAME = "Mapper";
     private static final String VALUEJOINER_NAME = "ValueJoiner";
-    private final GlobalTableDefinition joinGlobalTable;
-    private final FunctionDefinition keySelector;
-    private final FunctionDefinition valueJoiner;
 
-    public LeftJoinWithGlobalTableOperation(OperationConfig config, GlobalTableDefinition joinTable, FunctionDefinition keySelector, FunctionDefinition valueJoiner) {
-        super(config);
-        this.joinGlobalTable = joinTable;
-        this.keySelector = keySelector;
-        this.valueJoiner = valueJoiner;
+    public LeftJoinWithGlobalTableOperation(LeftJoinWithGlobalTableOperationDefinition definition) {
+        super(definition);
     }
 
     @Override
@@ -53,17 +45,17 @@ public class LeftJoinWithGlobalTableOperation extends BaseOperation {
          *          final Named named)
          */
 
-        checkNotNull(valueJoiner, VALUEJOINER_NAME.toLowerCase());
+        checkNotNull(def.valueJoiner(), VALUEJOINER_NAME.toLowerCase());
         final var k = input.keyType();
         final var v = input.valueType();
-        final var otherGlobalKTable = context.getStreamWrapper(joinGlobalTable);
-        checkNotNull(keySelector, KEYSELECTOR_NAME.toLowerCase());
+        final var otherGlobalKTable = context.getStreamWrapper(def.joinTable());
+        checkNotNull(def.keySelector(), KEYSELECTOR_NAME.toLowerCase());
         final var gk = otherGlobalKTable.keyType();
         final var gv = otherGlobalKTable.valueType();
-        final var rv = streamDataTypeOf(firstSpecificType(valueJoiner, gv, v), false);
+        final var rv = streamDataTypeOf(firstSpecificType(def.valueJoiner(), gv, v), false);
         checkType("Join globalKTable keyType", gk, equalTo(k));
-        final var sel = userFunctionOf(context, KEYSELECTOR_NAME, keySelector, gk, superOf(k), superOf(v));
-        final var joiner = userFunctionOf(context, VALUEJOINER_NAME, valueJoiner, rv, superOf(k), superOf(v), superOf(gv));
+        final var sel = userFunctionOf(context, KEYSELECTOR_NAME, def.keySelector(), gk, superOf(k), superOf(v));
+        final var joiner = userFunctionOf(context, VALUEJOINER_NAME, def.keySelector(), rv, superOf(k), superOf(v), superOf(gv));
         final var userSel = new UserKeyTransformer(sel, tags);
         final var userJoiner = valueJoinerWithKey(joiner, tags);
         final var named = namedOf();

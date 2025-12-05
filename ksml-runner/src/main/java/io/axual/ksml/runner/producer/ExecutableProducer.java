@@ -25,7 +25,7 @@ import io.axual.ksml.data.mapper.DataObjectConverter;
 import io.axual.ksml.data.object.DataList;
 import io.axual.ksml.data.object.DataObject;
 import io.axual.ksml.data.object.DataTuple;
-import io.axual.ksml.definition.ProducerDefinition;
+import io.axual.ksml.topology.ProducerDefinition;
 import io.axual.ksml.exception.TopologyException;
 import io.axual.ksml.execution.ExecutionContext;
 import io.axual.ksml.metric.MetricTags;

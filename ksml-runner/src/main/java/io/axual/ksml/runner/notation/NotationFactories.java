@@ -80,7 +80,7 @@ public class NotationFactories {
         final var binaryContext = new NotationContext(BinaryNotation.NOTATION_NAME, nativeMapper, typeSchemaMapper);
         notations.put(binaryContext.name(), config -> new BinaryNotation(binaryContext, json.create(null)::serde));
 
-        // Create the binary notation, with JSON for complex types and register it as the default notation
+        // Create the binary notation with JSON for complex types and register it as the default notation
         final var defaultContext = new NotationContext(UserType.DEFAULT_NOTATION, nativeMapper, typeSchemaMapper);
         notations.put(defaultContext.name(), config -> new BinaryNotation(defaultContext, json.create(null)::serde));
     }

@@ -21,7 +21,7 @@ package io.axual.ksml.runner.backend;
  */
 
 import io.axual.ksml.client.producer.ResolvingProducer;
-import io.axual.ksml.generator.TopologyDefinition;
+import io.axual.ksml.topology.TopologyDefinition;
 import io.axual.ksml.python.PythonContext;
 import io.axual.ksml.python.PythonContextConfig;
 import io.axual.ksml.python.PythonFunction;

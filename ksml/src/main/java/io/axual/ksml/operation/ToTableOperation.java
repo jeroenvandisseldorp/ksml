@@ -26,9 +26,9 @@ import io.axual.ksml.stream.KTableWrapper;
 import io.axual.ksml.stream.StreamWrapper;
 import org.apache.kafka.streams.kstream.KTable;
 
-public class ToTableOperation extends StoreOperation {
-    public ToTableOperation(StoreOperationConfig config) {
-        super(config);
+public class ToTableOperation extends StoreOperation<ToTableOperationDefinition> {
+    public ToTableOperation(ToTableOperationDefinition definition) {
+        super(definition);
     }
 
     @Override

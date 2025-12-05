@@ -1,0 +1,52 @@
+package io.axual.ksml.definition.parser;
+
+/*-
+ * ========================LICENSE_START=================================
+ * KSML
+ * %%
+ * Copyright (C) 2021 - 2024 Axual B.V.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =========================LICENSE_END==================================
+ */
+
+import io.axual.ksml.function.TopicNameExtractorDefinition;
+import io.axual.ksml.dsl.KSMLDSL;
+import io.axual.ksml.operation.OperationConfig;
+import io.axual.ksml.operation.ToTopicNameExtractorOperationDefinition;
+import io.axual.ksml.parser.ParseContext;
+import io.axual.ksml.parser.StructsParser;
+import io.axual.ksml.parser.TopologyResourceAwareParser;
+import io.axual.ksml.resource.TopologyResources;
+
+public class ToTopicNameExtractorDefinitionParser extends TopologyResourceAwareParser<ToTopicNameExtractorOperationDefinition> {
+    public ToTopicNameExtractorDefinitionParser(ParseContext context, TopologyResources resources) {
+        super(context, resources);
+    }
+
+    @Override
+    protected StructsParser<ToTopicNameExtractorOperationDefinition> parser() {
+        return structsParser(
+                ToTopicNameExtractorOperationDefinition.class,
+                "",
+                "Writes out pipeline messages to a topic as given by a topic name extractor",
+                lookupField(
+                        "topic name extractor",
+                        KSMLDSL.Operations.ToTopicNameExtractor.TOPIC_NAME_EXTRACTOR,
+                        "Reference to a pre-defined topic name extractor, or an inline definition of a topic name extractor",
+                        (name, tags) -> resources().function(name),
+                        new TopicNameExtractorDefinitionParser(context, false)),
+                optional(functionField(KSMLDSL.Operations.ToTopicNameExtractor.PARTITIONER, "A function that partitions the records in the output topic", new StreamPartitionerDefinitionParser(context, false))),
+                (tne, partitioner, tags) -> tne != null ? new ToTopicNameExtractorOperationDefinition(new OperationConfig(tne.name(), tags), new TopicNameExtractorDefinition(tne), partitioner) : null);
+    }
+}

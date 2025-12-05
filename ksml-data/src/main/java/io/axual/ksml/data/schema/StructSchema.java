@@ -20,6 +20,7 @@ package io.axual.ksml.data.schema;
  * =========================LICENSE_END==================================
  */
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import io.axual.ksml.data.compare.Assignable;
 import io.axual.ksml.data.compare.DataEquals;
@@ -33,6 +34,7 @@ import lombok.Getter;
 import lombok.Singular;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,13 +69,16 @@ import static io.axual.ksml.data.util.EqualUtil.otherIsNull;
  */
 @EqualsAndHashCode
 public class StructSchema extends NamedSchema {
+    public record Attribute(String notation, String name, String value) {
+    }
+
     /**
      * Represents a field in a data schema, containing metadata about the field such as its name,
      * schema definition, documentation, and constraints. This class provides functionality
      * to define and validate fields within a schema.
      */
     public record Field(String name, DataSchema schema, String doc, int tag, boolean required, boolean constant,
-                        DataObject defaultValue, Order order) implements DataEquals {
+                        DataObject defaultValue, Order order, Collection<Attribute> attributes) implements DataEquals {
         /**
          * Enum representing the sorting order of the field.
          * <ul>
@@ -97,8 +102,9 @@ public class StructSchema extends NamedSchema {
          * @param constant     Whether the field is constant and unmodifiable.
          * @param defaultValue The default value of the field. Can be null.
          * @param order        The sorting order of the field (ascending, descending, or ignored).
+         * @param attributes   The notation-specific attributes associated with this field.
          */
-        public Field(String name, DataSchema schema, String doc, int tag, boolean required, boolean constant, DataObject defaultValue, Order order) {
+        public Field(String name, DataSchema schema, String doc, int tag, boolean required, boolean constant, DataObject defaultValue, Order order, Collection<Attribute> attributes) {
             Objects.requireNonNull(schema);
             this.name = name;
             this.schema = schema;
@@ -109,6 +115,7 @@ public class StructSchema extends NamedSchema {
             this.constant = constant;
             this.defaultValue = defaultValue;
             this.order = order;
+            this.attributes = attributes != null ? new ArrayList<>(attributes) : new ArrayList<>();
         }
 
         /**
@@ -193,6 +200,22 @@ public class StructSchema extends NamedSchema {
          */
         public Field(String name, DataSchema schema, String doc, int tag, boolean required, boolean constant, DataObject defaultValue) {
             this(name, schema, doc, tag, required, constant, defaultValue, Order.ASCENDING);
+        }
+
+        /**
+         * Constructs a new StructField with the specified properties and assigns a default ascending order.
+         *
+         * @param name         The name of the field.
+         * @param schema       The schema of the field. Cannot be null.
+         * @param doc          The documentation string for the field. Can be null.
+         * @param tag          The tag of the field.
+         * @param required     Whether the field is required.
+         * @param constant     Whether the field is constant and unmodifiable.
+         * @param defaultValue The default value of the field. Can be null.
+         * @param order        The sorting order of the field (ascending, descending, or ignored).
+         */
+        public Field(String name, DataSchema schema, String doc, int tag, boolean required, boolean constant, DataObject defaultValue, Order order) {
+            this(name, schema, doc, tag, required, constant, defaultValue, order, null);
         }
 
         /**
@@ -286,7 +309,7 @@ public class StructSchema extends NamedSchema {
      * the absence of a schema be reflected through null fields. Only 1 instance without a name is allowed, so code
      * that checks if the StructSchema represents "schemaless" can simply perform an equality ('==') check.
      */
-    public static final StructSchema SCHEMALESS = new StructSchema(null, null, null, null, null, null);
+    public static final StructSchema SCHEMALESS = new StructSchema(null, null, null, null, false, null, null);
 
     /**
      * A list of fields that make up the structured schema.
@@ -323,6 +346,12 @@ public class StructSchema extends NamedSchema {
     private final DataSchema additionalFieldsSchema;
 
     /**
+     * The notation-specific attributes associated with this schema.
+     */
+    @Getter
+    private final Collection<Attribute> attributes;
+
+    /**
      * Copy constructor for creating a new {@code StructSchema} based on an existing one.
      * <p>
      * The new schema will contain the same fields and metadata as the provided {@code other} schema.
@@ -332,7 +361,7 @@ public class StructSchema extends NamedSchema {
      * @throws IllegalArgumentException if {@code other} is null.
      */
     public StructSchema(StructSchema other) {
-        this(other.namespace(), other.name(), other.doc(), other.fields(), other.additionalFieldsAllowed(), other.additionalFieldsSchema());
+        this(other.namespace(), other.name(), other.doc(), other.fields(), other.additionalFieldsAllowed(), other.additionalFieldsSchema(), other.attributes());
     }
 
     /**
@@ -364,12 +393,27 @@ public class StructSchema extends NamedSchema {
      * @param namespace               The namespace of the schema. May be {@code null}.
      * @param name                    The name of the schema. Must not be {@code null} or empty.
      * @param doc                     Optional documentation or description of the schema.
-     * @param fields                  The list of fields that make up the schema. May be empty but not null.
+     * @param fields                  The list of fields that make up the schema. Maybe empty but not null.
      * @param additionalFieldsAllowed set to true or null to allow additional fields to be used in this struct
      * @throws IllegalArgumentException if {@code name} is null or empty.
      */
-    public StructSchema(String namespace, String name, String doc, @Singular List<Field> fields, boolean additionalFieldsAllowed) {
-        this(namespace, name, doc, fields, additionalFieldsAllowed, null);
+    public StructSchema(String namespace, String name, String doc, @Singular List<Field> fields, Boolean additionalFieldsAllowed) {
+        this(namespace, name, doc, fields, additionalFieldsAllowed, null, null);
+    }
+
+    /**
+     * Constructs a {@code StructSchema} with the specified namespace, name, documentation, and fields.
+     *
+     * @param namespace               The namespace of the schema. May be {@code null}.
+     * @param name                    The name of the schema. Must not be {@code null} or empty.
+     * @param doc                     Optional documentation or description of the schema.
+     * @param fields                  The list of fields that make up the schema. May be empty but not null.
+     * @param additionalFieldsAllowed set to true or null to allow additional fields to be used in this struct
+     * @param additionalFieldsSchema  Use a {@link DataSchema} to limit any additional fields to a specific schema
+     * @throws IllegalArgumentException if {@code name} is null or empty.
+     */
+    public StructSchema(String namespace, String name, String doc, @Singular List<Field> fields, Boolean additionalFieldsAllowed, DataSchema additionalFieldsSchema) {
+        this(namespace, name, doc, fields, additionalFieldsAllowed, additionalFieldsSchema, null);
     }
 
     /**
@@ -381,10 +425,11 @@ public class StructSchema extends NamedSchema {
      * @param fields                  The list of fields that make up the schema. Maybe empty but not null.
      * @param additionalFieldsAllowed set to true or null to allow additional fields in this struct
      * @param additionalFieldsSchema  Use a {@link DataSchema} to limit any additional fields to a specific schema
+     * @param attributes              The notation-specific attributes associated with this schema
      * @throws IllegalArgumentException if {@code name} is null or empty.
      */
     @Builder(builderMethodName = "builder")
-    public StructSchema(String namespace, String name, String doc, @Singular List<Field> fields, Boolean additionalFieldsAllowed, DataSchema additionalFieldsSchema) {
+    public StructSchema(String namespace, String name, String doc, @Singular List<Field> fields, Boolean additionalFieldsAllowed, DataSchema additionalFieldsSchema, Collection<Attribute> attributes) {
         super(DataSchemaConstants.STRUCT_TYPE, namespace, name, doc);
         if (fields != null) {
             this.fields.addAll(fields);
@@ -398,6 +443,7 @@ public class StructSchema extends NamedSchema {
         } else {
             this.additionalFieldsSchema = null;
         }
+        this.attributes = attributes != null ? ImmutableList.copyOf(attributes) : List.of();
     }
 
     /**

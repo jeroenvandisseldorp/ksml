@@ -22,7 +22,6 @@ package io.axual.ksml.operation;
 
 
 import io.axual.ksml.data.object.DataBoolean;
-import io.axual.ksml.definition.FunctionDefinition;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.operation.processor.FilterProcessor;
 import io.axual.ksml.operation.processor.FixedKeyOperationProcessorSupplier;
@@ -30,15 +29,16 @@ import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.stream.KTableWrapper;
 import io.axual.ksml.stream.StreamWrapper;
 import io.axual.ksml.user.UserPredicate;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.streams.kstream.Named;
 
-public class FilterOperation extends StoreOperation {
+@Slf4j
+public class FilterOperation extends StoreOperation<FilterOperationDefinition> {
     private static final String PREDICATE_NAME = "Predicate";
-    private final FunctionDefinition predicate;
 
-    public FilterOperation(StoreOperationConfig config, FunctionDefinition predicate) {
-        super(config);
-        this.predicate = predicate;
+    public FilterOperation(FilterOperationDefinition definition) {
+        super(definition);
+        log.warn("Definition: " + definition.details());
     }
 
     @Override
@@ -51,9 +51,9 @@ public class FilterOperation extends StoreOperation {
 
         final var k = input.keyType();
         final var v = input.valueType();
-        final var pred = userFunctionOf(context, PREDICATE_NAME, predicate, DataBoolean.DATATYPE, superOf(k.flatten()), superOf(v.flatten()));
+        final var pred = userFunctionOf(context, PREDICATE_NAME, def.predicate(), DataBoolean.DATATYPE, superOf(k.flatten()), superOf(v.flatten()));
         final var userPred = new UserPredicate(pred, tags);
-        final var storeNames = predicate.storeNames().toArray(String[]::new);
+        final var storeNames = def.predicate().storeNames().toArray(String[]::new);
         final var supplier = new FixedKeyOperationProcessorSupplier<>(
                 name,
                 FilterProcessor::new,
@@ -75,7 +75,7 @@ public class FilterOperation extends StoreOperation {
 
         final var k = input.keyType();
         final var v = input.valueType();
-        final var pred = userFunctionOf(context, PREDICATE_NAME, predicate, DataBoolean.DATATYPE, superOf(k), superOf(v));
+        final var pred = userFunctionOf(context, PREDICATE_NAME, def.predicate(), DataBoolean.DATATYPE, superOf(k), superOf(v));
         final var userPred = new UserPredicate(pred, tags);
         final var kvStore = validateKeyValueStore(store(), k, v);
         final var mat = materializedOf(context, kvStore);

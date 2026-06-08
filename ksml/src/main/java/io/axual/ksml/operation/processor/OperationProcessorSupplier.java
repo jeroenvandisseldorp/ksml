@@ -20,8 +20,9 @@ package io.axual.ksml.operation.processor;
  * =========================LICENSE_END==================================
  */
 
-import org.apache.kafka.streams.processor.api.Processor;
-import org.apache.kafka.streams.processor.api.ProcessorSupplier;
+
+import io.stoatflow.core.processor.Processor;
+import io.stoatflow.core.processor.ProcessorSupplier;
 
 public class OperationProcessorSupplier<T> implements ProcessorSupplier<Object, Object, Object, Object> {
     public interface ProcessorFactory<T> {

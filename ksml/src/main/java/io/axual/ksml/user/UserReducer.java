@@ -26,7 +26,7 @@ import io.axual.ksml.data.object.DataObject;
 import io.axual.ksml.dsl.KSMLDSL;
 import io.axual.ksml.metric.MetricTags;
 import io.axual.ksml.python.Invoker;
-import org.apache.kafka.streams.kstream.Reducer;
+import io.stoatflow.core.topology.Reducer;
 
 public class UserReducer extends Invoker implements Reducer<Object> {
     private static final NativeDataObjectMapper NATIVE_MAPPER = new DataObjectFlattener();

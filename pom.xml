@@ -105,6 +105,8 @@
         <victools.version>4.38.0</victools.version>
         <wire.version>5.2.1</wire.version>
 
+        <stoatflow.version>1.0.0-alpha.2</stoatflow.version>
+
         <!-- KSML schema generation -->
         <ksml.schema.output.file>docs/ksml-language-spec.json</ksml.schema.output.file>
         <ksml-runner.schema.output.file>docs/ksml-runner-spec.json</ksml-runner.schema.output.file>
@@ -342,35 +344,9 @@
                 <version>${apache.kafka.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.kafka</groupId>
-                <artifactId>kafka-streams</artifactId>
-                <version>${apache.kafka.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.osgi</groupId>
-                        <artifactId>org.osgi.core</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.fasterxml.jackson.core</groupId>
-                        <artifactId>jackson-annotations</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.fasterxml.jackson.core</groupId>
-                        <artifactId>jackson-core</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.fasterxml.jackson.core</groupId>
-                        <artifactId>jackson-databind</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.fasterxml.jackson.dataformat</groupId>
-                        <artifactId>jackson-dataformat-yaml</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.fasterxml.jackson.jakarta.rs</groupId>
-                        <artifactId>jackson-jakarta-rs-json-provider</artifactId>
-                    </exclusion>
-                </exclusions>
+                <groupId>io.stoatflow</groupId>
+                <artifactId>stoatflow-core</artifactId>
+                <version>${stoatflow.version}</version>
             </dependency>
 
             <dependency>

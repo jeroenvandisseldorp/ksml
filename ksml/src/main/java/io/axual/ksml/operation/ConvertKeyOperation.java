@@ -24,8 +24,8 @@ import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.stream.StreamWrapper;
 import io.axual.ksml.type.UserType;
-import org.apache.kafka.streams.kstream.KeyValueMapper;
-import org.apache.kafka.streams.kstream.Named;
+import io.stoatflow.core.topology.KeyValueMapper;
+import io.stoatflow.core.topology.Named;
 
 public class ConvertKeyOperation extends BaseOperation {
     private final UserType targetKeyType;

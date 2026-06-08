@@ -29,7 +29,7 @@ import io.axual.ksml.exception.ExecutionException;
 import io.axual.ksml.metric.MetricTags;
 import io.axual.ksml.python.Invoker;
 import io.axual.ksml.store.StateStores;
-import org.apache.kafka.streams.kstream.Predicate;
+import io.stoatflow.core.topology.Predicate;
 
 public class UserPredicate extends Invoker implements Predicate<Object, Object> {
     public static final DataType EXPECTED_RESULT_TYPE = DataBoolean.DATATYPE;

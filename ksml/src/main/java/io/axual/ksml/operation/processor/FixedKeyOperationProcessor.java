@@ -23,9 +23,9 @@ package io.axual.ksml.operation.processor;
 import io.axual.ksml.exception.ExecutionException;
 import io.axual.ksml.proxy.store.ProxyUtil;
 import io.axual.ksml.store.StateStores;
-import org.apache.kafka.streams.processor.StateStore;
-import org.apache.kafka.streams.processor.api.FixedKeyProcessor;
-import org.apache.kafka.streams.processor.api.FixedKeyProcessorContext;
+import io.stoatflow.core.processor.FixedKeyProcessor;
+import io.stoatflow.core.processor.FixedKeyProcessorContext;
+import io.stoatflow.core.state.StateStore;
 
 public abstract class FixedKeyOperationProcessor implements FixedKeyProcessor<Object, Object, Object> {
     protected FixedKeyProcessorContext<Object, Object> context;

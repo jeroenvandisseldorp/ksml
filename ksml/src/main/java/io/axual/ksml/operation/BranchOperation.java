@@ -26,10 +26,6 @@ import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.stream.StreamWrapper;
 import io.axual.ksml.user.UserPredicate;
-import org.apache.kafka.streams.kstream.Branched;
-import org.apache.kafka.streams.kstream.BranchedKStream;
-import org.apache.kafka.streams.kstream.Named;
-import org.apache.kafka.streams.kstream.Predicate;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -25,7 +25,6 @@ import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.KGroupedStreamWrapper;
 import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.stream.StreamWrapper;
-import org.apache.kafka.streams.kstream.KGroupedStream;
 
 public class GroupByKeyOperation extends StoreOperation {
     public GroupByKeyOperation(StoreOperationConfig config) {

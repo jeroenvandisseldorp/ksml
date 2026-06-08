@@ -20,7 +20,7 @@ package io.axual.ksml.proxy.store;
  * =========================LICENSE_END==================================
  */
 
-import org.apache.kafka.streams.state.WindowStore;
+import io.stoatflow.core.state.WindowStore;
 import org.graalvm.polyglot.HostAccess;
 
 /**

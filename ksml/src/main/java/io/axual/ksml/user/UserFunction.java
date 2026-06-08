@@ -31,7 +31,7 @@ import io.axual.ksml.exception.ExecutionException;
 import io.axual.ksml.exception.TopologyException;
 import io.axual.ksml.store.StateStores;
 import io.axual.ksml.type.UserType;
-import org.apache.kafka.streams.KeyValue;
+import io.stoatflow.core.state.KeyValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

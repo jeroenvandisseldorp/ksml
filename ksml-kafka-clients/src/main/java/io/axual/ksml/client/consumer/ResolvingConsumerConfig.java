@@ -39,7 +39,6 @@ public class ResolvingConsumerConfig extends ResolvingClientConfig {
         if (configs.containsKey(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG)) {
             downstreamConfigs.put(ResolvingConsumerPartitionAssignorConfig.BACKING_ASSIGNOR_CONFIG, configs.get(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG));
             downstreamConfigs.put(ResolvingConsumerPartitionAssignorConfig.ASSIGNOR_TOPIC_RESOLVER_CONFIG, topicResolver);
-            downstreamConfigs.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG, ResolvingConsumerPartitionAssignor.class.getName());
         }
     }
 }

@@ -20,7 +20,7 @@ package io.axual.ksml.proxy.store;
  * =========================LICENSE_END==================================
  */
 
-import org.apache.kafka.streams.state.VersionedKeyValueStore;
+import io.stoatflow.core.state.VersionedKeyValueStore;
 import org.graalvm.polyglot.HostAccess;
 
 /**
@@ -38,16 +38,6 @@ public class VersionedKeyValueStoreProxy extends AbstractStateStoreProxy<Version
     @HostAccess.Export
     public Object delete(Object key, long timestamp) {
         return ProxyUtil.toPython(delegate.delete(NATIVE_MAPPER.fromPython(key), timestamp));
-    }
-
-    @HostAccess.Export
-    public Object get(Object key) {
-        return ProxyUtil.toPython(delegate.get(NATIVE_MAPPER.fromPython(key)));
-    }
-
-    @HostAccess.Export
-    public Object get(Object key, long asOfTimestamp) {
-        return ProxyUtil.toPython(delegate.get(NATIVE_MAPPER.fromPython(key), asOfTimestamp));
     }
 
     @HostAccess.Export

@@ -22,7 +22,7 @@ package io.axual.ksml.data.type;
 
 
 import io.axual.ksml.schema.parser.DataSchemaDSL;
-import org.apache.kafka.streams.kstream.Window;
+import io.stoatflow.core.topology.Window;
 
 public class WindowedType extends ComplexType {
     public WindowedType(DataType keyType) {

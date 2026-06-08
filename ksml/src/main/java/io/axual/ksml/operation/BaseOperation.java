@@ -41,26 +41,27 @@ import io.axual.ksml.store.StoreUtil;
 import io.axual.ksml.type.UserType;
 import io.axual.ksml.user.UserFunction;
 import io.axual.ksml.user.UserValueJoiner;
+import io.stoatflow.core.state.KeyValueStore;
+import io.stoatflow.core.state.SessionStore;
+import io.stoatflow.core.state.WindowStore;
+import io.stoatflow.core.topology.Grouped;
+import io.stoatflow.core.topology.JoinWindows;
+import io.stoatflow.core.topology.Joined;
+import io.stoatflow.core.topology.KeyValueMapper;
+import io.stoatflow.core.topology.Materialized;
+import io.stoatflow.core.topology.Named;
+import io.stoatflow.core.topology.Printed;
+import io.stoatflow.core.topology.Produced;
+import io.stoatflow.core.topology.Repartitioned;
+import io.stoatflow.core.topology.StreamJoined;
+import io.stoatflow.core.topology.StreamPartitioner;
+import io.stoatflow.core.topology.TableJoined;
+import io.stoatflow.core.topology.ValueJoiner;
+import io.stoatflow.core.topology.ValueJoinerWithKey;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.utils.Bytes;
-import org.apache.kafka.streams.kstream.Grouped;
-import org.apache.kafka.streams.kstream.JoinWindows;
-import org.apache.kafka.streams.kstream.Joined;
-import org.apache.kafka.streams.kstream.KeyValueMapper;
-import org.apache.kafka.streams.kstream.Materialized;
-import org.apache.kafka.streams.kstream.Named;
-import org.apache.kafka.streams.kstream.Printed;
-import org.apache.kafka.streams.kstream.Produced;
-import org.apache.kafka.streams.kstream.Repartitioned;
-import org.apache.kafka.streams.kstream.StreamJoined;
-import org.apache.kafka.streams.kstream.TableJoined;
-import org.apache.kafka.streams.kstream.ValueJoiner;
-import org.apache.kafka.streams.kstream.ValueJoinerWithKey;
-import org.apache.kafka.streams.processor.StreamPartitioner;
-import org.apache.kafka.streams.state.KeyValueStore;
-import org.apache.kafka.streams.state.SessionStore;
-import org.apache.kafka.streams.state.WindowStore;
 
+import javax.annotation.Nonnull;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -71,18 +72,17 @@ import java.util.Set;
 public abstract class BaseOperation implements StreamOperation {
     private static final String ERROR_IN_TOPOLOGY = "Error in topology";
 
-    private static class NameValidator extends Named {
+    private static class NameValidator {
         // Satisfy compiler with dummy constructor
         private NameValidator() {
-            super("nonsense");
         }
 
         // Define a static method that calls the protected validate method in Named
         public static String validateNameAndReturnError(String name) {
             try {
-                if (name != null) Named.validate(name);
+                if (name != null) Named.as(name);
                 return null;
-            } catch (org.apache.kafka.streams.errors.TopologyException e) {
+            } catch (Exception e) {
                 return e.getMessage();
             }
         }
@@ -394,7 +394,6 @@ public abstract class BaseOperation implements StreamOperation {
     protected Repartitioned<Object, Object> repartitionedOf(StreamDataType k, StreamDataType v, Integer numberOfPartitions, StreamPartitioner<Object, Object> partitioner) {
         if (partitioner == null && numberOfPartitions == null) return null;
         var repartitioned = Repartitioned.with(k.serde(), v.serde());
-        if (numberOfPartitions != null) repartitioned = repartitioned.withNumberOfPartitions(numberOfPartitions);
         if (partitioner != null) repartitioned = repartitioned.withStreamPartitioner(partitioner);
         if (name != null) repartitioned = repartitioned.withName(name);
         return repartitioned;
@@ -403,16 +402,12 @@ public abstract class BaseOperation implements StreamOperation {
     protected Printed<Object, Object> printedOf(String filename, String label, KeyValueMapper<Object, Object, String> mapper) {
         var printed = filename != null ? Printed.toFile(filename) : Printed.toSysOut();
         if (label != null) printed = printed.withLabel(label);
-        if (mapper != null) printed = printed.withKeyValueMapper(mapper);
-        if (name != null) printed = printed.withName(name);
+        if (mapper != null) printed = printed.withKeyValueMapper(mapper::apply);
         return printed;
     }
 
-    protected Joined<Object, Object, Object> joinedOf(StreamDataType k, StreamDataType v, StreamDataType vo, Duration gracePeriod) {
-        var result = Joined.with(k.serde(), v.serde(), vo.serde());
-        if (name != null) result = result.withName(name);
-        if (gracePeriod != null) result = result.withGracePeriod(gracePeriod);
-        return result;
+    protected Joined joinedOf(StreamDataType k, StreamDataType v, StreamDataType vo, Duration gracePeriod) {
+        return Joined.create();
     }
 
     protected StreamJoined<Object, Object, Object> streamJoinedOf(WindowStateStoreDefinition thisStore, WindowStateStoreDefinition otherStore, StreamDataType k, StreamDataType v, StreamDataType vo, JoinWindows joinWindows) {
@@ -429,18 +424,17 @@ public abstract class BaseOperation implements StreamOperation {
         return result;
     }
 
-    private record WrapPartitioner(
-            StreamPartitioner<Object, Object> partitioner) implements StreamPartitioner<Object, Void> {
+    private record WrapPartitioner(StreamPartitioner<Object, Object> partitioner) implements StreamPartitioner<Object, Object> {
         @Override
-        public Optional<Set<Integer>> partitions(String topic, Object key, Void value, int numPartitions) {
-            return partitioner.partitions(topic, key, value, numPartitions);
+        public int partition(@Nonnull String topic, Object key, Object value, int numPartitions) {
+            return partitioner.partition(topic, key, value, numPartitions);
         }
     }
 
     protected TableJoined<Object, Object> tableJoinedOf(StreamPartitioner<Object, Object> partitioner, StreamPartitioner<Object, Object> otherPartitioner) {
         final var part = partitioner != null ? new WrapPartitioner(partitioner) : null;
         final var otherPart = otherPartitioner != null ? new WrapPartitioner(otherPartitioner) : null;
-        return TableJoined.with(part, otherPart).withName(name);
+        return TableJoined.with().withName(name);
     }
 
     protected JoinWindows joinWindowsOf(Duration timeDifference, Duration gracePeriod) {

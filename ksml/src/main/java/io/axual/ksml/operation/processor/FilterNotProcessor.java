@@ -21,7 +21,7 @@ package io.axual.ksml.operation.processor;
  */
 
 import io.axual.ksml.store.StateStores;
-import org.apache.kafka.streams.processor.api.FixedKeyRecord;
+import io.stoatflow.core.processor.FixedKeyRecord;
 
 public class FilterNotProcessor extends FixedKeyOperationProcessor {
     public interface Predicate {

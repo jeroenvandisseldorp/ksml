@@ -22,7 +22,7 @@ package io.axual.ksml.definition;
 
 
 import io.axual.ksml.type.UserType;
-import org.apache.kafka.streams.AutoOffsetReset;
+import io.stoatflow.core.topology.AutoOffsetReset;
 
 public class StreamDefinition extends TopicDefinition {
     public StreamDefinition(String topic, UserType keyType, UserType valueType, AutoOffsetReset resetPolicy, FunctionDefinition tsExtractor, FunctionDefinition partitioner) {

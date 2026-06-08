@@ -26,8 +26,8 @@ import io.axual.ksml.definition.StreamDefinition;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.stream.StreamWrapper;
-import org.apache.kafka.streams.kstream.JoinWindows;
-import org.apache.kafka.streams.kstream.KStream;
+import io.stoatflow.core.topology.JoinWindows;
+import io.stoatflow.core.topology.KStream;
 
 import java.time.Duration;
 

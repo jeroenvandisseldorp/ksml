@@ -26,8 +26,8 @@ import io.axual.ksml.data.object.DataString;
 import io.axual.ksml.data.object.DataStruct;
 import io.axual.ksml.data.type.DataType;
 import io.axual.ksml.data.type.WindowedType;
-import org.apache.kafka.streams.kstream.Windowed;
-import org.apache.kafka.streams.kstream.internals.TimeWindow;
+import io.stoatflow.core.topology.TimeWindow;
+import io.stoatflow.core.topology.Windowed;
 
 import static io.axual.ksml.dsl.WindowedSchema.WINDOWED_SCHEMA_END_FIELD;
 import static io.axual.ksml.dsl.WindowedSchema.WINDOWED_SCHEMA_END_TIME_FIELD;
@@ -59,13 +59,13 @@ public class DataObjectFlattener extends NativeDataObjectMapper {
     public DataObject toDataObject(DataType expected, Object value) {
         if (value instanceof Windowed<?> windowedObject) {
             // Convert a Windowed object into a struct with fields that contain the window fields.
-            final var keyAsData = toDataObject(windowedObject.key());
+            final var keyAsData = toDataObject(windowedObject.getKey());
             final var schema = generateWindowedSchema(new WindowedType(keyAsData.type()), FLATTENER::toDataSchema);
             final var result = new DataStruct(schema);
-            result.put(WINDOWED_SCHEMA_START_FIELD, new DataLong(windowedObject.window().start()));
-            result.put(WINDOWED_SCHEMA_END_FIELD, new DataLong(windowedObject.window().end()));
-            result.put(WINDOWED_SCHEMA_START_TIME_FIELD, new DataString(windowedObject.window().startTime().toString()));
-            result.put(WINDOWED_SCHEMA_END_TIME_FIELD, new DataString(windowedObject.window().endTime().toString()));
+            result.put(WINDOWED_SCHEMA_START_FIELD, new DataLong(windowedObject.getWindow().start()));
+            result.put(WINDOWED_SCHEMA_END_FIELD, new DataLong(windowedObject.getWindow().end()));
+            result.put(WINDOWED_SCHEMA_START_TIME_FIELD, new DataString(windowedObject.getWindow().startTime().toString()));
+            result.put(WINDOWED_SCHEMA_END_TIME_FIELD, new DataString(windowedObject.getWindow().endTime().toString()));
             result.put(WINDOWED_SCHEMA_KEY_FIELD, keyAsData);
             return result;
         }

@@ -27,7 +27,7 @@ import io.axual.ksml.stream.KGroupedStreamWrapper;
 import io.axual.ksml.stream.SessionWindowedCogroupedKStreamWrapper;
 import io.axual.ksml.stream.SessionWindowedKStreamWrapper;
 import io.axual.ksml.stream.StreamWrapper;
-import org.apache.kafka.streams.kstream.SessionWindows;
+import io.stoatflow.core.topology.SessionWindows;
 
 public class WindowBySessionOperation extends BaseOperation {
     private final SessionWindows sessionWindows;

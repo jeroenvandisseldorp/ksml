@@ -20,7 +20,7 @@ package io.axual.ksml.proxy.store;
  * =========================LICENSE_END==================================
  */
 
-import org.apache.kafka.streams.state.KeyValueStore;
+import io.stoatflow.core.state.KeyValueStore;
 import org.graalvm.polyglot.HostAccess;
 
 /**
@@ -34,21 +34,6 @@ public class KeyValueStoreProxy extends AbstractStateStoreProxy<KeyValueStore<Ob
     }
 
     // ==================== ReadOnlyKeyValueStore methods ====================
-
-    @HostAccess.Export
-    public Object all() {
-        return ProxyUtil.toPython(delegate.all());
-    }
-
-    @HostAccess.Export
-    public Object approximateNumEntries() {
-        return ProxyUtil.toPython(delegate.approximateNumEntries());
-    }
-
-    @HostAccess.Export
-    public Object get(Object key) {
-        return ProxyUtil.toPython(delegate.get(NATIVE_MAPPER.fromPython(key)));
-    }
 
     // ==================== KeyValueStore methods ====================
 

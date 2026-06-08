@@ -26,8 +26,8 @@ import io.axual.ksml.exception.TopologyException;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.KTableWrapper;
 import io.axual.ksml.stream.StreamWrapper;
-import org.apache.kafka.streams.kstream.Suppressed;
-import org.apache.kafka.streams.kstream.Windowed;
+import io.stoatflow.core.topology.Suppressed;
+import io.stoatflow.core.topology.Windowed;
 
 public class SuppressOperation extends BaseOperation {
     private final Suppressed<Windowed<?>> suppressedWindowed;
@@ -35,8 +35,8 @@ public class SuppressOperation extends BaseOperation {
 
     private SuppressOperation(OperationConfig config, Suppressed<Object> suppressed, Suppressed<Windowed<?>> suppressedWindowed) {
         super(config);
-        this.suppressed = suppressed != null ? suppressed.withName(name) : null;
-        this.suppressedWindowed = suppressedWindowed != null ? suppressedWindowed.withName(name) : null;
+        this.suppressed = suppressed;
+        this.suppressedWindowed = suppressedWindowed;
     }
 
     public static SuppressOperation create(OperationConfig config, Suppressed<Object> suppressed) {

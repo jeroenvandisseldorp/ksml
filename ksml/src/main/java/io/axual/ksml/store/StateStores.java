@@ -20,7 +20,7 @@ package io.axual.ksml.store;
  * =========================LICENSE_END==================================
  */
 
-import org.apache.kafka.streams.processor.StateStore;
+import io.stoatflow.core.state.StateStore;
 
 import java.util.HashMap;
 

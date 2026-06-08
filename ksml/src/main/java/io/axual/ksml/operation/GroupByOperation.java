@@ -34,8 +34,8 @@ import io.axual.ksml.type.UserTupleType;
 import io.axual.ksml.type.UserType;
 import io.axual.ksml.user.UserKeyTransformer;
 import io.axual.ksml.user.UserKeyValueTransformer;
-import org.apache.kafka.streams.kstream.KGroupedStream;
-import org.apache.kafka.streams.kstream.KGroupedTable;
+import io.stoatflow.core.topology.KGroupedStream;
+import io.stoatflow.core.topology.KGroupedTable;
 
 public class GroupByOperation extends StoreOperation {
     private static final String SELECTOR_NAME = "Selector";

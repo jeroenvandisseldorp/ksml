@@ -26,19 +26,14 @@ import io.axual.ksml.data.value.Struct;
 import io.axual.ksml.python.PythonDataObjectMapper;
 import io.axual.ksml.python.PythonDict;
 import io.axual.ksml.python.PythonNativeMapper;
-import org.apache.kafka.streams.KeyValue;
-import org.apache.kafka.streams.kstream.Windowed;
-import org.apache.kafka.streams.processor.StateStore;
-import org.apache.kafka.streams.state.KeyValueIterator;
-import org.apache.kafka.streams.state.KeyValueStore;
-import org.apache.kafka.streams.state.SessionStore;
-import org.apache.kafka.streams.state.TimestampedKeyValueStore;
-import org.apache.kafka.streams.state.TimestampedWindowStore;
-import org.apache.kafka.streams.state.ValueAndTimestamp;
-import org.apache.kafka.streams.state.VersionedKeyValueStore;
-import org.apache.kafka.streams.state.VersionedRecord;
-import org.apache.kafka.streams.state.WindowStore;
-import org.apache.kafka.streams.state.WindowStoreIterator;
+import io.stoatflow.core.state.KeyValue;
+import io.stoatflow.core.state.KeyValueStore;
+import io.stoatflow.core.state.SessionStore;
+import io.stoatflow.core.state.StateStore;
+import io.stoatflow.core.state.ValueAndTimestamp;
+import io.stoatflow.core.state.VersionedKeyValueStore;
+import io.stoatflow.core.state.WindowStore;
+import io.stoatflow.core.topology.Windowed;
 
 /**
  * Utility class for creating proxy objects and converted values returned to Python
@@ -86,8 +81,8 @@ public class ProxyUtil {
     private static Object resultFrom(ValueAndTimestamp<?> vat) {
         if (vat == null) return null;
         final var converted = new Struct<>();
-        converted.put(VALUE_FIELD, toPython(vat.value()));
-        converted.put(TIMESTAMP_FIELD, toPython(vat.timestamp()));
+        converted.put(VALUE_FIELD, toPython(vat.getValue()));
+        converted.put(TIMESTAMP_FIELD, toPython(vat.getTimestamp()));
         return new PythonDict(converted);
     }
 
@@ -132,14 +127,10 @@ public class ProxyUtil {
     public static StateStore wrapStateStore(StateStore store) {
         if (store instanceof VersionedKeyValueStore<?, ?> versionedStore) {
             return new VersionedKeyValueStoreProxy((VersionedKeyValueStore<Object, Object>) versionedStore);
-        } else if (store instanceof TimestampedKeyValueStore<?, ?> timestampedKeyValueStore) {
-            return new TimestampedKeyValueStoreProxy((TimestampedKeyValueStore<Object, Object>) timestampedKeyValueStore);
         } else if (store instanceof KeyValueStore<?, ?> kvStore) {
             return new KeyValueStoreProxy((KeyValueStore<Object, Object>) kvStore);
         } else if (store instanceof SessionStore<?, ?> sessionStore) {
             return new SessionStoreProxy((SessionStore<Object, Object>) sessionStore);
-        } else if (store instanceof TimestampedWindowStore<?, ?> timestampedWindowStore) {
-            return new TimestampedWindowStoreProxy((TimestampedWindowStore<Object, Object>) timestampedWindowStore);
         } else if (store instanceof WindowStore<?, ?> windowStore) {
             return new WindowStoreProxy((WindowStore<Object, Object>) windowStore);
         }

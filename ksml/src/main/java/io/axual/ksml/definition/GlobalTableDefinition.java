@@ -22,9 +22,9 @@ package io.axual.ksml.definition;
 
 
 import io.axual.ksml.type.UserType;
+import io.stoatflow.core.topology.AutoOffsetReset;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import org.apache.kafka.streams.AutoOffsetReset;
 
 @Getter
 @EqualsAndHashCode

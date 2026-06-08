@@ -21,7 +21,9 @@ package io.axual.ksml.operation.processor;
  */
 
 import io.axual.ksml.store.StateStores;
-import org.apache.kafka.streams.processor.api.FixedKeyRecord;
+import io.stoatflow.core.processor.FixedKeyRecord;
+
+import javax.annotation.Nonnull;
 
 public class FilterProcessor extends FixedKeyOperationProcessor {
     public interface Predicate {
@@ -36,7 +38,7 @@ public class FilterProcessor extends FixedKeyOperationProcessor {
     }
 
     @Override
-    public void process(FixedKeyRecord<Object, Object> rec) {
+    public void process(@Nonnull FixedKeyRecord<Object, Object> rec) {
         if (action.test(stores, rec)) {
             context.forward(rec);
         }

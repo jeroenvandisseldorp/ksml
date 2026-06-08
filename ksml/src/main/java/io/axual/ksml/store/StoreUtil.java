@@ -26,19 +26,15 @@ import io.axual.ksml.definition.StateStoreDefinition;
 import io.axual.ksml.definition.WindowStateStoreDefinition;
 import io.axual.ksml.exception.TopologyException;
 import io.axual.ksml.generator.StreamDataType;
+import io.stoatflow.core.state.KeyValueStore;
+import io.stoatflow.core.state.SessionStore;
+import io.stoatflow.core.state.StateStore;
+import io.stoatflow.core.state.Stores;
+import io.stoatflow.core.state.WindowStore;
+import io.stoatflow.core.topology.JoinWindows;
+import io.stoatflow.core.topology.Materialized;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.utils.Bytes;
-import org.apache.kafka.streams.kstream.JoinWindows;
-import org.apache.kafka.streams.kstream.Materialized;
-import org.apache.kafka.streams.processor.StateStore;
-import org.apache.kafka.streams.state.KeyValueBytesStoreSupplier;
-import org.apache.kafka.streams.state.KeyValueStore;
-import org.apache.kafka.streams.state.SessionBytesStoreSupplier;
-import org.apache.kafka.streams.state.SessionStore;
-import org.apache.kafka.streams.state.StoreBuilder;
-import org.apache.kafka.streams.state.Stores;
-import org.apache.kafka.streams.state.WindowBytesStoreSupplier;
-import org.apache.kafka.streams.state.WindowStore;
 
 import java.util.HashMap;
 
@@ -157,8 +153,9 @@ public class StoreUtil {
         return storeBuilder;
     }
 
-    public record MaterializedStore<V, S extends StateStore>(Materialized<Object, V, S> materialized,
-                                                             Serde<Object> keySerde, Serde<V> valueSerde) {
+    public record MaterializedStore<V, S extends StateStore>(
+            Materialized<Object, V, S> materialized,
+            Serde<Object> keySerde, Serde<V> valueSerde) {
     }
 
     public static <V> MaterializedStore<V, KeyValueStore<Bytes, byte[]>> materialize(KeyValueStateStoreDefinition store) {

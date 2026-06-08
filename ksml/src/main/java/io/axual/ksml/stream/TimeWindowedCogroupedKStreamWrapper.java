@@ -24,7 +24,7 @@ package io.axual.ksml.stream;
 import io.axual.ksml.generator.StreamDataType;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.operation.StreamOperation;
-import org.apache.kafka.streams.kstream.TimeWindowedCogroupedKStream;
+import io.stoatflow.core.topology.TimeWindowedCogroupedKStream;
 
 public class TimeWindowedCogroupedKStreamWrapper extends BaseStreamWrapper {
     public final TimeWindowedCogroupedKStream<Object, Object> timeWindowedCogroupedKStream;

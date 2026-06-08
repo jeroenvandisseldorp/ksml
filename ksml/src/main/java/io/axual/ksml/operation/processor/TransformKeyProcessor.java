@@ -21,7 +21,9 @@ package io.axual.ksml.operation.processor;
  */
 
 import io.axual.ksml.store.StateStores;
-import org.apache.kafka.streams.processor.api.Record;
+import io.stoatflow.core.processor.Record;
+
+import javax.annotation.Nonnull;
 
 public class TransformKeyProcessor extends OperationProcessor {
     public interface TransformKeyAction {
@@ -36,7 +38,7 @@ public class TransformKeyProcessor extends OperationProcessor {
     }
 
     @Override
-    public void process(Record<Object, Object> rec) {
+    public void process(@Nonnull Record<Object, Object> rec) {
         var k = action.apply(stores, rec);
         context.forward(rec.withKey(k));
     }

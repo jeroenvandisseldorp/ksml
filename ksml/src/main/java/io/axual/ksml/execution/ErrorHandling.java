@@ -20,20 +20,20 @@ package io.axual.ksml.execution;
  * =========================LICENSE_END==================================
  */
 
+import io.stoatflow.core.exception.DeserializationContext;
+import io.stoatflow.core.exception.DeserializationHandlerResponse;
+import io.stoatflow.core.exception.ProcessingContext;
+import io.stoatflow.core.exception.ProcessingHandlerResponse;
+import io.stoatflow.core.exception.ProductionContext;
+import io.stoatflow.core.exception.ProductionHandlerResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.errors.TopicAuthorizationException;
-import org.apache.kafka.streams.errors.DeserializationExceptionHandler;
-import org.apache.kafka.streams.errors.ErrorHandlerContext;
-import org.apache.kafka.streams.errors.ProcessingExceptionHandler;
-import org.apache.kafka.streams.errors.ProductionExceptionHandler;
-import org.apache.kafka.streams.errors.StreamsException;
-import org.apache.kafka.streams.errors.StreamsUncaughtExceptionHandler;
-import org.apache.kafka.streams.processor.api.Record;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.stream.Collectors;
 
@@ -76,7 +76,7 @@ public class ErrorHandling {
             processExceptionLogger.error("Caught unhandled exception, stopping this KSML instance", throwable);
         }
         // Stop only the current instance of KSML
-        return StreamsUncaughtExceptionHandler.StreamThreadExceptionResponse.SHUTDOWN_CLIENT;
+        return StreamsUn.StreamThreadExceptionResponse.SHUTDOWN_CLIENT;
     }
 
     public String bytesToString(byte[] data) {
@@ -87,21 +87,46 @@ public class ErrorHandling {
         return data == null ? DATA_NULL : STRING_PREFIX + data;
     }
 
-    private void logError(Logger logger, String errorType, ErrorHandlerContext context, String key, String value, Exception exception) {
-        logger.error("{} error:\n  topic={}\n  partition={}\n  offset={}\n  processorNodeId={}\n  taskId={}\n  timestamp={}\n  key={}\n  value={}\n",
-                errorType,
-                context.topic() != null ? context.topic() : "<null>",
-                context.partition(),
-                context.offset(),
-                context.processorNodeId() != null ? context.processorNodeId() : "<null>",
-                context.taskId(),
-                context.timestamp(),
-                key,
-                value,
-                exception);
+    private void logError(Logger logger, String errorType, Object context, String key, String value, Exception exception) {
+        switch(context) {
+            case DeserializationContext ctx: {
+                logger.error("Deserialization error:\n  topic={}\n  partition={}\n  offset={}\n  key={}\n  value={}\n",
+                        ctx.getTopic(),
+                        ctx.getPartition(),
+                        ctx.getOffset(),
+                        key,
+                        value);
+                logger.error("Caused by: {}", exception.getMessage(), exception);
+                break;
+            }
+            case ProcessingContext ctx: {
+                logger.error("Processing error:\n  sourceTopic={}\n  sourcePartition={}\n  sourceOffset={}\n  processorName={}\n  timestamp={}\n  key={}\n  value={}\n",
+                        ctx.getSourceTopic(),
+                        ctx.getSourcePartition(),
+                        ctx.getSourceOffset(),
+                        ctx.getProcessorName(),
+                        ctx.getTimestamp(),
+                        key,
+                        value);
+                logger.error("Caused by: {}", exception.getMessage(), exception);
+                break;
+            }
+            case  ProductionContext ctx: {
+                logger.error("Processing error:\n  topic={}\n  failedOn={}\n  sourceTopic={}\n  sourcePartition={}\n  sourceOffset={}\n  processorNodeId={}\n  key={}\n  value={}\n",
+                        ctx.getTopic(),
+                        ctx.getFailedOn(),
+                        ctx.getSourceTopic(),
+                        ctx.getSourcePartition(),
+                        ctx.getSourceOffset(),
+                        ctx.getProcessorNodeId(),
+                        key,
+                        value);
+                logger.error("Caused by: {}", exception.getMessage(), exception);
+            }
+        }
     }
 
-    public DeserializationExceptionHandler.DeserializationHandlerResponse handle(ErrorHandlerContext context, ConsumerRecord<byte[], byte[]> rec, Exception exception) {
+    public DeserializationHandlerResponse handle(ConsumerRecord<byte[], byte[]> rec, Exception exception, DeserializationContext context) {
         if (consumeHandler.log()) {
             // log record
             String key = consumeHandler.logPayload() ? bytesToString(rec.key()) : DATA_MASK;
@@ -109,29 +134,29 @@ public class ErrorHandling {
             logError(consumeExceptionLogger, "Deserialization", context, key, value, exception);
         }
         return switch (consumeHandler.handlerType()) {
-            case CONTINUE_ON_FAIL -> DeserializationExceptionHandler.DeserializationHandlerResponse.CONTINUE;
-            case STOP_ON_FAIL -> DeserializationExceptionHandler.DeserializationHandlerResponse.FAIL;
+            case CONTINUE_ON_FAIL -> new DeserializationHandlerResponse(DeserializationHandlerResponse.Result.CONTINUE, new ArrayList<>());
+            case STOP_ON_FAIL ->new DeserializationHandlerResponse(DeserializationHandlerResponse.Result.FAIL, new ArrayList<>());
             default ->
                     throw new UnsupportedOperationException("Unsupported deserialization error handler type. Only CONTINUE_ON_FAIL or STOP_ON_FAIL are allowed.");
         };
     }
 
-    public ProcessingExceptionHandler.ProcessingHandlerResponse handle(ErrorHandlerContext context, Record<?, ?> rec, Exception exception) {
+    public ProcessingHandlerResponse handle(Object key, Object value, Exception exception, ProcessingContext context) {
         if (processHandler.log()) {
             // log record
-            String key = processHandler.logPayload() ? objectToString(rec.key()) : DATA_MASK;
-            String value = processHandler.logPayload() ? objectToString(rec.value()) : DATA_MASK;
-            logError(processExceptionLogger, "Processing", context, key, value, exception);
+            String keyStr = processHandler.logPayload() ? objectToString(key) : DATA_MASK;
+            String valueStr = processHandler.logPayload() ? objectToString(value) : DATA_MASK;
+            logError(processExceptionLogger, "Processing", context, keyStr, valueStr, exception);
         }
         return switch (processHandler.handlerType()) {
-            case CONTINUE_ON_FAIL -> ProcessingExceptionHandler.ProcessingHandlerResponse.CONTINUE;
-            case STOP_ON_FAIL -> ProcessingExceptionHandler.ProcessingHandlerResponse.FAIL;
+            case CONTINUE_ON_FAIL -> new ProcessingHandlerResponse(ProcessingHandlerResponse.Result.CONTINUE, new ArrayList<>());
+            case STOP_ON_FAIL -> new ProcessingHandlerResponse(ProcessingHandlerResponse.Result.FAIL, new ArrayList<>());
             default ->
                     throw new UnsupportedOperationException("Unsupported processing error handler type. Only CONTINUE_ON_FAIL or STOP_ON_FAIL are allowed.");
         };
     }
 
-    public ProductionExceptionHandler.ProductionExceptionHandlerResponse handle(ErrorHandlerContext context, ProducerRecord<byte[], byte[]> rec, Exception exception) {
+    public ProductionHandlerResponse handle(ProducerRecord<byte[], byte[]> rec, Exception exception, ProductionContext context) {
         if (produceHandler.log()) {
             // log record
             String key = produceHandler.logPayload() ? bytesToString(rec.key()) : DATA_MASK;
@@ -139,9 +164,9 @@ public class ErrorHandling {
             logError(produceExceptionLogger, "Produce", context, key, value, exception);
         }
         return switch (produceHandler.handlerType()) {
-            case CONTINUE_ON_FAIL -> ProductionExceptionHandler.ProductionExceptionHandlerResponse.CONTINUE;
-            case STOP_ON_FAIL -> ProductionExceptionHandler.ProductionExceptionHandlerResponse.FAIL;
-            case RETRY_ON_FAIL -> ProductionExceptionHandler.ProductionExceptionHandlerResponse.RETRY;
+            case CONTINUE_ON_FAIL -> new ProductionHandlerResponse(ProductionHandlerResponse.Result.CONTINUE, new ArrayList<>());
+            case STOP_ON_FAIL -> new ProductionHandlerResponse(ProductionHandlerResponse.Result.FAIL, new ArrayList<>());
+            case RETRY_ON_FAIL -> new ProductionHandlerResponse(ProductionHandlerResponse.Result.RETRY, new ArrayList<>());
         };
     }
 }

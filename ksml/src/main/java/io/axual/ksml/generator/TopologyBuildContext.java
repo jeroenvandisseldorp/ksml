@@ -44,16 +44,16 @@ import io.axual.ksml.stream.KTableWrapper;
 import io.axual.ksml.stream.StreamWrapper;
 import io.axual.ksml.user.UserFunction;
 import io.axual.ksml.user.UserTimestampExtractor;
+import io.stoatflow.core.state.KeyValueStore;
+import io.stoatflow.core.state.SessionStore;
+import io.stoatflow.core.state.WindowStore;
+import io.stoatflow.core.topology.AutoOffsetReset;
+import io.stoatflow.core.topology.Consumed;
+import io.stoatflow.core.topology.Materialized;
+import io.stoatflow.core.topology.StreamsBuilder;
 import lombok.Getter;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.utils.Bytes;
-import org.apache.kafka.streams.AutoOffsetReset;
-import org.apache.kafka.streams.StreamsBuilder;
-import org.apache.kafka.streams.kstream.Consumed;
-import org.apache.kafka.streams.kstream.Materialized;
-import org.apache.kafka.streams.state.KeyValueStore;
-import org.apache.kafka.streams.state.SessionStore;
-import org.apache.kafka.streams.state.WindowStore;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -196,10 +196,6 @@ public class TopologyBuildContext {
         var result = Consumed.<K, V>as(name);
         if (keySerde != null) result = result.withKeySerde(keySerde);
         if (valueSerde != null) result = result.withValueSerde(valueSerde);
-        if (tsExtractor != null) {
-            final var tags = defaultMetricTags();
-            result = result.withTimestampExtractor(new UserTimestampExtractor(createUserFunction(tsExtractor), tags.append("topic", name)));
-        }
         if (resetPolicy != null) result = result.withOffsetResetPolicy(resetPolicy);
         return result;
     }

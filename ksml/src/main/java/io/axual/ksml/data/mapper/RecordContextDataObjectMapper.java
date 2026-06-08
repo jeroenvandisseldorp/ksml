@@ -26,9 +26,9 @@ import io.axual.ksml.data.object.DataObject;
 import io.axual.ksml.data.object.DataString;
 import io.axual.ksml.data.object.DataStruct;
 import io.axual.ksml.data.type.DataType;
+import io.stoatflow.core.topology.DefaultRecordContext;
+import io.stoatflow.core.topology.RecordContext;
 import org.apache.kafka.common.header.internals.RecordHeaders;
-import org.apache.kafka.streams.processor.RecordContext;
-import org.apache.kafka.streams.processor.internals.ProcessorRecordContext;
 
 import static io.axual.ksml.dsl.RecordContextSchema.RECORD_CONTEXT_SCHEMA;
 import static io.axual.ksml.dsl.RecordContextSchema.RECORD_CONTEXT_SCHEMA_HEADERS_FIELD;
@@ -46,11 +46,11 @@ public class RecordContextDataObjectMapper implements DataObjectMapper<RecordCon
     @Override
     public DataObject toDataObject(DataType expected, RecordContext value) {
         final var result = new DataStruct(RECORD_CONTEXT_SCHEMA);
-        result.put(RECORD_CONTEXT_SCHEMA_OFFSET_FIELD, new DataLong(value.offset()));
-        result.put(RECORD_CONTEXT_SCHEMA_TIMESTAMP_FIELD, new DataLong(value.timestamp()));
-        result.put(RECORD_CONTEXT_SCHEMA_TOPIC_FIELD, new DataString(value.topic()));
-        result.put(RECORD_CONTEXT_SCHEMA_PARTITION_FIELD, new DataInteger(value.partition()));
-        result.put(RECORD_CONTEXT_SCHEMA_HEADERS_FIELD, HEADER_MAPPER.toDataObject(value.headers()));
+        result.put(RECORD_CONTEXT_SCHEMA_OFFSET_FIELD, new DataLong(value.getOffset()));
+        result.put(RECORD_CONTEXT_SCHEMA_TIMESTAMP_FIELD, new DataLong(value.getTimestamp()));
+        result.put(RECORD_CONTEXT_SCHEMA_TOPIC_FIELD, new DataString(value.getTopic()));
+        result.put(RECORD_CONTEXT_SCHEMA_PARTITION_FIELD, new DataInteger(value.getPartition()));
+        result.put(RECORD_CONTEXT_SCHEMA_HEADERS_FIELD, HEADER_MAPPER.toDataObject(value.getHeaders()));
         return result;
     }
 
@@ -64,11 +64,11 @@ public class RecordContextDataObjectMapper implements DataObjectMapper<RecordCon
         final var partition = valueStruct.getAs(RECORD_CONTEXT_SCHEMA_PARTITION_FIELD, DataInteger.class);
         final var topic = valueStruct.getAs(RECORD_CONTEXT_SCHEMA_TOPIC_FIELD, DataString.class);
         final var headers = valueStruct.getAs(RECORD_CONTEXT_SCHEMA_HEADERS_FIELD, DataStruct.class);
-        return new ProcessorRecordContext(
+        return new DefaultRecordContext(
+                topic != null ? topic.value() : null,
+                partition != null ? partition.value() : NO_PARTITION,
                 offset != null ? offset.value() : NO_OFFSET,
                 timestamp != null ? timestamp.value() : NO_TIMESTAMP,
-                partition != null ? partition.value() : NO_PARTITION,
-                topic != null ? topic.value() : null,
                 headers != null ? HEADER_MAPPER.fromDataObject(headers) : new RecordHeaders()
         );
     }

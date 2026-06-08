@@ -28,7 +28,7 @@ import io.axual.ksml.stream.CogroupedKStreamWrapper;
 import io.axual.ksml.stream.KGroupedStreamWrapper;
 import io.axual.ksml.stream.StreamWrapper;
 import io.axual.ksml.user.UserAggregator;
-import org.apache.kafka.streams.kstream.CogroupedKStream;
+import io.stoatflow.core.topology.CogroupedKStream;
 
 public class CogroupOperation extends BaseOperation {
     private static final String AGGREGATOR_NAME = "Aggregator";

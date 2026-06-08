@@ -28,7 +28,7 @@ import io.axual.ksml.dsl.KSMLDSL;
 import io.axual.ksml.metric.MetricTags;
 import io.axual.ksml.python.Invoker;
 import io.axual.ksml.store.StateStores;
-import org.apache.kafka.streams.kstream.KeyValueMapper;
+import io.stoatflow.core.topology.KeyValueMapper;
 
 public class UserKeyTransformer extends Invoker implements KeyValueMapper<Object, Object, Object> {
     public static final DataType EXPECTED_RESULT_TYPE = DataType.UNKNOWN;

@@ -23,9 +23,11 @@ package io.axual.ksml.operation.processor;
 import io.axual.ksml.exception.ExecutionException;
 import io.axual.ksml.proxy.store.ProxyUtil;
 import io.axual.ksml.store.StateStores;
-import org.apache.kafka.streams.processor.StateStore;
-import org.apache.kafka.streams.processor.api.Processor;
-import org.apache.kafka.streams.processor.api.ProcessorContext;
+import io.stoatflow.core.processor.Processor;
+import io.stoatflow.core.processor.ProcessorContext;
+import io.stoatflow.core.state.StateStore;
+
+import javax.annotation.Nonnull;
 
 public abstract class OperationProcessor implements Processor<Object, Object, Object, Object> {
     protected ProcessorContext<Object, Object> context;
@@ -39,7 +41,7 @@ public abstract class OperationProcessor implements Processor<Object, Object, Ob
     }
 
     @Override
-    public void init(ProcessorContext<Object, Object> context) {
+    public void init(@Nonnull ProcessorContext<Object, Object> context) {
         this.context = context;
         stores.clear();
         for (String storeName : storeNames) {

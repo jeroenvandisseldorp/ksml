@@ -27,7 +27,6 @@ import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.stream.StreamWrapper;
 import io.axual.ksml.user.UserStreamPartitioner;
-import org.apache.kafka.streams.kstream.KStream;
 
 public class RepartitionOperation extends BaseOperation {
     private static final String PARTITIONER_NAME = "Partitioner";

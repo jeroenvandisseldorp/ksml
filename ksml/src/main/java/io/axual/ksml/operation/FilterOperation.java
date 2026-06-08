@@ -30,7 +30,7 @@ import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.stream.KTableWrapper;
 import io.axual.ksml.stream.StreamWrapper;
 import io.axual.ksml.user.UserPredicate;
-import org.apache.kafka.streams.kstream.Named;
+import io.stoatflow.core.topology.Named;
 
 public class FilterOperation extends StoreOperation {
     private static final String PREDICATE_NAME = "Predicate";
@@ -60,8 +60,8 @@ public class FilterOperation extends StoreOperation {
                 (stores, rec) -> userPred.test(stores, flattenValue(rec.key()), flattenValue(rec.value())),
                 storeNames);
         final var output = name != null
-                ? input.stream.processValues(supplier, Named.as(name), storeNames)
-                : input.stream.processValues(supplier, storeNames);
+                ? input.stream.processValues(supplier, Named.as(name))
+                : input.stream.processValues(supplier);
         return new KStreamWrapper(output, k, v);
     }
 

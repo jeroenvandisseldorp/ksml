@@ -30,13 +30,13 @@ import io.axual.ksml.stream.SessionWindowedKStreamWrapper;
 import io.axual.ksml.stream.StreamWrapper;
 import io.axual.ksml.stream.TimeWindowedKStreamWrapper;
 import io.axual.ksml.type.UserType;
+import io.stoatflow.core.state.KeyValueStore;
+import io.stoatflow.core.state.SessionStore;
+import io.stoatflow.core.state.WindowStore;
+import io.stoatflow.core.topology.KTable;
+import io.stoatflow.core.topology.Materialized;
+import io.stoatflow.core.topology.Windowed;
 import org.apache.kafka.common.utils.Bytes;
-import org.apache.kafka.streams.kstream.KTable;
-import org.apache.kafka.streams.kstream.Materialized;
-import org.apache.kafka.streams.kstream.Windowed;
-import org.apache.kafka.streams.state.KeyValueStore;
-import org.apache.kafka.streams.state.SessionStore;
-import org.apache.kafka.streams.state.WindowStore;
 
 public class CountOperation extends StoreOperation {
     public CountOperation(StoreOperationConfig config) {

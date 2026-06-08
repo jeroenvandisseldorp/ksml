@@ -24,7 +24,7 @@ package io.axual.ksml.stream;
 import io.axual.ksml.generator.StreamDataType;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.operation.StreamOperation;
-import org.apache.kafka.streams.kstream.CogroupedKStream;
+import io.stoatflow.core.topology.CogroupedKStream;
 
 public class CogroupedKStreamWrapper extends BaseStreamWrapper {
     public final CogroupedKStream<Object, Object> cogroupedStream;

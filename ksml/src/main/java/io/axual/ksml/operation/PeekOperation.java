@@ -29,7 +29,7 @@ import io.axual.ksml.operation.processor.PeekProcessor;
 import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.stream.StreamWrapper;
 import io.axual.ksml.user.UserForeachAction;
-import org.apache.kafka.streams.kstream.Named;
+import io.stoatflow.core.topology.Named;
 
 public class PeekOperation extends BaseOperation {
     private static final String FOREACHACTION_NAME = "ForEachAction";
@@ -53,8 +53,8 @@ public class PeekOperation extends BaseOperation {
                 (stores, rec) -> userAction.apply(stores, flattenValue(rec.key()), flattenValue(rec.value())),
                 storeNames);
         final var output = name != null
-                ? input.stream.processValues(supplier, Named.as(name), storeNames)
-                : input.stream.processValues(supplier, storeNames);
+                ? input.stream.processValues(supplier, Named.as(name))
+                : input.stream.processValues(supplier);
         return new KStreamWrapper(output, k, v);
     }
 }

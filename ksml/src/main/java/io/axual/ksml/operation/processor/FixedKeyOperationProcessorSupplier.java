@@ -20,8 +20,11 @@ package io.axual.ksml.operation.processor;
  * =========================LICENSE_END==================================
  */
 
-import org.apache.kafka.streams.processor.api.FixedKeyProcessor;
-import org.apache.kafka.streams.processor.api.FixedKeyProcessorSupplier;
+
+import io.stoatflow.core.processor.FixedKeyProcessor;
+import io.stoatflow.core.processor.FixedKeyProcessorSupplier;
+
+import javax.annotation.Nonnull;
 
 public class FixedKeyOperationProcessorSupplier<T> implements FixedKeyProcessorSupplier<Object, Object, Object> {
     public interface ProcessorFactory<T> {
@@ -41,6 +44,7 @@ public class FixedKeyOperationProcessorSupplier<T> implements FixedKeyProcessorS
     }
 
     @Override
+    @Nonnull
     public FixedKeyProcessor<Object, Object, Object> get() {
         return factory.create(name, action, storeNames);
     }

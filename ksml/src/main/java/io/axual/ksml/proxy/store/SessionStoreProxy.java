@@ -23,8 +23,8 @@ package io.axual.ksml.proxy.store;
 import io.axual.ksml.data.mapper.DataObjectFlattener;
 import io.axual.ksml.data.type.DataType;
 import io.axual.ksml.data.type.WindowedType;
-import org.apache.kafka.streams.kstream.Windowed;
-import org.apache.kafka.streams.state.SessionStore;
+import io.stoatflow.core.state.SessionStore;
+import io.stoatflow.core.topology.Windowed;
 import org.graalvm.polyglot.HostAccess;
 
 /**
@@ -40,50 +40,6 @@ public class SessionStoreProxy extends AbstractStateStoreProxy<SessionStore<Obje
 
     // ==================== ReadOnlySessionStore methods ====================
 
-    @HostAccess.Export
-    public Object backwardFetch(final Object key) {
-        return ProxyUtil.toPython(delegate.backwardFetch(NATIVE_MAPPER.fromPython(key)));
-    }
-
-    @HostAccess.Export
-    public Object backwardFetch(final Object keyFrom, final Object keyTo) {
-        return ProxyUtil.toPython(delegate.backwardFetch(NATIVE_MAPPER.fromPython(keyFrom), NATIVE_MAPPER.fromPython(keyTo)));
-    }
-
-    @HostAccess.Export
-    public Object backwardFindSessions(final Object key, final long earliestSessionEndTime, final long latestSessionStartTime) {
-        return ProxyUtil.toPython(delegate.backwardFindSessions(NATIVE_MAPPER.fromPython(key), earliestSessionEndTime, latestSessionStartTime));
-    }
-
-    @HostAccess.Export
-    public Object backwardFindSessions(final Object keyFrom, final Object keyTo, final long earliestSessionEndTime, final long latestSessionStartTime) {
-        return ProxyUtil.toPython(delegate.backwardFindSessions(NATIVE_MAPPER.fromPython(keyFrom), NATIVE_MAPPER.fromPython(keyTo), earliestSessionEndTime, latestSessionStartTime));
-    }
-
-    @HostAccess.Export
-    public Object fetch(final Object key) {
-        return ProxyUtil.toPython(delegate.fetch(NATIVE_MAPPER.fromPython(key)));
-    }
-
-    @HostAccess.Export
-    public Object fetch(final Object keyFrom, final Object keyTo) {
-        return ProxyUtil.toPython(delegate.fetch(NATIVE_MAPPER.fromPython(keyFrom), NATIVE_MAPPER.fromPython(keyTo)));
-    }
-
-    @HostAccess.Export
-    public Object fetchSession(final Object key, final long sessionStartTime, final long sessionEndTime) {
-        return ProxyUtil.toPython(delegate.fetchSession(NATIVE_MAPPER.fromPython(key), sessionStartTime, sessionEndTime));
-    }
-
-    @HostAccess.Export
-    public Object findSessions(Object key, long earliestSessionEndTime, long latestSessionStartTime) {
-        return ProxyUtil.toPython(delegate.findSessions(NATIVE_MAPPER.fromPython(key), earliestSessionEndTime, latestSessionStartTime));
-    }
-
-    @HostAccess.Export
-    public Object findSessions(Object keyFrom, Object keyTo, long earliestSessionEndTime, long latestSessionStartTime) {
-        return ProxyUtil.toPython(delegate.findSessions(NATIVE_MAPPER.fromPython(keyFrom), NATIVE_MAPPER.fromPython(keyTo), earliestSessionEndTime, latestSessionStartTime));
-    }
 
     // ==================== SessionStore methods ====================
 

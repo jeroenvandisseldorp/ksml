@@ -23,9 +23,11 @@ package io.axual.ksml.proxy.store;
 import io.axual.ksml.proxy.base.AbstractProxy;
 import io.axual.ksml.python.PythonDataObjectMapper;
 import io.axual.ksml.python.PythonNativeMapper;
-import org.apache.kafka.streams.processor.StateStore;
-import org.apache.kafka.streams.processor.StateStoreContext;
+import io.stoatflow.core.state.StateStore;
+import io.stoatflow.core.state.StateStoreContext;
 import org.graalvm.polyglot.HostAccess;
+
+import javax.annotation.Nonnull;
 
 /**
  * Base class for state store proxy implementations.
@@ -43,13 +45,14 @@ public abstract class AbstractStateStoreProxy<T extends StateStore> implements S
 
     @HostAccess.Export
     @Override
-    public String name() {
-        return delegate.name();
+    @Nonnull
+    public String getName() {
+        return delegate.getName();
     }
 
     @Override
-    public void init(StateStoreContext stateStoreContext, StateStore root) {
-        delegate.init(stateStoreContext, root);
+    public void init(@Nonnull StateStoreContext stateStoreContext) {
+        delegate.init(stateStoreContext);
     }
 
     @HostAccess.Export
@@ -66,12 +69,6 @@ public abstract class AbstractStateStoreProxy<T extends StateStore> implements S
 
     @HostAccess.Export
     @Override
-    public boolean persistent() {
-        return delegate.persistent();
-    }
-
-    @HostAccess.Export
-    @Override
     public boolean isOpen() {
         return delegate.isOpen();
     }
@@ -79,6 +76,6 @@ public abstract class AbstractStateStoreProxy<T extends StateStore> implements S
     @HostAccess.Export
     @Override
     public String toString() {
-        return getClass().getSimpleName() + " [name=\"" + name() + "\"]";
+        return getClass().getSimpleName() + " [name=\"" + getName() + "\"]";
     }
 }

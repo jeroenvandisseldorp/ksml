@@ -21,8 +21,10 @@ package io.axual.ksml.operation.processor;
  */
 
 import io.axual.ksml.store.StateStores;
-import org.apache.kafka.streams.KeyValue;
-import org.apache.kafka.streams.processor.api.Record;
+import io.stoatflow.core.processor.Record;
+import io.stoatflow.core.state.KeyValue;
+
+import javax.annotation.Nonnull;
 
 public class TransformKeyValueProcessor extends OperationProcessor {
     public interface TransformKeyValueAction {
@@ -37,8 +39,9 @@ public class TransformKeyValueProcessor extends OperationProcessor {
     }
 
     @Override
-    public void process(Record<Object, Object> rec) {
+    public void process(@Nonnull Record<Object, Object> rec) {
         var kv = action.apply(stores, rec);
-        if (kv != null) context.forward(rec.withKey(kv.key).withValue(kv.value));
+        if (kv != null)
+            context.forward(rec.withKey(kv.key).withValue(kv.value));
     }
 }

@@ -29,6 +29,7 @@ import io.axual.ksml.generator.StreamDataType;
 import io.stoatflow.core.state.KeyValueStore;
 import io.stoatflow.core.state.SessionStore;
 import io.stoatflow.core.state.StateStore;
+import io.stoatflow.core.state.StoreBuilder;
 import io.stoatflow.core.state.Stores;
 import io.stoatflow.core.state.WindowStore;
 import io.stoatflow.core.topology.JoinWindows;

@@ -20,27 +20,27 @@ package io.axual.ksml.docs.examples;
  * =========================LICENSE_END==================================
  */
 
-import lombok.extern.slf4j.Slf4j;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.networknt.schema.JsonSchema;
-import com.networknt.schema.JsonSchemaFactory;
-import com.networknt.schema.SpecVersion;
-import com.networknt.schema.ValidationMessage;
+import com.networknt.schema.Error;
+import com.networknt.schema.Schema;
+import com.networknt.schema.SchemaRegistry;
+import com.networknt.schema.SpecificationVersion;
 import io.axual.ksml.data.notation.json.JsonSchemaMapper;
 import io.axual.ksml.definition.parser.TopologyDefinitionParser;
 import io.axual.ksml.generator.YAMLObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Set;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -58,7 +58,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 @Slf4j
 class AllDefinitionsSchemaValidationTest {
 
-    private static JsonSchema ksmlSchema;
+    private static Schema ksmlSchema;
 
     /**
      * Discovers all YAML files in the resources directory from both the ksml module
@@ -78,21 +78,21 @@ class AllDefinitionsSchemaValidationTest {
         // Get the integration tests directory
         // From target/test-classes, go up 3 levels to reach project root, then navigate to integration tests
         Path integrationTestsDir = ksmlTestResourcesDir.getParent().getParent().getParent()
-            .resolve("ksml-integration-tests/src/test/resources/docs-examples");
+                .resolve("ksml-integration-tests/src/test/resources/docs-examples");
 
         // Find all .yaml files from both directories, excluding ksml-runner.yaml files (runner config, not KSML definitions)
         Stream<Path> ksmlFiles = Files.walk(ksmlTestResourcesDir)
-            .filter(Files::isRegularFile)
-            .filter(path -> path.toString().endsWith(".yaml"))
-            .filter(path -> !path.getFileName().toString().equals("ksml-runner.yaml"));
+                .filter(Files::isRegularFile)
+                .filter(path -> path.toString().endsWith(".yaml"))
+                .filter(path -> !path.getFileName().toString().equals("ksml-runner.yaml"));
 
         // Add integration tests files if the directory exists
         Stream<Path> integrationFiles = Stream.empty();
         if (Files.exists(integrationTestsDir)) {
             integrationFiles = Files.walk(integrationTestsDir)
-                .filter(Files::isRegularFile)
-                .filter(path -> path.toString().endsWith(".yaml"))
-                .filter(path -> !path.getFileName().toString().equals("ksml-runner.yaml"));
+                    .filter(Files::isRegularFile)
+                    .filter(path -> path.toString().endsWith(".yaml"))
+                    .filter(path -> !path.getFileName().toString().equals("ksml-runner.yaml"));
         }
 
         // Combine both streams and sort for consistent test ordering
@@ -116,16 +116,15 @@ class AllDefinitionsSchemaValidationTest {
         // The generated schema by default allows additional properties, but for validation
         // we want to catch typos like "functionss:" instead of "functions:"
         ((ObjectNode) schemaNode).put("additionalProperties", false);
-
         // Load the schema using networknt validator with Draft 2019-09 support
-        JsonSchemaFactory schemaFactory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V201909);
+        SchemaRegistry schemaFactory = SchemaRegistry.withDefaultDialect(SpecificationVersion.DRAFT_2019_09);
         ksmlSchema = schemaFactory.getSchema(schemaNode);
     }
-    
+
     /**
      * Returns the generated KSML JSON schema
      */
-    private static JsonSchema getKsmlSchema() {
+    private static Schema getKsmlSchema() {
         assertNotNull(ksmlSchema, "Schema was not generated. Run generateSchema() first.");
         return ksmlSchema;
     }
@@ -136,25 +135,25 @@ class AllDefinitionsSchemaValidationTest {
         log.info("Validating: {}", yamlFile.getFileName());
 
         // Load the KSML schema
-        JsonSchema schema = getKsmlSchema();
+        Schema schema = getKsmlSchema();
 
         // Read and parse the YAML file into JsonNode
         String yamlContent = Files.readString(yamlFile);
         JsonNode jsonContent = YAMLObjectMapper.INSTANCE.readValue(yamlContent, JsonNode.class);
 
         // Validate the JSON content against the schema
-        Set<ValidationMessage> validationMessages = schema.validate(jsonContent);
+        List<Error> errors = schema.validate(jsonContent);
 
         // Check if validation passed
-        if (validationMessages.isEmpty()) {
+        if (errors.isEmpty()) {
             // Validation passed
             assertTrue(true, "YAML file " + yamlFile.getFileName() + " is valid against KSML schema");
         } else {
             // Validation failed - collect all error messages
             StringBuilder errorMessages = new StringBuilder();
             errorMessages.append("Schema validation failed for ").append(yamlFile.getFileName()).append(":\n");
-            for (ValidationMessage msg : validationMessages) {
-                errorMessages.append("  - ").append(msg.getMessage()).append("\n");
+            for (Error error : errors) {
+                errorMessages.append("  - ").append(error.getMessage()).append("\n");
             }
             fail(errorMessages.toString());
         }

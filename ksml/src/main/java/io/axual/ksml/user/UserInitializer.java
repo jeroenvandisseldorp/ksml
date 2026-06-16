@@ -26,7 +26,7 @@ import io.axual.ksml.data.type.DataType;
 import io.axual.ksml.dsl.KSMLDSL;
 import io.axual.ksml.metric.MetricTags;
 import io.axual.ksml.python.Invoker;
-import org.apache.kafka.streams.kstream.Initializer;
+import io.stoatflow.core.topology.Initializer;
 
 public class UserInitializer extends Invoker implements Initializer<Object> {
     private static final DataType EXPECTED_RESULT_TYPE = DataType.UNKNOWN;

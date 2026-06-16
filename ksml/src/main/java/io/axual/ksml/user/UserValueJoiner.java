@@ -28,8 +28,8 @@ import io.axual.ksml.data.type.DataType;
 import io.axual.ksml.dsl.KSMLDSL;
 import io.axual.ksml.metric.MetricTags;
 import io.axual.ksml.python.Invoker;
-import org.apache.kafka.streams.kstream.ValueJoiner;
-import org.apache.kafka.streams.kstream.ValueJoinerWithKey;
+import io.stoatflow.core.topology.ValueJoiner;
+import io.stoatflow.core.topology.ValueJoinerWithKey;
 
 public class UserValueJoiner extends Invoker implements ValueJoiner<Object, Object, Object>, ValueJoinerWithKey<Object, Object, Object, Object> {
     private static final DataType EXPECTED_RESULT_TYPE = DataType.UNKNOWN;

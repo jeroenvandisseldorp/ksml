@@ -76,7 +76,7 @@ public class ErrorHandling {
             processExceptionLogger.error("Caught unhandled exception, stopping this KSML instance", throwable);
         }
         // Stop only the current instance of KSML
-        return StreamsUn.StreamThreadExceptionResponse.SHUTDOWN_CLIENT;
+        return StreamsUncaughtExceptionHandler.StreamThreadExceptionResponse.SHUTDOWN_CLIENT;
     }
 
     public String bytesToString(byte[] data) {
@@ -111,7 +111,7 @@ public class ErrorHandling {
                 logger.error("Caused by: {}", exception.getMessage(), exception);
                 break;
             }
-            case  ProductionContext ctx: {
+            case ProductionContext ctx: {
                 logger.error("Processing error:\n  topic={}\n  failedOn={}\n  sourceTopic={}\n  sourcePartition={}\n  sourceOffset={}\n  processorNodeId={}\n  key={}\n  value={}\n",
                         ctx.getTopic(),
                         ctx.getFailedOn(),

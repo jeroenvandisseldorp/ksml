@@ -26,11 +26,14 @@ import io.axual.ksml.definition.StateStoreDefinition;
 import io.axual.ksml.definition.WindowStateStoreDefinition;
 import io.axual.ksml.exception.TopologyException;
 import io.axual.ksml.generator.StreamDataType;
+import io.stoatflow.core.state.KeyValueBytesStoreSupplier;
 import io.stoatflow.core.state.KeyValueStore;
+import io.stoatflow.core.state.SessionBytesStoreSupplier;
 import io.stoatflow.core.state.SessionStore;
 import io.stoatflow.core.state.StateStore;
 import io.stoatflow.core.state.StoreBuilder;
 import io.stoatflow.core.state.Stores;
+import io.stoatflow.core.state.WindowBytesStoreSupplier;
 import io.stoatflow.core.state.WindowStore;
 import io.stoatflow.core.topology.JoinWindows;
 import io.stoatflow.core.topology.Materialized;
@@ -58,10 +61,10 @@ public class StoreUtil {
         if (!result.retainDuplicates()) {
             throw new TopologyException("The window store '" + store.name() + "' should have 'retainDuplicates' set to 'true'.");
         }
-        if (result.windowSize() != joinWindows.size()) {
+        if (result.windowSize() != joinWindows.getTimeDifferenceMs()) {
             throw new TopologyException("The window store '" + store.name() + "' should have 'windowSize' equal to '2*timeDifference'.");
         }
-        if (result.retentionPeriod() != joinWindows.size() + joinWindows.gracePeriodMs()) {
+        if (result.retentionPeriod() != joinWindows.getTimeDifferenceMs() + joinWindows.getGraceMs()) {
             throw new TopologyException("The window store '" + store.name() + "' should have 'retention' equal to '2*timeDifference + grace'.");
         }
         return result;

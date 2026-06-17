@@ -28,7 +28,7 @@ import io.axual.ksml.generator.TopologyResources;
 import io.axual.ksml.operation.SuppressOperation;
 import io.axual.ksml.parser.ChoiceParser;
 import io.axual.ksml.parser.StructsParser;
-import org.apache.kafka.streams.kstream.Suppressed;
+import io.stoatflow.core.topology.Suppressed;
 
 import java.util.List;
 import java.util.Map;

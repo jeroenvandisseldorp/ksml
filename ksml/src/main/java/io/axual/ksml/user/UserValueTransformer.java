@@ -29,7 +29,7 @@ import io.axual.ksml.dsl.KSMLDSL;
 import io.axual.ksml.metric.MetricTags;
 import io.axual.ksml.python.Invoker;
 import io.axual.ksml.store.StateStores;
-import org.apache.kafka.streams.kstream.ValueMapperWithKey;
+import io.stoatflow.core.topology.ValueMapperWithKey;
 
 public class UserValueTransformer extends Invoker implements ValueMapperWithKey<Object, Object, DataObject> {
     private static final DataType EXPECTED_RESULT_TYPE = DataType.UNKNOWN;

@@ -28,8 +28,6 @@ import io.axual.ksml.generator.YAMLObjectMapper;
 import io.axual.ksml.parser.ParseNode;
 import io.axual.ksml.python.PythonContextConfig;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.streams.StreamsBuilder;
-import org.apache.kafka.streams.TopologyTestDriver;
 import org.graalvm.home.Version;
 import picocli.CommandLine;
 

@@ -30,8 +30,6 @@ import io.axual.ksml.generator.YAMLObjectMapper;
 import io.axual.ksml.parser.ParseNode;
 import io.axual.ksml.type.UserType;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.streams.StreamsBuilder;
-import org.apache.kafka.streams.TopologyDescription;
 import org.graalvm.home.Version;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;

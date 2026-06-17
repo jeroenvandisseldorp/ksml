@@ -30,7 +30,7 @@ import io.axual.ksml.exception.ExecutionException;
 import io.axual.ksml.metric.MetricTags;
 import io.axual.ksml.python.Invoker;
 import io.axual.ksml.store.StateStores;
-import org.apache.kafka.streams.kstream.ValueMapperWithKey;
+import io.stoatflow.core.topology.ValueMapperWithKey;
 
 import java.util.ArrayList;
 

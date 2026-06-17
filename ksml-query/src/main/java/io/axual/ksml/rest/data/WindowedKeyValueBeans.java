@@ -21,7 +21,6 @@ package io.axual.ksml.rest.data;
  */
 
 import io.axual.ksml.data.object.DataObject;
-import org.apache.kafka.streams.kstream.Window;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -27,7 +27,6 @@ import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.stream.StreamWrapper;
 import io.axual.ksml.user.UserKeyTransformer;
-import org.apache.kafka.streams.kstream.KStream;
 
 public class LeftJoinWithGlobalTableOperation extends BaseOperation {
     private static final String KEYSELECTOR_NAME = "Mapper";

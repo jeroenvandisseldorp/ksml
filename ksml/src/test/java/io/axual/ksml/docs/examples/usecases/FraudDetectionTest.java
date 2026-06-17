@@ -25,8 +25,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.axual.ksml.testutil.KSMLTopic;
 import io.axual.ksml.testutil.KSMLTopologyTest;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.streams.TestInputTopic;
-import org.apache.kafka.streams.TestOutputTopic;
 import org.junit.jupiter.api.DisplayName;
 
 import java.util.HashMap;

@@ -20,8 +20,8 @@ package io.axual.ksml.proxy.store;
  * =========================LICENSE_END==================================
  */
 
-import org.apache.kafka.streams.state.TimestampedKeyValueStore;
-import org.apache.kafka.streams.state.ValueAndTimestamp;
+import io.stoatflow.core.state.TimestampedKeyValueStore;
+import io.stoatflow.core.state.ValueAndTimestamp;
 import org.graalvm.polyglot.HostAccess;
 
 /**

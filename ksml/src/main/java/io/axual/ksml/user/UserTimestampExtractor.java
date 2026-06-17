@@ -33,9 +33,9 @@ import io.axual.ksml.dsl.KSMLDSL;
 import io.axual.ksml.exception.ExecutionException;
 import io.axual.ksml.metric.MetricTags;
 import io.axual.ksml.python.Invoker;
+import io.stoatflow.core.topology.TimestampExtractor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.streams.processor.TimestampExtractor;
 
 @Slf4j
 public class UserTimestampExtractor extends Invoker implements TimestampExtractor {

@@ -27,7 +27,7 @@ import io.axual.ksml.data.object.DataObject;
 import io.axual.ksml.dsl.KSMLDSL;
 import io.axual.ksml.metric.MetricTags;
 import io.axual.ksml.python.Invoker;
-import org.apache.kafka.streams.kstream.Aggregator;
+import io.stoatflow.core.topology.Aggregator;
 
 public class UserAggregator extends Invoker implements Aggregator<Object, Object, Object> {
     private static final NativeDataObjectMapper NATIVE_MAPPER = new DataObjectFlattener();

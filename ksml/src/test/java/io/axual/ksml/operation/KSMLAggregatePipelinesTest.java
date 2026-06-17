@@ -23,11 +23,6 @@ package io.axual.ksml.operation;
 import io.axual.ksml.testutil.KSMLDriver;
 import io.axual.ksml.testutil.KSMLTopic;
 import io.axual.ksml.testutil.KSMLTopologyTest;
-import org.apache.kafka.streams.KeyValue;
-import org.apache.kafka.streams.TestInputTopic;
-import org.apache.kafka.streams.TestOutputTopic;
-import org.apache.kafka.streams.TopologyTestDriver;
-import org.apache.kafka.streams.state.KeyValueStore;
 import org.junit.jupiter.api.DisplayName;
 
 import java.util.List;

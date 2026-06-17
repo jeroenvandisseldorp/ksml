@@ -119,7 +119,7 @@
 
         <dependency>
             <groupId>io.stoatflow</groupId>
-            <artifactId>stoatflow-core</artifactId>
+            <artifactId>stoatflow-runtime</artifactId>
         </dependency>
         <!-- Metrics -->
         <dependency>

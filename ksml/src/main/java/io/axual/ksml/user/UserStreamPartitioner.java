@@ -23,19 +23,16 @@ package io.axual.ksml.user;
 import io.axual.ksml.data.mapper.DataObjectFlattener;
 import io.axual.ksml.data.mapper.NativeDataObjectMapper;
 import io.axual.ksml.data.object.DataInteger;
-import io.axual.ksml.data.object.DataList;
 import io.axual.ksml.data.object.DataString;
 import io.axual.ksml.data.type.DataType;
 import io.axual.ksml.data.type.ListType;
 import io.axual.ksml.data.type.UnionType;
 import io.axual.ksml.dsl.KSMLDSL;
+import io.axual.ksml.exception.ExecutionException;
 import io.axual.ksml.metric.MetricTags;
 import io.axual.ksml.python.Invoker;
-import org.apache.kafka.streams.processor.StreamPartitioner;
-
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import io.stoatflow.core.topology.StreamPartitioner;
+import org.jspecify.annotations.NonNull;
 
 public class UserStreamPartitioner extends Invoker implements StreamPartitioner<Object, Object> {
     public static final DataType EXPECTED_RESULT_TYPE = new UnionType(
@@ -49,19 +46,29 @@ public class UserStreamPartitioner extends Invoker implements StreamPartitioner<
         verifyResultType(EXPECTED_RESULT_TYPE);
     }
 
+//    @Override
+//    public Optional<Set<Integer>> partitions(String topic, Object key, Object value, int numPartitions) {
+//        final var result = timeExecutionOf(() -> function.call(new DataString(topic), NATIVE_MAPPER.toDataObject(key), NATIVE_MAPPER.toDataObject(value), new DataInteger(numPartitions)));
+//        // Check for old-style partitioner return value (one partition number)
+//        if (result instanceof DataInteger dataInteger) {
+//            return Optional.of(Set.of(dataInteger.value()));
+//        }
+//        // Check for new-style partitioner return value (set of partitions)
+//        if (result instanceof DataList dataList && dataList.valueType() == DataInteger.DATATYPE) {
+//            final var parts = new HashSet<Integer>();
+//            dataList.forEach(i -> parts.add(((DataInteger) i).value()));
+//            return Optional.of(parts);
+//        }
+//        return Optional.empty();
+//    }
+
     @Override
-    public Optional<Set<Integer>> partitions(String topic, Object key, Object value, int numPartitions) {
+    public int partition(@NonNull String topic, Object key, Object value, int numPartitions) {
         final var result = timeExecutionOf(() -> function.call(new DataString(topic), NATIVE_MAPPER.toDataObject(key), NATIVE_MAPPER.toDataObject(value), new DataInteger(numPartitions)));
         // Check for old-style partitioner return value (one partition number)
         if (result instanceof DataInteger dataInteger) {
-            return Optional.of(Set.of(dataInteger.value()));
+            return dataInteger.value();
         }
-        // Check for new-style partitioner return value (set of partitions)
-        if (result instanceof DataList dataList && dataList.valueType() == DataInteger.DATATYPE) {
-            final var parts = new HashSet<Integer>();
-            dataList.forEach(i -> parts.add(((DataInteger) i).value()));
-            return Optional.of(parts);
-        }
-        return Optional.empty();
+        throw new ExecutionException("Partitioner did not return a number");
     }
 }

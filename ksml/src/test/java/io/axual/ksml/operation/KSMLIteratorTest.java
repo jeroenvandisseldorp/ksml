@@ -24,7 +24,6 @@ import io.axual.ksml.testutil.KSMLTest;
 import io.axual.ksml.testutil.KSMLTestExtension;
 import io.axual.ksml.testutil.KSMLTopic;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.streams.TestInputTopic;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @Slf4j

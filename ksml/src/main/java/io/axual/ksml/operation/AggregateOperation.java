@@ -35,8 +35,8 @@ import io.axual.ksml.stream.TimeWindowedKStreamWrapper;
 import io.axual.ksml.user.UserAggregator;
 import io.axual.ksml.user.UserInitializer;
 import io.axual.ksml.user.UserMerger;
-import org.apache.kafka.streams.kstream.KTable;
-import org.apache.kafka.streams.kstream.Windowed;
+import io.stoatflow.core.topology.KTable;
+import io.stoatflow.core.topology.Windowed;
 
 public class AggregateOperation extends StoreOperation {
     private static final String ADDER_NAME = "Adder";

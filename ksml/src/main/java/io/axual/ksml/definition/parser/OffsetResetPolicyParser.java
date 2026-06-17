@@ -22,8 +22,8 @@ package io.axual.ksml.definition.parser;
 
 import io.axual.ksml.exception.TopologyException;
 import io.axual.ksml.parser.DurationParser;
+import io.stoatflow.core.topology.AutoOffsetReset;
 import org.apache.kafka.clients.consumer.internals.AutoOffsetResetStrategy;
-import org.apache.kafka.streams.AutoOffsetReset;
 
 public class OffsetResetPolicyParser {
     public static AutoOffsetReset parseResetPolicy(String resetPolicy) {

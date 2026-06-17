@@ -32,7 +32,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.apache.kafka.streams.TopologyTestDriver;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -30,9 +30,9 @@ import io.axual.ksml.stream.KTableWrapper;
 import io.axual.ksml.stream.StreamWrapper;
 import io.axual.ksml.user.UserValueTransformer;
 import io.axual.ksml.user.UserValueTransformerWithKey;
-import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.KTable;
-import org.apache.kafka.streams.kstream.ValueTransformerWithKeySupplier;
+import io.stoatflow.core.topology.KStream;
+import io.stoatflow.core.topology.KTable;
+import io.stoatflow.core.topology.ValueTransformerWithKeySupplier;
 
 public class TransformValueOperation extends StoreOperation {
     private static final String MAPPER_NAME = "Mapper";

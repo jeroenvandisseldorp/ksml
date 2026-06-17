@@ -105,7 +105,7 @@
         <victools.version>4.38.0</victools.version>
         <wire.version>5.2.1</wire.version>
 
-        <stoatflow.version>1.0.0-alpha.5</stoatflow.version>
+        <stoatflow.version>1.0.0-alpha.7</stoatflow.version>
 
         <!-- KSML schema generation -->
         <ksml.schema.output.file>docs/ksml-language-spec.json</ksml.schema.output.file>
@@ -345,7 +345,12 @@
             </dependency>
             <dependency>
                 <groupId>io.stoatflow</groupId>
-                <artifactId>stoatflow-core</artifactId>
+                <artifactId>stoatflow-runtime</artifactId>
+                <version>${stoatflow.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.stoatflow</groupId>
+                <artifactId>stoatflow-test-utils</artifactId>
                 <version>${stoatflow.version}</version>
             </dependency>
 

@@ -27,8 +27,6 @@ import io.axual.ksml.generator.TopologyResources;
 import io.axual.ksml.operation.WindowByTimeOperation;
 import io.axual.ksml.parser.ChoiceParser;
 import io.axual.ksml.parser.StructsParser;
-import org.apache.kafka.streams.kstream.SlidingWindows;
-import org.apache.kafka.streams.kstream.TimeWindows;
 
 import java.util.Map;
 

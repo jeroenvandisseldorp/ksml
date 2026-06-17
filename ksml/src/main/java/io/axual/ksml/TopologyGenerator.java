@@ -33,10 +33,10 @@ import io.axual.ksml.operation.StoreOperation;
 import io.axual.ksml.operation.StreamOperation;
 import io.axual.ksml.python.PythonContextConfig;
 import io.axual.ksml.stream.StreamWrapper;
+import io.stoatflow.core.config.StreamsConfig;
+import io.stoatflow.core.topology.StreamsBuilder;
+import io.stoatflow.core.topology.Topology;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.streams.StreamsBuilder;
-import org.apache.kafka.streams.StreamsConfig;
-import org.apache.kafka.streams.Topology;
 
 import java.util.HashSet;
 import java.util.Map;

@@ -32,8 +32,8 @@ import io.axual.ksml.exception.TopologyException;
 import io.axual.ksml.execution.FatalError;
 import io.axual.ksml.store.StateStores;
 import io.axual.ksml.user.UserFunction;
+import io.stoatflow.core.state.StateStore;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.streams.processor.StateStore;
 import org.graalvm.polyglot.Value;
 
 import java.util.ArrayList;

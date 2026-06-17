@@ -35,7 +35,6 @@ import jakarta.annotation.Nonnull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.streams.StreamsConfig;
 
 import java.util.Collections;
 import java.util.HashMap;

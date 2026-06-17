@@ -30,8 +30,6 @@ import io.axual.ksml.stream.SessionWindowedKStreamWrapper;
 import io.axual.ksml.stream.StreamWrapper;
 import io.axual.ksml.stream.TimeWindowedKStreamWrapper;
 import io.axual.ksml.user.UserReducer;
-import org.apache.kafka.streams.kstream.KTable;
-import org.apache.kafka.streams.kstream.Windowed;
 
 public class ReduceOperation extends StoreOperation {
     private static final String ADDER_NAME = "Adder";

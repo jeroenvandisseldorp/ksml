@@ -24,8 +24,6 @@ import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.stream.StreamWrapper;
 import io.axual.ksml.type.UserType;
-import org.apache.kafka.streams.kstream.Named;
-import org.apache.kafka.streams.kstream.ValueMapper;
 
 public class ConvertValueOperation extends BaseOperation {
     private final UserType targetValueType;

@@ -27,7 +27,7 @@ import io.axual.ksml.data.type.DataType;
 import io.axual.ksml.dsl.KSMLDSL;
 import io.axual.ksml.metric.MetricTags;
 import io.axual.ksml.python.Invoker;
-import org.apache.kafka.streams.kstream.KeyValueMapper;
+import io.stoatflow.core.topology.KeyValueMapper;
 
 public class UserKeyValuePrinter extends Invoker implements KeyValueMapper<Object, Object, String> {
     public static final DataType EXPECTED_RESULT_TYPE = DataString.DATATYPE;

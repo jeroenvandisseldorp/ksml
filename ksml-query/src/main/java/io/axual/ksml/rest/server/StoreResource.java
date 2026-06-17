@@ -29,13 +29,6 @@ import io.axual.ksml.rest.data.WindowedKeyValueBeans;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.ServiceUnavailableException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.streams.KeyValue;
-import org.apache.kafka.streams.StoreQueryParameters;
-import org.apache.kafka.streams.errors.UnknownStateStoreException;
-import org.apache.kafka.streams.kstream.Windowed;
-import org.apache.kafka.streams.state.HostInfo;
-import org.apache.kafka.streams.state.KeyValueIterator;
-import org.apache.kafka.streams.state.QueryableStoreType;
 
 import java.util.List;
 import java.util.Optional;

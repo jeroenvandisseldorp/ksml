@@ -21,7 +21,6 @@ package io.axual.ksml.rest.data;
  */
 
 import lombok.Getter;
-import org.apache.kafka.streams.kstream.Window;
 
 @Getter
 public class WindowDataBean {

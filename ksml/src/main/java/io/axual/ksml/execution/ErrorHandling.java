@@ -26,6 +26,8 @@ import io.stoatflow.core.exception.ProcessingContext;
 import io.stoatflow.core.exception.ProcessingHandlerResponse;
 import io.stoatflow.core.exception.ProductionContext;
 import io.stoatflow.core.exception.ProductionHandlerResponse;
+import io.stoatflow.core.exception.StreamsException;
+import io.stoatflow.core.exception.StreamsUncaughtExceptionHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -122,7 +124,9 @@ public class ErrorHandling {
                         key,
                         value);
                 logger.error("Caused by: {}", exception.getMessage(), exception);
+                break;
             }
+            default: throw new UnsupportedOperationException("Unsupported context type: " + context.getClass().getName());
         }
     }
 

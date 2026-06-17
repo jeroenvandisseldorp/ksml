@@ -28,8 +28,8 @@ import io.axual.ksml.stream.KGroupedStreamWrapper;
 import io.axual.ksml.stream.StreamWrapper;
 import io.axual.ksml.stream.TimeWindowedCogroupedKStreamWrapper;
 import io.axual.ksml.stream.TimeWindowedKStreamWrapper;
-import org.apache.kafka.streams.kstream.SlidingWindows;
-import org.apache.kafka.streams.kstream.TimeWindows;
+import io.stoatflow.core.topology.SlidingWindows;
+import io.stoatflow.core.topology.TimeWindows;
 
 public class WindowByTimeOperation extends BaseOperation {
     private final SlidingWindows slidingWindows;

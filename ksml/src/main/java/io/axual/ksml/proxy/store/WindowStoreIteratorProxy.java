@@ -20,32 +20,36 @@ package io.axual.ksml.proxy.store;
  * =========================LICENSE_END==================================
  */
 
-import io.axual.ksml.proxy.base.AbstractProxy;
-import io.stoatflow.core.state.KeyValueIterator;
+import io.stoatflow.core.state.WindowStoreIterator;
 import org.graalvm.polyglot.HostAccess;
+import org.jspecify.annotations.NonNull;
 
-public class KeyValueIteratorProxy implements AbstractProxy {
-    private final KeyValueIterator<?, ?> iterator;
-    private boolean closed = false;
+public class WindowStoreIteratorProxy<V> {
+    private final WindowStoreIterator<V> delegate;
 
-    public KeyValueIteratorProxy(KeyValueIterator<?, ?> iterator) {
-        this.iterator = iterator;
-    }
-
-    @HostAccess.Export
-    public void close() {
-        if (!closed) iterator.close();
-        closed = true;
-    }
-
-    @HostAccess.Export
-    public boolean hasNext() {
-        return iterator.hasNext();
+    public WindowStoreIteratorProxy(WindowStoreIterator<V> delegate) {
+        this.delegate = delegate;
     }
 
     @HostAccess.Export
     public Object next() {
-        if (!iterator.hasNext()) return null;
-        return ProxyUtil.toPython(iterator.next());
+        if (!delegate.hasNext())
+            return null;
+        return ProxyUtil.toPython(delegate.next());
+    }
+
+    @HostAccess.Export
+    public boolean hasNext() {
+        return delegate.hasNext();
+    }
+
+    @HostAccess.Export
+    public @NonNull Long peekNextKey() {
+        return delegate.peekNextKey();
+    }
+
+    @HostAccess.Export
+    public void close() {
+        delegate.close();
     }
 }

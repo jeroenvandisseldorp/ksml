@@ -27,7 +27,6 @@ import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.stream.KTableWrapper;
 import io.axual.ksml.stream.StreamWrapper;
 import io.axual.ksml.user.UserKeyTransformer;
-import org.apache.kafka.streams.kstream.KStream;
 
 public class ToStreamOperation extends BaseOperation {
     private static final String MAPPER_NAME = "Mapper";

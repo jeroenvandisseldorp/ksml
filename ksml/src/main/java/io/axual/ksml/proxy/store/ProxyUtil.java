@@ -27,12 +27,15 @@ import io.axual.ksml.python.PythonDataObjectMapper;
 import io.axual.ksml.python.PythonDict;
 import io.axual.ksml.python.PythonNativeMapper;
 import io.stoatflow.core.state.KeyValue;
+import io.stoatflow.core.state.KeyValueIterator;
 import io.stoatflow.core.state.KeyValueStore;
 import io.stoatflow.core.state.SessionStore;
 import io.stoatflow.core.state.StateStore;
 import io.stoatflow.core.state.ValueAndTimestamp;
 import io.stoatflow.core.state.VersionedKeyValueStore;
+import io.stoatflow.core.state.VersionedRecord;
 import io.stoatflow.core.state.WindowStore;
+import io.stoatflow.core.state.WindowStoreIterator;
 import io.stoatflow.core.topology.Windowed;
 
 /**
@@ -61,7 +64,7 @@ public class ProxyUtil {
         if (object instanceof ValueAndTimestamp<?> vat) return resultFrom(vat);
         if (object instanceof VersionedRecord<?> vr) return resultFrom(vr);
         if (object instanceof KeyValue<?, ?> kv) return resultFrom(kv);
-        if (object instanceof WindowStoreIterator<?> wis) return new WindowStoreIteratorProxy(wis);
+        if (object instanceof WindowStoreIterator<?> wis) return new WindowStoreIteratorProxy<>(wis);
         if (object instanceof KeyValueIterator<?, ?> kvi) return new KeyValueIteratorProxy(kvi);
 
         // Normal processing, ensuring flattened data structures

@@ -36,8 +36,6 @@ import io.axual.ksml.type.UserType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.apache.kafka.streams.TestInputTopic;
-import org.apache.kafka.streams.TopologyTestDriver;
 
 import java.time.Instant;
 import java.util.ArrayList;

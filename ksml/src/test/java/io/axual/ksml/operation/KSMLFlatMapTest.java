@@ -23,6 +23,9 @@ package io.axual.ksml.operation;
 import io.axual.ksml.testutil.KSMLTest;
 import io.axual.ksml.testutil.KSMLTestExtension;
 import io.axual.ksml.testutil.KSMLTopic;
+import kotlin.Pair;
+import io.stoatflow.testutils.TestInputTopic;
+import io.stoatflow.testutils.TestOutputTopic;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -50,10 +53,10 @@ class KSMLFlatMapTest {
         // we expect the output to contain this record, duplicated
         assertEquals(2, outputTopic.getQueueSize(), "output should contain 2 records");
 
-        List<KeyValue<String, String>> keyValues = outputTopic.readKeyValuesToList();
-        assertEquals("someKey", keyValues.get(0).key, "key should be copied");
-        assertEquals("someValue", keyValues.get(0).value, "value should be copied");
-        assertEquals("someKey-b", keyValues.get(1).key, "key should be copied and changed");
-        assertEquals("someValue-b", keyValues.get(1).value, "value should be copied and changed");
+        List<Pair<String, String>> keyValues = outputTopic.readKeyValuesToList();
+        assertEquals("someKey", keyValues.get(0).getFirst(), "key should be copied");
+        assertEquals("someValue", keyValues.get(0).getSecond(), "value should be copied");
+        assertEquals("someKey-b", keyValues.get(1).getFirst(), "key should be copied and changed");
+        assertEquals("someValue-b", keyValues.get(1).getSecond(), "value should be copied and changed");
     }
 }

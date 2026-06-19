@@ -142,7 +142,8 @@ public class StoreUtil {
             return Stores.inMemoryWindowStore(store.name(), store.retention(), store.windowSize(), store.retainDuplicates());
         }
         if (store.timestamped()) {
-            return Stores.persistentTimestampedWindowStore(store.name(), store.retention(), store.windowSize(), store.retainDuplicates());
+            return Stores.persistentTimestampedWindowStore(store.name(), store.retention(), store.windowSize());
+//            return Stores.persistentTimestampedWindowStore(store.name(), store.retention(), store.windowSize(), store.retainDuplicates());
         }
         return Stores.persistentWindowStore(store.name(), store.retention(), store.windowSize(), store.retainDuplicates());
     }

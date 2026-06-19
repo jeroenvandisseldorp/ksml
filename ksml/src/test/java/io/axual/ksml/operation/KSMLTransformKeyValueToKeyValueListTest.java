@@ -23,6 +23,9 @@ package io.axual.ksml.operation;
 import io.axual.ksml.testutil.KSMLTest;
 import io.axual.ksml.testutil.KSMLTestExtension;
 import io.axual.ksml.testutil.KSMLTopic;
+import io.stoatflow.testutils.TestInputTopic;
+import io.stoatflow.testutils.TestOutputTopic;
+import kotlin.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -50,10 +53,10 @@ class KSMLTransformKeyValueToKeyValueListTest {
         // we expect the output to contain this record, duplicated, with transformed key and value
         assertEquals(2, outputTopic.getQueueSize(), "output should contain 2 records");
 
-        List<KeyValue<String, String>> keyValues = outputTopic.readKeyValuesToList();
-        assertEquals("somekey-a", keyValues.get(0).key, "key should be copied");
-        assertEquals("somevalue-a", keyValues.get(0).value, "value should be copied");
-        assertEquals("somekey-b", keyValues.get(1).key, "key should be copied");
-        assertEquals("somevalue-b", keyValues.get(1).value, "value should be copied");
+        List<Pair<String, String>> keyValues = outputTopic.readKeyValuesToList();
+        assertEquals("somekey-a", keyValues.get(0).getFirst(), "key should be copied");
+        assertEquals("somevalue-a", keyValues.get(0).getSecond(), "value should be copied");
+        assertEquals("somekey-b", keyValues.get(1).getFirst(), "key should be copied");
+        assertEquals("somevalue-b", keyValues.get(1).getSecond(), "value should be copied");
     }
 }

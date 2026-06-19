@@ -27,6 +27,7 @@ import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.stream.StreamWrapper;
 import io.axual.ksml.user.UserKeyTransformer;
+import io.stoatflow.core.topology.KStream;
 
 public class LeftJoinWithGlobalTableOperation extends BaseOperation {
     private static final String KEYSELECTOR_NAME = "Mapper";
@@ -67,7 +68,7 @@ public class LeftJoinWithGlobalTableOperation extends BaseOperation {
         final var userJoiner = valueJoinerWithKey(joiner, tags);
         final var named = namedOf();
         final KStream<Object, Object> output = named != null
-                ? input.stream.leftJoin(otherGlobalKTable.globalTable, userSel, userJoiner, named)
+                ? input.stream.leftJoin(otherGlobalKTable.globalTable, userSel, userJoiner)
                 : input.stream.leftJoin(otherGlobalKTable.globalTable, userSel, userJoiner);
         return new KStreamWrapper(output, k, rv);
     }

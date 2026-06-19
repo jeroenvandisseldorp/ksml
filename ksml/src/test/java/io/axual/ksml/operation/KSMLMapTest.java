@@ -23,6 +23,8 @@ package io.axual.ksml.operation;
 import io.axual.ksml.testutil.KSMLTest;
 import io.axual.ksml.testutil.KSMLTestExtension;
 import io.axual.ksml.testutil.KSMLTopic;
+import io.stoatflow.testutils.TestInputTopic;
+import io.stoatflow.testutils.TestOutputTopic;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.generic.GenericRecord;
 import org.junit.jupiter.api.DisplayName;
@@ -33,6 +35,7 @@ import java.util.List;
 import static io.axual.ksml.operation.SensorData.SensorType.HUMIDITY;
 import static io.axual.ksml.operation.SensorData.SensorType.TEMPERATURE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import kotlin.Pair;
 
 @ExtendWith(KSMLTestExtension.class)
 @Slf4j
@@ -56,14 +59,14 @@ public class KSMLMapTest {
     void testMapByExpression() {
         inputs.forEach(rec -> inputTopic.pipeInput(rec));
 
-        List<KeyValue<String, String>> keyValues = outputTopic.readKeyValuesToList();
+        List<Pair<String, String>> keyValues = outputTopic.readKeyValuesToList();
         assertEquals(4, keyValues.size(), "All records should be transformed");
 
         // verify first and last record key and value; the pipeline creates them from fields in the record value
-        assertEquals("AMS", keyValues.get(0).key);
-        assertEquals("HUMIDITY 80", keyValues.get(0).value);
-        assertEquals("UTR", keyValues.get(3).key);
-        assertEquals("TEMPERATURE 27", keyValues.get(3).value);
+        assertEquals("AMS", keyValues.get(0).getFirst());
+        assertEquals("HUMIDITY 80", keyValues.get(0).getSecond());
+        assertEquals("UTR", keyValues.get(3).getFirst());
+        assertEquals("TEMPERATURE 27", keyValues.get(3).getSecond());
     }
 
     @KSMLTest(topology = "pipelines/test-map-code.yaml", schemaDirectory = "schemas")
@@ -71,14 +74,14 @@ public class KSMLMapTest {
     void testMapByCode() {
         inputs.forEach(rec -> inputTopic.pipeInput(rec));
 
-        List<KeyValue<String, String>> keyValues = outputTopic.readKeyValuesToList();
+        List<Pair<String, String>> keyValues = outputTopic.readKeyValuesToList();
         assertEquals(4, keyValues.size(), "All records should be transformed");
 
         // verify first and last record key and value; the pipeline creates them from fields in the record value
-        assertEquals("AMS", keyValues.get(0).key);
-        assertEquals("HUMIDITY 80", keyValues.get(0).value);
-        assertEquals("UTR", keyValues.get(3).key);
-        assertEquals("TEMPERATURE 27", keyValues.get(3).value);
+        assertEquals("AMS", keyValues.get(0).getFirst());
+        assertEquals("HUMIDITY 80", keyValues.get(0).getSecond());
+        assertEquals("UTR", keyValues.get(3).getFirst());
+        assertEquals("TEMPERATURE 27", keyValues.get(3).getSecond());
     }
 }
 

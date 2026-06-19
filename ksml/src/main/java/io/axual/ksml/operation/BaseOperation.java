@@ -58,7 +58,6 @@ import io.stoatflow.core.topology.StreamPartitioner;
 import io.stoatflow.core.topology.TableJoined;
 import io.stoatflow.core.topology.ValueJoiner;
 import io.stoatflow.core.topology.ValueJoinerWithKey;
-import io.stoatflow.core.topology.Windowed;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.utils.Bytes;
 import org.jspecify.annotations.NonNull;
@@ -378,7 +377,7 @@ public abstract class BaseOperation implements StreamOperation {
         return null;
     }
 
-    protected <V> Materialized<Windowed<Object>, V, SessionStore<Bytes, byte[]>> materializedOf(TopologyBuildContext context, SessionStateStoreDefinition store) {
+    protected <V> Materialized<Object, V, SessionStore<Bytes, byte[]>> materializedOf(TopologyBuildContext context, SessionStateStoreDefinition store) {
         if (store != null) {
             return context.materialize(store);
         }

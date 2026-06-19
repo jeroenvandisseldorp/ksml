@@ -26,6 +26,9 @@ import io.axual.ksml.testutil.KSMLDriver;
 import io.axual.ksml.testutil.KSMLTest;
 import io.axual.ksml.testutil.KSMLTestExtension;
 import io.axual.ksml.testutil.KSMLTopic;
+import io.stoatflow.core.state.VersionedKeyValueStore;
+import io.stoatflow.testutils.TestInputTopic;
+import io.stoatflow.testutils.TopologyTestDriver;
 import org.apache.avro.generic.GenericRecord;
 import org.junit.jupiter.api.extension.ExtendWith;
 

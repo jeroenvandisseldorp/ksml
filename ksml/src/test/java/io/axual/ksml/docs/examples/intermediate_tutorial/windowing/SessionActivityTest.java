@@ -25,6 +25,10 @@ import io.axual.ksml.testutil.KSMLDriver;
 import io.axual.ksml.testutil.KSMLTest;
 import io.axual.ksml.testutil.KSMLTestExtension;
 import io.axual.ksml.testutil.KSMLTopic;
+import io.stoatflow.testutils.TestInputTopic;
+import io.stoatflow.testutils.TestOutputTopic;
+import io.stoatflow.testutils.TopologyTestDriver;
+import kotlin.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -80,14 +84,14 @@ public class SessionActivityTest {
         testDriver.advanceWallClockTime(Duration.ofMinutes(2).plusSeconds(30));
 
         // Verify session closed with count of 3
-        List<KeyValue<String, Long>> results = outputTopic.readKeyValuesToList();
+        List<Pair<String, Long>> results = outputTopic.readKeyValuesToList();
         assertThat(results).isNotEmpty();
 
         // Find the final window result for user1 (last update has highest count)
         // Filter out null values (tombstone records)
         long maxCount = results.stream()
-                .filter(kv -> kv.key.contains("user1") && kv.value != null)
-                .mapToLong(kv -> kv.value)
+                .filter(kv -> kv.getFirst().contains("user1") && kv.getSecond() != null)
+                .mapToLong(kv -> kv.getSecond())
                 .max()
                 .orElse(0L);
 
@@ -109,17 +113,17 @@ public class SessionActivityTest {
         testDriver.advanceWallClockTime(Duration.ofMinutes(2).plusSeconds(30));
 
         // Verify both users have independent sessions
-        List<KeyValue<String, Long>> results = outputTopic.readKeyValuesToList();
+        List<Pair<String, Long>> results = outputTopic.readKeyValuesToList();
 
         long aliceMaxCount = results.stream()
-                .filter(kv -> kv.key.contains("alice") && kv.value != null)
-                .mapToLong(kv -> kv.value)
+                .filter(kv -> kv.getFirst().contains("alice") && kv.getSecond() != null)
+                .mapToLong(kv -> kv.getSecond())
                 .max()
                 .orElse(0L);
 
         long bobMaxCount = results.stream()
-                .filter(kv -> kv.key.contains("bob") && kv.value != null)
-                .mapToLong(kv -> kv.value)
+                .filter(kv -> kv.getFirst().contains("bob") && kv.getSecond() != null)
+                .mapToLong(kv -> kv.getSecond())
                 .max()
                 .orElse(0L);
 

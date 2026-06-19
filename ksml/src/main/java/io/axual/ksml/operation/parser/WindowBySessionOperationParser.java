@@ -25,6 +25,7 @@ import io.axual.ksml.dsl.KSMLDSL;
 import io.axual.ksml.generator.TopologyResources;
 import io.axual.ksml.operation.WindowBySessionOperation;
 import io.axual.ksml.parser.StructsParser;
+import io.stoatflow.core.topology.SessionWindows;
 
 public class WindowBySessionOperationParser extends OperationParser<WindowBySessionOperation> {
     public WindowBySessionOperationParser(TopologyResources resources) {

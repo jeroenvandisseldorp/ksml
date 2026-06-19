@@ -35,6 +35,7 @@ import io.axual.ksml.stream.TimeWindowedKStreamWrapper;
 import io.axual.ksml.user.UserAggregator;
 import io.axual.ksml.user.UserInitializer;
 import io.axual.ksml.user.UserMerger;
+import io.axual.ksml.user.UserSubtractor;
 import io.stoatflow.core.topology.KTable;
 import io.stoatflow.core.topology.Windowed;
 
@@ -111,7 +112,7 @@ public class AggregateOperation extends StoreOperation {
         final var add = userFunctionOf(context, ADDER_NAME, adder, vr, superOf(k), superOf(v), superOf(vr));
         final var userAdd = new UserAggregator(add, tags);
         final var sub = userFunctionOf(context, SUBTRACTOR_NAME, subtractor, vr, superOf(k), superOf(vr), superOf(vr));
-        final var userSub = new UserAggregator(sub, tags);
+        final var userSub = new UserSubtractor(sub, tags);
         final var kvStore = validateKeyValueStore(store(), k, vr);
         final var mat = materializedOf(context, kvStore);
         final var named = namedOf();
@@ -246,11 +247,11 @@ public class AggregateOperation extends StoreOperation {
         final var named = namedOf();
         final KTable<Windowed<Object>, Object> output = named != null
                 ? mat != null
-                ? input.sessionWindowedCogroupedKStream.aggregate(userInit, userMerg, named, mat)
-                : input.sessionWindowedCogroupedKStream.aggregate(userInit, userMerg, named)
+                ? input.sessionWindowedCogroupedKStream.aggregate(userMerg, userInit, named, mat)
+                : input.sessionWindowedCogroupedKStream.aggregate(userMerg, userInit, named)
                 : mat != null
-                ? input.sessionWindowedCogroupedKStream.aggregate(userInit, userMerg, mat)
-                : input.sessionWindowedCogroupedKStream.aggregate(userInit, userMerg);
+                ? input.sessionWindowedCogroupedKStream.aggregate(userMerg, userInit, mat)
+                : input.sessionWindowedCogroupedKStream.aggregate(userMerg, userInit);
         return new KTableWrapper((KTable) output, windowed(k), v);
     }
 

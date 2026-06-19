@@ -25,6 +25,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.axual.ksml.testutil.KSMLTest;
 import io.axual.ksml.testutil.KSMLTestExtension;
 import io.axual.ksml.testutil.KSMLTopic;
+import io.stoatflow.testutils.TestInputTopic;
+import io.stoatflow.testutils.TestOutputTopic;
+import kotlin.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -77,11 +80,11 @@ public class InlineStoreTest {
         inputTopic.pipeInput("temp_003", createSensorJson("temp_003", "charlie", "temperature", 24.0));
 
         // Read all aggregation updates (one per input)
-        List<KeyValue<String, String>> results = outputTopic.readKeyValuesToList();
+        List<Pair<String, String>> results = outputTopic.readKeyValuesToList();
         assertThat(results).hasSize(3);
 
         // Verify final aggregation (last result)
-        JsonNode finalResult = objectMapper.readTree(results.get(2).value);
+        JsonNode finalResult = objectMapper.readTree(results.get(2).getSecond());
 
         assertThat(finalResult.get("total_value").asDouble()).isCloseTo(76.0, offset(0.01)); // 25.5 + 26.5 + 24.0
         assertThat(finalResult.get("count").asInt()).isEqualTo(3);
@@ -98,7 +101,7 @@ public class InlineStoreTest {
         inputTopic.pipeInput("hum_002", createSensorJson("hum_002", "eve", "humidity", 65.0));
 
         // Read all aggregation updates
-        List<KeyValue<String, String>> results = outputTopic.readKeyValuesToList();
+        List<Pair<String, String>> results = outputTopic.readKeyValuesToList();
         assertThat(results).hasSize(5);
 
         // Find final results for each sensor type
@@ -106,10 +109,10 @@ public class InlineStoreTest {
         JsonNode humResult = null;
         JsonNode presResult = null;
 
-        for (KeyValue<String, String> kv : results) {
-            if (kv.key.equals("temperature")) tempResult = objectMapper.readTree(kv.value);
-            if (kv.key.equals("humidity")) humResult = objectMapper.readTree(kv.value);
-            if (kv.key.equals("pressure")) presResult = objectMapper.readTree(kv.value);
+        for (Pair<String, String> kv : results) {
+            if (kv.getFirst().equals("temperature")) tempResult = objectMapper.readTree(kv.getSecond());
+            if (kv.getFirst().equals("humidity")) humResult = objectMapper.readTree(kv.getSecond());
+            if (kv.getFirst().equals("pressure")) presResult = objectMapper.readTree(kv.getSecond());
         }
 
         // Verify temperature aggregation (2 readings: 25.0, 27.0)

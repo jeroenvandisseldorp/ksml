@@ -50,7 +50,7 @@ public class MergeOperation extends BaseOperation {
         final var named = namedOf();
         final var output = named != null
                 ? input.stream.merge(otherStream.stream, named)
-                : input.stream.merge(otherStream.stream);
+                : input.stream.merge(otherStream.stream, null);
         return new KStreamWrapper(output, k, v);
     }
 }

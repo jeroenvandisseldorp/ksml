@@ -20,9 +20,9 @@ package io.axual.ksml.generator;
  * =========================LICENSE_END==================================
  */
 
-import io.stoatflow.core.topology.StoatFlowProcessorDescription;
-import io.stoatflow.core.topology.StoatFlowSinkDescription;
-import io.stoatflow.core.topology.StoatFlowSourceDescription;
+import io.stoatflow.core.topology.ProcessorDescription;
+import io.stoatflow.core.topology.SinkDescription;
+import io.stoatflow.core.topology.SourceDescription;
 import io.stoatflow.core.topology.Topology;
 
 import java.util.Set;
@@ -70,19 +70,19 @@ public class TopologyAnalyzer {
 
     private static void analyzeTopology(Topology topology, Set<String> inputTopics, Set<String> outputTopics) {
         final var description = topology.describe();
-        for (int index = 0; index < description.getSubtopologies().size(); index++) {
-            for (var subTopology : description.getSubtopologies()) {
-                for (var node : subTopology.getNodes()) {
-                    if (node instanceof StoatFlowSourceDescription sourceNode) {
-                        inputTopics.addAll(sourceNode.getTopics());
+        for (int index = 0; index < description.subtopologies().size(); index++) {
+            for (var subTopology : description.subtopologies()) {
+                for (var node : subTopology.nodes()) {
+                    if (node instanceof SourceDescription sourceNode) {
+                        inputTopics.addAll(sourceNode.topicSet());
 //                        if (sourceNode.topicPattern() != null)
 //                            inputTopics.add(sourceNode.topicPattern().pattern());
                     }
-                    if (node instanceof StoatFlowProcessorDescription processorNode) {
+                    if (node instanceof ProcessorDescription processorNode) {
                         // Ignore store names here
                     }
-                    if (node instanceof StoatFlowSinkDescription sinkNode) {
-                        outputTopics.add(sinkNode.getTopic());
+                    if (node instanceof SinkDescription sinkNode) {
+                        outputTopics.add(sinkNode.topic());
                     }
                 }
             }

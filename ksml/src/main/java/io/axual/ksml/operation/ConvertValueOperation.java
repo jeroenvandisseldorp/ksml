@@ -24,6 +24,8 @@ import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.stream.StreamWrapper;
 import io.axual.ksml.type.UserType;
+import io.stoatflow.core.topology.Named;
+import io.stoatflow.core.topology.ValueMapper;
 
 public class ConvertValueOperation extends BaseOperation {
     private final UserType targetValueType;

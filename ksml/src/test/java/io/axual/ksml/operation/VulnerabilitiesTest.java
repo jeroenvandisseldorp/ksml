@@ -27,6 +27,10 @@ import io.axual.ksml.testutil.KSMLTest;
 import io.axual.ksml.testutil.KSMLTestExtension;
 import io.axual.ksml.testutil.KSMLTopic;
 import io.axual.ksml.testutil.KSMLTopologyTest;
+import io.stoatflow.core.state.KeyValueStore;
+import io.stoatflow.testutils.TestInputTopic;
+import io.stoatflow.testutils.TestOutputTopic;
+import io.stoatflow.testutils.TopologyTestDriver;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.generic.GenericRecord;
 import org.junit.jupiter.api.AfterAll;
@@ -113,7 +117,7 @@ public class VulnerabilitiesTest {
             inputTopic.pipeInput("key1", "value1");
             assertFalse(outputTopic.isEmpty(), "record should be copied");
             var keyValue = outputTopic.readKeyValue();
-            System.out.printf("Output topic key=%s, value=%s%n", keyValue.key, keyValue.value);
+            System.out.printf("Output topic key=%s, value=%s%n", keyValue.getFirst(), keyValue.getSecond());
             assertEquals(oldcounter, counter.get(), "No curl request should be received");
         }, "trying to exploit log and metrics should result in RuntimeException");
 

@@ -22,6 +22,13 @@ package io.axual.ksml.metric;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.jmx.JmxReporter;
+import io.stoatflow.core.config.StreamsConfig;
+import io.stoatflow.core.processor.Processor;
+import io.stoatflow.core.processor.ProcessorContext;
+import io.stoatflow.core.processor.Record;
+import io.stoatflow.core.topology.Topology;
+import io.stoatflow.core.topology.TopologyDescription;
+import io.stoatflow.testutils.TopologyTestDriver;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.MetricName;
 import org.apache.kafka.common.metrics.KafkaMetric;
@@ -280,12 +287,12 @@ class KsmlMetricsReporterIntegrationTest {
                     nodeId,
                     () -> new Processor<Object, Object, Void, Void>() {
                         @Override
-                        public void init(org.apache.kafka.streams.processor.api.ProcessorContext<Void, Void> context) {
+                        public void init(ProcessorContext<Void, Void> context) {
                             // No-op init
                         }
 
                         @Override
-                        public void process(org.apache.kafka.streams.processor.api.Record<Object, Object> kafkaRecord) {
+                        public void process(Record<Object, Object> kafkaRecord) {
                             // No-op for test purposes
                         }
 

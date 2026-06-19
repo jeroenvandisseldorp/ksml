@@ -30,6 +30,7 @@ import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.stream.KTableWrapper;
 import io.axual.ksml.stream.StreamWrapper;
 import io.axual.ksml.user.UserPredicate;
+import io.stoatflow.core.topology.KTable;
 
 public class FilterNotOperation extends StoreOperation {
     private static final String PREDICATE_NAME = "Predicate";

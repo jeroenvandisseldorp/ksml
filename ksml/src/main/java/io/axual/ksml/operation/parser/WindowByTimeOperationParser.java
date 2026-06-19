@@ -27,6 +27,8 @@ import io.axual.ksml.generator.TopologyResources;
 import io.axual.ksml.operation.WindowByTimeOperation;
 import io.axual.ksml.parser.ChoiceParser;
 import io.axual.ksml.parser.StructsParser;
+import io.stoatflow.core.topology.SlidingWindows;
+import io.stoatflow.core.topology.TimeWindows;
 
 import java.util.Map;
 
@@ -71,8 +73,8 @@ public class WindowByTimeOperationParser extends OperationParser<WindowByTimeOpe
                         throw new TopologyException("A hopping window can not advanceBy more than its duration");
                     }
                     final var timeWindows = (grace != null && grace.toMillis() > 0)
-                            ? org.apache.kafka.streams.kstream.TimeWindows.ofSizeAndGrace(duration, grace).advanceBy(advanceBy)
-                            : org.apache.kafka.streams.kstream.TimeWindows.ofSizeWithNoGrace(duration).advanceBy(advanceBy);
+                            ? TimeWindows.ofSizeAndGrace(duration, grace).advanceBy(advanceBy)
+                            : TimeWindows.ofSizeWithNoGrace(duration).advanceBy(advanceBy);
                     return new WindowByTimeOperation(operationConfig(name, tags), timeWindows);
                 });
 

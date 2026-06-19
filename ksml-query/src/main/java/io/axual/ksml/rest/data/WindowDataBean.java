@@ -20,6 +20,7 @@ package io.axual.ksml.rest.data;
  * =========================LICENSE_END==================================
  */
 
+import io.stoatflow.core.topology.Window;
 import lombok.Getter;
 
 @Getter

@@ -23,13 +23,17 @@ package io.axual.ksml.operation;
 import io.axual.ksml.testutil.KSMLTest;
 import io.axual.ksml.testutil.KSMLTestExtension;
 import io.axual.ksml.testutil.KSMLTopic;
+import io.stoatflow.core.state.KeyValue;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.streams.TestInputTopic;
+import org.apache.kafka.streams.TestOutputTopic;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import kotlin.Pair;
 
 @ExtendWith(KSMLTestExtension.class)
 @Slf4j
@@ -56,14 +60,14 @@ public class KSMLMergeTest {
 
         // we expect the output to contain all messages.
         // there are no guarantees for ordering but all records should be present; check values
-        List<KeyValue<String, String>> keyValues = mergedTopic.readKeyValuesToList();
+        List<Pair<String, String>> keyValues = mergedTopic.readKeyValuesToList();
         assertThat(keyValues)
                 .hasSize(4)
                 .containsExactlyInAnyOrder(
-                        new KeyValue<>("1", "one"),
-                        new KeyValue<>("2", "two"),
-                        new KeyValue<>("1", "eins"),
-                        new KeyValue<>("2", "zwei"));
+                        new Pair<>("1", "one"),
+                        new Pair<>("2", "two"),
+                        new Pair<>("1", "eins"),
+                        new Pair<>("2", "zwei"));
     }
 
 }

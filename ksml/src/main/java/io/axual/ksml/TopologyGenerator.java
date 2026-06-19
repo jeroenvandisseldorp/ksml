@@ -33,7 +33,6 @@ import io.axual.ksml.operation.StoreOperation;
 import io.axual.ksml.operation.StreamOperation;
 import io.axual.ksml.python.PythonContextConfig;
 import io.axual.ksml.stream.StreamWrapper;
-import io.stoatflow.core.config.StreamsConfig;
 import io.stoatflow.core.topology.StreamsBuilder;
 import io.stoatflow.core.topology.Topology;
 import lombok.extern.slf4j.Slf4j;
@@ -60,7 +59,7 @@ public class TopologyGenerator {
         this.applicationId = applicationId;
         this.optimization = new Properties();
         if (optimization != null) {
-            this.optimization.put(StreamsConfig.TOPOLOGY_OPTIMIZATION_CONFIG, optimization);
+//            this.optimization.put(StreamsConfig.TOPOLOGY_OPTIMIZATION_CONFIG, optimization);
         }
         this.pythonContextConfig = pythonContextConfig != null
                 ? pythonContextConfig

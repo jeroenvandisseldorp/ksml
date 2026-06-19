@@ -26,6 +26,10 @@ import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.stream.StreamWrapper;
 import io.axual.ksml.user.UserPredicate;
+import io.stoatflow.core.topology.Branched;
+import io.stoatflow.core.topology.BranchedKStream;
+import io.stoatflow.core.topology.Named;
+import io.stoatflow.core.topology.Predicate;
 
 import java.util.ArrayList;
 import java.util.List;

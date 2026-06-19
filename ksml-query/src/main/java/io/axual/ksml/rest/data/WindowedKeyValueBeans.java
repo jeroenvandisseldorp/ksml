@@ -21,6 +21,7 @@ package io.axual.ksml.rest.data;
  */
 
 import io.axual.ksml.data.object.DataObject;
+import io.stoatflow.core.topology.Window;
 
 import java.util.ArrayList;
 import java.util.List;

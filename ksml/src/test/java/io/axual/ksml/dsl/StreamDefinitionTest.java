@@ -28,6 +28,8 @@ import io.axual.ksml.generator.TopologyResources;
 import io.axual.ksml.parser.UserTypeParser;
 import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.type.UserType;
+import io.stoatflow.core.topology.Consumed;
+import io.stoatflow.core.topology.StreamsBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;

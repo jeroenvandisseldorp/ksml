@@ -31,6 +31,8 @@ import io.axual.ksml.stream.KTableWrapper;
 import io.axual.ksml.stream.StreamWrapper;
 import io.axual.ksml.user.UserForeignKeyExtractor;
 import io.axual.ksml.user.UserStreamPartitioner;
+import io.stoatflow.core.topology.KStream;
+import io.stoatflow.core.topology.KTable;
 
 import java.time.Duration;
 

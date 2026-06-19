@@ -23,6 +23,9 @@ package io.axual.ksml.operation;
 import io.axual.ksml.testutil.KSMLTest;
 import io.axual.ksml.testutil.KSMLTestExtension;
 import io.axual.ksml.testutil.KSMLTopic;
+import io.stoatflow.testutils.TestInputTopic;
+import io.stoatflow.testutils.TestOutputTopic;
+import kotlin.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -57,17 +60,17 @@ class KSMLTupleListTypeTest {
         // The pipeline uses tuple_function_syntax which returns tuple(string, string)
         
         // Then: Output should contain transformed key-value pair
-        List<KeyValue<String, String>> output = outputTupleTopic.readKeyValuesToList();
+        List<Pair<String, String>> output = outputTupleTopic.readKeyValuesToList();
         
         assertThat(output)
                 .as("Should produce one message with tuple() syntax")
                 .hasSize(1);
                 
-        assertThat(output.getFirst().key)
+        assertThat(output.getFirst().getFirst())
                 .as("Key should be transformed with tuple_ prefix")
                 .isEqualTo("tuple_key1");
                 
-        assertThat(output.getFirst().value)
+        assertThat(output.getFirst().getSecond())
                 .as("Value should be transformed with tuple_ prefix")
                 .isEqualTo("tuple_value1");
     }
@@ -82,7 +85,7 @@ class KSMLTupleListTypeTest {
         // The pipeline uses nested_list_tuple which returns list(string)
         
         // Then: Should produce multiple messages (one for each value in the list)
-        List<KeyValue<String, String>> output = outputListTopic.readKeyValuesToList();
+        List<Pair<String, String>> output = outputListTopic.readKeyValuesToList();
         
         assertThat(output)
                 .as("Should produce 3 messages from list() return type")
@@ -90,7 +93,7 @@ class KSMLTupleListTypeTest {
                 
         // Verify the values contain the expected pattern
         for (int i = 0; i < 3; i++) {
-            assertThat(output.get(i).value)
+            assertThat(output.get(i).getSecond())
                     .as("Value should contain key, index, and value")
                     .contains("test_key")
                     .contains(String.valueOf(i))
@@ -108,27 +111,27 @@ class KSMLTupleListTypeTest {
         // The pipeline uses list_of_tuples_function which returns list(tuple(string, string))
         
         // Then: Should produce multiple key-value pairs (2 messages from the list)
-        List<KeyValue<String, String>> output = outputListOfTuplesTopic.readKeyValuesToList();
+        List<Pair<String, String>> output = outputListOfTuplesTopic.readKeyValuesToList();
         
         assertThat(output)
                 .as("Should produce 2 messages from list(tuple()) return type")
                 .hasSize(2);
                 
         // Verify first tuple
-        assertThat(output.get(0).key)
+        assertThat(output.get(0).getFirst())
                 .as("First tuple key should have tuple_0 suffix")
                 .isEqualTo("complex_key_tuple_0");
                 
-        assertThat(output.get(0).value)
+        assertThat(output.get(0).getSecond())
                 .as("First tuple value should have modified_0 suffix")
                 .isEqualTo("complex_value_modified_0");
                 
         // Verify second tuple
-        assertThat(output.get(1).key)
+        assertThat(output.get(1).getFirst())
                 .as("Second tuple key should have tuple_1 suffix")
                 .isEqualTo("complex_key_tuple_1");
                 
-        assertThat(output.get(1).value)
+        assertThat(output.get(1).getSecond())
                 .as("Second tuple value should have modified_1 suffix")
                 .isEqualTo("complex_value_modified_1");
     }

@@ -23,6 +23,11 @@ package io.axual.ksml.operation;
 import io.axual.ksml.testutil.KSMLDriver;
 import io.axual.ksml.testutil.KSMLTopic;
 import io.axual.ksml.testutil.KSMLTopologyTest;
+import io.stoatflow.core.state.KeyValueStore;
+import io.stoatflow.testutils.TestInputTopic;
+import io.stoatflow.testutils.TestOutputTopic;
+import io.stoatflow.testutils.TopologyTestDriver;
+import kotlin.Pair;
 import org.junit.jupiter.api.DisplayName;
 
 import java.util.List;
@@ -49,11 +54,11 @@ public class KSMLAggregatePipelinesTest {
         inputTopic.pipeInput("key1", 3L);
 
         // the table as a topic should show the values aggregagting
-        List<KeyValue<String, Long>> keyValues = outputTopic.readKeyValuesToList();
+        List<Pair<String, Long>> keyValues = outputTopic.readKeyValuesToList();
         assertThat(keyValues).contains(
-                new KeyValue<>("key1", 1L),
-                new KeyValue<>("key1", 3L),
-                new KeyValue<>("key1", 6L)
+                new Pair<>("key1", 1L),
+                new Pair<>("key1", 3L),
+                new Pair<>("key1", 6L)
         );
 
         // and the named keyvalue store should have the final result

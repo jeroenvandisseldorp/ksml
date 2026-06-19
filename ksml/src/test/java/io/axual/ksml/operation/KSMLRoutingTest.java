@@ -23,6 +23,9 @@ package io.axual.ksml.operation;
 import io.axual.ksml.testutil.KSMLTest;
 import io.axual.ksml.testutil.KSMLTestExtension;
 import io.axual.ksml.testutil.KSMLTopic;
+import io.stoatflow.testutils.TestInputTopic;
+import io.stoatflow.testutils.TestOutputTopic;
+import kotlin.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -65,9 +68,9 @@ public class KSMLRoutingTest {
         assertFalse(outputSensor1.isEmpty());
         assertFalse(outputSensor2.isEmpty());
 
-        List<KeyValue<String, String>> keyValues0 = outputSensor0.readKeyValuesToList();
-        List<KeyValue<String, String>> keyValues1 = outputSensor1.readKeyValuesToList();
-        List<KeyValue<String, String>> keyValues2 = outputSensor2.readKeyValuesToList();
+        List<Pair<String, String>> keyValues0 = outputSensor0.readKeyValuesToList();
+        List<Pair<String, String>> keyValues1 = outputSensor1.readKeyValuesToList();
+        List<Pair<String, String>> keyValues2 = outputSensor2.readKeyValuesToList();
 
         assertEquals(2, keyValues2.size(), "2 sensor2 readings were routed to output2");
         assertEquals(4, keyValues1.size(), "4 sensor1 readings were routed to output1");

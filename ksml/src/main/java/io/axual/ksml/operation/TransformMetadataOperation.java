@@ -29,6 +29,7 @@ import io.axual.ksml.operation.processor.TransformMetadataProcessor;
 import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.stream.StreamWrapper;
 import io.axual.ksml.user.UserMetadataTransformer;
+import io.stoatflow.core.topology.KStream;
 
 public class TransformMetadataOperation extends BaseOperation {
     private static final String MAPPER_NAME = "Mapper";

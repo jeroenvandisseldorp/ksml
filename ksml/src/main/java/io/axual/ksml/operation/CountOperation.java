@@ -100,7 +100,7 @@ public class CountOperation extends StoreOperation {
         final var k = input.keyType();
         final var vr = streamDataTypeOf(new UserType(DataLong.DATATYPE), false);
         final var sessionStore = validateSessionStore(store(), k, vr);
-        final Materialized<Windowed<Object>, Long, SessionStore<Bytes, byte[]>> mat = materializedOf(context, sessionStore);
+        final Materialized<Object, Long, SessionStore<Bytes, byte[]>> mat = materializedOf(context, sessionStore);
         final var named = namedOf();
         final KTable<Windowed<Object>, Long> output = named != null
                 ? mat != null

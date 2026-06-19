@@ -26,7 +26,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation which marks fields of type {@link org.apache.kafka.streams.TestInputTopic} and {@link org.apache.kafka.streams.TestOutputTopic}
+ * Annotation which marks fields of type {@link TestInputTopic} and {@link TestOutputTopic}
  * which should be bound to a topic in the KSML topology under test.
  */
 @Target(ElementType.FIELD)

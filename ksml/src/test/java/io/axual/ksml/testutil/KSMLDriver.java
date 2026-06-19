@@ -26,7 +26,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation to mark a field of type {@link org.apache.kafka.streams.TopologyTestDriver}.
+ * Annotation to mark a field of type {@link TopologyTestDriver}.
  * The annotated field will be set to the driver created by {@link KSMLTestExtension}.
  */
 @Target(ElementType.FIELD)

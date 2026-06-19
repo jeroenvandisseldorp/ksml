@@ -42,6 +42,8 @@ import io.axual.ksml.parser.ParseNode;
 import io.axual.ksml.python.PythonContextConfig;
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import io.confluent.kafka.serializers.KafkaAvroSerializer;
+import io.stoatflow.core.topology.StreamsBuilder;
+import io.stoatflow.testutils.TopologyTestDriver;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.IntegerDeserializer;
@@ -84,7 +86,7 @@ public class KSMLTopologyTestExtension implements ExecutionCondition, BeforeEach
     private final Map<String, KSMLTopic> inputTopics;
 
     /**
-     * Map of annotated {@link org.apache.kafka.streams.TestOutputTopic} to their annotations.
+     * Map of annotated {@link TestOutputTopic} to their annotations.
      */
     private final Map<String, KSMLTopic> outputTopics;
 
@@ -259,26 +261,26 @@ public class KSMLTopologyTestExtension implements ExecutionCondition, BeforeEach
         modifiedFields.clear();
     }
 
-    private Serializer<?> getKeySerializer(final KSMLTopic ksmlTopic) {
+    private <T> Serializer<T> getKeySerializer(final KSMLTopic ksmlTopic) {
         return getSerializer(ksmlTopic, true);
     }
 
-    private Serializer<?> getValueSerializer(final KSMLTopic ksmlTopic) {
+    private <T> Serializer<T> getValueSerializer(final KSMLTopic ksmlTopic) {
         return getSerializer(ksmlTopic, false);
     }
 
-    private Serializer<?> getSerializer(final KSMLTopic ksmlTopic, final boolean isKey) {
+    private <T> Serializer<T> getSerializer(final KSMLTopic ksmlTopic, final boolean isKey) {
         return switch (isKey ? ksmlTopic.keySerde() : ksmlTopic.valueSerde()) {
             case AVRO -> {
                 final var avroNotation = (AvroNotation) ExecutionContext.INSTANCE.notationLibrary().get(AvroNotation.NOTATION_NAME);
                 final var registryClient = (MockConfluentSchemaRegistryClient) ((ConfluentAvroSerdeSupplier) avroNotation.serdeSupplier()).registryClient();
                 final var result = new KafkaAvroSerializer(registryClient);
                 result.configure(registryClient.configs(), isKey);
-                yield result;
+                yield (Serializer<T>)result;
             }
-            case STRING -> new StringSerializer();
-            case LONG -> new LongSerializer();
-            case INTEGER -> new IntegerSerializer();
+            case STRING -> (Serializer<T>)new StringSerializer();
+            case LONG -> (Serializer<T>)new LongSerializer();
+            case INTEGER -> (Serializer<T>)new IntegerSerializer();
         };
     }
 

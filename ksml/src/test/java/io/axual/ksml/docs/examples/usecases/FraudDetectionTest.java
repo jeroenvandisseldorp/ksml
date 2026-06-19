@@ -24,6 +24,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.axual.ksml.testutil.KSMLTopic;
 import io.axual.ksml.testutil.KSMLTopologyTest;
+import io.stoatflow.testutils.TestInputTopic;
+import io.stoatflow.testutils.TestOutputTopic;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 

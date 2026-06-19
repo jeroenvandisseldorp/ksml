@@ -29,6 +29,8 @@ import io.axual.ksml.execution.ExecutionContext;
 import io.axual.ksml.generator.YAMLObjectMapper;
 import io.axual.ksml.parser.ParseNode;
 import io.axual.ksml.type.UserType;
+import io.stoatflow.core.topology.StreamsBuilder;
+import io.stoatflow.core.topology.TopologyDescription;
 import lombok.extern.slf4j.Slf4j;
 import org.graalvm.home.Version;
 import org.junit.jupiter.api.BeforeAll;

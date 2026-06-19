@@ -37,7 +37,6 @@ import io.stoatflow.core.state.WindowBytesStoreSupplier;
 import io.stoatflow.core.state.WindowStore;
 import io.stoatflow.core.topology.JoinWindows;
 import io.stoatflow.core.topology.Materialized;
-import io.stoatflow.core.topology.Windowed;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.utils.Bytes;
 
@@ -158,7 +157,7 @@ public class StoreUtil {
         return storeBuilder;
     }
 
-    public record MaterializedStore<V, S extends StateStore>(Materialized<Windowed<Object>, V, S> materialized, Serde<Object> keySerde, Serde<V> valueSerde) {
+    public record MaterializedStore<V, S extends StateStore>(Materialized<Object, V, S> materialized, Serde<Object> keySerde, Serde<V> valueSerde) {
     }
 
     public static <V> MaterializedStore<V, KeyValueStore<Bytes, byte[]>> materialize(KeyValueStateStoreDefinition store) {
@@ -178,7 +177,7 @@ public class StoreUtil {
         return materialize(mat, store);
     }
 
-    private static <V, S extends StateStore> MaterializedStore<V, S> materialize(Materialized<Windowed<Object>, V, S> mat, StateStoreDefinition store) {
+    private static <V, S extends StateStore> MaterializedStore<V, S> materialize(Materialized<Object, V, S> mat, StateStoreDefinition store) {
         final var keySerde = new StreamDataType(store.keyType(), true).serde();
         @SuppressWarnings("unchecked") final var valueSerde = (Serde<V>) new StreamDataType(store.valueType(), false).serde();
         mat = mat.withKeySerde(keySerde).withValueSerde(valueSerde);

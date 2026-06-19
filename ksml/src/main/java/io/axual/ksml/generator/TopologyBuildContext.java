@@ -90,17 +90,17 @@ public class TopologyBuildContext {
         return resources.namespace();
     }
 
-    public <V> Materialized<Windowed<Object>, V, KeyValueStore<Bytes, byte[]>> materialize(KeyValueStateStoreDefinition store) {
+    public <V> Materialized<Object, V, KeyValueStore<Bytes, byte[]>> materialize(KeyValueStateStoreDefinition store) {
         resources.register(store.name(), store);
         return StoreUtil.<V>materialize(store).materialized();
     }
 
-    public <V> Materialized<Windowed<Object>, V, SessionStore<Bytes, byte[]>> materialize(SessionStateStoreDefinition store) {
+    public <V> Materialized<Object, V, SessionStore<Bytes, byte[]>> materialize(SessionStateStoreDefinition store) {
         resources.register(store.name(), store);
         return StoreUtil.<V>materialize(store).materialized();
     }
 
-    public <V> Materialized<Windowed<Object>, V, WindowStore<Bytes, byte[]>> materialize(WindowStateStoreDefinition store) {
+    public <V> Materialized<Object, V, WindowStore<Bytes, byte[]>> materialize(WindowStateStoreDefinition store) {
         resources.register(store.name(), store);
         return StoreUtil.<V>materialize(store).materialized();
     }

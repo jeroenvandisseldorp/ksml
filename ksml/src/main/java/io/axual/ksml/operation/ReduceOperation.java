@@ -30,6 +30,8 @@ import io.axual.ksml.stream.SessionWindowedKStreamWrapper;
 import io.axual.ksml.stream.StreamWrapper;
 import io.axual.ksml.stream.TimeWindowedKStreamWrapper;
 import io.axual.ksml.user.UserReducer;
+import io.stoatflow.core.topology.KTable;
+import io.stoatflow.core.topology.Windowed;
 
 public class ReduceOperation extends StoreOperation {
     private static final String ADDER_NAME = "Adder";

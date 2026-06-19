@@ -26,6 +26,7 @@ import io.axual.ksml.definition.TableDefinition;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.KTableWrapper;
 import io.axual.ksml.stream.StreamWrapper;
+import io.stoatflow.core.topology.KTable;
 
 public class OuterJoinWithTableOperation extends StoreOperation {
     private static final String VALUEJOINER_NAME = "ValueJoiner";

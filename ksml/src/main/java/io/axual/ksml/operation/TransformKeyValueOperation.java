@@ -32,6 +32,7 @@ import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.type.UserTupleType;
 import io.axual.ksml.type.UserType;
 import io.axual.ksml.user.UserKeyValueTransformer;
+import io.stoatflow.core.topology.KStream;
 
 public class TransformKeyValueOperation extends BaseOperation {
     private static final String MAPPER_NAME = "Mapper";

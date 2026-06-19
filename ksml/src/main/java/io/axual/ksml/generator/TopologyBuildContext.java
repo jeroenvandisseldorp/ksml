@@ -43,7 +43,6 @@ import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.stream.KTableWrapper;
 import io.axual.ksml.stream.StreamWrapper;
 import io.axual.ksml.user.UserFunction;
-import io.axual.ksml.user.UserTimestampExtractor;
 import io.stoatflow.core.state.KeyValueStore;
 import io.stoatflow.core.state.SessionStore;
 import io.stoatflow.core.state.WindowStore;
@@ -51,6 +50,7 @@ import io.stoatflow.core.topology.AutoOffsetReset;
 import io.stoatflow.core.topology.Consumed;
 import io.stoatflow.core.topology.Materialized;
 import io.stoatflow.core.topology.StreamsBuilder;
+import io.stoatflow.core.topology.Windowed;
 import lombok.Getter;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.utils.Bytes;
@@ -90,17 +90,17 @@ public class TopologyBuildContext {
         return resources.namespace();
     }
 
-    public <V> Materialized<Object, V, KeyValueStore<Bytes, byte[]>> materialize(KeyValueStateStoreDefinition store) {
+    public <V> Materialized<Windowed<Object>, V, KeyValueStore<Bytes, byte[]>> materialize(KeyValueStateStoreDefinition store) {
         resources.register(store.name(), store);
         return StoreUtil.<V>materialize(store).materialized();
     }
 
-    public <V> Materialized<Object, V, SessionStore<Bytes, byte[]>> materialize(SessionStateStoreDefinition store) {
+    public <V> Materialized<Windowed<Object>, V, SessionStore<Bytes, byte[]>> materialize(SessionStateStoreDefinition store) {
         resources.register(store.name(), store);
         return StoreUtil.<V>materialize(store).materialized();
     }
 
-    public <V> Materialized<Object, V, WindowStore<Bytes, byte[]>> materialize(WindowStateStoreDefinition store) {
+    public <V> Materialized<Windowed<Object>, V, WindowStore<Bytes, byte[]>> materialize(WindowStateStoreDefinition store) {
         resources.register(store.name(), store);
         return StoreUtil.<V>materialize(store).materialized();
     }

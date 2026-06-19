@@ -20,36 +20,31 @@ package io.axual.ksml.execution;
  * =========================LICENSE_END==================================
  */
 
-import io.stoatflow.core.exception.DeserializationContext;
 import io.stoatflow.core.exception.DeserializationExceptionHandler;
 import io.stoatflow.core.exception.DeserializationHandlerResponse;
-import io.stoatflow.core.exception.ProcessingContext;
+import io.stoatflow.core.exception.ErrorHandlerContext;
 import io.stoatflow.core.exception.ProcessingExceptionHandler;
 import io.stoatflow.core.exception.ProcessingHandlerResponse;
-import io.stoatflow.core.exception.ProductionContext;
 import io.stoatflow.core.exception.ProductionExceptionHandler;
 import io.stoatflow.core.exception.ProductionHandlerResponse;
+import io.stoatflow.core.processor.Record;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
-
-import javax.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 public class ExecutionErrorHandler implements DeserializationExceptionHandler, ProcessingExceptionHandler, ProductionExceptionHandler {
     @Override
-    @Nonnull
-    public DeserializationHandlerResponse handle(@Nonnull ConsumerRecord<byte[], byte[]> rec, @Nonnull Exception exception, @Nonnull DeserializationContext context) {
-        return ExecutionContext.INSTANCE.errorHandling().handle(rec, exception, context);
+    public @NonNull DeserializationHandlerResponse handle(@NonNull ErrorHandlerContext errorHandlerContext, @NonNull ConsumerRecord<byte[], byte[]> rec, @NonNull Exception exception) {
+        return ExecutionContext.INSTANCE.errorHandling().handle(rec, exception, errorHandlerContext);
     }
 
     @Override
-    @Nonnull
-    public ProcessingHandlerResponse handle(Object key, Object value, @Nonnull Exception exception, @Nonnull ProcessingContext context) {
-        return ExecutionContext.INSTANCE.errorHandling().handle(key, value, exception, context);
+    public @NonNull ProcessingHandlerResponse handle(@NonNull ErrorHandlerContext errorHandlerContext, @NonNull Record<?, ?> rec, @NonNull Exception exception) {
+        return ExecutionContext.INSTANCE.errorHandling().handle(rec, exception, errorHandlerContext);
     }
 
     @Override
-    @Nonnull
-    public ProductionHandlerResponse handle(@Nonnull ProducerRecord<byte[], byte[]> rec, @Nonnull Exception exception, @Nonnull ProductionContext context) {
-        return ExecutionContext.INSTANCE.errorHandling().handle(rec, exception, context);
+    public @NonNull ProductionHandlerResponse handle(@NonNull ErrorHandlerContext errorHandlerContext, @NonNull ProducerRecord<byte[], byte[]> rec, @NonNull Exception exception) {
+        return ExecutionContext.INSTANCE.errorHandling().handle(rec, exception, errorHandlerContext);
     }
 }

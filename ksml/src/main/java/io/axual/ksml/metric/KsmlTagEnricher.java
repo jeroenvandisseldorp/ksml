@@ -20,8 +20,6 @@ package io.axual.ksml.metric;
  * =========================LICENSE_END==================================
  */
 
-import io.stoatflow.core.topology.NodeDescription;
-import io.stoatflow.core.topology.SubtopologyDescription;
 import io.stoatflow.core.topology.TopologyDescription;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.metrics.KafkaMetric;
@@ -80,23 +78,23 @@ public final class KsmlTagEnricher {
 
         Map<String, OperationMeta> node2Operation = new HashMap<>();
 
-        for (final var st : desc.getSubtopologies()) {
+        for (final var st : desc.subtopologies()) {
             processSubtopology(st, node2Operation);
         }
 
         return new KsmlTagEnricher(node2Operation);
     }
 
-    private static void processSubtopology(SubtopologyDescription subtopology,
+    private static void processSubtopology(TopologyDescription.Subtopology subtopology,
                                            Map<String, OperationMeta> node2Operation) {
-        for (final var node : subtopology.getNodes()) {
+        for (final var node : subtopology.nodes()) {
             processNode(node, node2Operation);
         }
     }
 
-    private static void processNode(NodeDescription node,
+    private static void processNode(TopologyDescription.Node node,
                                     Map<String, OperationMeta> node2Operation) {
-        String nodeName = node.getName();
+        String nodeName = node.name();
 
         if (!isValidNodeName(nodeName)) {
             log.warn("Skipping invalid node name: {}", nodeName);

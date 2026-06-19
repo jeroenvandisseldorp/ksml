@@ -58,10 +58,11 @@ import io.stoatflow.core.topology.StreamPartitioner;
 import io.stoatflow.core.topology.TableJoined;
 import io.stoatflow.core.topology.ValueJoiner;
 import io.stoatflow.core.topology.ValueJoinerWithKey;
+import io.stoatflow.core.topology.Windowed;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.utils.Bytes;
+import org.jspecify.annotations.NonNull;
 
-import javax.annotation.Nonnull;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -377,7 +378,7 @@ public abstract class BaseOperation implements StreamOperation {
         return null;
     }
 
-    protected <V> Materialized<Object, V, SessionStore<Bytes, byte[]>> materializedOf(TopologyBuildContext context, SessionStateStoreDefinition store) {
+    protected <V> Materialized<Windowed<Object>, V, SessionStore<Bytes, byte[]>> materializedOf(TopologyBuildContext context, SessionStateStoreDefinition store) {
         if (store != null) {
             return context.materialize(store);
         }
@@ -402,12 +403,12 @@ public abstract class BaseOperation implements StreamOperation {
     protected Printed<Object, Object> printedOf(String filename, String label, KeyValueMapper<Object, Object, String> mapper) {
         var printed = filename != null ? Printed.toFile(filename) : Printed.toSysOut();
         if (label != null) printed = printed.withLabel(label);
-        if (mapper != null) printed = printed.withKeyValueMapper(mapper::apply);
+        if (mapper != null) printed = printed.withKeyValueMapper(mapper);
         return printed;
     }
 
-    protected Joined joinedOf(StreamDataType k, StreamDataType v, StreamDataType vo, Duration gracePeriod) {
-        return Joined.create();
+    protected Joined<Object,Object,Object> joinedOf(StreamDataType k, StreamDataType v, StreamDataType vo, Duration gracePeriod) {
+        return Joined.with(k.serde(), v.serde(), vo.serde()).withGracePeriod(gracePeriod);
     }
 
     protected StreamJoined<Object, Object, Object> streamJoinedOf(WindowStateStoreDefinition thisStore, WindowStateStoreDefinition otherStore, StreamDataType k, StreamDataType v, StreamDataType vo, JoinWindows joinWindows) {
@@ -426,14 +427,12 @@ public abstract class BaseOperation implements StreamOperation {
 
     private record WrapPartitioner(StreamPartitioner<Object, Object> partitioner) implements StreamPartitioner<Object, Object> {
         @Override
-        public int partition(@Nonnull String topic, Object key, Object value, int numPartitions) {
-            return partitioner.partition(topic, key, value, numPartitions);
+        public @NonNull Optional<Set<Integer>> partitions(@NonNull String topic, Object key, Object value, int numPartitions) {
+            return partitioner.partitions(topic, key, value, numPartitions);
         }
     }
 
     protected TableJoined<Object, Object> tableJoinedOf(StreamPartitioner<Object, Object> partitioner, StreamPartitioner<Object, Object> otherPartitioner) {
-        final var part = partitioner != null ? new WrapPartitioner(partitioner) : null;
-        final var otherPart = otherPartitioner != null ? new WrapPartitioner(otherPartitioner) : null;
         return TableJoined.with().withName(name);
     }
 

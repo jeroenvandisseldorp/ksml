@@ -29,7 +29,9 @@ import io.axual.ksml.dsl.KSMLDSL;
 import io.axual.ksml.metric.MetricTags;
 import io.axual.ksml.python.Invoker;
 import io.axual.ksml.store.StateStores;
-import io.stoatflow.core.processor.ProcessorContext;
+import io.stoatflow.core.processor.FixedKeyProcessorContext;
+import io.stoatflow.core.topology.ValueTransformerWithKey;
+import org.jspecify.annotations.NonNull;
 
 public class UserValueTransformerWithKey extends Invoker implements ValueTransformerWithKey<Object, Object, DataObject> {
     private static final DataType EXPECTED_RESULT_TYPE = DataType.UNKNOWN;
@@ -41,8 +43,8 @@ public class UserValueTransformerWithKey extends Invoker implements ValueTransfo
     }
 
     @Override
-    public void init(ProcessorContext<?,?> context) {
-        // Nothing to do here.
+    public void init(@NonNull FixedKeyProcessorContext<Object, DataObject> fixedKeyProcessorContext) {
+        // Do nothing.
     }
 
     @Override

@@ -24,6 +24,7 @@ import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.stream.KTableWrapper;
 import io.axual.ksml.stream.StreamWrapper;
+import io.stoatflow.core.topology.KTable;
 
 public class ToTableOperation extends StoreOperation {
     public ToTableOperation(StoreOperationConfig config) {

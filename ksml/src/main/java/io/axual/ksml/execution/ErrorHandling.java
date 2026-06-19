@@ -20,8 +20,10 @@ package io.axual.ksml.execution;
  * =========================LICENSE_END==================================
  */
 
+import io.stoatflow.core.processor.Record;
 import io.stoatflow.core.exception.DeserializationContext;
 import io.stoatflow.core.exception.DeserializationHandlerResponse;
+import io.stoatflow.core.exception.ErrorHandlerContext;
 import io.stoatflow.core.exception.ProcessingContext;
 import io.stoatflow.core.exception.ProcessingHandlerResponse;
 import io.stoatflow.core.exception.ProductionContext;
@@ -130,12 +132,12 @@ public class ErrorHandling {
         }
     }
 
-    public DeserializationHandlerResponse handle(ConsumerRecord<byte[], byte[]> rec, Exception exception, DeserializationContext context) {
+    public DeserializationHandlerResponse handle(ConsumerRecord<byte[], byte[]> rec, Exception exception, ErrorHandlerContext context) {
         if (consumeHandler.log()) {
             // log record
-            String key = consumeHandler.logPayload() ? bytesToString(rec.key()) : DATA_MASK;
-            String value = consumeHandler.logPayload() ? bytesToString(rec.value()) : DATA_MASK;
-            logError(consumeExceptionLogger, "Deserialization", context, key, value, exception);
+            final var keyStr = consumeHandler.logPayload() ? bytesToString(rec.key()) : DATA_MASK;
+            final var valueStr = consumeHandler.logPayload() ? bytesToString(rec.value()) : DATA_MASK;
+            logError(consumeExceptionLogger, "Deserialization", context, keyStr, valueStr, exception);
         }
         return switch (consumeHandler.handlerType()) {
             case CONTINUE_ON_FAIL -> new DeserializationHandlerResponse(DeserializationHandlerResponse.Result.CONTINUE, new ArrayList<>());
@@ -145,11 +147,11 @@ public class ErrorHandling {
         };
     }
 
-    public ProcessingHandlerResponse handle(Object key, Object value, Exception exception, ProcessingContext context) {
+    public ProcessingHandlerResponse handle(Record<?, ?> rec, Exception exception, ErrorHandlerContext context) {
         if (processHandler.log()) {
             // log record
-            String keyStr = processHandler.logPayload() ? objectToString(key) : DATA_MASK;
-            String valueStr = processHandler.logPayload() ? objectToString(value) : DATA_MASK;
+            final var keyStr = processHandler.logPayload() ? objectToString(rec.key()) : DATA_MASK;
+            final var valueStr = processHandler.logPayload() ? objectToString(rec.value()) : DATA_MASK;
             logError(processExceptionLogger, "Processing", context, keyStr, valueStr, exception);
         }
         return switch (processHandler.handlerType()) {
@@ -160,12 +162,12 @@ public class ErrorHandling {
         };
     }
 
-    public ProductionHandlerResponse handle(ProducerRecord<byte[], byte[]> rec, Exception exception, ProductionContext context) {
+    public ProductionHandlerResponse handle(ProducerRecord<byte[], byte[]> rec, Exception exception, ErrorHandlerContext context) {
         if (produceHandler.log()) {
             // log record
-            String key = produceHandler.logPayload() ? bytesToString(rec.key()) : DATA_MASK;
-            String value = produceHandler.logPayload() ? bytesToString(rec.value()) : DATA_MASK;
-            logError(produceExceptionLogger, "Produce", context, key, value, exception);
+            final var keyStr = produceHandler.logPayload() ? bytesToString(rec.key()) : DATA_MASK;
+            final var valueStr = produceHandler.logPayload() ? bytesToString(rec.value()) : DATA_MASK;
+            logError(produceExceptionLogger, "Produce", context, keyStr, valueStr, exception);
         }
         return switch (produceHandler.handlerType()) {
             case CONTINUE_ON_FAIL -> new ProductionHandlerResponse(ProductionHandlerResponse.Result.CONTINUE, new ArrayList<>());

@@ -25,6 +25,7 @@ import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.stream.KGroupedStreamWrapper;
 import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.stream.StreamWrapper;
+import io.stoatflow.core.topology.KGroupedStream;
 
 public class GroupByKeyOperation extends StoreOperation {
     public GroupByKeyOperation(StoreOperationConfig config) {

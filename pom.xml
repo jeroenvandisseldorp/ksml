@@ -101,7 +101,7 @@
         <protobuf.version>3.25.9</protobuf.version>
         <saaj.version>3.0.6</saaj.version>
         <slf4j.version>2.1.0-alpha1</slf4j.version>
-        <victools.version>4.38.0</victools.version>
+        <victools.version>5.0.0</victools.version>
         <wire.version>5.2.1</wire.version>
 
         <!-- KSML schema generation -->

@@ -41,6 +41,8 @@ import io.axual.ksml.type.UserType;
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import io.confluent.kafka.serializers.KafkaAvroSerializer;
 import io.stoatflow.core.topology.StreamsBuilder;
+import io.stoatflow.testutils.TestInputTopic;
+import io.stoatflow.testutils.TestOutputTopic;
 import io.stoatflow.testutils.TopologyTestDriver;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.serialization.Deserializer;
@@ -83,7 +85,7 @@ public class KSMLTestExtension implements ExecutionCondition, BeforeAllCallback,
     private final Map<String, KSMLTopic> inputTopics = new HashMap<>();
 
     /**
-     * Map of annotated {@link org.apache.kafka.streams.TestOutputTopic} to their annotations.
+     * Map of annotated {@link TestOutputTopic} to their annotations.
      */
     private final Map<String, KSMLTopic> outputTopics = new HashMap<>();
 
@@ -132,7 +134,7 @@ public class KSMLTestExtension implements ExecutionCondition, BeforeAllCallback,
                 final var ksmlTopic = field.getAnnotation(KSMLTopic.class);
                 log.debug("Found annotated input topic field {}:{}", field.getName(), ksmlTopic);
                 inputTopics.put(field.getName(), ksmlTopic);
-            } else if (type.equals(org.apache.kafka.streams.TestOutputTopic.class) && field.isAnnotationPresent(KSMLTopic.class)) {
+            } else if (type.equals(TestOutputTopic.class) && field.isAnnotationPresent(KSMLTopic.class)) {
                 final var ksmlTopic = field.getAnnotation(KSMLTopic.class);
                 log.debug("Found annotated output topic field {}:{}", field.getName(), ksmlTopic);
                 outputTopics.put(field.getName(), ksmlTopic);

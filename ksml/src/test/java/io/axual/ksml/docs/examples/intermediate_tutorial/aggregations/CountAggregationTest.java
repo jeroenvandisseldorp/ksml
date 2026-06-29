@@ -24,9 +24,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.axual.ksml.testutil.KSMLTest;
 import io.axual.ksml.testutil.KSMLTestExtension;
 import io.axual.ksml.testutil.KSMLTopic;
+import io.stoatflow.core.state.KeyValue;
 import io.stoatflow.testutils.TestInputTopic;
 import io.stoatflow.testutils.TestOutputTopic;
-import kotlin.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -93,11 +93,11 @@ public class CountAggregationTest {
         // Read all and verify counts
         var keyValues = outputTopic.readKeyValuesToList();
         assertThat(keyValues).isEqualTo(List.of(
-                new Pair<>("alice", "1"),
-                new Pair<>("bob", "1"),
-                new Pair<>("alice", "2"),
-                new Pair<>("bob", "2"),
-                new Pair<>("alice", "3")));
+                new KeyValue<>("alice", "1"),
+                new KeyValue<>("bob", "1"),
+                new KeyValue<>("alice", "2"),
+                new KeyValue<>("bob", "2"),
+                new KeyValue<>("alice", "3")));
     }
 
     @KSMLTest(topology = "docs-examples/intermediate-tutorial/aggregations/processor-count.yaml")

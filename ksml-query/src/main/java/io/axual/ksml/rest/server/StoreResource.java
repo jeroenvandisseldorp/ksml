@@ -26,6 +26,12 @@ import io.axual.ksml.rest.data.KeyValueBean;
 import io.axual.ksml.rest.data.KeyValueBeans;
 import io.axual.ksml.rest.data.WindowedKeyValueBean;
 import io.axual.ksml.rest.data.WindowedKeyValueBeans;
+import io.stoatflow.core.state.HostInfo;
+import io.stoatflow.core.state.KeyValue;
+import io.stoatflow.core.state.KeyValueIterator;
+import io.stoatflow.core.state.QueryableStoreType;
+import io.stoatflow.core.state.StoreQueryParameters;
+import io.stoatflow.core.topology.Windowed;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.ServiceUnavailableException;
 import lombok.extern.slf4j.Slf4j;
@@ -47,11 +53,7 @@ public class StoreResource implements AutoCloseable {
     }
 
     protected <T> T getStore(StoreQueryParameters<T> storeQueryParameters) {
-        try {
-            return querier().store(storeQueryParameters);
-        } catch (UnknownStateStoreException uste) {
-            throw new NotFoundException("Could not find store %s of type %s".formatted(storeQueryParameters.storeName(), storeQueryParameters.queryableStoreType()));
-        }
+        return querier().store(storeQueryParameters);
     }
 
 
@@ -103,12 +105,12 @@ public class StoreResource implements AutoCloseable {
         var result = new KeyValueBeans();
         querier().allMetadataForStore(storeName)
                 .stream()
-                .filter(sm -> !(sm.host().equals(thisInstance.host()) && sm.port() == thisInstance.port())) //only query remote node stores
+                .filter(sm -> !(sm.hostInfo().equals(thisInstance.host()) && sm.hostInfo().port() == thisInstance.port())) //only query remote node stores
                 .forEach(remoteInstance -> {
-                    String url = "http://" + remoteInstance.host() + ":" + remoteInstance.port() + "/state/" + stateSubPath + "/" + storeName + "/local/all";
-                    log.debug("Fetching remote store at {}:{}", remoteInstance.host(), remoteInstance.port());
+                    String url = "http://" + remoteInstance.hostInfo().host() + ":" + remoteInstance.hostInfo().port() + "/state/" + stateSubPath + "/" + storeName + "/local/all";
+                    log.debug("Fetching remote store at {}:{}", remoteInstance.hostInfo().host(), remoteInstance.hostInfo().port);
                     KeyValueBeans remoteResult = restClient.getRemoteKeyValueBeans(url);
-                    log.debug("Data from remote store at {}:{} == {}", remoteInstance.host(), remoteInstance.port(), remoteResult);
+                    log.debug("Data from remote store at {}:{} == {}", remoteInstance.hostInfo().host(), remoteInstance.hostInfo().port(), remoteResult);
                     result.add(remoteResult);
                 });
 

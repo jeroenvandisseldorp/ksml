@@ -20,6 +20,8 @@ package io.axual.ksml.rest.server;
  * =========================LICENSE_END==================================
  */
 
+import io.stoatflow.core.state.HostInfo;
+
 public enum GlobalState {
 
     INSTANCE;

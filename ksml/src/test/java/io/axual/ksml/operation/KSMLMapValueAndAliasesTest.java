@@ -70,10 +70,10 @@ public class KSMLMapValueAndAliasesTest {
         assertEquals(4, keyValues.size(), "All records should be transformed");
 
         // verify first and last value; the pipeline creates them from fields in the input value
-        assertEquals("HUMIDITY 80", keyValues.get(0).getSecond());
-        assertEquals("HUMIDITY 75", keyValues.get(1).getSecond());
-        assertEquals("TEMPERATURE 25", keyValues.get(2).getSecond());
-        assertEquals("TEMPERATURE 27", keyValues.get(3).getSecond());
+        assertEquals("HUMIDITY 80", keyValues.get(0).value);
+        assertEquals("HUMIDITY 75", keyValues.get(1).value);
+        assertEquals("TEMPERATURE 25", keyValues.get(2).value);
+        assertEquals("TEMPERATURE 27", keyValues.get(3).value);
     }
 }
 

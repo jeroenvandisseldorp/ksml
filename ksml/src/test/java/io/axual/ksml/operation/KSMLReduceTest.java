@@ -23,9 +23,9 @@ package io.axual.ksml.operation;
 import io.axual.ksml.testutil.KSMLTest;
 import io.axual.ksml.testutil.KSMLTestExtension;
 import io.axual.ksml.testutil.KSMLTopic;
+import io.stoatflow.core.state.KeyValue;
 import io.stoatflow.testutils.TestInputTopic;
 import io.stoatflow.testutils.TestOutputTopic;
-import kotlin.Pair;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.List;
@@ -54,13 +54,13 @@ public class KSMLReduceTest {
 
         // we should see 5 output messages with the values for each key concatenated
         assertEquals(5, outMessages.getQueueSize());
-        List<Pair<String, String>> keyValuesList = outMessages.readKeyValuesToList();
+        List<KeyValue<String, String>> keyValuesList = outMessages.readKeyValuesToList();
         assertThat(keyValuesList). contains(
-                new Pair<>("key1", "Hello "),
-                new Pair<>("key1", "Hello World"),
-                new Pair<>("key1", "Hello World from KSML"),
-                new Pair<>("key2", "foo"),
-                new Pair<>("key2", "foobar")
+                new KeyValue<>("key1", "Hello "),
+                new KeyValue<>("key1", "Hello World"),
+                new KeyValue<>("key1", "Hello World from KSML"),
+                new KeyValue<>("key2", "foo"),
+                new KeyValue<>("key2", "foobar")
         );
     }
 }

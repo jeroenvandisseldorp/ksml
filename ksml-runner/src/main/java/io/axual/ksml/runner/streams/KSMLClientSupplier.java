@@ -23,6 +23,7 @@ package io.axual.ksml.runner.streams;
 import io.axual.ksml.client.admin.ResolvingAdmin;
 import io.axual.ksml.client.consumer.ResolvingConsumer;
 import io.axual.ksml.client.producer.ResolvingProducer;
+import io.stoatflow.core.KafkaClientSupplier;
 import org.apache.kafka.clients.admin.Admin;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;

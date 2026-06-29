@@ -25,7 +25,6 @@ import io.axual.ksml.testutil.KSMLTestExtension;
 import io.axual.ksml.testutil.KSMLTopic;
 import io.stoatflow.testutils.TestInputTopic;
 import io.stoatflow.testutils.TestOutputTopic;
-import kotlin.Pair;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -62,7 +61,7 @@ public class KSMLStreamPartitionerTest {
 
         // Verify we can read all partitioned events
         // This validates that the partitioner function with resultType: integer works correctly
-        var eventKeys = allEvents.stream().map(Pair::getFirst).toList();
+        var eventKeys = allEvents.stream().map(kv -> kv.key).toList();
         assertTrue(eventKeys.contains("A"));
         assertTrue(eventKeys.contains("B"));
         assertTrue(eventKeys.contains("C"));

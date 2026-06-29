@@ -23,9 +23,9 @@ package io.axual.ksml.operation;
 import io.axual.ksml.testutil.KSMLTest;
 import io.axual.ksml.testutil.KSMLTestExtension;
 import io.axual.ksml.testutil.KSMLTopic;
+import io.stoatflow.core.state.KeyValue;
 import io.stoatflow.testutils.TestInputTopic;
 import io.stoatflow.testutils.TestOutputTopic;
-import kotlin.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -53,15 +53,15 @@ class KSMLTransformKeyValueToValueListTest {
         // we expect the output to contain this record, duplicated
         assertEquals(3, outputTopic.getQueueSize(), "output should contain 3 records");
 
-        List<Pair<String, String>> keyValues = outputTopic.readKeyValuesToList();
-        assertEquals("value1a", keyValues.get(0).getSecond());
-        assertEquals("value1b", keyValues.get(1).getSecond());
-        assertEquals("value1c", keyValues.get(2).getSecond());
+        List<KeyValue<String, String>> keyValues = outputTopic.readKeyValuesToList();
+        assertEquals("value1a", keyValues.get(0).value);
+        assertEquals("value1b", keyValues.get(1).value);
+        assertEquals("value1c", keyValues.get(2).value);
 
         // and the key to be duplicated as is
-        assertEquals("keyFirst", keyValues.get(0).getFirst());
-        assertEquals("keyFirst", keyValues.get(1).getFirst());
-        assertEquals("keyFirst", keyValues.get(2).getFirst());
+        assertEquals("keyFirst", keyValues.get(0).key);
+        assertEquals("keyFirst", keyValues.get(1).key);
+        assertEquals("keyFirst", keyValues.get(2).key);
     }
 
     @KSMLTest(topology = "pipelines/test-transformkeyvaluetovaluelist-expression.yaml")
@@ -74,14 +74,14 @@ class KSMLTransformKeyValueToValueListTest {
         // we expect the output to contain this record, duplicated
         assertEquals(3, outputTopic.getQueueSize(), "output should contain 3 records");
 
-        List<Pair<String, String>> keyValues = outputTopic.readKeyValuesToList();
-        assertEquals("value1-1", keyValues.get(0).getSecond());
-        assertEquals("value1-2", keyValues.get(1).getSecond());
-        assertEquals("value1-3", keyValues.get(2).getSecond());
+        List<KeyValue<String, String>> keyValues = outputTopic.readKeyValuesToList();
+        assertEquals("value1-1", keyValues.get(0).value);
+        assertEquals("value1-2", keyValues.get(1).value);
+        assertEquals("value1-3", keyValues.get(2).value);
 
         // and the key to be duplicated as is
-        assertEquals("keyFirst", keyValues.get(0).getFirst());
-        assertEquals("keyFirst", keyValues.get(1).getFirst());
-        assertEquals("keyFirst", keyValues.get(2).getFirst());
+        assertEquals("keyFirst", keyValues.get(0).key);
+        assertEquals("keyFirst", keyValues.get(1).key);
+        assertEquals("keyFirst", keyValues.get(2).key);
     }
 }

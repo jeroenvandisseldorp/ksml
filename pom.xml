@@ -103,7 +103,7 @@
         <victools.version>4.38.0</victools.version>
         <wire.version>5.2.1</wire.version>
 
-        <stoatflow.version>1.0.0-alpha.9</stoatflow.version>
+        <stoatflow.version>1.0.0-alpha.13</stoatflow.version>
 
         <!-- KSML schema generation -->
         <ksml.schema.output.file>docs/ksml-language-spec.json</ksml.schema.output.file>
@@ -333,6 +333,11 @@
                 <groupId>org.apache.kafka</groupId>
                 <artifactId>kafka-clients</artifactId>
                 <version>${apache.kafka.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.stoatflow</groupId>
+                <artifactId>stoatflow-core</artifactId>
+                <version>${stoatflow.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.stoatflow</groupId>

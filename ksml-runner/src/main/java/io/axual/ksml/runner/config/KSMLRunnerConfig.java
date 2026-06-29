@@ -31,6 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.axual.ksml.client.resolving.ResolvingClientConfig;
 import io.axual.ksml.runner.config.internal.StringMap;
+import io.stoatflow.core.config.StreamsConfig;
 import jakarta.annotation.Nonnull;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -75,14 +75,15 @@ public class TopologyAnalyzer {
                 for (var node : subTopology.nodes()) {
                     if (node instanceof SourceDescription sourceNode) {
                         inputTopics.addAll(sourceNode.topicSet());
-//                        if (sourceNode.topicPattern() != null)
-//                            inputTopics.add(sourceNode.topicPattern().pattern());
+                        if (sourceNode.topicPattern() != null)
+                            inputTopics.add(sourceNode.topicPattern().pattern());
                     }
                     if (node instanceof ProcessorDescription processorNode) {
                         // Ignore store names here
                     }
                     if (node instanceof SinkDescription sinkNode) {
-                        outputTopics.add(sinkNode.topic());
+                        if (sinkNode.topic() != null)
+                            outputTopics.add(sinkNode.topic());
                     }
                 }
             }

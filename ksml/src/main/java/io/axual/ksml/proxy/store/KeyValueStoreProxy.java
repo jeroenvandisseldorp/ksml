@@ -35,6 +35,21 @@ public class KeyValueStoreProxy extends AbstractStateStoreProxy<KeyValueStore<Ob
 
     // ==================== ReadOnlyKeyValueStore methods ====================
 
+    @HostAccess.Export
+    public Object all() {
+        return ProxyUtil.toPython(delegate.all());
+    }
+
+    @HostAccess.Export
+    public Object approximateNumEntries() {
+        return ProxyUtil.toPython(delegate.approximateNumEntries());
+    }
+
+    @HostAccess.Export
+    public Object get(Object key) {
+        return ProxyUtil.toPython(delegate.get(NATIVE_MAPPER.fromPython(key)));
+    }
+
     // ==================== KeyValueStore methods ====================
 
     @HostAccess.Export
@@ -52,3 +67,4 @@ public class KeyValueStoreProxy extends AbstractStateStoreProxy<KeyValueStore<Ob
         return ProxyUtil.toPython(delegate.putIfAbsent(NATIVE_MAPPER.fromPython(key), NATIVE_MAPPER.fromPython(value)));
     }
 }
+

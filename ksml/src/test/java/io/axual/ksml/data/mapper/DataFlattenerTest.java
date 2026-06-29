@@ -22,6 +22,8 @@ package io.axual.ksml.data.mapper;
 
 import io.axual.ksml.data.object.DataString;
 import io.axual.ksml.data.object.DataStruct;
+import io.stoatflow.core.topology.TimeWindow;
+import io.stoatflow.core.topology.Windowed;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

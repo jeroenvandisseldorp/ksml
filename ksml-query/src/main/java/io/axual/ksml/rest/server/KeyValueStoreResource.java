@@ -21,6 +21,10 @@ package io.axual.ksml.rest.server;
  */
 
 import io.axual.ksml.rest.data.KeyValueBean;
+import io.stoatflow.core.KeyQueryMetadata;
+import io.stoatflow.core.state.QueryableStoreTypes;
+import io.stoatflow.core.state.ReadOnlyKeyValueStore;
+import io.stoatflow.core.state.StoreQueryParameters;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;

@@ -49,7 +49,7 @@ public class UserTimestampExtractor extends Invoker implements TimestampExtracto
     }
 
     @Override
-    public long extract(ConsumerRecord<?, ?> rec, long previousTimestamp) {
+    public long extract(ConsumerRecord<Object,Object> rec, long previousTimestamp) {
         final var dataRecord = new DataStruct(ConsumerRecordSchema.CONSUMER_RECORD_SCHEMA);
         dataRecord.put(ConsumerRecordSchema.CONSUMER_RECORD_SCHEMA_TIMESTAMP_FIELD, new DataLong(rec.timestamp()));
         dataRecord.put(ConsumerRecordSchema.CONSUMER_RECORD_SCHEMA_TIMESTAMP_TYPE_FIELD, new DataString(rec.timestampType().toString()));
@@ -64,4 +64,6 @@ public class UserTimestampExtractor extends Invoker implements TimestampExtracto
         }
         throw new ExecutionException("Expected long result from function: " + function.name);
     }
+
+
 }

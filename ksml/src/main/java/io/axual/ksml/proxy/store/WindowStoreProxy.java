@@ -87,3 +87,4 @@ public class WindowStoreProxy extends AbstractStateStoreProxy<WindowStore<Object
         delegate.put(NATIVE_MAPPER.fromPython(key), NATIVE_MAPPER.fromPython(value), windowStartTimestamp);
     }
 }
+

@@ -20,6 +20,8 @@ package io.axual.ksml.rest.server;
  * =========================LICENSE_END==================================
  */
 
+import io.stoatflow.core.KeyQueryMetadata;
+import io.stoatflow.core.StreamsMetadata;
 import io.stoatflow.core.state.StoreQueryParameters;
 import org.apache.kafka.common.serialization.Serializer;
 

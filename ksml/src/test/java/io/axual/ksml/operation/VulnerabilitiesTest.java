@@ -33,6 +33,8 @@ import io.stoatflow.testutils.TestOutputTopic;
 import io.stoatflow.testutils.TopologyTestDriver;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.kafka.common.serialization.Deserializer;
+import org.apache.kafka.common.serialization.Serdes;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
@@ -71,9 +73,6 @@ public class VulnerabilitiesTest {
 
     @KSMLTopic(topic = "ksml_sensordata_avro")
     protected TestInputTopic<String, String> inputTopic;
-
-    @KSMLTopic(topic = "ksml_sensordata_copy")
-    protected TestOutputTopic<String, String> outputTopic;
 
     @KSMLDriver
     TopologyTestDriver topologyTestDriver;
@@ -115,13 +114,15 @@ public class VulnerabilitiesTest {
         var rte = assertThrows(RuntimeException.class, () -> {
             int oldcounter = counter.get();
             inputTopic.pipeInput("key1", "value1");
+            final Deserializer<Object> stringDeserializer = (Deserializer) new Serdes.StringSerde().deserializer();
+            final var outputTopic = new TestOutputTopic<String, String>("ksml_sensordata_copy", topologyTestDriver,  stringDeserializer,stringDeserializer);
             assertFalse(outputTopic.isEmpty(), "record should be copied");
             var keyValue = outputTopic.readKeyValue();
-            System.out.printf("Output topic key=%s, value=%s%n", keyValue.getFirst(), keyValue.getSecond());
+            System.out.printf("Output topic key=%s, value=%s%n", keyValue.key, keyValue.value);
             assertEquals(oldcounter, counter.get(), "No curl request should be received");
         }, "trying to exploit log and metrics should result in RuntimeException");
 
-        assertTrue(rte.getCause().getMessage().contains("foreign object has no attribute 'getClass'"), "`getClass' should be blocked by the sandbox.");
+        assertTrue(rte.getMessage().contains("foreign object has no attribute 'getClass'"), "`getClass' should be blocked by the sandbox.");
     }
 
     @KSMLTest(topology = "pipelines/vulnerable-state-store.yaml", schemaDirectory = "schemas")
@@ -162,7 +163,7 @@ public class VulnerabilitiesTest {
                 assertEquals(oldCounter, counter.get(), "No curl request should be received");
         }, "Trying to exploit state stores should result on RuntimeException");
 
-        assertTrue(rte.getCause().getMessage().contains("foreign object has no attribute 'getClass'"), "`getClass' should be blocked by the sandbox.");
+        assertTrue(rte.getMessage().contains("foreign object has no attribute 'getClass'"), "`getClass' should be blocked by the sandbox.");
     }
 
     @KSMLTest(topology = "pipelines/vulnerable-versioned-state-store.yaml", schemaDirectory = "schemas")
@@ -203,7 +204,7 @@ public class VulnerabilitiesTest {
                 assertEquals(oldCounter, counter.get(), "No curl request should be received");
         }, "Trying to exploit state stores should result on RuntimeException");
 
-        assertTrue(rte.getCause().getMessage().contains("foreign object has no attribute 'getClass'"), "`getClass' should be blocked by the sandbox.");
+        assertTrue(rte.getMessage().contains("foreign object has no attribute 'getClass'"), "`getClass' should be blocked by the sandbox.");
     }
 
     /**

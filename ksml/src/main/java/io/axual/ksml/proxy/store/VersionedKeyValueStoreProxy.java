@@ -41,7 +41,18 @@ public class VersionedKeyValueStoreProxy extends AbstractStateStoreProxy<Version
     }
 
     @HostAccess.Export
+    public Object get(Object key) {
+        return ProxyUtil.toPython(delegate.get(NATIVE_MAPPER.fromPython(key)));
+    }
+
+    @HostAccess.Export
+    public Object get(Object key, long asOfTimestamp) {
+        return ProxyUtil.toPython(delegate.get(NATIVE_MAPPER.fromPython(key), asOfTimestamp));
+    }
+
+    @HostAccess.Export
     public Object put(Object key, Object value, long timestamp) {
         return ProxyUtil.toPython(delegate.put(NATIVE_MAPPER.fromPython(key), NATIVE_MAPPER.fromPython(value), timestamp));
     }
 }
+

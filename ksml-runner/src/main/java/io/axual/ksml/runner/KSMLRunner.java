@@ -63,6 +63,10 @@ import io.axual.ksml.runner.config.internal.StringMapDefinitionPropertiesResolve
 import io.axual.ksml.runner.exception.ConfigException;
 import io.axual.ksml.runner.notation.NotationFactories;
 import io.axual.ksml.runner.prometheus.PrometheusExport;
+import io.stoatflow.core.KeyQueryMetadata;
+import io.stoatflow.core.StreamsMetadata;
+import io.stoatflow.core.state.HostInfo;
+import io.stoatflow.core.state.StoreQueryParameters;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

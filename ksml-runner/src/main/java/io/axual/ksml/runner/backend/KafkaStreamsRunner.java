@@ -33,6 +33,10 @@ import io.axual.ksml.runner.config.ApplicationServerConfig;
 import io.axual.ksml.runner.exception.RunnerException;
 import io.axual.ksml.runner.streams.KSMLClientSupplier;
 import io.axual.utils.headers.cleaning.AxualHeaderCleaningInterceptor;
+import io.stoatflow.core.StoatFlow;
+import io.stoatflow.core.config.StreamsConfig;
+import io.stoatflow.core.topology.StreamsBuilder;
+import io.stoatflow.core.topology.Topology;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -66,48 +70,13 @@ import java.util.function.BiFunction;
  */
 @Slf4j
 public class KafkaStreamsRunner implements Runner {
+    private static final String CLEANUP_INTERCEPTOR_CLASS_NAME = AxualHeaderCleaningInterceptor.class.getCanonicalName();
     @Getter
-    private final KafkaStreams kafkaStreams;
+    private final StoatFlow kafkaStreams;
     private final AtomicBoolean stopRunning = new AtomicBoolean(false);
     // Default sleep durations that can be overridden in tests
     private long startupSleepMs = 1000;
     private long pollingSleepMs = 200;
-
-    /**
-     * Configuration record for the KafkaStreamsRunner.
-     *
-     * @param definitions         Map of topology definitions to be used in the Kafka Streams application
-     * @param storageDirectory    Directory where Kafka Streams will store its state
-     * @param appServer           Configuration for the application server (used for interactive queries)
-     * @param kafkaConfig         Kafka configuration properties
-     * @param pythonContextConfig Configuration for the Python execution context
-     */
-    @Builder
-    public record Config(Map<String, TopologyDefinition> definitions,
-                         String storageDirectory,
-                         ApplicationServerConfig appServer,
-                         Map<String, String> kafkaConfig,
-                         PythonContextConfig pythonContextConfig) {
-        public Config(
-                final Map<String, TopologyDefinition> definitions,
-                final String storageDirectory,
-                final ApplicationServerConfig appServer,
-                final Map<String, String> kafkaConfig,
-                final PythonContextConfig pythonContextConfig) {
-            this.definitions = definitions;
-            this.storageDirectory = storageDirectory;
-            this.appServer = appServer;
-
-            var processedKafkaConfig = new HashMap<>(kafkaConfig);
-            // Check if a resolving client is required
-            if (ResolvingClientConfig.configRequiresResolving(processedKafkaConfig)) {
-                log.info("Using resolving Kafka clients");
-                processedKafkaConfig.put(StreamsConfig.DEFAULT_CLIENT_SUPPLIER_CONFIG, KSMLClientSupplier.class.getCanonicalName());
-            }
-            this.kafkaConfig = processedKafkaConfig;
-            this.pythonContextConfig = pythonContextConfig;
-        }
-    }
 
     /**
      * Creates a new KafkaStreamsRunner with the provided configuration.
@@ -115,7 +84,7 @@ public class KafkaStreamsRunner implements Runner {
      * @param config The configuration for the Kafka Streams application
      */
     public KafkaStreamsRunner(Config config) {
-        this(config, KafkaStreams::new);
+        this(config, (top, sc) -> new StoatFlow(sc., top, null, null));
     }
 
     /**
@@ -124,7 +93,7 @@ public class KafkaStreamsRunner implements Runner {
      * @param config              The configuration for the Kafka Streams application
      * @param kafkaStreamsFactory Factory function for creating KafkaStreams instances
      */
-    KafkaStreamsRunner(Config config, BiFunction<Topology, Properties, KafkaStreams> kafkaStreamsFactory) {
+    KafkaStreamsRunner(Config config, BiFunction<Topology, Properties, StoatFlow> kafkaStreamsFactory) {
         log.info("Constructing Kafka Backend");
 
         final var streamsProps = getStreamsConfig(config.kafkaConfig, config.storageDirectory, config.appServer);
@@ -135,7 +104,7 @@ public class KafkaStreamsRunner implements Runner {
         final var streamsConfig = new StreamsConfig(streamsProps);
         final var topologyConfig = new TopologyConfig(streamsConfig);
         final var streamsBuilder = new StreamsBuilder(topologyConfig);
-        var optimize = streamsProps.getOrDefault(StreamsConfig.TOPOLOGY_OPTIMIZATION_CONFIG, StreamsConfig.OPTIMIZE);
+        final var optimize = streamsProps.getOrDefault(StreamsConfig.TOPOLOGY_OPTIMIZATION_CONFIG, StreamsConfig.OPTIMIZE);
         final var topologyGenerator = new TopologyGenerator(applicationId, (String) optimize, config.pythonContextConfig());
         final var topology = topologyGenerator.create(streamsBuilder, config.definitions);
         final var topologyDesc = topology.describe();
@@ -152,17 +121,41 @@ public class KafkaStreamsRunner implements Runner {
     }
 
     /**
+     * Package-private constructor specifically for testing.
+     * Creates a KafkaStreamsRunner with a dummy topology and the provided tag enricher.
+     *
+     * @param config              The configuration for the Kafka Streams application
+     * @param kafkaStreamsFactory Factory function for creating KafkaStreams instances
+     * @param tagEnricher         The tag enricher to use for metrics
+     */
+    KafkaStreamsRunner(Config config, BiFunction<Topology, Properties, StoatFlow> kafkaStreamsFactory, KsmlTagEnricher tagEnricher) {
+        log.info("Constructing Kafka Backend (test mode)");
+
+        final var streamsProps = getStreamsConfig(config.kafkaConfig, config.storageDirectory, config.appServer);
+
+        streamsProps.put(StreamsConfig.METRIC_REPORTER_CLASSES_CONFIG,
+                "io.axual.ksml.metric.KsmlMetricsReporter," +
+                        "org.apache.kafka.common.metrics.JmxReporter");
+        streamsProps.put(KsmlMetricsReporter.ENRICHER_INSTANCE_CONFIG, tagEnricher);
+
+        // Create a dummy topology for testing
+        Topology dummyTopology = new Topology();
+
+        kafkaStreams = kafkaStreamsFactory.apply(dummyTopology, mapToProperties(streamsProps));
+        kafkaStreams.setStateListener(this::logStreamsStateChange);
+        kafkaStreams.setUncaughtExceptionHandler(ExecutionContext.INSTANCE.errorHandling()::uncaughtException);
+    }
+
+    /**
      * Logs state changes in the Kafka Streams application.
      * This method is used as a state listener for the Kafka Streams instance.
      *
      * @param newState The new state of the Kafka Streams application
      * @param oldState The previous state of the Kafka Streams application
      */
-    private void logStreamsStateChange(KafkaStreams.State newState, KafkaStreams.State oldState) {
+    private void logStreamsStateChange(io.stoatflow.core.StoatFlow newState, State oldState) {
         log.info("Pipeline processing state change. Moving from old state '{}' to new state '{}'", oldState, newState);
     }
-
-    private static final String CLEANUP_INTERCEPTOR_CLASS_NAME = AxualHeaderCleaningInterceptor.class.getCanonicalName();
 
     /**
      * Adds the AxualHeaderCleaningInterceptor to the consumer interceptor configuration.
@@ -210,32 +203,6 @@ public class KafkaStreamsRunner implements Runner {
         }
 
         configs.put(configName, String.join(",", interceptorClasses));
-    }
-
-    /**
-     * Package-private constructor specifically for testing.
-     * Creates a KafkaStreamsRunner with a dummy topology and the provided tag enricher.
-     *
-     * @param config              The configuration for the Kafka Streams application
-     * @param kafkaStreamsFactory Factory function for creating KafkaStreams instances
-     * @param tagEnricher         The tag enricher to use for metrics
-     */
-    KafkaStreamsRunner(Config config, BiFunction<Topology, Properties, KafkaStreams> kafkaStreamsFactory, KsmlTagEnricher tagEnricher) {
-        log.info("Constructing Kafka Backend (test mode)");
-
-        final var streamsProps = getStreamsConfig(config.kafkaConfig, config.storageDirectory, config.appServer);
-
-        streamsProps.put(StreamsConfig.METRIC_REPORTER_CLASSES_CONFIG,
-                "io.axual.ksml.metric.KsmlMetricsReporter," +
-                        "org.apache.kafka.common.metrics.JmxReporter");
-        streamsProps.put(KsmlMetricsReporter.ENRICHER_INSTANCE_CONFIG, tagEnricher);
-
-        // Create a dummy topology for testing
-        Topology dummyTopology = new Topology();
-
-        kafkaStreams = kafkaStreamsFactory.apply(dummyTopology, mapToProperties(streamsProps));
-        kafkaStreams.setStateListener(this::logStreamsStateChange);
-        kafkaStreams.setUncaughtExceptionHandler(ExecutionContext.INSTANCE.errorHandling()::uncaughtException);
     }
 
     /**
@@ -300,12 +267,19 @@ public class KafkaStreamsRunner implements Runner {
     @Override
     public State getState() {
         return switch (kafkaStreams.state()) {
-            case CREATED -> State.CREATED;
-            case REBALANCING -> State.STARTING;
-            case RUNNING -> State.STARTED;
-            case PENDING_SHUTDOWN -> State.STOPPING;
-            case NOT_RUNNING -> State.STOPPED;
-            case PENDING_ERROR, ERROR -> State.FAILED;
+            case CREATED ->
+                    State.CREATED;
+            case REBALANCING ->
+                    State.STARTING;
+            case RUNNING ->
+                    State.STARTED;
+            case PENDING_SHUTDOWN ->
+                    State.STOPPING;
+            case NOT_RUNNING ->
+                    State.STOPPED;
+            case PENDING_ERROR,
+                 ERROR ->
+                    State.FAILED;
         };
     }
 
@@ -366,5 +340,42 @@ public class KafkaStreamsRunner implements Runner {
     @Override
     public void stop() {
         stopRunning.set(true);
+    }
+
+    /**
+     * Configuration record for the KafkaStreamsRunner.
+     *
+     * @param definitions         Map of topology definitions to be used in the Kafka Streams application
+     * @param storageDirectory    Directory where Kafka Streams will store its state
+     * @param appServer           Configuration for the application server (used for interactive queries)
+     * @param kafkaConfig         Kafka configuration properties
+     * @param pythonContextConfig Configuration for the Python execution context
+     */
+    @Builder
+    public record Config(
+            Map<String, TopologyDefinition> definitions,
+            String storageDirectory,
+            ApplicationServerConfig appServer,
+            Map<String, String> kafkaConfig,
+            PythonContextConfig pythonContextConfig) {
+        public Config(
+                final Map<String, TopologyDefinition> definitions,
+                final String storageDirectory,
+                final ApplicationServerConfig appServer,
+                final Map<String, String> kafkaConfig,
+                final PythonContextConfig pythonContextConfig) {
+            this.definitions = definitions;
+            this.storageDirectory = storageDirectory;
+            this.appServer = appServer;
+
+            var processedKafkaConfig = new HashMap<>(kafkaConfig);
+            // Check if a resolving client is required
+            if (ResolvingClientConfig.configRequiresResolving(processedKafkaConfig)) {
+                log.info("Using resolving Kafka clients");
+                processedKafkaConfig.put(StreamsConfig.DEFAULT_CLIENT_SUPPLIER_CONFIG, KSMLClientSupplier.class.getCanonicalName());
+            }
+            this.kafkaConfig = processedKafkaConfig;
+            this.pythonContextConfig = pythonContextConfig;
+        }
     }
 }

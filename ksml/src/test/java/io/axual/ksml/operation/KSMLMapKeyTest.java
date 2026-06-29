@@ -23,9 +23,9 @@ package io.axual.ksml.operation;
 import io.axual.ksml.testutil.KSMLTest;
 import io.axual.ksml.testutil.KSMLTestExtension;
 import io.axual.ksml.testutil.KSMLTopic;
+import io.stoatflow.core.state.KeyValue;
 import io.stoatflow.testutils.TestInputTopic;
 import io.stoatflow.testutils.TestOutputTopic;
-import kotlin.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.generic.GenericRecord;
 import org.junit.jupiter.api.DisplayName;
@@ -71,14 +71,14 @@ public class KSMLMapKeyTest {
         inputTopic.pipeInput("amsterdam", inputs.get(0));
         inputTopic.pipeInput("utrecht", inputs.get(1));
 
-        List<Pair<String, GenericRecord>> keyValues = outputTopic.readKeyValuesToList();
+        List<KeyValue<String, GenericRecord>> keyValues = outputTopic.readKeyValuesToList();
         assertEquals(2, keyValues.size(), "All records should be transformed");
 
         // we expect the mapped key to be the first 4 characters, uppercased, and the value unchanged
-        assertEquals("AMST", keyValues.get(0).getFirst());
-        assertEquals(inputs.getFirst(), keyValues.get(0).getSecond());
-        assertEquals("UTRE", keyValues.get(1).getFirst());
-        assertEquals(inputs.get(1), keyValues.get(1).getSecond());
+        assertEquals("AMST", keyValues.get(0).key);
+        assertEquals(inputs.getFirst(), keyValues.get(0).value);
+        assertEquals("UTRE", keyValues.get(1).key);
+        assertEquals(inputs.get(1), keyValues.get(1).value);
     }
 }
 

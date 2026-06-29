@@ -22,6 +22,12 @@ package io.axual.ksml.rest.server;
 
 import io.axual.ksml.rest.data.KeyValueBean;
 import io.axual.ksml.rest.data.WindowedKeyValueBean;
+import io.stoatflow.core.KeyQueryMetadata;
+import io.stoatflow.core.state.KeyValue;
+import io.stoatflow.core.state.QueryableStoreTypes;
+import io.stoatflow.core.state.ReadOnlyWindowStore;
+import io.stoatflow.core.state.StoreQueryParameters;
+import io.stoatflow.core.topology.Windowed;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -44,12 +50,12 @@ public class WindowedKeyValueStoreResource extends StoreResource {
         log.info("Querying remote stores....");
         querier().allMetadataForStore(storeName)
                 .stream()
-                .filter(sm -> !(sm.host().equals(thisInstance.host()) && sm.port() == thisInstance.port())) //only query remote node stores
+                .filter(sm -> !(sm.hostInfo().host().equals(thisInstance.host()) && sm.hostInfo.port() == thisInstance.port())) //only query remote node stores
                 .forEach(remoteInstance -> {
-                    String url = "http://" + remoteInstance.host() + ":" + remoteInstance.port() + "/state/windowed/" + storeName + "/local/all";
-                    log.info("Fetching remote store at {}:{}", remoteInstance.host(), remoteInstance.port());
+                    String url = "http://" + remoteInstance.hostInfo().host() + ":" + remoteInstance.hostInfo().port() + "/state/windowed/" + storeName + "/local/all";
+                    log.info("Fetching remote store at {}:{}", remoteInstance.hostInfo().host(), remoteInstance.hostInfo().port());
                     List<WindowedKeyValueBean> remoteResult = restClient.getRemoteWindowedKeyValueBeans(url).elements();
-                    log.info("Data from remote store at {}:{} == {}", remoteInstance.host(), remoteInstance.port(), remoteResult);
+                    log.info("Data from remote store at {}:{} == {}", remoteInstance.hostInfo().host(), remoteInstance.hostInfo().port(), remoteResult);
                     result.addAll(remoteResult);
                 });
 

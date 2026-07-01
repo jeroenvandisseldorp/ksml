@@ -31,6 +31,7 @@ import io.axual.ksml.data.notation.string.StringNotation;
 import lombok.extern.slf4j.Slf4j;
 import io.axual.ksml.data.object.DataObject;
 import io.axual.ksml.data.schema.DataSchema;
+import io.axual.ksml.data.schema.StructSchema;
 import io.axual.ksml.data.util.JsonNodeUtil;
 import io.axual.ksml.schema.NativeDataSchemaMapper;
 import io.axual.ksml.type.UserType;
@@ -42,13 +43,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
 class NotationTestRunner {
+    private final TestData.Variant variant;
+
+    NotationTestRunner(TestData.Variant variant) {
+        this.variant = variant;
+    }
+
     public interface Tester<T> {
         void test(T input, T output);
     }
 
-    static <T> void schemaTest(String type, DataSchemaMapper<T> schemaMapper, Tester<DataSchema> tester) {
+    <T> void schemaTest(String type, DataSchemaMapper<T> schemaMapper, Tester<DataSchema> tester) {
         try {
-            final var inputSchema = TestData.testSchema();
+            final var inputSchema = TestData.testSchema(variant);
             final var nativeSchema = new NativeDataSchemaMapper().fromDataSchema(inputSchema);
             final var jsonSchema = JsonNodeUtil.convertNativeToJsonNode(nativeSchema).toPrettyString();
             log.info("INPUT SCHEMA: {}", jsonSchema);
@@ -63,7 +70,7 @@ class NotationTestRunner {
         }
     }
 
-    static <T> void schemaTest(String type, DataSchemaMapper<T> schemaMapper, EqualityFlags flags) {
+    <T> void schemaTest(String type, DataSchemaMapper<T> schemaMapper, EqualityFlags flags) {
         schemaTest(type, schemaMapper, (input, output) -> {
             final var inputEqualsOutput = input.equals(output, flags);
             if (!inputEqualsOutput.isEqual()) {
@@ -81,9 +88,9 @@ class NotationTestRunner {
         });
     }
 
-    static <T> void dataTest(String type, DataObjectMapper<T> objectMapper, EqualityFlags flags) {
+    <T> void dataTest(String type, DataObjectMapper<T> objectMapper, EqualityFlags flags) {
         try {
-            final var inputData = TestData.testStruct();
+            final var inputData = TestData.testStruct(variant);
             log.info("INPUT DATA: {}", inputData);
             final var nativeObject = objectMapper.fromDataObject(inputData);
             log.info("{} DATA: {}", type.toUpperCase(), nativeObject);
@@ -96,9 +103,9 @@ class NotationTestRunner {
         }
     }
 
-    static void serdeTest(Notation notation, boolean strictTypeChecking, EqualityFlags flags) {
+    void serdeTest(Notation notation, boolean strictTypeChecking, EqualityFlags flags) {
         try {
-            final var inputData = TestData.testStruct();
+            final var inputData = TestData.testStruct(variant);
             log.info("INPUT DATA: {}", inputData);
             final var serde = notation.serde(inputData.type(), false);
             final var headers = new RecordHeaders();

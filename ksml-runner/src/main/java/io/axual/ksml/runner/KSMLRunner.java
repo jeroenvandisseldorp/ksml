@@ -20,14 +20,15 @@ package io.axual.ksml.runner;
  * =========================LICENSE_END==================================
  */
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.OptionPreset;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaVersion;
-import com.github.victools.jsonschema.module.jackson.JacksonModule;
 import com.github.victools.jsonschema.module.jackson.JacksonOption;
+import com.github.victools.jsonschema.module.jackson.JacksonSchemaModule;
 import com.github.victools.jsonschema.module.jakarta.validation.JakartaValidationModule;
 import com.github.victools.jsonschema.module.jakarta.validation.JakartaValidationOption;
 import io.axual.ksml.client.serde.ResolvingDeserializer;
@@ -52,6 +53,7 @@ import io.axual.ksml.runner.backend.KafkaStreamsRunner;
 import io.axual.ksml.runner.backend.Runner;
 import io.axual.ksml.runner.config.ErrorHandlingConfig;
 import io.axual.ksml.runner.config.KSMLRunnerConfig;
+import io.axual.ksml.runner.config.NotationConfig;
 import io.axual.ksml.runner.config.internal.KsmlFileOrDefinitionProvider;
 import io.axual.ksml.runner.config.internal.KsmlFileOrDefinitionSubTypeResolver;
 import io.axual.ksml.runner.config.internal.StringMapDefinitionPropertiesResolver;
@@ -71,7 +73,6 @@ import org.apache.kafka.streams.StreamsMetadata;
 import org.apache.kafka.streams.state.HostInfo;
 import picocli.CommandLine;
 import tools.jackson.core.JacksonException;
-import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.yaml.YAMLFactory;
 
@@ -227,7 +228,7 @@ public class KSMLRunner {
                 }
 
                 final var notationConfig = notationEntry.getValue();
-                final var factoryName = notationConfig != null ? notationConfig.type() : "unknown";
+                final var factoryName = resolveFactoryName(notationConfig);
                 if (notationConfig != null && factoryName != null) {
                     final var factory = notationFactories.notations().get(factoryName);
                     if (factory == null) {
@@ -363,6 +364,17 @@ public class KSMLRunner {
         System.exit(0);
     }
 
+    /**
+     * Returns the wire-name string for the notation factory lookup, or {@code null} when the
+     * config or its type is missing. Extracted for testability.
+     */
+    static String resolveFactoryName(NotationConfig notationConfig) {
+        if (notationConfig == null || notationConfig.type() == null) {
+            return null;
+        }
+        return notationConfig.type().jsonValue();
+    }
+
     private static void closeExecutorService(final ExecutorService executorService) throws ExecutionException {
         executorService.shutdown();
         try {
@@ -447,15 +459,15 @@ public class KSMLRunner {
 
     @SuppressWarnings("java:S106")
     private static void printRunnerSchema(String filename) {
-        JacksonModule moduleJackson = new JacksonModule(
+        final var moduleJackson = new JacksonSchemaModule(
                 JacksonOption.RESPECT_JSONPROPERTY_REQUIRED,
                 JacksonOption.ALWAYS_REF_SUBTYPES,
-                JacksonOption.FLATTENED_ENUMS_FROM_JSONPROPERTY);
-        JakartaValidationModule moduleJakarta = new JakartaValidationModule(
+                JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE);
+        final var moduleJakarta = new JakartaValidationModule(
                 JakartaValidationOption.INCLUDE_PATTERN_EXPRESSIONS
         );
 
-        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(
+        final var configBuilder = new SchemaGeneratorConfigBuilder(
                 SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
                 .with(moduleJackson)
                 .with(moduleJakarta)
@@ -464,7 +476,8 @@ public class KSMLRunner {
         // Instantiate add providers/resolved to allow the KsmlFileOrDefinition and StringMap to be processed with correct Schema types
         final var stringMapResolver = new StringMapDefinitionPropertiesResolver();
         configBuilder.forFields()
-                .withAdditionalPropertiesResolver(stringMapResolver);
+                .withAdditionalPropertiesResolver(stringMapResolver)
+                .withDefaultResolver(KSMLRunner::resolveDefaultValue);
         configBuilder.forTypesInGeneral()
                 // Add support for the KsmlFileOrDefinition
                 .withCustomDefinitionProvider(stringMapResolver)
@@ -473,10 +486,10 @@ public class KSMLRunner {
         ;
 
         // Construct the real schema
-        SchemaGeneratorConfig config = configBuilder.build();
-        SchemaGenerator generator = new SchemaGenerator(config);
-        JsonNode jsonSchema = generator.generateSchema(KSMLRunnerConfig.class);
-        String schema = jsonSchema.toPrettyString();
+        final var config = configBuilder.build();
+        final var generator = new SchemaGenerator(config);
+        final var jsonSchema = generator.generateSchema(KSMLRunnerConfig.class);
+        final var schema = jsonSchema.toPrettyString();
 
         try {
             if (filename != null) {
@@ -500,6 +513,29 @@ public class KSMLRunner {
     }
 
     @SuppressWarnings("java:S106")
+    /**
+     * Resolves the schema {@code default} for a field from its {@link JsonProperty#defaultValue()}.
+     * <p>
+     * victools does not read {@code @JsonProperty(defaultValue=...)} on its own, so emit it here.
+     * The value is converted to the field's type so the schema 'default' is correctly typed
+     * (e.g. boolean false rather than the string "false") for autocomplete tooling.
+     *
+     * @param field the field whose default value should be resolved
+     * @return the typed default value, or {@code null} when the field has no {@code defaultValue}
+     */
+    private static Object resolveDefaultValue(FieldScope field) {
+        final var jsonProperty = field.getAnnotationConsideringFieldAndGetter(JsonProperty.class);
+        if (jsonProperty == null || jsonProperty.defaultValue().isEmpty()) {
+            return null;
+        }
+        final var defaultValue = jsonProperty.defaultValue();
+        final var type = field.getType().getErasedType();
+        if (type == boolean.class || type == Boolean.class) return Boolean.valueOf(defaultValue);
+        if (type == int.class || type == Integer.class) return Integer.valueOf(defaultValue);
+        if (type == long.class || type == Long.class) return Long.valueOf(defaultValue);
+        return defaultValue;
+    }
+
     private static void printKsmlDefinitionSchema(String filename) {
         // Check if the runner was started with "--schema". If so, then we output the JSON schema to validate the
         // KSML definitions with on stdout and exit
@@ -538,11 +574,14 @@ public class KSMLRunner {
         throw new ConfigException("No configuration found");
     }
 
-    private static ErrorHandler getErrorHandler(ErrorHandlingConfig.ErrorTypeHandlingConfig config) {
+    static ErrorHandler getErrorHandler(ErrorHandlingConfig.ErrorTypeHandlingConfig config) {
         final var handlerType = switch (config.handler()) {
             case CONTINUE -> ErrorHandler.HandlerType.CONTINUE_ON_FAIL;
             case STOP -> ErrorHandler.HandlerType.STOP_ON_FAIL;
             case RETRY -> ErrorHandler.HandlerType.RETRY_ON_FAIL;
+            // An explicit "handler:" (null) in the config overrides the Handler.STOP field default,
+            // fall back to the documented default rather than throwing a NullPointerException here.
+            case null -> ErrorHandler.HandlerType.STOP_ON_FAIL;
         };
         return new ErrorHandler(
                 config.log(),

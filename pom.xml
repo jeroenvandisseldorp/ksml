@@ -6,7 +6,7 @@
 
     <groupId>io.axual.ksml</groupId>
     <artifactId>ksml-parent</artifactId>
-    <version>1.3.0-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <licenses>
@@ -69,6 +69,7 @@
         <module>ksml-reporting</module>
         <module>ksml-integration-tests</module>
         <module>ksml-examples-test</module>
+        <module>ksml-docs-test</module>
     </modules>
 
     <properties>
@@ -82,7 +83,7 @@
         <apicurio.version>3.3.0</apicurio.version>
         <axual.utils.version>1.0.0</axual.utils.version>
         <commons.io.version>2.22.0</commons.io.version>
-        <confluent.version>8.2.1</confluent.version>
+        <confluent.version>8.3.0</confluent.version>
         <dropwizard.version>4.2.39</dropwizard.version>
         <findbugs.jsr305.version>3.0.2</findbugs.jsr305.version>
         <graalvm.version>25.0.3</graalvm.version>
@@ -96,7 +97,7 @@
         <lombok.version>1.18.46</lombok.version>
         <picocli.version>4.7.7</picocli.version>
         <prometheus.version>1.0.1</prometheus.version>
-        <prometheus-instrumentation.version>1.7.0</prometheus-instrumentation.version>
+        <prometheus-instrumentation.version>1.8.0</prometheus-instrumentation.version>
         <protobuf.version>3.25.9</protobuf.version>
         <saaj.version>3.0.6</saaj.version>
         <slf4j.version>2.1.0-alpha1</slf4j.version>
@@ -142,6 +143,11 @@
         <!-- Following properties filled at build time by jacoco -->
         <surefireArgLine/>
         <failsafeArgLine/>
+        <!-- JVM flags for JDK 24+: grant native access (Truffle/GraalPy load native libs) and allow
+             sun.misc.Unsafe memory access (protobuf, Truffle). Without these the JVM prints
+             "restricted method"/"terminally deprecated Unsafe" warnings at startup. The build runs on
+             GraalVM/JDK 25, so both flags are always valid here. -->
+        <jdk24PlusJvmArgs>--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow</jdk24PlusJvmArgs>
 
         <!-- License properties -->
         <license.licensename>apache_v2</license.licensename>
@@ -153,14 +159,6 @@
 
         <!-- Sonar for JACOCO-->
         <sonar.coverage.jacoco.xmlReportPaths>${maven.multiModuleProjectDirectory}/ksml-reporting/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-
-        <!-- Suppress S125 (commented-out code) false positives from Apache License headers -->
-        <sonar.issue.ignore.block>licenseHeader,kafkaStreamsSignature</sonar.issue.ignore.block>
-        <sonar.issue.ignore.block.licenseHeader.beginBlockRegexp>.*LICENSE_START.*</sonar.issue.ignore.block.licenseHeader.beginBlockRegexp>
-        <sonar.issue.ignore.block.licenseHeader.endBlockRegexp>.*LICENSE_END.*</sonar.issue.ignore.block.licenseHeader.endBlockRegexp>
-        <!-- Suppress S125 false positives from Kafka Streams method signature reference comments -->
-        <sonar.issue.ignore.block.kafkaStreamsSignature.beginBlockRegexp>.*Kafka Streams method signature.*</sonar.issue.ignore.block.kafkaStreamsSignature.beginBlockRegexp>
-        <sonar.issue.ignore.block.kafkaStreamsSignature.endBlockRegexp>.*\*/.*</sonar.issue.ignore.block.kafkaStreamsSignature.endBlockRegexp>
     </properties>
 
     <dependencyManagement>
@@ -654,7 +652,7 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven.surefire.plugin.version}</version>
                     <configuration>
-                        <argLine>${surefireArgLine}</argLine>
+                        <argLine>${surefireArgLine} ${jdk24PlusJvmArgs}</argLine>
                     </configuration>
                 </plugin>
 
@@ -663,7 +661,7 @@
                     <artifactId>maven-failsafe-plugin</artifactId>
                     <version>${maven.failsafe.plugin.version}</version>
                     <configuration>
-                        <argLine>${failsafeArgLine}</argLine>
+                        <argLine>${failsafeArgLine} ${jdk24PlusJvmArgs}</argLine>
                     </configuration>
                 </plugin>
 

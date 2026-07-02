@@ -33,8 +33,10 @@ import io.axual.ksml.runner.config.ApplicationServerConfig;
 import io.axual.ksml.runner.exception.RunnerException;
 import io.axual.ksml.runner.streams.KSMLClientSupplier;
 import io.axual.utils.headers.cleaning.AxualHeaderCleaningInterceptor;
+import io.stoatflow.core.StateListener;
 import io.stoatflow.core.StoatFlow;
 import io.stoatflow.core.config.StreamsConfig;
+import io.stoatflow.core.config.TopologyConfig;
 import io.stoatflow.core.topology.StreamsBuilder;
 import io.stoatflow.core.topology.Topology;
 import lombok.Builder;
@@ -84,7 +86,7 @@ public class KafkaStreamsRunner implements Runner {
      * @param config The configuration for the Kafka Streams application
      */
     public KafkaStreamsRunner(Config config) {
-        this(config, (top, sc) -> new StoatFlow(sc., top, null, null));
+        this(config, (top, sc) -> new StoatFlow(sc, top, null, null));
     }
 
     /**
@@ -93,7 +95,7 @@ public class KafkaStreamsRunner implements Runner {
      * @param config              The configuration for the Kafka Streams application
      * @param kafkaStreamsFactory Factory function for creating KafkaStreams instances
      */
-    KafkaStreamsRunner(Config config, BiFunction<Topology, Properties, StoatFlow> kafkaStreamsFactory) {
+    KafkaStreamsRunner(Config config, BiFunction<Topology, StreamsConfig, StoatFlow> kafkaStreamsFactory) {
         log.info("Constructing Kafka Backend");
 
         final var streamsProps = getStreamsConfig(config.kafkaConfig, config.storageDirectory, config.appServer);
@@ -101,22 +103,23 @@ public class KafkaStreamsRunner implements Runner {
         final var defaultAppId = "ksmlApplicationId";
         final var applicationId = config.kafkaConfig != null ? config.kafkaConfig.getOrDefault(StreamsConfig.APPLICATION_ID_CONFIG, defaultAppId) : defaultAppId;
 
-        final var streamsConfig = new StreamsConfig(streamsProps);
+//        final var streamsConfig = new StreamsConfig((String)streamsProps.getOrDefault(StreamsConfig.APPLICATION_ID_CONFIG, "someid"));
+        final var streamsConfig = StreamsConfig.fromMap(streamsProps).build();
         final var topologyConfig = new TopologyConfig(streamsConfig);
         final var streamsBuilder = new StreamsBuilder(topologyConfig);
-        final var optimize = streamsProps.getOrDefault(StreamsConfig.TOPOLOGY_OPTIMIZATION_CONFIG, StreamsConfig.OPTIMIZE);
-        final var topologyGenerator = new TopologyGenerator(applicationId, (String) optimize, config.pythonContextConfig());
+//        final var optimize = streamsProps.getOrDefault(StreamsConfig.TOPOLOGY_OPTIMIZATION_CONFIG, StreamsConfig.OPTIMIZE);
+        final var topologyGenerator = new TopologyGenerator(applicationId, true, config.pythonContextConfig());
         final var topology = topologyGenerator.create(streamsBuilder, config.definitions);
         final var topologyDesc = topology.describe();
         final var ksmlTagEnricher = KsmlTagEnricher.from(topologyDesc);
 
-        streamsProps.put(StreamsConfig.METRIC_REPORTER_CLASSES_CONFIG,
-                "io.axual.ksml.metric.KsmlMetricsReporter," +
-                        "org.apache.kafka.common.metrics.JmxReporter");
+//        streamsProps.put(StreamsConfig.METRIC_REPORTER_CLASSES_CONFIG,
+//                "io.axual.ksml.metric.KsmlMetricsReporter," +
+//                        "org.apache.kafka.common.metrics.JmxReporter");
         streamsProps.put(KsmlMetricsReporter.ENRICHER_INSTANCE_CONFIG, ksmlTagEnricher);
 
-        kafkaStreams = kafkaStreamsFactory.apply(topology, mapToProperties(streamsProps));
-        kafkaStreams.setStateListener(this::logStreamsStateChange);
+        kafkaStreams = kafkaStreamsFactory.apply(topology, streamsConfig);
+        kafkaStreams.setStateListener((StateListener) this::logStreamsStateChange);
         kafkaStreams.setUncaughtExceptionHandler(ExecutionContext.INSTANCE.errorHandling()::uncaughtException);
     }
 
@@ -133,16 +136,16 @@ public class KafkaStreamsRunner implements Runner {
 
         final var streamsProps = getStreamsConfig(config.kafkaConfig, config.storageDirectory, config.appServer);
 
-        streamsProps.put(StreamsConfig.METRIC_REPORTER_CLASSES_CONFIG,
-                "io.axual.ksml.metric.KsmlMetricsReporter," +
-                        "org.apache.kafka.common.metrics.JmxReporter");
+//        streamsProps.put(StreamsConfig.METRIC_REPORTER_CLASSES_CONFIG,
+//                "io.axual.ksml.metric.KsmlMetricsReporter," +
+//                        "org.apache.kafka.common.metrics.JmxReporter");
         streamsProps.put(KsmlMetricsReporter.ENRICHER_INSTANCE_CONFIG, tagEnricher);
 
         // Create a dummy topology for testing
         Topology dummyTopology = new Topology();
 
         kafkaStreams = kafkaStreamsFactory.apply(dummyTopology, mapToProperties(streamsProps));
-        kafkaStreams.setStateListener(this::logStreamsStateChange);
+        kafkaStreams.setStateListener((StateListener)this::logStreamsStateChange);
         kafkaStreams.setUncaughtExceptionHandler(ExecutionContext.INSTANCE.errorHandling()::uncaughtException);
     }
 
@@ -153,7 +156,7 @@ public class KafkaStreamsRunner implements Runner {
      * @param newState The new state of the Kafka Streams application
      * @param oldState The previous state of the Kafka Streams application
      */
-    private void logStreamsStateChange(io.stoatflow.core.StoatFlow newState, State oldState) {
+    private void logStreamsStateChange(StoatFlow.State newState, StoatFlow.State oldState) {
         log.info("Pipeline processing state change. Moving from old state '{}' to new state '{}'", oldState, newState);
     }
 
@@ -227,17 +230,17 @@ public class KafkaStreamsRunner implements Runner {
     Map<String, Object> getStreamsConfig(Map<String, String> initialConfigs, String storageDirectory, ApplicationServerConfig appServer) {
         final Map<String, Object> result = initialConfigs != null ? new HashMap<>(initialConfigs) : new HashMap<>();
         // Set default value if not explicitly configured
-        result.putIfAbsent(StreamsConfig.TOPOLOGY_OPTIMIZATION_CONFIG, StreamsConfig.OPTIMIZE);
+//        result.putIfAbsent(StreamsConfig.TOPOLOGY_OPTIMIZATION_CONFIG, StreamsConfig.OPTIMIZE);
 
         // Explicit configs can overwrite those from the map
         result.put(StreamsConfig.PRODUCTION_EXCEPTION_HANDLER_CLASS_CONFIG, ExecutionErrorHandler.class);
         result.put(StreamsConfig.DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG, ExecutionErrorHandler.class);
 
         // Make sure that all consumers have an interceptor configuration
-        addCleanupInterceptor(StreamsConfig.CONSUMER_PREFIX, result, true);
-        addCleanupInterceptor(StreamsConfig.MAIN_CONSUMER_PREFIX, result, false);
-        addCleanupInterceptor(StreamsConfig.RESTORE_CONSUMER_PREFIX, result, false);
-        addCleanupInterceptor(StreamsConfig.GLOBAL_CONSUMER_PREFIX, result, false);
+//        addCleanupInterceptor(StreamsConfig.CONSUMER_PREFIX, result, true);
+//        addCleanupInterceptor(StreamsConfig.MAIN_CONSUMER_PREFIX, result, false);
+//        addCleanupInterceptor(StreamsConfig.RESTORE_CONSUMER_PREFIX, result, false);
+//        addCleanupInterceptor(StreamsConfig.GLOBAL_CONSUMER_PREFIX, result, false);
 
         result.put(StreamsConfig.STATE_DIR_CONFIG, storageDirectory);
         if (appServer != null && appServer.enabled()) {
@@ -269,16 +272,23 @@ public class KafkaStreamsRunner implements Runner {
         return switch (kafkaStreams.state()) {
             case CREATED ->
                     State.CREATED;
-            case REBALANCING ->
+            case STARTING ->
+                    State.STARTING;
+            case VALIDATING_STATE ->
+                    State.STARTING;
+            case RESTORING ->
                     State.STARTING;
             case RUNNING ->
                     State.STARTED;
-            case PENDING_SHUTDOWN ->
+            case DRAINING ->
                     State.STOPPING;
-            case NOT_RUNNING ->
+            case PAUSED ->
+                    State.STARTED;
+            case STOPPING ->
+                    State.STOPPING;
+            case STOPPED ->
                     State.STOPPED;
-            case PENDING_ERROR,
-                 ERROR ->
+            case ERROR ->
                     State.FAILED;
         };
     }

@@ -51,14 +51,14 @@ public class TopologyGenerator {
     private final PythonContextConfig pythonContextConfig;
 
     public TopologyGenerator(String applicationId) {
-        this(applicationId, null, PythonContextConfig.builder().build());
+        this(applicationId, false, PythonContextConfig.builder().build());
     }
 
-    public TopologyGenerator(String applicationId, String optimization, PythonContextConfig pythonContextConfig) {
+    public TopologyGenerator(String applicationId, boolean optimization, PythonContextConfig pythonContextConfig) {
         // Parse configuration
         this.applicationId = applicationId;
         this.optimization = new Properties();
-        if (optimization != null) {
+        if (optimization) {
 //            this.optimization.put(StreamsConfig.TOPOLOGY_OPTIMIZATION_CONFIG, optimization);
         }
         this.pythonContextConfig = pythonContextConfig != null
@@ -146,7 +146,7 @@ public class TopologyGenerator {
         // 2. run through all stores and create the remaining ones manually
         final var kafkaStreamsCreatedStores = new HashSet<String>();
 
-        // Ensure that local state store in tables are registered with the StreamBuilder
+        // Ensure that local state stores in tables are registered with the StreamBuilder
         definition.topics().forEach((name, def) -> {
             if (def instanceof TableDefinition tableDef) {
                 context.getStreamWrapper(tableDef);

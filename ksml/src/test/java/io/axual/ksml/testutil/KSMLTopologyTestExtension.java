@@ -189,8 +189,7 @@ public class KSMLTopologyTestExtension implements ExecutionCondition, BeforeEach
         PythonContextConfig pythonContextConfig = PythonContextConfig.builder()
                 .modulePath(modulesDirectoryAbsolute)
                 .build();
-        final var topologyGenerator = new TopologyGenerator(methodName + ".app", null,
-                pythonContextConfig);
+        final var topologyGenerator = new TopologyGenerator(methodName + ".app", false, pythonContextConfig);
         final var topology = topologyGenerator.create(streamsBuilder, definitions);
         final var description = topology.describe();
         log.info("{}", description);

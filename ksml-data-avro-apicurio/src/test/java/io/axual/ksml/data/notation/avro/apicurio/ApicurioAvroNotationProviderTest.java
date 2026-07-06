@@ -43,7 +43,7 @@ class ApicurioAvroNotationProviderTest {
 //    @DisplayName("buildAuth returns HTTP Basic auth when a username and password are set")
 //    void buildAuth_withUsernameAndPassword_returnsBasicAuth() {
 //        final Map<String, Object> config = new HashMap<>();
-//        config.put("apicurio.registry.url", "http://registry:8081/apis/registry/v2");
+//        config.put("apicurio.registry.url", "http://registry:8081/apis/registry/v3");
 //        config.put("apicurio.auth.username", "alice");
 //        config.put("apicurio.auth.password", "secret");
 //
@@ -59,7 +59,7 @@ class ApicurioAvroNotationProviderTest {
 //    @DisplayName("buildAuth returns null when no username is set (behavior unchanged)")
 //    void buildAuth_withoutUsername_returnsNull() {
 //        final Map<String, Object> config = new HashMap<>();
-//        config.put("apicurio.registry.url", "http://registry:8081/apis/registry/v2");
+//        config.put("apicurio.registry.url", "http://registry:8081/apis/registry/v3");
 //
 //        assertThat(new ApicurioAvroNotationProvider().buildAuth(config)).isNull();
 //    }
@@ -74,7 +74,7 @@ class ApicurioAvroNotationProviderTest {
     @DisplayName("createSrClient builds a client when a URL is set but no login")
     void createSrClient_withUrlNoAuth_returnsClient() {
         final Map<String, Object> config = new HashMap<>();
-        config.put("apicurio.registry.url", "http://registry:8081/apis/registry/v2");
+        config.put("apicurio.registry.url", "http://registry:8081/apis/registry/v3");
 
         assertThat(new ApicurioAvroNotationProvider().createSrClient(config)).isNotNull();
     }
@@ -83,7 +83,7 @@ class ApicurioAvroNotationProviderTest {
     @DisplayName("createSrClient builds a client when a URL and a login are set")
     void createSrClient_withUrlAndAuth_returnsClient() {
         final Map<String, Object> config = new HashMap<>();
-        config.put("apicurio.registry.url", "http://registry:8081/apis/registry/v2");
+        config.put("apicurio.registry.url", "http://registry:8081/apis/registry/v3");
         config.put("apicurio.auth.username", "alice");
         config.put("apicurio.auth.password", "secret");
 

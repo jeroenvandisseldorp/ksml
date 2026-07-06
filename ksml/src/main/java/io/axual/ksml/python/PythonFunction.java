@@ -51,6 +51,7 @@ public class PythonFunction extends UserFunction {
     private static final PythonDataObjectMapper DATA_OBJECT_MAPPER = new PythonDataObjectMapper(true);
     private static final String QUOTE = "\"";
     private final DataObjectConverter converter;
+    private final String sourceCode;
     private final Value function;
 
     public static PythonFunction forFunction(PythonContext context, String namespace, String name, FunctionDefinition definition) {
@@ -68,10 +69,10 @@ public class PythonFunction extends UserFunction {
     private PythonFunction(PythonContext context, String namespace, String type, String name, FunctionDefinition definition) {
         super(namespace, name, definition.parameters(), definition.resultType(), definition.storeNames());
         converter = context.converter();
-        final var pyCode = generatePythonCode(namespace, type, name, definition);
-        function = context.registerFunction(pyCode, name + "_caller");
+        sourceCode = generatePythonCode(namespace, type, name, definition);
+        function = context.registerFunction(sourceCode, name + "_caller");
         if (function == null) {
-            final var pyCodeLines = pyCode.split("\n");
+            final var pyCodeLines = sourceCode.split("\n");
             final var builder = new StringBuilder();
             for (int index = 1; index <= pyCodeLines.length; index++) {
                 builder.append(index).append("  ").append(pyCodeLines[index - 1]).append("\n");
@@ -164,7 +165,7 @@ public class PythonFunction extends UserFunction {
 
         // Code to include all global variables
         final var assignStores = definition.storeNames().stream()
-                .map(storeName -> "  " + storeName + " = stores[\"" + storeName + "\"]\n")
+                .map(storeName -> "  " + storeName + " = stores.get(\"" + storeName + "\")\n")
                 .collect(Collectors.joining());
         // Code to copy / initialize all global variables
         final var includeGlobals = """
@@ -172,7 +173,7 @@ public class PythonFunction extends UserFunction {
                 """;
         // globalVars is now pre-converted to Python dict by PythonTypeConverter in Java
         final var initializeGlobals = """
-                  stores = globalVars["stores"]
+                  stores = globalVars.get("stores")
                 """;
         // Code to initialize optional parameters with default values
         final var initializeOptionalParams = Arrays.stream(definition.parameters())
@@ -264,9 +265,7 @@ public class PythonFunction extends UserFunction {
     private String initFunctionLocalVariables(int indentCount, String loggerName) {
         final var indent = " ".repeat(indentCount);
         return indent + "global loggerBridge\n" +
-                indent + "log = None\n" +
-                indent + "if loggerBridge is not None:\n" +
-                indent + "  log = loggerBridge.getLogger(\"" + loggerName + "\")\n" +
+                indent + "log = loggerBridge.getLogger(\"" + loggerName + "\") if loggerBridge is not None else None\n" +
                 indent + "global metrics\n";
     }
 }

@@ -31,6 +31,8 @@ import io.stoatflow.core.state.KeyValueIterator;
 import io.stoatflow.core.state.KeyValueStore;
 import io.stoatflow.core.state.SessionStore;
 import io.stoatflow.core.state.StateStore;
+import io.stoatflow.core.state.TimestampedKeyValueStore;
+import io.stoatflow.core.state.TimestampedWindowStore;
 import io.stoatflow.core.state.ValueAndTimestamp;
 import io.stoatflow.core.state.VersionedKeyValueStore;
 import io.stoatflow.core.state.VersionedRecord;
@@ -128,16 +130,14 @@ public class ProxyUtil {
      */
     @SuppressWarnings("unchecked")
     public static StateStore wrapStateStore(StateStore store) {
-        if (store instanceof VersionedKeyValueStore<?, ?> versionedStore) {
-            return new VersionedKeyValueStoreProxy((VersionedKeyValueStore<Object, Object>) versionedStore);
-        } else if (store instanceof KeyValueStore<?, ?> kvStore) {
-            return new KeyValueStoreProxy((KeyValueStore<Object, Object>) kvStore);
-        } else if (store instanceof SessionStore<?, ?> sessionStore) {
-            return new SessionStoreProxy((SessionStore<Object, Object>) sessionStore);
-        } else if (store instanceof WindowStore<?, ?> windowStore) {
-            return new WindowStoreProxy((WindowStore<Object, Object>) windowStore);
-        }
-        // Return unwrapped for unknown store types
-        return store;
+        return switch (store) {
+            case TimestampedKeyValueStore<?,?> s -> new TimestampedKeyValueStoreProxy((TimestampedKeyValueStore<Object, Object>) s);
+            case TimestampedWindowStore<?,?> s -> new TimestampedWindowStoreProxy((TimestampedWindowStore<Object, Object>) s);
+            case VersionedKeyValueStore<?,?> s -> new VersionedKeyValueStoreProxy((VersionedKeyValueStore<Object, Object>) s);
+            case KeyValueStore<?,?> s -> new KeyValueStoreProxy((KeyValueStore<Object, Object>) s);
+            case SessionStore<?,?> s -> new SessionStoreProxy((SessionStore<Object, Object>) s);
+            case WindowStore<?,?> s -> new WindowStoreProxy((WindowStore<Object, Object>) s);
+            default -> store;
+        };
     }
 }

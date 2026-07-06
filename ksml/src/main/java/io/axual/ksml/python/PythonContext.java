@@ -51,6 +51,7 @@ public class PythonContext implements AutoCloseable {
     // Java collections (ArrayList, HashMap, TreeMap) are no longer needed since PythonTypeConverter
     // converts them to Python-native types before passing to Python code
     private static final List<String> ALLOWED_JAVA_CLASSES = List.of(
+            "io.axual.ksml.proxy.log.LoggerBridge",
             "io.axual.ksml.proxy.log.LoggerBridge$PythonLogger",
             "io.axual.ksml.proxy.metric.MetricsBridge",
             "io.axual.ksml.proxy.metric.CounterBridge",
@@ -59,10 +60,11 @@ public class PythonContext implements AutoCloseable {
             "io.axual.ksml.proxy.store.KeyValueStoreProxy",
             "io.axual.ksml.proxy.store.SessionStoreProxy",
             "io.axual.ksml.proxy.store.WindowStoreProxy",
-            "io.axual.ksml.proxy.store.TimestampedWindowStoreProxy",
             "io.axual.ksml.proxy.store.TimestampedKeyValueStoreProxy",
+            "io.axual.ksml.proxy.store.TimestampedWindowStoreProxy",
             "io.axual.ksml.proxy.store.VersionedKeyValueStoreProxy",
-            "io.axual.ksml.proxy.store.KeyValueIteratorProxy");
+            "io.axual.ksml.proxy.store.KeyValueIteratorProxy",
+            "io.axual.ksml.proxy.store.WindowStoreIteratorProxy");
     private final Context context;
     @Getter
     private final DataObjectConverter converter;

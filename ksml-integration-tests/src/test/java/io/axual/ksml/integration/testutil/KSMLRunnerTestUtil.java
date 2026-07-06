@@ -23,8 +23,15 @@ package io.axual.ksml.integration.testutil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.axual.ksml.runner.KSMLRunner;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.AdminClientConfig;
+import org.apache.kafka.clients.admin.DescribeTopicsResult;
+import org.apache.kafka.clients.admin.ListOffsetsResult;
+import org.apache.kafka.clients.admin.OffsetSpec;
+import org.apache.kafka.clients.admin.TopicDescription;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.TopicPartitionInfo;
 
 import java.io.IOException;
@@ -37,6 +44,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -325,31 +333,29 @@ public class KSMLRunnerTestUtil {
                 minMessages, topicName, timeout.toSeconds());
 
         Properties adminProps = new Properties();
-        adminProps.put(org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBootstrapServers);
+        adminProps.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBootstrapServers);
 
-        try (org.apache.kafka.clients.admin.AdminClient adminClient = org.apache.kafka.clients.admin.AdminClient.create(adminProps)) {
+        try (AdminClient adminClient = AdminClient.create(adminProps)) {
             long startTime = System.currentTimeMillis();
             long timeoutMs = timeout.toMillis();
 
             while (System.currentTimeMillis() - startTime < timeoutMs) {
                 try {
                     // Get partition info for the topic
-                    org.apache.kafka.clients.admin.DescribeTopicsResult topicsResult =
-                        adminClient.describeTopics(java.util.Collections.singletonList(topicName));
-                    org.apache.kafka.clients.admin.TopicDescription topicDesc =
-                        topicsResult.topicNameValues().get(topicName).get();
+                    DescribeTopicsResult topicsResult = adminClient.describeTopics(Collections.singletonList(topicName));
+                    TopicDescription topicDesc = topicsResult.topicNameValues().get(topicName).get();
 
                     // Get high watermarks (message counts) for all partitions
-                    Map<org.apache.kafka.common.TopicPartition, org.apache.kafka.clients.admin.OffsetSpec> partitionOffsetSpecs = new HashMap<>();
+                    Map<TopicPartition, OffsetSpec> partitionOffsetSpecs = new HashMap<>();
                     for (TopicPartitionInfo partition : topicDesc.partitions()) {
-                        org.apache.kafka.common.TopicPartition tp = new org.apache.kafka.common.TopicPartition(topicName, partition.partition());
-                        partitionOffsetSpecs.put(tp, org.apache.kafka.clients.admin.OffsetSpec.latest());
+                        TopicPartition tp = new TopicPartition(topicName, partition.partition());
+                        partitionOffsetSpecs.put(tp, OffsetSpec.latest());
                     }
 
-                    org.apache.kafka.clients.admin.ListOffsetsResult offsetsResult = adminClient.listOffsets(partitionOffsetSpecs);
+                    ListOffsetsResult offsetsResult = adminClient.listOffsets(partitionOffsetSpecs);
 
                     long totalMessages = 0;
-                    for (Map.Entry<org.apache.kafka.common.TopicPartition, org.apache.kafka.clients.admin.ListOffsetsResult.ListOffsetsResultInfo> entry :
+                    for (Map.Entry<TopicPartition, ListOffsetsResult.ListOffsetsResultInfo> entry :
                          offsetsResult.all().get().entrySet()) {
                         totalMessages += entry.getValue().offset();
                     }

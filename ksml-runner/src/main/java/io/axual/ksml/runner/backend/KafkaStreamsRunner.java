@@ -86,7 +86,7 @@ public class KafkaStreamsRunner implements Runner {
      * @param config The configuration for the Kafka Streams application
      */
     public KafkaStreamsRunner(Config config) {
-        this(config, (top, sc) -> new StoatFlow(sc, top, null, null));
+        this(config, StoatFlow.Companion::fromBuilder);
     }
 
     /**
@@ -95,7 +95,7 @@ public class KafkaStreamsRunner implements Runner {
      * @param config              The configuration for the Kafka Streams application
      * @param kafkaStreamsFactory Factory function for creating KafkaStreams instances
      */
-    KafkaStreamsRunner(Config config, BiFunction<Topology, StreamsConfig, StoatFlow> kafkaStreamsFactory) {
+    KafkaStreamsRunner(Config config, BiFunction<StreamsConfig, StreamsBuilder, StoatFlow> kafkaStreamsFactory) {
         log.info("Constructing Kafka Backend");
 
         final var streamsProps = getStreamsConfig(config.kafkaConfig, config.storageDirectory, config.appServer);
@@ -118,7 +118,7 @@ public class KafkaStreamsRunner implements Runner {
 //                        "org.apache.kafka.common.metrics.JmxReporter");
         streamsProps.put(KsmlMetricsReporter.ENRICHER_INSTANCE_CONFIG, ksmlTagEnricher);
 
-        kafkaStreams = kafkaStreamsFactory.apply(topology, streamsConfig);
+        kafkaStreams = kafkaStreamsFactory.apply(streamsConfig, streamsBuilder);
         kafkaStreams.setStateListener((StateListener) this::logStreamsStateChange);
         kafkaStreams.setUncaughtExceptionHandler(ExecutionContext.INSTANCE.errorHandling()::uncaughtException);
     }
@@ -237,10 +237,10 @@ public class KafkaStreamsRunner implements Runner {
         result.put(StreamsConfig.DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG, ExecutionErrorHandler.class);
 
         // Make sure that all consumers have an interceptor configuration
-//        addCleanupInterceptor(StreamsConfig.CONSUMER_PREFIX, result, true);
-//        addCleanupInterceptor(StreamsConfig.MAIN_CONSUMER_PREFIX, result, false);
-//        addCleanupInterceptor(StreamsConfig.RESTORE_CONSUMER_PREFIX, result, false);
-//        addCleanupInterceptor(StreamsConfig.GLOBAL_CONSUMER_PREFIX, result, false);
+        addCleanupInterceptor(StreamsConfig.CONSUMER_PREFIX, result, true);
+        addCleanupInterceptor(StreamsConfig.MAIN_CONSUMER_PREFIX, result, false);
+        addCleanupInterceptor(StreamsConfig.RESTORE_CONSUMER_PREFIX, result, false);
+        addCleanupInterceptor(StreamsConfig.GLOBAL_CONSUMER_PREFIX, result, false);
 
         result.put(StreamsConfig.STATE_DIR_CONFIG, storageDirectory);
         if (appServer != null && appServer.enabled()) {
@@ -269,27 +269,12 @@ public class KafkaStreamsRunner implements Runner {
      */
     @Override
     public State getState() {
-        return switch (kafkaStreams.state()) {
-            case CREATED ->
-                    State.CREATED;
-            case STARTING ->
-                    State.STARTING;
-            case VALIDATING_STATE ->
-                    State.STARTING;
-            case RESTORING ->
-                    State.STARTING;
-            case RUNNING ->
-                    State.STARTED;
-            case DRAINING ->
-                    State.STOPPING;
-            case PAUSED ->
-                    State.STARTED;
-            case STOPPING ->
-                    State.STOPPING;
-            case STOPPED ->
-                    State.STOPPED;
-            case ERROR ->
-                    State.FAILED;
+        return switch (kafkaStreams.kafkaStreamsState()) {
+            case CREATED -> State.CREATED;
+            case REBALANCING, RUNNING -> State.STARTED;
+            case PENDING_SHUTDOWN -> State.STOPPING;
+            case NOT_RUNNING -> State.STOPPED;
+            case PENDING_ERROR, ERROR -> State.FAILED;
         };
     }
 

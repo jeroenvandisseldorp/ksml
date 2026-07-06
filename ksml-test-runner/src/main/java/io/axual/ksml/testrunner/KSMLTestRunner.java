@@ -27,6 +27,8 @@ import io.axual.ksml.definition.parser.TopologyDefinitionParser;
 import io.axual.ksml.generator.YAMLObjectMapper;
 import io.axual.ksml.parser.ParseNode;
 import io.axual.ksml.python.PythonContextConfig;
+import io.stoatflow.core.topology.StreamsBuilder;
+import io.stoatflow.testutils.TopologyTestDriver;
 import lombok.extern.slf4j.Slf4j;
 import org.graalvm.home.Version;
 import picocli.CommandLine;
@@ -171,7 +173,7 @@ public class KSMLTestRunner {
 
             var topologyGenerator = new TopologyGenerator(
                     topologyName + ".test",
-                    null,
+                    false,
                     PythonContextConfig.builder()
                             .modulePath(modulesDirectory)
                             .build()

@@ -20,6 +20,16 @@ package io.axual.ksml.testrunner;
  * =========================LICENSE_END==================================
  */
 
+import io.stoatflow.core.processor.Record;
+import io.stoatflow.core.processor.Processor;
+import io.stoatflow.core.processor.ProcessorContext;
+import io.stoatflow.core.processor.ProcessorSupplier;
+import io.stoatflow.core.state.KeyValueStore;
+import io.stoatflow.core.state.Stores;
+import io.stoatflow.core.topology.Consumed;
+import io.stoatflow.core.topology.Produced;
+import io.stoatflow.core.topology.StreamsBuilder;
+import io.stoatflow.testutils.TopologyTestDriver;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.graalvm.home.Version;
@@ -31,7 +41,10 @@ import org.junit.jupiter.api.condition.EnabledIf;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests for {@link AssertionRunner}. Requires GraalVM for Python execution.
@@ -66,10 +79,10 @@ class AssertionRunnerTest {
         builder.stream(INPUT_TOPIC, Consumed.with(stringSerde, stringSerde))
                 .process((ProcessorSupplier<String, String, String, String>) () -> new Processor<>() {
                     private KeyValueStore<String, String> store;
-                    private org.apache.kafka.streams.processor.api.ProcessorContext<String, String> ctx;
+                    private ProcessorContext<String, String> ctx;
 
                     @Override
-                    public void init(org.apache.kafka.streams.processor.api.ProcessorContext<String, String> context) {
+                    public void init(ProcessorContext<String, String> context) {
                         this.ctx = context;
                         this.store = context.getStateStore(STORE_NAME);
                     }

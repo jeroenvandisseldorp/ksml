@@ -25,6 +25,7 @@ import io.axual.ksml.execution.ExecutionErrorHandler;
 import io.axual.ksml.metric.KsmlTagEnricher;
 import io.axual.ksml.runner.config.ApplicationServerConfig;
 import io.axual.ksml.runner.exception.RunnerException;
+import io.stoatflow.core.KafkaStreamsState;
 import io.stoatflow.core.StoatFlow;
 import io.stoatflow.core.config.StreamsConfig;
 import io.stoatflow.core.topology.Topology;
@@ -60,7 +61,6 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Named.named;
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -193,8 +193,8 @@ class KafkaStreamsRunnerTest {
                                                 "AnotherKey", "value",
                                                 StreamsConfig.STATE_DIR_CONFIG, "test-dir",
                                                 StreamsConfig.PRODUCTION_EXCEPTION_HANDLER_CLASS_CONFIG, ExecutionErrorHandler.class,
-                                                StreamsConfig.DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG, ExecutionErrorHandler.class,
-                                                StreamsConfig.TOPOLOGY_OPTIMIZATION_CONFIG, StreamsConfig.OPTIMIZE
+                                                StreamsConfig.DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG, ExecutionErrorHandler.class
+//                                                StreamsConfig.TOPOLOGY_OPTIMIZATION_CONFIG, StreamsConfig.OPTIMIZE
                                         ),
                                         Set.of(
                                                 StreamsConfig.CONSUMER_PREFIX + ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG
@@ -215,7 +215,7 @@ class KafkaStreamsRunnerTest {
                                                 StreamsConfig.STATE_DIR_CONFIG, "test-dir",
                                                 StreamsConfig.PRODUCTION_EXCEPTION_HANDLER_CLASS_CONFIG, ExecutionErrorHandler.class,
                                                 StreamsConfig.DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG, ExecutionErrorHandler.class,
-                                                StreamsConfig.TOPOLOGY_OPTIMIZATION_CONFIG, StreamsConfig.OPTIMIZE,
+//                                                StreamsConfig.TOPOLOGY_OPTIMIZATION_CONFIG, StreamsConfig.OPTIMIZE,
                                                 StreamsConfig.APPLICATION_SERVER_CONFIG, "localhost:8080"
                                         ),
                                         Set.of(
@@ -233,8 +233,8 @@ class KafkaStreamsRunnerTest {
                                         Map.of(
                                                 StreamsConfig.STATE_DIR_CONFIG, "test-dir",
                                                 StreamsConfig.PRODUCTION_EXCEPTION_HANDLER_CLASS_CONFIG, ExecutionErrorHandler.class,
-                                                StreamsConfig.DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG, ExecutionErrorHandler.class,
-                                                StreamsConfig.TOPOLOGY_OPTIMIZATION_CONFIG, StreamsConfig.OPTIMIZE
+                                                StreamsConfig.DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG, ExecutionErrorHandler.class
+//                                                StreamsConfig.TOPOLOGY_OPTIMIZATION_CONFIG, StreamsConfig.OPTIMIZE
                                         ),
                                         Set.of(
                                                 StreamsConfig.CONSUMER_PREFIX + ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG
@@ -259,8 +259,8 @@ class KafkaStreamsRunnerTest {
                                                 StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "mock:9092",
                                                 StreamsConfig.STATE_DIR_CONFIG, "test-dir",
                                                 StreamsConfig.PRODUCTION_EXCEPTION_HANDLER_CLASS_CONFIG, ExecutionErrorHandler.class,
-                                                StreamsConfig.DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG, ExecutionErrorHandler.class,
-                                                StreamsConfig.TOPOLOGY_OPTIMIZATION_CONFIG, StreamsConfig.OPTIMIZE
+                                                StreamsConfig.DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG, ExecutionErrorHandler.class
+//                                                StreamsConfig.TOPOLOGY_OPTIMIZATION_CONFIG, StreamsConfig.OPTIMIZE
                                         ),
                                         Set.of(
                                                 StreamsConfig.CONSUMER_PREFIX + ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG,
@@ -523,10 +523,10 @@ class KafkaStreamsRunnerTest {
     @DisplayName("Test error handling")
     void testErrorHandling() throws Exception {
         final var mockStreams = mock(StoatFlow.class);
-        AtomicReference<StoatFlow.State> streamState = new AtomicReference<>(StoatFlow.State.CREATED);
+        AtomicReference<KafkaStreamsState> streamState = new AtomicReference<>(KafkaStreamsState.CREATED);
 
         // Mock the state method to return the current state from the AtomicReference
-        when(mockStreams.state()).thenAnswer(inv -> streamState.get());
+        when(mockStreams.kafkaStreamsState()).thenAnswer(inv -> streamState.get());
 
         // Create a runner with the mock
         final var config = KafkaStreamsRunner.Config.builder()
@@ -543,7 +543,7 @@ class KafkaStreamsRunnerTest {
 
         try {
             // Start in ERROR state
-            streamState.set(StoatFlow.State.ERROR);
+            streamState.set(KafkaStreamsState.ERROR);
 
             // Start the runner
             thread.start();
@@ -652,20 +652,20 @@ class KafkaStreamsRunnerTest {
     @Test
     @DisplayName("Check Kafka Streams lifecycle")
     void testStreamsRunner() throws Exception {
-        final var mockStreams = mock(KafkaStreams.class);
-        AtomicReference<KafkaStreams.State> streamState = new AtomicReference<>(KafkaStreams.State.CREATED);
-        lenient().doAnswer(a -> streamState.get()).when(mockStreams).state();
+        final var mockStreams = mock(StoatFlow.class);
+        AtomicReference<KafkaStreamsState> streamState = new AtomicReference<>(KafkaStreamsState.CREATED);
+        lenient().doAnswer(a -> streamState.get()).when(mockStreams).kafkaStreamsState();
 
         final var closeAnswer = new Answer<>() {
             @Override
             public Object answer(final InvocationOnMock invocation) throws Throwable {
-                streamState.set(StoatFlow.State.NOT_RUNNING);
+                streamState.set(KafkaStreamsState.NOT_RUNNING);
                 return invocation.getRawArguments().length == 0 ? null : Boolean.TRUE;
             }
         };
         lenient().doAnswer(closeAnswer).when(mockStreams).close();
-        lenient().doAnswer(closeAnswer).when(mockStreams).close(any(Duration.class));
-        lenient().doAnswer(closeAnswer).when(mockStreams).close(any(KafkaStreams.CloseOptions.class));
+//        lenient().doAnswer(closeAnswer).when(mockStreams).close(any(Duration.class));
+//        lenient().doAnswer(closeAnswer).when(mockStreams).close(any(StoatFlow.CloseOptions.class));
 
 
         final var mockStreamsSupplier = new MockStreamsSupplier(mockStreams);
@@ -698,7 +698,7 @@ class KafkaStreamsRunnerTest {
                 .containsAllEntriesOf(EXPECTED_CONFIG_WITHOUT_PATTERNS);
 
         // start returning state running
-        streamState.set(StoatFlow.State.RUNNING);
+        streamState.set(KafkaStreamsState.RUNNING);
 
         final var executor = Executors.newSingleThreadExecutor();
         try {

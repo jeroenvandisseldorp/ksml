@@ -20,6 +20,11 @@ package io.axual.ksml.testrunner;
  * =========================LICENSE_END==================================
  */
 
+import io.stoatflow.core.topology.Consumed;
+import io.stoatflow.core.topology.Produced;
+import io.stoatflow.core.topology.StreamsBuilder;
+import io.stoatflow.testutils.TestOutputTopic;
+import io.stoatflow.testutils.TopologyTestDriver;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.jupiter.api.AfterEach;
@@ -29,7 +34,8 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Tests for {@link TestDataProducer} using string-typed topics.
@@ -61,7 +67,7 @@ class TestDataProducerTest {
         }
     }
 
-    private org.apache.kafka.streams.TestOutputTopic<String, String> outputTopic() {
+    private TestOutputTopic<String, String> outputTopic() {
         return driver.createOutputTopic(OUTPUT_TOPIC, new StringDeserializer(), new StringDeserializer());
     }
 

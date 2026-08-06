@@ -3,7 +3,7 @@ streams:
     topic: ksml_sensordata_csv
     keyType: string
     valueType: csv:SensorData
-    offsetResetPolicy: latest
+    offsetResetPolicy: earliest
 
   csv_output:
     topic: ksml_sensordata_csv_processed

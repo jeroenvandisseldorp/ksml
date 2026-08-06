@@ -3,7 +3,7 @@ streams:
     topic: ksml_sensordata_binary
     keyType: string
     valueType: bytes
-    offsetResetPolicy: latest
+    offsetResetPolicy: earliest
 
   binary_output:
     topic: ksml_sensordata_binary_processed

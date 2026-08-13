@@ -200,9 +200,18 @@ public class KSMLTopologyTestExtension implements ExecutionCondition, BeforeEach
         final var testInstance = extensionContext.getRequiredTestInstance();
 
         log.debug("Registering annotated fields");
+        // @KSMLTopic fields are declared on the test class, so they apply to every test method - including
+        // methods that load a topology which does not read from that topic at all. Bind only the topics the
+        // current topology actually sources from, and leave the other fields unset.
+        final var sourceTopics = topology.getSourceTopics();
         for (final var entry : inputTopics.entrySet()) {
             final var fieldName = entry.getKey();
             final var ksmlTopic = entry.getValue();
+            if (!sourceTopics.contains(ksmlTopic.topic())) {
+                log.debug("Skipping @KSMLTopic field '{}': topic '{}' is not a source topic of topology '{}' (source topics: {})",
+                        fieldName, ksmlTopic.topic(), topologyName, sourceTopics);
+                continue;
+            }
             log.debug("Set variable {} to topic {}", fieldName, ksmlTopic.topic());
             final var inputTopicField = testClass.getDeclaredField(fieldName);
             inputTopicField.setAccessible(true);

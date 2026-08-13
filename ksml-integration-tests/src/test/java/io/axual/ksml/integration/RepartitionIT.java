@@ -22,8 +22,17 @@ package io.axual.ksml.integration;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.axual.ksml.TopologyGenerator;
+import io.axual.ksml.data.notation.binary.BinaryNotation;
+import io.axual.ksml.data.notation.json.JsonNotation;
+import io.axual.ksml.definition.parser.TopologyDefinitionParser;
+import io.axual.ksml.execution.ExecutionContext;
+import io.axual.ksml.generator.YAMLObjectMapper;
 import io.axual.ksml.integration.testutil.KSMLContainer;
 import io.axual.ksml.integration.testutil.KSMLRunnerTestUtil;
+import io.axual.ksml.parser.ParseNode;
+import io.axual.ksml.type.UserType;
+import io.stoatflow.core.topology.StreamsBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -36,6 +45,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.kafka.KafkaContainer;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -84,6 +94,43 @@ class RepartitionIT {
             .withTopics("user_activities", "repartitioned_activities")
             .withPartitions(4)  // 4 partitions as per example
             .dependsOn(kafka);
+
+    private static final String PROCESSOR_DEFINITION =
+            "/docs-examples/reference/operations/repartition-example-processor.yaml";
+
+    /**
+     * Compiles the KSML processor definition and logs the StoatFlow topology it produces, including the
+     * per-node metadata (key-changing flags and node serdes) that determines where StoatFlow cuts
+     * sub-topology (lane) boundaries.
+     * <p>
+     * This runs in-process against the same YAML the container runs, so the printed topology is exactly what
+     * KSMLRunner executes. It is diagnostic output only - it makes no assertions about the sub-topology
+     * layout, which is a StoatFlow implementation detail.
+     */
+    @Test
+    void logCompiledTopologyDescription() throws Exception {
+        final var jsonNotation = new JsonNotation();
+        final var notations = ExecutionContext.INSTANCE.notationLibrary();
+        notations.register(UserType.DEFAULT_NOTATION, new BinaryNotation(jsonNotation::serde));
+        notations.register(BinaryNotation.NOTATION_NAME, new BinaryNotation(jsonNotation::serde));
+        notations.register(JsonNotation.NOTATION_NAME, jsonNotation);
+
+        final String yaml;
+        try (var in = RepartitionIT.class.getResourceAsStream(PROCESSOR_DEFINITION)) {
+            assertThat(in).as("Processor definition should be on the test classpath").isNotNull();
+            yaml = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+        }
+
+        final var name = "repartition-processor";
+        final JsonNode parsed = YAMLObjectMapper.INSTANCE.readValue(yaml, JsonNode.class);
+        final var definition = new TopologyDefinitionParser(name).parse(ParseNode.fromRoot(parsed, name));
+        final var topology = new TopologyGenerator("io.ksml.repartition.test")
+                .create(new StreamsBuilder(), Map.of(name, definition));
+
+        log.info("KSML '{}' compiles to the following StoatFlow topology:\n{}", PROCESSOR_DEFINITION, topology.describe());
+        log.info("Topology nodes (isKeyChanging / keySerde determine where lane boundaries are cut):");
+        topology.getNodes().forEach(node -> log.info("  {}", node));
+    }
 
     @Test
     void testRepartitionWithCustomPartitioner() throws Exception {

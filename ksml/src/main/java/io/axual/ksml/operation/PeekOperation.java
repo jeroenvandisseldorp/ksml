@@ -53,8 +53,8 @@ public class PeekOperation extends BaseOperation {
                 (stores, rec) -> userAction.apply(stores, flattenValue(rec.key()), flattenValue(rec.value())),
                 storeNames);
         final var output = name != null
-                ? input.stream.processValues(supplier, Named.as(name))
-                : input.stream.processValues(supplier);
+                ? input.stream.processValues(supplier, Named.as(name), storeNames)
+                : input.stream.processValues(supplier, storeNames);
         return new KStreamWrapper(output, k, v);
     }
 }

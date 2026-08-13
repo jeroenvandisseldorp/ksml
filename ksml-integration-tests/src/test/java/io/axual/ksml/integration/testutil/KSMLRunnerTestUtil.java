@@ -20,7 +20,7 @@ package io.axual.ksml.integration.testutil;
  * =========================LICENSE_END==================================
  */
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import io.axual.ksml.runner.KSMLRunner;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.AdminClient;
@@ -33,7 +33,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.TopicPartitionInfo;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -55,6 +54,7 @@ import java.util.Properties;
  * This allows for faster test execution and easier debugging.
  */
 @Slf4j
+@SuppressWarnings("java:S2925")
 public class KSMLRunnerTestUtil {
 
     /**
@@ -143,7 +143,7 @@ public class KSMLRunnerTestUtil {
                     log.warn("KSMLRunner didn't exit gracefully, forcing termination");
                     ksmlProcess.destroyForcibly();
                 }
-            } catch (InterruptedException e) {
+            } catch (InterruptedException _) {
                 Thread.currentThread().interrupt();
                 log.warn("Interrupted while waiting for KSMLRunner to stop");
                 ksmlProcess.destroyForcibly();

@@ -26,6 +26,7 @@ import io.axual.ksml.data.mapper.DataTypeDataSchemaMapper;
 import io.axual.ksml.data.mapper.NativeDataObjectMapper;
 import io.axual.ksml.data.object.DataNull;
 import io.axual.ksml.data.schema.DataSchema;
+import io.axual.ksml.data.schema.LogicalSchema;
 import io.axual.ksml.data.schema.EnumSchema;
 import io.axual.ksml.data.schema.ListSchema;
 import io.axual.ksml.data.schema.StructSchema;
@@ -206,12 +207,10 @@ public class XmlSchemaMapper implements DataSchemaMapper<String> {
                 return new UnionSchema(members.toArray(UnionSchema.Member[]::new));
             }
         }
-        if (type instanceof XmlSchemaComplexType complexType) {
-            if (complexType.getParticle() instanceof XmlSchemaSequence sequence) {
-                final var fields = convertToFields(context, sequence);
-                final var namespace = getNamespaceFromComplexType(complexType);
-                return new StructSchema(namespace, complexType.getName(), extractDoc(complexType.getAnnotation()), fields, false);
-            }
+        if (type instanceof XmlSchemaComplexType complexType && complexType.getParticle() instanceof XmlSchemaSequence sequence) {
+            final var fields = convertToFields(context, sequence);
+            final var namespace = getNamespaceFromComplexType(complexType);
+            return new StructSchema(namespace, complexType.getName(), extractDoc(complexType.getAnnotation()), fields, false);
         }
         throw new SchemaException("Could not convert XSD type to DataSchema: " + type);
     }
@@ -413,6 +412,8 @@ public class XmlSchemaMapper implements DataSchemaMapper<String> {
     }
 
     private QName convertToQName(DataSchema schema) {
+        // A logical type carries a base primitive; XSD has no notion of it, so map the base.
+        if (schema instanceof LogicalSchema logical) schema = logical.baseSchema();
         if (schema == DataSchema.ANY_SCHEMA) return XSD_ANY;
         if (schema == DataSchema.BOOLEAN_SCHEMA) return XSD_BOOLEAN;
         if (schema == DataSchema.BYTE_SCHEMA) return XSD_BYTE;

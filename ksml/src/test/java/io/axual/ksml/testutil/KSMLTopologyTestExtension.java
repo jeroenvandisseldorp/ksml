@@ -20,7 +20,7 @@ package io.axual.ksml.testutil;
  * =========================LICENSE_END==================================
  */
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
 import io.axual.ksml.TopologyGenerator;
 import io.axual.ksml.data.mapper.DataObjectFlattener;
@@ -32,7 +32,7 @@ import io.axual.ksml.data.notation.avro.confluent.ConfluentAvroSerdeSupplier;
 import io.axual.ksml.data.notation.confluent.MockConfluentSchemaRegistryClient;
 import io.axual.ksml.data.notation.jsonschema.JsonSchemaNotation;
 import io.axual.ksml.data.notation.jsonschema.apicurio.ApicurioJsonSchemaNotationProvider;
-import io.axual.ksml.data.notation.jsonschema.apicurio.MockApicurioSchemaRegistryClient;
+import io.axual.ksml.notation.MockApicurioSchemaRegistryClient;
 import io.axual.ksml.data.notation.protobuf.ProtobufNotation;
 import io.axual.ksml.data.notation.protobuf.apicurio.ApicurioProtobufNotationProvider;
 import io.axual.ksml.definition.parser.TopologyDefinitionParser;
@@ -147,9 +147,9 @@ public class KSMLTopologyTestExtension implements ExecutionCondition, BeforeEach
         if (!KSMLTopologyTestInvocationContext.NO_SCHEMAS.equals(schemaDirectory)) {
             log.debug("Annotated schema directory variable: `{}`", schemaDirectory);
             final var schemaDirectoryURI = ClassLoader.getSystemResource(schemaDirectory).toURI();
-            final var schemaDirectory = schemaDirectoryURI.getPath();
-            ExecutionContext.INSTANCE.schemaLibrary().schemaDirectory(schemaDirectory);
-            log.debug("Registered schema directory: {}", schemaDirectory);
+            final var schemaDirectoryAbsolute = schemaDirectoryURI.getPath();
+            ExecutionContext.INSTANCE.schemaLibrary().schemaDirectory(schemaDirectoryAbsolute);
+            log.debug("Registered schema directory: {}", schemaDirectoryAbsolute);
         } else {
             ExecutionContext.INSTANCE.schemaLibrary().schemaDirectory(KSMLTest.NO_SCHEMAS);
         }

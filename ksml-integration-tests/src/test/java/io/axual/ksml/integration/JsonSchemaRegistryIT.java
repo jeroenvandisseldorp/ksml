@@ -20,11 +20,11 @@ package io.axual.ksml.integration;
  * =========================LICENSE_END==================================
  */
 
-import com.fasterxml.jackson.databind.JsonNode;
-import io.axual.ksml.integration.testutil.ApicurioSchemaRegistryContainer;
+import tools.jackson.databind.JsonNode;
 import io.axual.ksml.integration.testutil.KSMLContainer;
 import io.axual.ksml.integration.testutil.KSMLRunnerTestUtil;
 import io.axual.ksml.integration.testutil.SensorDataTestUtil;
+import io.axual.ksml.integration.testutil.SharedKsmlInfra;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -32,10 +32,8 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.kafka.KafkaContainer;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -54,28 +52,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Slf4j
 @Testcontainers
 class JsonSchemaRegistryIT {
-
-    static final Network network = Network.newNetwork();
-
-    @Container
-    static final KafkaContainer kafka = new KafkaContainer("apache/kafka:4.0.0")
-            .withNetwork(network)
-            .withNetworkAliases("broker")
-            .withExposedPorts(9092, 9093);
-
-    @Container
-    static final ApicurioSchemaRegistryContainer schemaRegistry = new ApicurioSchemaRegistryContainer()
-            .withNetwork(network);
-
     @Container
     static final KSMLContainer ksml = new KSMLContainer()
             .withKsmlFiles("/docs-examples/beginner-tutorial/different-data-formats/jsonschema",
                           "jsonschema-producer.yaml", "jsonschema-processor.yaml", "SensorData.json")
-            .withKafka(kafka)
-            .withApicurioJsonRegistry(schemaRegistry)
+            .withKafka(SharedKsmlInfra.kafka())
+            .withApicurioJsonRegistry(SharedKsmlInfra.schemaRegistry())
             .withTopics("sensor_data_jsonschema", "sensor_data_jsonschema_processed")
             .withSetupCallback(container -> registerJsonSchema())
-            .dependsOn(kafka, schemaRegistry);
+            .dependsOn(SharedKsmlInfra.kafka(), SharedKsmlInfra.schemaRegistry());
 
     @Test
     void testKSMLJsonSchemaProcessing() throws Exception {
@@ -96,10 +81,10 @@ class JsonSchemaRegistryIT {
             log.info("Found {} JsonSchema sensor messages", records.count());
 
             // Validate JsonSchema messages
-            records.forEach(record -> {
-                log.info("JsonSchema Sensor: key={}, value size={} bytes", record.key(), record.value().length());
-                assertThat(record.key()).as("Sensor key should start with 'sensor'").startsWith("sensor");
-                assertThat(record.value()).as("JsonSchema message should have content").isNotEmpty();
+            records.forEach(consumerRecord -> {
+                log.info("JsonSchema Sensor: key={}, value size={} bytes", consumerRecord.key(), consumerRecord.value().length());
+                assertThat(consumerRecord.key()).as("Sensor key should start with 'sensor'").startsWith("sensor");
+                assertThat(consumerRecord.value()).as("JsonSchema message should have content").isNotEmpty();
             });
         }
 
@@ -114,12 +99,12 @@ class JsonSchemaRegistryIT {
 
             // Validate processed JSON structure and content using Jackson ObjectMapper and SoftAssertions
             SoftAssertions softly = new SoftAssertions();
-            records.forEach(record -> {
-                log.info("Processed JSON: key={}, value={}", record.key(), record.value());
-                softly.assertThat(record.key()).as("Sensor key should start with 'sensor'").startsWith("sensor");
+            records.forEach(consumerRecord -> {
+                log.info("Processed JSON: key={}, value={}", consumerRecord.key(), consumerRecord.value());
+                softly.assertThat(consumerRecord.key()).as("Sensor key should start with 'sensor'").startsWith("sensor");
 
                 // Use Jackson ObjectMapper for structured JSON validation
-                JsonNode jsonNode = SensorDataTestUtil.validateProcessedSensorJsonStructure(record.value(), softly);
+                JsonNode jsonNode = SensorDataTestUtil.validateProcessedSensorJsonStructure(consumerRecord.value(), softly);
 
                 // Validate sensor type enum using JsonNode path access
                 if (jsonNode != null) {
@@ -147,7 +132,7 @@ class JsonSchemaRegistryIT {
         // Producer generates every 3 seconds, so wait for at least 2 messages
         // Use AdminClient to check actual message count instead of fixed sleep
         KSMLRunnerTestUtil.waitForTopicMessages(
-            kafka.getBootstrapServers(),
+            SharedKsmlInfra.kafka().getBootstrapServers(),
             "sensor_data_jsonschema",
             2, // Wait for at least 2 messages
             Duration.ofSeconds(30) // Maximum 30 seconds (much better than fixed 10s)
@@ -156,6 +141,7 @@ class JsonSchemaRegistryIT {
         log.info("Sensor data has been generated and verified");
     }
 
+    @SuppressWarnings("java:S2925")
     private static void registerJsonSchema() throws Exception {
         log.info("Registering JsonSchema with Apicurio Schema Registry...");
 
@@ -172,7 +158,7 @@ class JsonSchemaRegistryIT {
             throw new RuntimeException("Failed to read schema file: " + schemaPath, e);
         }
 
-        String schemaRegistryUrl = "http://localhost:" + schemaRegistry.getMappedPort(8081);
+        String schemaRegistryUrl = "http://localhost:" + SharedKsmlInfra.schemaRegistry().getMappedPort(8081);
 
         // Wait for schema registry to be ready using HTTP client
         KSMLRunnerTestUtil.waitForSchemaRegistryReady(schemaRegistryUrl, Duration.ofMinutes(1));
@@ -198,7 +184,7 @@ class JsonSchemaRegistryIT {
 
     private Properties createConsumerProperties(String groupId) {
         final Properties props = new Properties();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafka.getBootstrapServers());
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, SharedKsmlInfra.kafka().getBootstrapServers());
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());

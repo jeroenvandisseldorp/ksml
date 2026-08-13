@@ -41,6 +41,7 @@ import io.axual.ksml.data.schema.DataSchema;
 import io.axual.ksml.data.schema.EnumSchema;
 import io.axual.ksml.data.schema.FixedSchema;
 import io.axual.ksml.data.schema.ListSchema;
+import io.axual.ksml.data.schema.LogicalSchema;
 import io.axual.ksml.data.schema.MapSchema;
 import io.axual.ksml.data.schema.NamedSchema;
 import io.axual.ksml.data.schema.StructSchema;
@@ -61,7 +62,6 @@ import static io.axual.ksml.data.notation.protobuf.ProtobufConstants.NO_DOCUMENT
 import static io.axual.ksml.data.schema.DataSchemaConstants.NO_TAG;
 
 public class ProtobufFileElementSchemaMapper implements DataSchemaMapper<ProtoFileElement> {
-    private static final int PROTOBUF_ENUM_DEFAULT_VALUE_INDEX = 0;
     private final NativeDataObjectMapper nativeMapper;
     private final DataTypeDataSchemaMapper typeSchemaMapper;
 
@@ -125,7 +125,9 @@ public class ProtobufFileElementSchemaMapper implements DataSchemaMapper<ProtoFi
 
     private StructSchema.Field convertFieldElementToStructField(ProtobufReadContext context, FieldElement field) {
         final var name = field.getName();
-        final var required = field.getLabel() == null || field.getLabel() == Field.Label.REQUIRED;
+        // Only proto2 `required` label makes a field mandatory; proto3 implicit fields (label==null)
+        // and proto2 `optional` fields both allow absence and are treated as optional here.
+        final var required = field.getLabel() == Field.Label.REQUIRED;
         final var type = convertFieldElementToDataSchema(context, field);
         if (type == null) throw new SchemaException("Schema for field '" + field.getName() + "' can not be NULL");
         final var defaultValue = convertDefaultValueToDataObject(type, field.getDefaultValue());
@@ -224,13 +226,14 @@ public class ProtobufFileElementSchemaMapper implements DataSchemaMapper<ProtoFi
                 Collections.emptyList());
     }
 
+    @SuppressWarnings("java:S3358")
     private static FieldElement convertStructFieldToFieldElement(StructSchema.Field field, String type) {
         final var required = field.required();
         final var list = field.schema() instanceof ListSchema;
         final var defaultValue = field.defaultValue() != null && field.defaultValue() != DataNull.INSTANCE ? field.defaultValue().toString() : null;
         return new FieldElement(
                 DEFAULT_LOCATION,
-                required ? Field.Label.REQUIRED : list ? Field.Label.REPEATED : Field.Label.OPTIONAL,
+                required ? null : list ? Field.Label.REPEATED : Field.Label.OPTIONAL,
                 type,
                 field.name(),
                 defaultValue,
@@ -272,6 +275,8 @@ public class ProtobufFileElementSchemaMapper implements DataSchemaMapper<ProtoFi
     }
 
     private String convertDataSchemaToProtoType(ProtobufWriteContext context, List<TypeElement> parentNestedTypes, String parentName, DataSchema schema) {
+        // A logical type carries a base primitive; PROTOBUF has no notion of it, so map the base.
+        if (schema instanceof LogicalSchema logical) schema = logical.baseSchema();
         if (schema == DataSchema.BOOLEAN_SCHEMA) return "boolean";
         if (schema == DataSchema.BYTE_SCHEMA || schema == DataSchema.SHORT_SCHEMA || schema == DataSchema.INTEGER_SCHEMA)
             return "int32";
@@ -387,6 +392,7 @@ public class ProtobufFileElementSchemaMapper implements DataSchemaMapper<ProtoFi
                     Location.get(""),
                     namespace,
                     ProtobufConstants.DEFAULT_SYNTAX,
+                    Collections.emptyList(),
                     Collections.emptyList(),
                     Collections.emptyList(),
                     types.reversed(),

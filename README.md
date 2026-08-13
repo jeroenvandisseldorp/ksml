@@ -59,6 +59,7 @@ The submodules are as follows:
 | Module                                      | Description                                                                                                  |
 |---------------------------------------------|--------------------------------------------------------------------------------------------------------------|
 | [`ksml-data`](ksml-data/)                   | contains core data type and schema logic.                                                                    |
+| [`ksml-data-apicurio`](ksml-data-apicurio/) | shared support for the Apicurio-backed notations.                                                            |
 | [`ksml-data-avro`](ksml-data-avro/)         | extension to the data library for AVRO support.                                                              |
 | [`ksml-data-binary`](ksml-data-binary/)     | extension to the data library for BINARY support.                                                            |
 | [`ksml-data-csv`](ksml-data-csv/)           | extension to the data library for CSV support.                                                               |
@@ -111,6 +112,10 @@ the installation instructions for your platform.
 Once installed, configure GraalVM as your default JVM, then build the project using Maven:
 
 ```mvn clean package```
+
+> Builds are single-threaded by default. To speed up a multi-module build or the test suite, add `-T1C`
+> (one build thread per CPU core), e.g. `mvn -T1C clean verify`. CI already applies this to the test build;
+> it is kept off the `sonar:sonar` and release paths, which are not parallel-safe.
 
 ## Running KSML
 

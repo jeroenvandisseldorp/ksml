@@ -34,10 +34,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.util.List;
 
 import static io.axual.ksml.operation.SensorData.SensorType.HUMIDITY;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(KSMLTestExtension.class)
 @Slf4j
+@SuppressWarnings("java:S2187")
 public class KSMLSelectKeyTest {
 
     @KSMLTopic(topic = "input_topic", valueSerde = KSMLTopic.SerdeType.AVRO)
@@ -69,13 +70,13 @@ public class KSMLSelectKeyTest {
         inputTopic.pipeInput("utrecht", inputs.get(1));
 
         List<KeyValue<String, GenericRecord>> keyValues = outputTopic.readKeyValuesToList();
-        assertEquals(2, keyValues.size(), "All records should be transformed");
+        assertThat(keyValues.size()).as("All records should be transformed").isEqualTo(2);
 
         // we expect the mapped key to be the first 4 characters, uppercased
-        assertEquals("AMST", keyValues.get(0).key);
-        assertEquals("UTRE", keyValues.get(1).key);
-        assertEquals(inputs.get(0), keyValues.get(0).value);
-        assertEquals(inputs.get(1), keyValues.get(1).value);
+        assertThat(keyValues.get(0).key).isEqualTo("AMST");
+        assertThat(keyValues.get(1).key).isEqualTo("UTRE");
+        assertThat(keyValues.get(0).value).isEqualTo(inputs.get(0));
+        assertThat(keyValues.get(1).value).isEqualTo(inputs.get(1));
     }
 }
 

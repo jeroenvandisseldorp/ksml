@@ -33,6 +33,7 @@ import io.stoatflow.core.state.SessionStore;
 import io.stoatflow.core.state.StateStore;
 import io.stoatflow.core.state.StoreBuilder;
 import io.stoatflow.core.state.Stores;
+import io.stoatflow.core.state.TimestampedWindowStoreSupplier;
 import io.stoatflow.core.state.WindowBytesStoreSupplier;
 import io.stoatflow.core.state.WindowStore;
 import io.stoatflow.core.topology.JoinWindows;
@@ -83,6 +84,7 @@ public class StoreUtil {
         return Stores.persistentKeyValueStore(store.name());
     }
 
+    @SuppressWarnings("java:S1452") // wildcard is unavoidable: KV/Session/Window store builders have unrelated type parameters
     public static StoreBuilder<?> getStoreBuilder(StateStoreDefinition store) {
         if (store instanceof KeyValueStateStoreDefinition kvStore) {
             return getKeyValueStateStoreBuilder(kvStore);
@@ -142,8 +144,7 @@ public class StoreUtil {
             return Stores.inMemoryWindowStore(store.name(), store.retention(), store.windowSize(), store.retainDuplicates());
         }
         if (store.timestamped()) {
-            return Stores.persistentTimestampedWindowStore(store.name(), store.retention(), store.windowSize());
-//            return Stores.persistentTimestampedWindowStore(store.name(), store.retention(), store.windowSize(), store.retainDuplicates());
+            return Stores.persistentTimestampedWindowStore(store.name(), store.retention(), store.windowSize(), store.retainDuplicates());
         }
         return Stores.persistentWindowStore(store.name(), store.retention(), store.windowSize(), store.retainDuplicates());
     }
@@ -152,7 +153,11 @@ public class StoreUtil {
         final var keyType = new StreamDataType(store.keyType(), true);
         final var valueType = new StreamDataType(store.valueType(), false);
         final var supplier = getWindowStoreSupplier(store);
-        var storeBuilder = Stores.windowStoreBuilder(supplier, keyType.serde(), valueType.serde());
+        // StoatFlow rejects a timestamped supplier passed to the plain window store builder, so pick
+        // the builder that matches the supplier the definition produced.
+        StoreBuilder<?> storeBuilder = supplier instanceof TimestampedWindowStoreSupplier
+                ? Stores.timestampedWindowStoreBuilder(supplier, keyType.serde(), valueType.serde())
+                : Stores.windowStoreBuilder(supplier, keyType.serde(), valueType.serde());
         storeBuilder = store.caching() ? storeBuilder.withCachingEnabled() : storeBuilder.withCachingDisabled();
         storeBuilder = store.logging() ? storeBuilder.withLoggingEnabled(new HashMap<>()) : storeBuilder.withLoggingDisabled();
         return storeBuilder;

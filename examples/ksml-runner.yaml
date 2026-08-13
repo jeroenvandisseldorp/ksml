@@ -44,13 +44,13 @@ ksml:
     apicurio:
       config:
         # Below is an example SSL configuration for Apicurio Serialization library from Apicurio documentation
-        apicurio.registry.url: http://schema_registry:8081
+        apicurio.registry.url: http://schema_registry:8081/apis/registry/v3
         apicurio.registry.headers.enabled: false
         apicurio.registry.dereference-schema: true
         apicurio.registry.serializer.dereference-schema: true
         apicurio.registry.deserializer.dereference-schema: true
         apicurio.registry.auto-register: true
-        apicurio.registry.auto-register.if-exists: RETURN
+        apicurio.registry.auto-register.if-exists: FIND_OR_CREATE_VERSION
         # apicurio.registry.request.ssl.keystore.location: /path/to/keystore.jks
         # apicurio.registry.request.ssl.keystore.type: JKS
         # apicurio.registry.request.ssl.keystore.password: password
@@ -91,28 +91,28 @@ ksml:
     second_avro:
       type: apicurio_avro           # For AVRO there are two implementations: apicurio_avro and confluent_avro
       schemaRegistry: apicurio
-      config:
-      # Apicurio Avro serialisation settings
-      # apicurio.registry.avro.encoding: "BINARY"
-      # apicurio.registry.headers.enabled: false
-      # apicurio.registry.serde.IdHandler: "io.apicurio.registry.serde.Default4ByteIdHandler"
-      # apicurio.registry.schema-resolver: "io.apicurio.registry.resolver.DefaultSchemaResolver"
+      # config:
+      #   Apicurio Avro serialisation settings
+      #   apicurio.registry.avro.encoding: "BINARY"
+      #   apicurio.registry.headers.enabled: false
+      #   apicurio.registry.serde.IdHandler: "io.apicurio.registry.serde.Default4ByteIdHandler"
+      #   apicurio.registry.schema-resolver: "io.apicurio.registry.resolver.DefaultSchemaResolver"
 
     # Definition for "json" notation
     jsonschema:
       type: apicurio_jsonschema      # For JSON Schema, only apicurio_jsonschema is valid
       schemaRegistry: apicurio
-      config:
-      # apicurio.registry.auto-register: true
+      # config:
+      #   apicurio.registry.auto-register: true
 
     # Definition for "protobuf" notation
     protobuf:                       # Definition for "protobuf" notation
       type: apicurio_protobuf       # For Protobuf there is only one implementation: apicurio_protobuf
       schemaRegistry: apicurio
       ## Below this line, specify properties to be passed into Apicurio's ProtobufKafkaSerializer and ProtobufKafkaDeserializer
-      config:
-      # apicurio.registry.auto-register: true
-      # apicurio.registry.headers.enabled: false
+      # config:
+      #   apicurio.registry.auto-register: true
+      #   apicurio.registry.headers.enabled: false
 
   # Section where you specify which KSML definitions to load, parse and execute.
   definitions:

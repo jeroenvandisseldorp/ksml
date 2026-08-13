@@ -20,12 +20,13 @@ package io.axual.ksml.data.notation.avro.apicurio;
  * =========================LICENSE_END==================================
  */
 
-import io.apicurio.registry.rest.client.RegistryClient;
-import io.apicurio.registry.rest.client.RegistryClientFactory;
-import io.apicurio.registry.serde.SerdeConfig;
+import io.apicurio.registry.resolver.client.RegistryClientFacade;
+import io.apicurio.registry.resolver.client.RegistryClientFacadeFactory;
+import io.apicurio.registry.resolver.config.SchemaResolverConfig;
 import io.axual.ksml.client.resolving.ResolvingClientConfig;
 import io.axual.ksml.data.notation.Notation;
 import io.axual.ksml.data.notation.NotationContext;
+import io.axual.ksml.data.notation.apicurio.ApicurioConfigChecks;
 import io.axual.ksml.data.notation.avro.AvroDataObjectMapper;
 import io.axual.ksml.data.notation.avro.AvroNotation;
 import io.axual.ksml.data.notation.vendor.VendorNotationContext;
@@ -36,13 +37,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ApicurioAvroNotationProvider extends VendorNotationProvider {
-    private final RegistryClient registryClient;
+    /** The group Apicurio itself falls back to when a strategy leaves the group unset. */
+    static final String DEFAULT_ARTIFACT_GROUP_ID = "default";
+
+    private final RegistryClientFacade registryClient;
 
     public ApicurioAvroNotationProvider() {
         this(null);
     }
 
-    public ApicurioAvroNotationProvider(RegistryClient registryClient) {
+    public ApicurioAvroNotationProvider(RegistryClientFacade registryClient) {
         super(AvroNotation.NOTATION_NAME, "apicurio");
         this.registryClient = registryClient;
     }
@@ -50,16 +54,25 @@ public class ApicurioAvroNotationProvider extends VendorNotationProvider {
     @Override
     public Notation createNotation(NotationContext context) {
         final Map<String, Object> serdeConfigs = context != null ? MapUtil.stringKeys(context.serdeConfigs()) : new HashMap<>();
+        ApicurioConfigChecks.rejectV2Configs(serdeConfigs);
         final var clientConfig = new ResolvingClientConfig(serdeConfigs);
-        final var srClient = this.registryClient != null ? this.registryClient : createSrClient(serdeConfigs);
+        final var srClient = this.registryClient != null ? registryClient : createSrClient(serdeConfigs);
         return new ApicurioAvroNotation(
                 new VendorNotationContext(vendorName(), context, new ApicurioAvroSerdeSupplier(srClient), new AvroDataObjectMapper()),
                 srClient,
-                clientConfig.topicResolver());
+                clientConfig.topicResolver(),
+                artifactGroupId(serdeConfigs));
     }
 
-    private RegistryClient createSrClient(Map<String, Object> serdeConfigs) {
-        if (!serdeConfigs.containsKey(SerdeConfig.REGISTRY_URL)) return null;
-        return RegistryClientFactory.create(MapUtil.stringValues(serdeConfigs).get(SerdeConfig.REGISTRY_URL), serdeConfigs);
+    RegistryClientFacade createSrClient(Map<String, Object> serdeConfigs) {
+        if (!serdeConfigs.containsKey(SchemaResolverConfig.REGISTRY_URL))
+            return null;
+        return RegistryClientFacadeFactory.create(new SchemaResolverConfig(serdeConfigs));
+    }
+
+    // The group the serde writes to: the user's explicit group if set, otherwise Apicurio's fallback.
+    static String artifactGroupId(Map<String, Object> serdeConfigs) {
+        final var group = serdeConfigs.get(SchemaResolverConfig.EXPLICIT_ARTIFACT_GROUP_ID);
+        return group != null ? group.toString() : DEFAULT_ARTIFACT_GROUP_ID;
     }
 }

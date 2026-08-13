@@ -50,12 +50,12 @@ public class WindowedKeyValueStoreResource extends StoreResource {
         log.info("Querying remote stores....");
         querier().allMetadataForStore(storeName)
                 .stream()
-                .filter(sm -> !(sm.hostInfo().host().equals(thisInstance.host()) && sm.hostInfo.port() == thisInstance.port())) //only query remote node stores
+                .filter(sm -> !(sm.host().equals(thisInstance.host()) && sm.port() == thisInstance.port())) //only query remote node stores
                 .forEach(remoteInstance -> {
-                    String url = "http://" + remoteInstance.hostInfo().host() + ":" + remoteInstance.hostInfo().port() + "/state/windowed/" + storeName + "/local/all";
-                    log.info("Fetching remote store at {}:{}", remoteInstance.hostInfo().host(), remoteInstance.hostInfo().port());
+                    String url = "http://" + remoteInstance.host() + ":" + remoteInstance.port() + "/state/windowed/" + storeName + "/local/all";
+                    log.info("Fetching remote store at {}:{}", remoteInstance.host(), remoteInstance.port());
                     List<WindowedKeyValueBean> remoteResult = restClient.getRemoteWindowedKeyValueBeans(url).elements();
-                    log.info("Data from remote store at {}:{} == {}", remoteInstance.hostInfo().host(), remoteInstance.hostInfo().port(), remoteResult);
+                    log.info("Data from remote store at {}:{} == {}", remoteInstance.host(), remoteInstance.port(), remoteResult);
                     result.addAll(remoteResult);
                 });
 
@@ -97,7 +97,7 @@ public class WindowedKeyValueStoreResource extends StoreResource {
             return result;
         } else {
             log.info("Querying remote store {} for key {}", storeName, key);
-            String url = "http://" + metadataForKey.activeHost() + ":" + metadataForKey.activeHost().port() + "/state/keyvalue/" + storeName + "/local/get/" + key;
+            String url = "http://" + metadataForKey.activeHost().host() + ":" + metadataForKey.activeHost().port() + "/state/windowed/" + storeName + "/local/get/" + key + "/" + timestamp;
             var result = restClient.getRemoteKeyValueBean(url, WindowedKeyValueBean.class);
             log.info("Store data from remote store at {} == {}", url, result);
             return result;

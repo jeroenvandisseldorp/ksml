@@ -5,10 +5,13 @@
 
 set -e  # Exit on any error
 
-mvn clean package -DskipITs=true
+mvn clean package -DskipITs=true -P '!sonarqube'
 
 # Prepare build artifacts
 echo "  - Creating build-output/ directory"
+# Start from a clean directory. Leftovers from an earlier build put several versions of the same
+# library in the image, which breaks class loading in ways that are hard to spot.
+rm -rf build-output
 echo "  - Copying ksml-runner JAR, ksml-test-runner JAR, libraries, and license files"
 
 mkdir -p build-output
@@ -19,17 +22,9 @@ cp -r ksml-runner/target/libs build-output/
 cp ksml-test-runner/target/libs/*.jar build-output/libs/
 cp ksml-runner/NOTICE.txt build-output/
 cp LICENSE.txt build-output/
-GRAALVM_JDK_VERSION=${GRAALVM_JDK_VERSION:-25.0.2}
-
-# Download graalvm tarfiles
-if [ ! -f graalvm-amd64.tar.gz ]; then
-  echo "Downloading GraalVM for AMD64"
-  wget https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-${GRAALVM_JDK_VERSION}/graalvm-community-jdk-${GRAALVM_JDK_VERSION}_linux-x64_bin.tar.gz -O graalvm-amd64.tar.gz
-fi
-if [ ! -f graalvm-arm64.tar.gz ]; then
-  echo "Downloading GraalVM for ARM64"
-  wget https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-${GRAALVM_JDK_VERSION}/graalvm-community-jdk-${GRAALVM_JDK_VERSION}_linux-aarch64_bin.tar.gz -O graalvm-arm64.tar.gz
-fi
+# Download graalvm tarfiles. Version comes from .graalvm-jdk-version; override it with
+# GRAALVM_JDK_VERSION=... to try another one.
+scripts/graalvm-tarballs.sh download
 
 # Create builder if it doesn't exist
 if ! docker buildx ls --format {{.Name}} | grep -E "^ksml$"; then

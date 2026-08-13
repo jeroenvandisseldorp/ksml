@@ -68,7 +68,7 @@ public class LeftJoinWithGlobalTableOperation extends BaseOperation {
         final var userJoiner = valueJoinerWithKey(joiner, tags);
         final var named = namedOf();
         final KStream<Object, Object> output = named != null
-                ? input.stream.leftJoin(otherGlobalKTable.globalTable, userSel, userJoiner)
+                ? input.stream.leftJoin(otherGlobalKTable.globalTable, userSel, userJoiner, named)
                 : input.stream.leftJoin(otherGlobalKTable.globalTable, userSel, userJoiner);
         return new KStreamWrapper(output, k, rv);
     }

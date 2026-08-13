@@ -22,16 +22,15 @@ package io.axual.ksml.integration;
 
 import io.axual.ksml.integration.testutil.KSMLContainer;
 import io.axual.ksml.integration.testutil.KSMLRunnerTestUtil;
+import io.axual.ksml.integration.testutil.SharedKsmlInfra;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.kafka.KafkaContainer;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
@@ -56,22 +55,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Slf4j
 @Testcontainers
 class XmlDataFormatIT {
-
-    static final Network network = Network.newNetwork();
-
-    @Container
-    static final KafkaContainer kafka = new KafkaContainer("apache/kafka:4.0.0")
-            .withNetwork(network)
-            .withNetworkAliases("broker")
-            .withExposedPorts(9092, 9093);
-
     @Container
     static final KSMLContainer ksml = new KSMLContainer()
             .withKsmlFiles("/docs-examples/beginner-tutorial/different-data-formats/xml",
                           "ksml-runner.yaml", "producer-xml.yaml", "processor-xml.yaml", "SensorData.xsd")
-            .withKafka(kafka)
+            .withKafka(SharedKsmlInfra.kafka())
             .withTopics("ksml_sensordata_xml", "ksml_sensordata_xml_processed")
-            .dependsOn(kafka);
+            .dependsOn(SharedKsmlInfra.kafka());
 
     @Test
     void testKSMLXmlProcessing() throws Exception {
@@ -93,11 +83,11 @@ class XmlDataFormatIT {
             log.info("Found {} XML sensor messages", records.count());
 
             // Validate XML messages using proper DOM parsing
-            records.forEach(record -> {
-                log.info("XML Sensor: key={}, value={}", record.key(), record.value());
-                assertThat(record.key()).as("Sensor key should start with 'sensor'").startsWith("sensor");
+            records.forEach(consumerRecord -> {
+                log.info("XML Sensor: key={}, value={}", consumerRecord.key(), consumerRecord.value());
+                assertThat(consumerRecord.key()).as("Sensor key should start with 'sensor'").startsWith("sensor");
 
-                String xmlValue = record.value();
+                String xmlValue = consumerRecord.value();
                 try {
                     // Parse XML using DOM parser - this validates well-formedness
                     Document doc = parseXmlDocument(xmlValue);
@@ -129,7 +119,7 @@ class XmlDataFormatIT {
                         name, timestamp, value, type, unit, color, city, owner);
 
                     // Store original for comparison with processed version
-                    originalMessages.put(record.key(), xmlValue);
+                    originalMessages.put(consumerRecord.key(), xmlValue);
                 } catch (Exception e) {
                     throw new AssertionError("Failed to parse XML: " + xmlValue, e);
                 }
@@ -146,13 +136,13 @@ class XmlDataFormatIT {
             log.info("Found {} processed XML messages", records.count());
 
             // Validate processed XML messages against originals using proper DOM parsing
-            records.forEach(record -> {
-                log.info("Processed XML: key={}, value={}", record.key(), record.value());
-                assertThat(record.key()).as("Sensor key should start with 'sensor'").startsWith("sensor");
+            records.forEach(consumerRecord -> {
+                log.info("Processed XML: key={}, value={}", consumerRecord.key(), consumerRecord.value());
+                assertThat(consumerRecord.key()).as("Sensor key should start with 'sensor'").startsWith("sensor");
 
-                String processedXmlValue = record.value();
-                String originalXmlValue = originalMessages.get(record.key());
-                assertThat(originalXmlValue).as("Should have original message for key: " + record.key()).isNotNull();
+                String processedXmlValue = consumerRecord.value();
+                String originalXmlValue = originalMessages.get(consumerRecord.key());
+                assertThat(originalXmlValue).as("Should have original message for key: " + consumerRecord.key()).isNotNull();
 
                 try {
                     // Parse both original and processed XML using DOM parser
@@ -184,19 +174,20 @@ class XmlDataFormatIT {
                     String originalOwner = getElementTextContent(originalDoc, "owner");
 
                     // Verify transformation: city should be uppercase
-                    assertThat(processedCity).isEqualTo(originalCity.toUpperCase())
-                        .as("City should be uppercase: original='%s', processed='%s'", originalCity, processedCity);
+                    assertThat(processedCity)
+                        .as("City should be uppercase: original='%s', processed='%s'", originalCity, processedCity)
+                        .isEqualTo(originalCity.toUpperCase());
 
                     log.info("Verified city transformation: '{}' -> '{}'", originalCity, processedCity);
 
                     // Verify other fields remain unchanged
-                    assertThat(processedName).isEqualTo(originalName).as("Name should remain unchanged");
-                    assertThat(processedTimestamp).isEqualTo(originalTimestamp).as("Timestamp should remain unchanged");
-                    assertThat(processedValue).isEqualTo(originalValue).as("Value should remain unchanged");
-                    assertThat(processedType).isEqualTo(originalType).as("Type should remain unchanged");
-                    assertThat(processedUnit).isEqualTo(originalUnit).as("Unit should remain unchanged");
-                    assertThat(processedColor).isEqualTo(originalColor).as("Color should remain unchanged");
-                    assertThat(processedOwner).isEqualTo(originalOwner).as("Owner should remain unchanged");
+                    assertThat(processedName).as("Name should remain unchanged").isEqualTo(originalName);
+                    assertThat(processedTimestamp).as("Timestamp should remain unchanged").isEqualTo(originalTimestamp);
+                    assertThat(processedValue).as("Value should remain unchanged").isEqualTo(originalValue);
+                    assertThat(processedType).as("Type should remain unchanged").isEqualTo(originalType);
+                    assertThat(processedUnit).as("Unit should remain unchanged").isEqualTo(originalUnit);
+                    assertThat(processedColor).as("Color should remain unchanged").isEqualTo(originalColor);
+                    assertThat(processedOwner).as("Owner should remain unchanged").isEqualTo(originalOwner);
 
                 } catch (Exception e) {
                     throw new AssertionError("Failed to parse and compare XML documents. Original: " + originalXmlValue + ", Processed: " + processedXmlValue, e);
@@ -219,7 +210,7 @@ class XmlDataFormatIT {
         // Producer generates every 3 seconds, so wait for at least 2 messages
         // Use AdminClient to check actual message count instead of fixed sleep
         KSMLRunnerTestUtil.waitForTopicMessages(
-            kafka.getBootstrapServers(),
+            SharedKsmlInfra.kafka().getBootstrapServers(),
             "ksml_sensordata_xml",
             2, // Wait for at least 2 messages
             Duration.ofSeconds(30) // Maximum 30 seconds (much better than fixed 7s)
@@ -230,7 +221,7 @@ class XmlDataFormatIT {
 
     private Properties createConsumerProperties(String groupId) {
         final Properties props = new Properties();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafka.getBootstrapServers());
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, SharedKsmlInfra.kafka().getBootstrapServers());
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());

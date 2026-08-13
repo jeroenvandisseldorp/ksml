@@ -20,10 +20,6 @@ package io.axual.ksml.rest.server;
  * =========================LICENSE_END==================================
  */
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.jakarta.rs.json.JacksonJsonProvider;
 import io.stoatflow.core.state.HostInfo;
 import jakarta.ws.rs.core.UriBuilder;
 import org.glassfish.grizzly.http.server.HttpHandler;
@@ -33,6 +29,10 @@ import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpContainer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ContainerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.jakarta.rs.json.JacksonJsonProvider;
 
 import java.io.IOException;
 
@@ -45,10 +45,10 @@ public class RestServer implements AutoCloseable {
         this.hostInfo = hostInfo;
 
         // create JsonProvider to provide custom ObjectMapper
-        var mapper = new ObjectMapper();
-        mapper.enable(SerializationFeature.INDENT_OUTPUT);
-        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-
+        var mapper = JsonMapper.builder()
+                .enable(SerializationFeature.INDENT_OUTPUT)
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .build();
         var provider = new JacksonJsonProvider();
         provider.setMapper(mapper);
 
@@ -75,9 +75,17 @@ public class RestServer implements AutoCloseable {
         try {
             server.start();
             return Utils.getHostIPForDiscovery();
-        } catch (IOException e) {
+        } catch (IOException _) {
             return null;
         }
+    }
+
+    /**
+     * @return the TCP port the underlying Grizzly listener actually bound to, useful when the server
+     * was created with port {@code 0} to let the OS assign a free one
+     */
+    public int boundPort() {
+        return server.getListener("grizzly").getPort();
     }
 
     public void initGlobalQuerier(KsmlQuerier ksmlQuerier) {

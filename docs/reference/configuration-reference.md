@@ -20,6 +20,19 @@ kafka:
   application.id: "my-ksml-app"
 ```
 
+### Unknown and duplicate keys are rejected
+
+KSML checks the configuration file strictly:
+
+* An unknown or misspelled key makes KSML stop at startup with an error. A typo such as
+  `schemaRegsitry` is reported instead of quietly disabling the setting.
+* A key that appears twice in the same block is an error as well, instead of the last one
+  quietly winning.
+
+The same duplicate-key rule applies to KSML definition files. A definition file that KSML cannot
+parse stops startup as well, rather than being skipped. See
+[Upgrading to 2.0.0](../migration-to-2.0.0.md) if you are coming from the 1.x line.
+
 ## Minimal Working Configurations
 
 ### Without Schema Registry
@@ -152,7 +165,7 @@ Each error type (`consume`, `process`, `produce`) supports these properties:
 | `log`        | Boolean | true           | Whether to log errors                                                   |
 | `logPayload` | Boolean | false          | Whether to include message payload in error logs                        |
 | `loggerName` | String  | Auto-generated | Custom logger name for this error type                                  |
-| `handler`    | String  | stop           | Error handling strategy (`continueOnFail`, `stopOnFail`, `retryOnFail`) |
+| `handler`    | String  | stopOnFail     | Error handling strategy (`continueOnFail`, `stopOnFail`, `retryOnFail`) |
 
 ```yaml
 ksml:
@@ -232,7 +245,7 @@ ksml:
     # Apicurio Schema Registry
     apicurio:
       config:
-        apicurio.registry.url: "http://apicurio:8080/apis/registry/v2"
+        apicurio.registry.url: "http://apicurio:8080/apis/registry/v3"
 ```
 
 #### SSL-Enabled Schema Registry
@@ -253,7 +266,7 @@ ksml:
 
     apicurio_secure:
       config:
-        apicurio.registry.url: "https://apicurio:8080/apis/registry/v2"
+        apicurio.registry.url: "https://apicurio:8080/apis/registry/v3"
         apicurio.registry.request.ssl.keystore.location: /path/to/keystore.jks
         apicurio.registry.request.ssl.keystore.type: JKS
         apicurio.registry.request.ssl.keystore.password: "${KEYSTORE_PASSWORD}"
@@ -304,6 +317,18 @@ ksml:
       config:
         apicurio.registry.auto-register: false
 ```
+
+!!! note
+    As of release 1.3.0 Apicurio AVRO has the default for `apicurio.registry.find-latest` changed to `true` (was: `false`).
+    The previous behavior is obtained by overriding the new default as follows:
+    ```yaml
+        notations:
+          avro:
+            type: apicurio_avro
+            config:
+              apicurio.registry.find-latest: false   # restore the old content-based lookup
+    ```
+    The default was changed due to issue [#290](https://github.com/Axual/ksml/issues/290).
 
 Available serializer types:
 

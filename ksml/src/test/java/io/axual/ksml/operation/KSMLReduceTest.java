@@ -31,9 +31,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(KSMLTestExtension.class)
+@SuppressWarnings("java:S2187")
 public class KSMLReduceTest {
 
     @KSMLTopic(topic = "inMessages")
@@ -53,7 +53,7 @@ public class KSMLReduceTest {
         inMessages.pipeInput("key2", "bar");
 
         // we should see 5 output messages with the values for each key concatenated
-        assertEquals(5, outMessages.getQueueSize());
+        assertThat(outMessages.getQueueSize()).isEqualTo(5);
         List<KeyValue<String, String>> keyValuesList = outMessages.readKeyValuesToList();
         assertThat(keyValuesList). contains(
                 new KeyValue<>("key1", "Hello "),

@@ -23,16 +23,21 @@ package io.axual.ksml.data.notation.json;
 import io.axual.ksml.data.mapper.DataSchemaMapper;
 import io.axual.ksml.data.notation.ReferenceResolver;
 import io.axual.ksml.data.object.DataBoolean;
+import io.axual.ksml.data.object.DataInteger;
 import io.axual.ksml.data.object.DataList;
+import io.axual.ksml.data.object.DataLong;
+import io.axual.ksml.data.object.DataNull;
 import io.axual.ksml.data.object.DataObject;
 import io.axual.ksml.data.object.DataString;
 import io.axual.ksml.data.object.DataStruct;
 import io.axual.ksml.data.schema.DataSchema;
 import io.axual.ksml.data.schema.EnumSchema;
 import io.axual.ksml.data.schema.ListSchema;
+import io.axual.ksml.data.schema.LogicalSchema;
 import io.axual.ksml.data.schema.MapSchema;
 import io.axual.ksml.data.schema.StructSchema;
 import io.axual.ksml.data.schema.UnionSchema;
+import io.axual.ksml.data.schema.logical.LogicalTypeConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,6 +75,7 @@ public class JsonSchemaMapper implements DataSchemaMapper<String> {
     private static final String ADDITIONAL_PROPERTIES = "additionalProperties";
     private static final String DEFINITIONS_NAME = "$defs";
     private static final String REF_NAME = "$ref";
+    private static final String DEFAULT_NAME = "default";
     private static final String ANY_OF_NAME = "anyOf";
     private static final String ENUM_NAME = "enum";
     private static final String ARRAY_TYPE = "array";
@@ -79,6 +85,8 @@ public class JsonSchemaMapper implements DataSchemaMapper<String> {
     private static final String NUMBER_TYPE = "number";
     private static final String OBJECT_TYPE = "object";
     private static final String STRING_TYPE = "string";
+    private static final String FORMAT_NAME = "format";
+    private static final String UUID_FORMAT = "uuid";
     private final JsonDataObjectMapper mapper;
 
     /**
@@ -190,11 +198,19 @@ public class JsonSchemaMapper implements DataSchemaMapper<String> {
             var spec = entry.getValue();
             if (spec instanceof DataStruct specStruct) {
                 var doc = specStruct.getAsString(DESCRIPTION_NAME);
-                var field = new StructSchema.Field(name, convertType(specStruct, referenceResolver), doc != null ? doc.value() : null, NO_TAG, requiredProperties.contains(name));
+                boolean required = requiredProperties.contains(name);
+                var defaultValue = specStruct.containsKey(DEFAULT_NAME)
+                        ? jsonDefaultToDataObject(specStruct.get(DEFAULT_NAME))
+                        : null;
+                var field = new StructSchema.Field(name, convertType(specStruct, referenceResolver), doc != null ? doc.value() : null, NO_TAG, required, false, defaultValue);
                 result.add(field);
             }
         }
         return result;
+    }
+
+    private static DataObject jsonDefaultToDataObject(DataObject value) {
+        return value != null ? value : DataNull.INSTANCE;
     }
 
     /**
@@ -230,7 +246,7 @@ public class JsonSchemaMapper implements DataSchemaMapper<String> {
             case BOOLEAN_TYPE -> DataSchema.BOOLEAN_SCHEMA;
             case INTEGER_TYPE -> DataSchema.LONG_SCHEMA;
             case NUMBER_TYPE -> DataSchema.DOUBLE_SCHEMA;
-            case STRING_TYPE -> DataSchema.STRING_SCHEMA;
+            case STRING_TYPE -> stringOrLogicalSchema(specStruct);
             case ARRAY_TYPE -> toListSchema(specStruct, referenceResolver);
             case OBJECT_TYPE -> {
                 final var ref = specStruct.getAsString(REF_NAME);
@@ -242,6 +258,14 @@ public class JsonSchemaMapper implements DataSchemaMapper<String> {
             }
             default -> ANY_SCHEMA;
         };
+    }
+
+    /** A string with {@code format: uuid} becomes a uuid logical type; any other string stays a plain string. */
+    private DataSchema stringOrLogicalSchema(DataStruct specStruct) {
+        final var format = specStruct.getAsString(FORMAT_NAME);
+        return format != null && UUID_FORMAT.equals(format.value())
+                ? new LogicalSchema(LogicalTypeConstants.UUID_TYPE)
+                : DataSchema.STRING_SCHEMA;
     }
 
     /**
@@ -349,6 +373,7 @@ public class JsonSchemaMapper implements DataSchemaMapper<String> {
     }
 
     private void convertType(DataSchema schema, boolean constant, DataObject defaultValue, DataStruct target, DefinitionLibrary definitions) {
+        if (schema instanceof LogicalSchema logicalSchema) writeLogicalType(logicalSchema, constant, defaultValue, target);
         if (schema == DataSchema.NULL_SCHEMA) target.put(TYPE_NAME, new DataString(NULL_TYPE));
         if (schema == DataSchema.BOOLEAN_SCHEMA) target.put(TYPE_NAME, new DataString(BOOLEAN_TYPE));
         if (schema == DataSchema.BYTE_SCHEMA || schema == DataSchema.SHORT_SCHEMA || schema == DataSchema.INTEGER_SCHEMA || schema == DataSchema.LONG_SCHEMA)
@@ -357,17 +382,13 @@ public class JsonSchemaMapper implements DataSchemaMapper<String> {
             target.put(TYPE_NAME, new DataString(NUMBER_TYPE));
         if (schema == DataSchema.STRING_SCHEMA) {
             if (constant && defaultValue != null) {
-                var enumList = new DataList();
-                enumList.add(new DataString(defaultValue.toString()));
-                target.put(ENUM_NAME, enumList);
+                target.put(ENUM_NAME, DataList.of(new DataString(defaultValue.toString())));
             } else {
                 target.put(TYPE_NAME, new DataString(STRING_TYPE));
             }
         }
         if (schema instanceof EnumSchema enumSchema) {
-            var enumList = new DataList();
-            enumSchema.symbols().forEach(symbol -> enumList.add(new DataString(symbol.name())));
-            target.put(ENUM_NAME, enumList);
+            target.put(ENUM_NAME, DataList.of(enumSchema.symbols().stream().map(s -> new DataString(s.name())).toArray(DataString[]::new)));
         }
         if (schema instanceof ListSchema listSchema) {
             target.put(TYPE_NAME, new DataString(ARRAY_TYPE));
@@ -404,5 +425,39 @@ public class JsonSchemaMapper implements DataSchemaMapper<String> {
             }
             target.put(ANY_OF_NAME, members);
         }
+        if (defaultValue != null && defaultAllowedByEnum(target, defaultValue)) {
+            target.put(DEFAULT_NAME, defaultValue);
+        }
+    }
+
+    /** uuid maps to a string with {@code format: uuid}; other logical types degrade to their representation primitive. */
+    private void writeLogicalType(LogicalSchema logicalSchema, boolean constant, DataObject defaultValue, DataStruct target) {
+        // A constant field is written as a single-value enum, the same rule the plain string branch uses.
+        if (constant && defaultValue != null) {
+            target.put(ENUM_NAME, DataList.of(new DataString(defaultValue.toString())));
+            return;
+        }
+        if (UUID_FORMAT.equals(logicalSchema.logicalType().name())) {
+            target.put(TYPE_NAME, new DataString(STRING_TYPE));
+            target.put(FORMAT_NAME, new DataString(UUID_FORMAT));
+            return;
+        }
+        final var repr = logicalSchema.logicalType().representationType();
+        final var jsonType = repr == DataInteger.DATATYPE || repr == DataLong.DATATYPE ? INTEGER_TYPE : STRING_TYPE;
+        target.put(TYPE_NAME, new DataString(jsonType));
+    }
+
+    /** A default is fine when the field has no enum, or when the default is one of the enum values. */
+    private static boolean defaultAllowedByEnum(DataStruct target, DataObject defaultValue) {
+        if (!(target.get(ENUM_NAME) instanceof DataList allowedValues)) {
+            return true; // no enum -> any default is fine
+        }
+        for (final DataObject allowed : allowedValues) { // enum present -> default must be in it
+            if (allowed.equals(defaultValue)) return true;
+            // Avro/Protobuf defaults arrive as DataEnum while JSON Schema enum entries are DataString.
+            // Object.equals() returns false across types, so fall back to comparing string values.
+            if (allowed.toString().equals(defaultValue.toString())) return true;
+        }
+        return false; // default contradicts the enum -> skip it
     }
 }

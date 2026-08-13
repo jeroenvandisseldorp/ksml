@@ -34,6 +34,7 @@ import io.axual.ksml.data.schema.DataSchemaConstants;
 import io.axual.ksml.data.schema.EnumSchema;
 import io.axual.ksml.data.schema.FixedSchema;
 import io.axual.ksml.data.schema.ListSchema;
+import io.axual.ksml.data.schema.LogicalSchema;
 import io.axual.ksml.data.schema.MapSchema;
 import io.axual.ksml.data.schema.StructSchema;
 import io.axual.ksml.data.schema.UnionSchema;
@@ -81,6 +82,9 @@ public class AvroSchemaMapper implements DataSchemaMapper<Schema> {
         if (schema == null) {
             return DataSchema.NULL_SCHEMA;
         }
+
+        final var logicalType = AvroLogicalTypes.resolve(schema);
+        if (logicalType != null) return new LogicalSchema(logicalType);
 
         return switch (schema.getType()) {
             case STRING -> DataSchema.STRING_SCHEMA;
@@ -142,6 +146,8 @@ public class AvroSchemaMapper implements DataSchemaMapper<Schema> {
         if (schema == null) {
             return AVRO_NULL_TYPE;
         }
+        if (schema instanceof LogicalSchema logical)
+            return AvroLogicalTypes.apply(fromDataSchema(logical.baseSchema()), logical.logicalType());
         if (schema instanceof StructSchema structSchema) {
             final var fields = convertFieldsToAvroFields(structSchema.fields());
             return Schema.createRecord(structSchema.name(), structSchema.doc(), structSchema.namespace(), false, fields);
@@ -194,13 +200,15 @@ public class AvroSchemaMapper implements DataSchemaMapper<Schema> {
     private record SchemaAndRequired(DataSchema schema, boolean required) {
     }
 
-    private record AvroSchemaAndDefaultValue(Schema schema, DataObject defaultValue) {
-    }
-
     private SchemaAndRequired convertAvroSchemaToDataSchemaAndRequired(Schema schema) {
         // Returns a record with
         //   1. the DataSchema representation of the schema parameter
         //   2. a boolean indicating whether the field is required
+        if (schema == null) throw new SchemaException("Can not convert a null Avro schema");
+
+        final var logicalType = AvroLogicalTypes.resolve(schema);
+        if (logicalType != null) return new SchemaAndRequired(new LogicalSchema(logicalType), true);
+
         return switch (schema.getType()) {
             case NULL -> new SchemaAndRequired(DataSchema.NULL_SCHEMA, false);
 
@@ -282,6 +290,8 @@ public class AvroSchemaMapper implements DataSchemaMapper<Schema> {
     }
 
     private Schema convertDataSchemaToAvroSchema(DataSchema schema) {
+        if (schema instanceof LogicalSchema logical)
+            return AvroLogicalTypes.apply(convertDataSchemaToAvroSchema(logical.baseSchema()), logical.logicalType());
         if (schema == DataSchema.ANY_SCHEMA) throw new SchemaException("AVRO schema do not support ANY types");
         if (schema == DataSchema.NULL_SCHEMA) return Schema.create(Schema.Type.NULL);
         if (schema == DataSchema.BOOLEAN_SCHEMA) return Schema.create(Schema.Type.BOOLEAN);
@@ -297,9 +307,9 @@ public class AvroSchemaMapper implements DataSchemaMapper<Schema> {
         if (schema instanceof EnumSchema enumSchema)
             return Schema.createEnum(enumSchema.name(), enumSchema.doc(), enumSchema.namespace(), enumSchema.symbols().stream().map(EnumSchema.Symbol::name).toList(), enumSchema.defaultValue() == null ? null : enumSchema.defaultValue().name());
         if (schema instanceof ListSchema listSchema)
-            return Schema.createArray(convertDataSchemaToAvroSchema(listSchema.valueSchema(), true).schema());
+            return Schema.createArray(convertDataSchemaToAvroSchema(listSchema.valueSchema(), true, true));
         if (schema instanceof MapSchema mapSchema)
-            return Schema.createMap(convertDataSchemaToAvroSchema(mapSchema.valueSchema(), true).schema());
+            return Schema.createMap(convertDataSchemaToAvroSchema(mapSchema.valueSchema(), true, true));
         if (schema instanceof StructSchema structSchema)
             return Schema.createRecord(structSchema.name(), structSchema.doc(), structSchema.namespace(), false, convertFieldsToAvroFields(structSchema.fields()));
         if (schema instanceof UnionSchema unionSchema)
@@ -307,36 +317,30 @@ public class AvroSchemaMapper implements DataSchemaMapper<Schema> {
         throw new SchemaException("Can not convert schema to AVRO: " + schema);
     }
 
-    private AvroSchemaAndDefaultValue convertDataSchemaToAvroSchema(DataSchema schema, boolean required) {
+    private Schema convertDataSchemaToAvroSchema(DataSchema schema, boolean required, boolean nullDefault) {
         final var result = convertDataSchemaToAvroSchema(schema);
 
-        // If the field is required, then return it
-        if (required) return new AvroSchemaAndDefaultValue(result, null);
+        if (required) return result;
 
-        // The field is not required, so we convert the schema to a UNION, with NULL as first possible type
-        final var defaultValue = DataNull.INSTANCE;
-
-        // If the schema is already of type UNION, then inject a NULL type at the start of array of types
-        if (result.getType() == Schema.Type.UNION) {
-            final var types = result.getTypes();
-            // If NULL is already part of the UNION types, then return the UNION as is
-            if (types.contains(AVRO_NULL_TYPE)) return new AvroSchemaAndDefaultValue(result, defaultValue);
-            // Add NULL as a possible value type at the start of the array
+        // Build a nullable union ordered so that the default's type comes first.
+        // Avro rule: the default of a union must be valid for the FIRST type in the union.
+        // So null defaults require null-first; non-null defaults require the value's type first.
+        final var types = result.getType() == Schema.Type.UNION
+                ? new ArrayList<>(result.getTypes())
+                : new ArrayList<>(List.of(result));
+        types.remove(AVRO_NULL_TYPE);
+        if (nullDefault) {
             types.addFirst(AVRO_NULL_TYPE);
-            return new AvroSchemaAndDefaultValue(Schema.createUnion(types), defaultValue);
+        } else {
+            types.addLast(AVRO_NULL_TYPE);
         }
-
-        // Create a UNION with NULL as its first type
-        final var schemas = new ArrayList<Schema>();
-        schemas.add(AVRO_NULL_TYPE);
-        schemas.add(result);
-        return new AvroSchemaAndDefaultValue(Schema.createUnion(schemas), defaultValue);
+        return Schema.createUnion(types);
     }
 
     private Schema[] convertUnionMemberSchemasToAvro(DataSchema[] schemas) {
         final var result = new Schema[schemas.length];
         for (var index = 0; index < schemas.length; index++) {
-            result[index] = convertDataSchemaToAvroSchema(schemas[index], true).schema();
+            result[index] = convertDataSchemaToAvroSchema(schemas[index], true, true);
         }
         return result;
     }
@@ -351,9 +355,10 @@ public class AvroSchemaMapper implements DataSchemaMapper<Schema> {
     }
 
     private Schema.Field convertStructFieldToAvroField(StructSchema.Field field) {
-        final var schemaAndDefault = convertDataSchemaToAvroSchema(field.schema(), field.required());
+        final var nullDefault = field.defaultValue() == null || field.defaultValue() == DataNull.INSTANCE;
+        final var avroSchema = convertDataSchemaToAvroSchema(field.schema(), field.required(), nullDefault);
         final var defaultAvroValue = convertDataObjectToAvroDefaultValue(field.defaultValue());
-        return new Schema.Field(field.name(), schemaAndDefault.schema(), field.doc(), defaultAvroValue, convertStructFieldOrderToAvroFieldOrder(field.order()));
+        return new Schema.Field(field.name(), avroSchema, field.doc(), defaultAvroValue, convertStructFieldOrderToAvroFieldOrder(field.order()));
     }
 
     private DataObject convertAvroDefaultValueToDataObject(DataSchema fieldSchema, Object defaultValue) {
@@ -428,8 +433,8 @@ public class AvroSchemaMapper implements DataSchemaMapper<Schema> {
         // native mapper unwrap the KSML wrapper to its underlying Java value
         // (DataString -> String, DataInteger -> Integer, etc.). If unwrapping
         // produces a raw Java null, swap it for Avro's null sentinel.
-        final var native_ = NATIVE_MAPPER.fromDataObject(value);
-        return native_ == null ? JsonProperties.NULL_VALUE : native_;
+        final var object = NATIVE_MAPPER.fromDataObject(value);
+        return object == null ? JsonProperties.NULL_VALUE : object;
     }
 
     private Schema.Field.Order convertStructFieldOrderToAvroFieldOrder(StructSchema.Field.Order order) {

@@ -20,6 +20,7 @@ package io.axual.ksml.data.schema;
  * =========================LICENSE_END==================================
  */
 
+import io.axual.ksml.data.compare.EqualityFlags;
 import io.axual.ksml.data.object.DataNull;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
@@ -46,7 +47,7 @@ class StructSchemaFieldTest {
     }
 
     @Test
-    @DisplayName("Constructor with required=false marks field optional and keeps tag")
+    @DisplayName("Constructor with required=false marks field optional with no default value")
     void optionalFieldConstructor() {
         assertThat(new StructSchema.Field("age", DataSchema.INTEGER_SCHEMA, "Age of user", 42, false))
                 .returns("age", StructSchema.Field::name)
@@ -90,13 +91,25 @@ class StructSchemaFieldTest {
     @DisplayName("isAssignableFrom delegates to underlying schema")
     void isAssignableFromBehavior() {
         final var target = new StructSchema.Field("i", DataSchema.INTEGER_SCHEMA, null, 0);
-        // other with long type is compatible (integer group)
+        // long → int is narrowing (FAIL)
         final var otherInt = new StructSchema.Field("l", DataSchema.LONG_SCHEMA, null, 0);
-        assertThat(target.isAssignableFrom(otherInt).isAssignable()).isTrue();
+        assertThat(target.isAssignableFrom(otherInt).isAssignable()).isFalse();
         // float is not compatible with integer
         final var otherFloat = new StructSchema.Field("f", DataSchema.FLOAT_SCHEMA, null, 0);
         assertThat(target.isAssignableFrom(otherFloat).isAssignable()).isFalse();
         // null is not assignable
         assertThat(target.isAssignableFrom(null).isAssignable()).isFalse();
+    }
+
+    @Test
+    @DisplayName("Deep equals compares the field attributes (name, schema, tag, ...)")
+    void deepEquals() {
+        final var base = new StructSchema.Field("id", DataSchema.INTEGER_SCHEMA, "doc", 1);
+
+        assertThat(base.equals(new StructSchema.Field("id", DataSchema.INTEGER_SCHEMA, "doc", 1), EqualityFlags.EMPTY).isEqual()).isTrue();
+        assertThat(base.equals(new StructSchema.Field("other", DataSchema.INTEGER_SCHEMA, "doc", 1), EqualityFlags.EMPTY).isNotEqual()).isTrue();
+        assertThat(base.equals(new StructSchema.Field("id", DataSchema.STRING_SCHEMA, "doc", 1), EqualityFlags.EMPTY).isNotEqual()).isTrue();
+        assertThat(base.equals(null, EqualityFlags.EMPTY).isNotEqual()).isTrue();
+        assertThat(base.equals("not-a-field", EqualityFlags.EMPTY).isNotEqual()).isTrue();
     }
 }

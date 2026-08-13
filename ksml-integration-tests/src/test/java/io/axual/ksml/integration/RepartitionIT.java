@@ -20,8 +20,6 @@ package io.axual.ksml.integration;
  * =========================LICENSE_END==================================
  */
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.axual.ksml.TopologyGenerator;
 import io.axual.ksml.data.notation.binary.BinaryNotation;
 import io.axual.ksml.data.notation.json.JsonNotation;
@@ -30,6 +28,7 @@ import io.axual.ksml.execution.ExecutionContext;
 import io.axual.ksml.generator.YAMLObjectMapper;
 import io.axual.ksml.integration.testutil.KSMLContainer;
 import io.axual.ksml.integration.testutil.KSMLRunnerTestUtil;
+import io.axual.ksml.integration.testutil.SharedKsmlInfra;
 import io.axual.ksml.parser.ParseNode;
 import io.axual.ksml.type.UserType;
 import io.stoatflow.core.topology.StreamsBuilder;
@@ -40,10 +39,10 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.kafka.KafkaContainer;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -75,25 +74,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Slf4j
 @Testcontainers
 class RepartitionIT {
-
     private final ObjectMapper objectMapper = new ObjectMapper();
-
-    static final Network network = Network.newNetwork();
-
-    @Container
-    static final KafkaContainer kafka = new KafkaContainer("apache/kafka:4.0.0")
-            .withNetwork(network)
-            .withNetworkAliases("broker")
-            .withExposedPorts(9092, 9093);
 
     @Container
     static final KSMLContainer ksml = new KSMLContainer()
             .withKsmlFiles("/docs-examples/reference/operations",
                           "ksml-runner.yaml", "repartition-example-producer.yaml", "repartition-example-processor.yaml")
-            .withKafka(kafka)
+            .withKafka(SharedKsmlInfra.kafka())
             .withTopics("user_activities", "repartitioned_activities")
             .withPartitions(4)  // 4 partitions as per example
-            .dependsOn(kafka);
+            .dependsOn(SharedKsmlInfra.kafka());
 
     private static final String PROCESSOR_DEFINITION =
             "/docs-examples/reference/operations/repartition-example-processor.yaml";
@@ -155,15 +145,15 @@ class RepartitionIT {
             log.info("Found {} repartitioned messages across {} partitions", records.count(), records.partitions().size());
 
             // Collect all records with partition information
-            records.forEach(record -> {
-                allRecords.add(record);
-                String userId = record.key();
-                int partition = record.partition();
+            records.forEach(consumerRecord -> {
+                allRecords.add(consumerRecord);
+                String userId = consumerRecord.key();
+                int partition = consumerRecord.partition();
 
                 userPartitions.computeIfAbsent(userId, k -> new ArrayList<>()).add(partition);
 
                 log.info("Record: key={}, partition={}, value preview={}",
-                         userId, partition, record.value().substring(0, Math.min(100, record.value().length())));
+                         userId, partition, consumerRecord.value().substring(0, Math.min(100, consumerRecord.value().length())));
             });
         }
 
@@ -228,14 +218,14 @@ class RepartitionIT {
      * - Key matches the user_id in the value
      */
     private void verifyKeyTransformationAndValueEnrichment(List<ConsumerRecord<String, String>> allRecords) throws Exception {
-        for (ConsumerRecord<String, String> record : allRecords) {
-            String userId = record.key();
+        for (ConsumerRecord<String, String> consumerRecord : allRecords) {
+            String userId = consumerRecord.key();
 
             // Key should be user_id (transformed from region)
             assertThat(userId).as("Key should be user_id").startsWith("user_");
 
             // Parse and validate value
-            JsonNode value = objectMapper.readTree(record.value());
+            JsonNode value = objectMapper.readTree(consumerRecord.value());
 
             // Validate required fields
             assertThat(value.has("user_id")).as("Should have user_id field").isTrue();
@@ -245,20 +235,20 @@ class RepartitionIT {
 
             // Validate processing metadata was added by transformValue operation
             assertThat(value.has("processing_info")).as("Should have processing_info field added by pipeline").isTrue();
-            assertThat(value.get("processing_info").asText())
+            assertThat(value.get("processing_info").asString())
                 .as("Processing info should indicate repartitioning by user")
                 .contains("Repartitioned by user:");
 
             assertThat(value.has("original_region")).as("Should have original_region field added by pipeline").isTrue();
 
             // Validate key matches user_id in value
-            assertThat(value.get("user_id").asText()).as("Key should match user_id in value").isEqualTo(userId);
+            assertThat(value.get("user_id").asString()).as("Key should match user_id in value").isEqualTo(userId);
         }
     }
 
     private Properties createConsumerProperties() {
         final Properties props = new Properties();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafka.getBootstrapServers());
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, SharedKsmlInfra.kafka().getBootstrapServers());
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
@@ -271,7 +261,7 @@ class RepartitionIT {
 
         // Producer generates every 3 seconds, wait for at least 5 messages to get good distribution
         KSMLRunnerTestUtil.waitForTopicMessages(
-            kafka.getBootstrapServers(),
+            SharedKsmlInfra.kafka().getBootstrapServers(),
             "repartitioned_activities",
             5, // Wait for at least 5 messages for good test coverage
             Duration.ofSeconds(30)

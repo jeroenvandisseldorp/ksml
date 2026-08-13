@@ -71,10 +71,14 @@ public class UserFunction {
     @Override
     public String toString() {
         String[] params = Arrays.stream(parameters).map(p -> p.name() + ":" + (p.type() != null ? p.type() : "?")).toArray(String[]::new);
+        final var plural = storeNames.length > 1 ? "s" : "";
+        final var storeSuffix = storeNames.length > 0
+                ? " using store" + plural + " " + String.join(",", storeNames)
+                : "";
         return namespace + "." + name
                 + "(" + String.join(", ", params) + ")"
                 + (resultType != null ? " ==> " + resultType : "")
-                + (storeNames.length > 0 ? " using store" + (storeNames.length > 1 ? "s" : "") + " " + String.join(",", storeNames) : "");
+                + storeSuffix;
     }
 
     // Count the number of fixed parameters. Throw an error if the ordering is illegal (ie. fixed parameters should
@@ -97,8 +101,11 @@ public class UserFunction {
 
     protected void checkType(DataType expected, DataObject value) {
         if (value instanceof DataNull) return;
-        if (expected != null && value != null && expected.isAssignableFrom(value.type()).isNotAssignable()) {
-            throw DataException.conversionFailed(expected, value.type());
+        if (expected != null && value != null) {
+            final var assignable = expected.isAssignableFrom(value.type());
+            if (assignable.isNotAssignable()) {
+                throw DataException.conversionFailed(expected, value.type(), assignable);
+            }
         }
     }
 

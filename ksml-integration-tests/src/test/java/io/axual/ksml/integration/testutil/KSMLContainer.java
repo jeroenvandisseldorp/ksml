@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.NewTopic;
+import org.apache.kafka.common.errors.TopicExistsException;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.lifecycle.Startable;
@@ -38,6 +39,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 
 /**
  * TestContainers-compatible wrapper for KSML that provides a fluent API for configuring
@@ -79,14 +81,14 @@ public class KSMLContainer implements Startable {
 
     public enum SchemaRegistryType {
         APICURIO_AVRO("apicurio_avro",
-                     "apicurio.registry.url: http://schema-registry:8081/apis/registry/v2",
-                     "apicurio.registry.url: http://localhost:%d/apis/registry/v2"),
+                     "apicurio.registry.url: http://schema-registry:8081/apis/registry/v3",
+                     "apicurio.registry.url: http://localhost:%d/apis/registry/v3"),
         CONFLUENT_AVRO("confluent_avro",
                       "schema.registry.url: http://schema-registry:8081/apis/ccompat/v7",
                       "schema.registry.url: http://localhost:%d/apis/ccompat/v7"),
         APICURIO_JSON("apicurio_jsonschema",
-                     "apicurio.registry.url: http://schema-registry:8081/apis/registry/v2",
-                     "apicurio.registry.url: http://localhost:%d/apis/registry/v2");
+                     "apicurio.registry.url: http://schema-registry:8081/apis/registry/v3",
+                     "apicurio.registry.url: http://localhost:%d/apis/registry/v3");
 
         final String subdirectory;
         final String oldUrlPattern;
@@ -312,13 +314,33 @@ public class KSMLContainer implements Startable {
             props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, kafka.getBootstrapServers());
 
             try (AdminClient adminClient = AdminClient.create(props)) {
-                List<NewTopic> topics = new ArrayList<>();
-                for (String topicName : topicsToCreate) {
-                    topics.add(new NewTopic(topicName, topicPartitionCount, (short) 1));
+                // The broker is shared across IT classes, so only create topics that do not exist yet
+                // (createTopics fails on an already-existing topic).
+                final var existingTopics = adminClient.listTopics().names().get();
+                final var topics = new ArrayList<NewTopic>();
+                for (final var topicName : topicsToCreate) {
+                    if (!existingTopics.contains(topicName)) {
+                        topics.add(new NewTopic(topicName, topicPartitionCount, (short) 1));
+                    } else if (topicPartitionCount > 1) {
+                        // A shared topic kept from an earlier IT may have fewer partitions than we need;
+                        // createTopics cannot change an existing topic, so warn instead of failing silently.
+                        log.warn("Topic {} already exists; not changing its partition count (wanted {})",
+                                topicName, topicPartitionCount);
+                    }
                 }
 
-                adminClient.createTopics(topics).all().get();
-                log.info("Created Kafka topics: {} with {} partitions", topicsToCreate, topicPartitionCount);
+                if (!topics.isEmpty()) {
+                    try {
+                        adminClient.createTopics(topics).all().get();
+                    } catch (ExecutionException e) {
+                        // listTopics/createTopics is check-then-act; tolerate a topic that was created
+                        // concurrently between the two calls instead of failing the whole suite.
+                        if (!(e.getCause() instanceof TopicExistsException)) {
+                            throw e;
+                        }
+                    }
+                }
+                log.info("Ensured Kafka topics exist: {} with {} partitions", topicsToCreate, topicPartitionCount);
             }
         } catch (Exception e) {
             log.error("Failed to create Kafka topics", e);

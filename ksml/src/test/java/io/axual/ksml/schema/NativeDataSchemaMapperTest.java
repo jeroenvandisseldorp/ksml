@@ -4,7 +4,7 @@ package io.axual.ksml.schema;
  * ========================LICENSE_START=================================
  * KSML
  * %%
- * Copyright (C) 2021 - 2025 Axual B.V.
+ * Copyright (C) 2021 - 2026 Axual B.V.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,9 +29,13 @@ import io.axual.ksml.data.object.DataStruct;
 import io.axual.ksml.data.schema.DataSchema;
 import io.axual.ksml.data.schema.EnumSchema;
 import io.axual.ksml.data.schema.ListSchema;
+import io.axual.ksml.data.schema.LogicalSchema;
 import io.axual.ksml.data.schema.StructSchema;
+import io.axual.ksml.data.schema.logical.DecimalLogicalType;
+import io.axual.ksml.data.schema.logical.LogicalTypeConstants;
 import io.axual.ksml.data.type.EnumType;
 import io.axual.ksml.exception.ExecutionException;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -53,8 +57,8 @@ class NativeDataSchemaMapperTest {
         var result = (Map<?, ?>) mapper.fromDataSchema(schema);
 
         var fields = (List<?>) result.get("fields");
-        var fieldMap = (Map<?, ?>) fields.get(0);
-        assertThat(fieldMap.get("defaultValue")).isEqualTo(true);
+        var fieldMap = (Map<?, ?>) fields.getFirst();
+        assertThat((Boolean) fieldMap.get("defaultValue")).isTrue();
     }
 
     @Test
@@ -65,8 +69,8 @@ class NativeDataSchemaMapperTest {
         var result = (Map<?, ?>) mapper.fromDataSchema(schema);
 
         var fields = (List<?>) result.get("fields");
-        var fieldMap = (Map<?, ?>) fields.get(0);
-        assertThat(fieldMap.get("defaultValue")).isEqualTo(false);
+        var fieldMap = (Map<?, ?>) fields.getFirst();
+        assertThat((Boolean) fieldMap.get("defaultValue")).isFalse();
     }
 
     @Test
@@ -77,8 +81,9 @@ class NativeDataSchemaMapperTest {
         var result = (Map<?, ?>) mapper.fromDataSchema(schema);
 
         var fields = (List<?>) result.get("fields");
-        var fieldMap = (Map<?, ?>) fields.get(0);
-        assertThat(fieldMap.get("defaultValue")).isEqualTo(List.of());
+        var fieldMap = (Map<?, ?>) fields.getFirst();
+        assertThat(fieldMap).asInstanceOf(InstanceOfAssertFactories.map(String.class, Object.class))
+                .containsEntry("defaultValue", List.of());
     }
 
     @Test
@@ -92,8 +97,9 @@ class NativeDataSchemaMapperTest {
         var result = (Map<?, ?>) mapper.fromDataSchema(schema);
 
         var fields = (List<?>) result.get("fields");
-        var fieldMap = (Map<?, ?>) fields.get(0);
-        assertThat(fieldMap.get("defaultValue")).isEqualTo(List.of("a", "b"));
+        var fieldMap = (Map<?, ?>) fields.getFirst();
+        assertThat(fieldMap).asInstanceOf(InstanceOfAssertFactories.map(String.class, Object.class))
+                .containsEntry("defaultValue", List.of("a", "b"));
     }
 
     @Test
@@ -107,8 +113,9 @@ class NativeDataSchemaMapperTest {
         var result = (Map<?, ?>) mapper.fromDataSchema(schema);
 
         var fields = (List<?>) result.get("fields");
-        var fieldMap = (Map<?, ?>) fields.get(0);
-        assertThat(fieldMap.get("defaultValue")).isEqualTo("AREA");
+        var fieldMap = (Map<?, ?>) fields.getFirst();
+        assertThat(fieldMap).asInstanceOf(InstanceOfAssertFactories.map(String.class, Object.class))
+                .containsEntry("defaultValue", "AREA");
     }
 
     @Test
@@ -119,8 +126,9 @@ class NativeDataSchemaMapperTest {
         var result = (Map<?, ?>) mapper.fromDataSchema(schema);
 
         var fields = (List<?>) result.get("fields");
-        var fieldMap = (Map<?, ?>) fields.get(0);
-        assertThat(fieldMap.get("defaultValue")).isEqualTo(Map.of());
+        var fieldMap = (Map<?, ?>) fields.getFirst();
+        assertThat(fieldMap).asInstanceOf(InstanceOfAssertFactories.map(String.class, Object.class))
+                .containsEntry("defaultValue", Map.of());
     }
 
     @Test
@@ -134,8 +142,9 @@ class NativeDataSchemaMapperTest {
         var result = (Map<?, ?>) mapper.fromDataSchema(schema);
 
         var fields = (List<?>) result.get("fields");
-        var fieldMap = (Map<?, ?>) fields.get(0);
-        assertThat(fieldMap.get("defaultValue")).isEqualTo(Map.of("key1", "val1", "key2", "val2"));
+        var fieldMap = (Map<?, ?>) fields.getFirst();
+        assertThat(fieldMap).asInstanceOf(InstanceOfAssertFactories.map(String.class, Object.class))
+                .containsEntry("defaultValue", Map.of("key1", "val1", "key2", "val2"));
     }
 
     @Test
@@ -161,5 +170,23 @@ class NativeDataSchemaMapperTest {
                 .isInstanceOf(ExecutionException.class)
                 .hasMessageContaining("DataStruct")
                 .hasMessageContaining(unhandledDefault.toString());
+    }
+
+    @Test
+    void logicalTypeFields_serializeAsRepresentationPrimitive() {
+        var schema = new StructSchema(null, "TestRecord", null, List.of(
+                new StructSchema.Field("id", new LogicalSchema(LogicalTypeConstants.UUID_TYPE)),
+                new StructSchema.Field("amount", new LogicalSchema(new DecimalLogicalType(10, 2))),
+                new StructSchema.Field("day", new LogicalSchema(LogicalTypeConstants.DATE_TYPE))));
+
+        var result = (Map<?, ?>) mapper.fromDataSchema(schema);
+
+        var fields = (List<?>) result.get("fields");
+        assertThat(fields.get(0)).asInstanceOf(InstanceOfAssertFactories.map(String.class, Object.class))
+                .containsEntry("type", "string");
+        assertThat(fields.get(1)).asInstanceOf(InstanceOfAssertFactories.map(String.class, Object.class))
+                .containsEntry("type", "string");
+        assertThat(fields.get(2)).asInstanceOf(InstanceOfAssertFactories.map(String.class, Object.class))
+                .containsEntry("type", "integer");
     }
 }

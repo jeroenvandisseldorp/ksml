@@ -24,13 +24,13 @@ jobs:
       github.event.workflow_run.conclusion == 'success'
     steps:
       - name: Checkout base repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: ${{ github.repository }}
           fetch-depth: 0
 
       - name: Download Sonar inputs
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: sonar-inputs-${{ github.event.workflow_run.head_sha }}
           github-token: ${{ secrets.GITHUB_TOKEN }}

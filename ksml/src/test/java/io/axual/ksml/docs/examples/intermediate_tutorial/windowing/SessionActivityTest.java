@@ -20,7 +20,7 @@ package io.axual.ksml.docs.examples.intermediate_tutorial.windowing;
  * =========================LICENSE_END==================================
  */
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import io.axual.ksml.testutil.KSMLDriver;
 import io.axual.ksml.testutil.KSMLTest;
 import io.axual.ksml.testutil.KSMLTestExtension;
@@ -58,6 +58,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @Slf4j
 @ExtendWith(KSMLTestExtension.class)
+@SuppressWarnings("java:S2187")
 public class SessionActivityTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();

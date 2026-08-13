@@ -20,7 +20,6 @@ package io.axual.ksml.generator;
  * =========================LICENSE_END==================================
  */
 
-import io.stoatflow.core.topology.ProcessorDescription;
 import io.stoatflow.core.topology.SinkDescription;
 import io.stoatflow.core.topology.SourceDescription;
 import io.stoatflow.core.topology.Topology;
@@ -78,12 +77,8 @@ public class TopologyAnalyzer {
                         if (sourceNode.topicPattern() != null)
                             inputTopics.add(sourceNode.topicPattern().pattern());
                     }
-                    if (node instanceof ProcessorDescription processorNode) {
-                        // Ignore store names here
-                    }
-                    if (node instanceof SinkDescription sinkNode) {
-                        if (sinkNode.topic() != null)
-                            outputTopics.add(sinkNode.topic());
+                    if (node instanceof SinkDescription sinkNode && sinkNode.topic() != null) {
+                        outputTopics.add(sinkNode.topic());
                     }
                 }
             }

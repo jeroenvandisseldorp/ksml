@@ -20,6 +20,7 @@ package io.axual.ksml.data.schema;
  * =========================LICENSE_END==================================
  */
 
+import io.axual.ksml.data.compare.EqualityFlags;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -55,18 +56,30 @@ class ListSchemaTest {
         final var listOfFloat = new ListSchema(DataSchema.FLOAT_SCHEMA);
         final var listOfDouble = new ListSchema(DataSchema.DOUBLE_SCHEMA);
 
-        // Integers: integer accepts from long
+        // Integers: long accepts int (widening), but int does not accept long (narrowing)
         assertThat(listOfInt.isAssignableFrom(listOfInt).isAssignable()).isTrue();
-        assertThat(listOfInt.isAssignableFrom(listOfLong).isAssignable()).isTrue();
+        assertThat(listOfInt.isAssignableFrom(listOfLong).isAssignable()).isFalse();
+        // widening direction: long accepts int
+        assertThat(listOfLong.isAssignableFrom(listOfInt).isAssignable()).isTrue();
         assertThat(listOfInt.isAssignableFrom(listOfString).isAssignable()).isFalse();
 
-        // Floating: float and double accept from each other
-        assertThat(listOfFloat.isAssignableFrom(listOfDouble).isAssignable()).isTrue();
+        // Floating: double accepts float (widening), float does not accept double (narrowing)
+        assertThat(listOfFloat.isAssignableFrom(listOfDouble).isAssignable()).isFalse();
         assertThat(listOfDouble.isAssignableFrom(listOfFloat).isAssignable()).isTrue();
 
         // Non-list should not be assignable
         assertThat(listOfInt.isAssignableFrom(DataSchema.STRING_SCHEMA).isAssignable()).isFalse();
         // Null not assignable
         assertThat(listOfInt.isAssignableFrom(null).isAssignable()).isFalse();
+    }
+
+    @Test
+    @DisplayName("Deep equals compares the value schema")
+    void deepEquals() {
+        final var listOfInt = new ListSchema(DataSchema.INTEGER_SCHEMA);
+
+        assertThat(listOfInt.equals(new ListSchema(DataSchema.INTEGER_SCHEMA), EqualityFlags.EMPTY).isEqual()).isTrue();
+        assertThat(listOfInt.equals(new ListSchema(DataSchema.STRING_SCHEMA), EqualityFlags.EMPTY).isNotEqual()).isTrue();
+        assertThat(listOfInt.equals(DataSchema.STRING_SCHEMA, EqualityFlags.EMPTY).isNotEqual()).isTrue();
     }
 }

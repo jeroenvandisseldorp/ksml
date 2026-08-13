@@ -26,25 +26,27 @@ import io.axual.ksml.data.notation.json.JsonNotation;
 import io.axual.ksml.data.notation.json.JsonSchemaMapper;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class JsonTests {
+    private final NotationTestRunner runner = new NotationTestRunner(TestData.Variant.JSON);
+
     @Test
     void schemaTest() {
-        NotationTestRunner.schemaTest(JsonNotation.NOTATION_NAME, new JsonSchemaMapper(false), (input, output) -> {
-            assertTrue(input.isAssignableFrom(output).isAssignable(), "Input is not assignable from the output");
-            assertTrue(output.isAssignableFrom(input).isAssignable(), "Output is not assignable from the input");
+        runner.schemaTest(JsonNotation.NOTATION_NAME, new JsonSchemaMapper(false), (input, output) -> {
+            assertThat(input.isAssignableFrom(output).isAssignable()).as("Input is not assignable from the output").isTrue();
+            assertThat(output.isAssignableFrom(input).isAssignable()).as("Output is not assignable from the input").isTrue();
         });
     }
 
     @Test
     void dataTest() {
-        NotationTestRunner.dataTest(JsonNotation.NOTATION_NAME, new JsonDataObjectMapper(false), EqualityFlags.EMPTY);
+        runner.dataTest(JsonNotation.NOTATION_NAME, new JsonDataObjectMapper(false), EqualityFlags.EMPTY);
     }
 
     @Test
     void serdeTest() {
         final var notation = new JsonNotation();
-        NotationTestRunner.serdeTest(notation, true, new EqualityFlags());
+        runner.serdeTest(notation, true, new EqualityFlags());
     }
 }

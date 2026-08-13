@@ -79,7 +79,6 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PythonDataObjectMapperTest {
     private static final PythonDataObjectMapper MAPPER = new PythonDataObjectMapper(true);
@@ -212,11 +211,11 @@ class PythonDataObjectMapperTest {
     @DisplayName("PythonNativeMapper.fromPython(DataType, Value): Python int that fits in the expected primitive returns the native value")
     void fromPython_typedNumeric_inRangeReturnsNative() {
         Value val = context.eval("python", "42");
-        final var native_ = new PythonNativeMapper();
-        assertThat(native_.fromPython(DataByte.DATATYPE, val)).isEqualTo((byte) 42);
-        assertThat(native_.fromPython(DataShort.DATATYPE, val)).isEqualTo((short) 42);
-        assertThat(native_.fromPython(DataInteger.DATATYPE, val)).isEqualTo(42);
-        assertThat(native_.fromPython(DataLong.DATATYPE, val)).isEqualTo(42L);
+        final var nativeMapper = new PythonNativeMapper();
+        assertThat(nativeMapper.fromPython(DataByte.DATATYPE, val)).isEqualTo((byte) 42);
+        assertThat(nativeMapper.fromPython(DataShort.DATATYPE, val)).isEqualTo((short) 42);
+        assertThat(nativeMapper.fromPython(DataInteger.DATATYPE, val)).isEqualTo(42);
+        assertThat(nativeMapper.fromPython(DataLong.DATATYPE, val)).isEqualTo(42L);
     }
 
     @Test
@@ -285,9 +284,9 @@ class PythonDataObjectMapperTest {
         Files.writeString(tempDir.resolve(schemaName + ".avsc"), schemaContent);
 
         final var mockParser = (Notation.SchemaParser) (contextName, name, schemaString) -> {
-            assertEquals(schemaName + ".avsc", contextName);
-            assertEquals(schemaName, name);
-            assertEquals(schemaContent, schemaString);
+            assertThat(contextName).isEqualTo(schemaName + ".avsc");
+            assertThat(name).isEqualTo(schemaName);
+            assertThat(schemaString).isEqualTo(schemaContent);
             return new StructSchema(null, schemaName, null, Collections.emptyList());
         };
 

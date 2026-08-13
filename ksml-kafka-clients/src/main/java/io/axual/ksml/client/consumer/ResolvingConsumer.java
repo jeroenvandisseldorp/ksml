@@ -196,7 +196,9 @@ public class ResolvingConsumer<K, V> extends ForwardingConsumer<K, V> {
         return unresolveTopicPartitionOffsetAndMetadataMap(super.committed(topicResolver.resolveTopicPartitions(partitions), timeout));
     }
 
+    // Only the 4-arg constructor keeps generationId/memberId/groupInstanceId, which EOS needs.
     @Override
+    @SuppressWarnings("removal")
     public ConsumerGroupMetadata groupMetadata() {
         final var groupMetadata = super.groupMetadata();
         return groupMetadata == null ? null : new ConsumerGroupMetadata(
@@ -274,10 +276,9 @@ public class ResolvingConsumer<K, V> extends ForwardingConsumer<K, V> {
         return super.currentLag(topicResolver.resolve(topicPartition));
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    // ----------------------------------------
     // End of public interface of KafkaConsumer
-
-    /// ////////////////////////////////////////////////////////////////////////////////////////////
+    // ----------------------------------------
 
     private ConsumerRebalanceListener convertListener(ConsumerRebalanceListener listener) {
         return listener != null ? new ProxyConsumerRebalanceListener(listener) : null;
@@ -339,9 +340,6 @@ public class ResolvingConsumer<K, V> extends ForwardingConsumer<K, V> {
         return result;
     }
 
-    /**
-     * Method to unresolve TopicPartition in OffsetAndMetadataMap
-     */
     private Map<TopicPartition, OffsetAndMetadata> unresolveTopicPartitionOffsetAndMetadataMap(Map<TopicPartition, OffsetAndMetadata> topicPartitionOffsetAndMetadataMap) {
         return topicPartitionOffsetAndMetadataMap == null || topicPartitionOffsetAndMetadataMap.isEmpty() ? topicPartitionOffsetAndMetadataMap :
                 topicPartitionOffsetAndMetadataMap.keySet()
@@ -368,6 +366,11 @@ public class ResolvingConsumer<K, V> extends ForwardingConsumer<K, V> {
         @Override
         public void onPartitionsAssigned(Collection<TopicPartition> collection) {
             listener.onPartitionsAssigned(topicResolver.unresolveTopicPartitions(collection));
+        }
+
+        @Override
+        public void onPartitionsLost(Collection<TopicPartition> collection) {
+            listener.onPartitionsLost(topicResolver.unresolveTopicPartitions(collection));
         }
     }
 

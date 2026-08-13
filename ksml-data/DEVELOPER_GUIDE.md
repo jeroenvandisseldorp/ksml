@@ -388,7 +388,16 @@ This section describes the internal schema model used by ksml-data. Schemas capt
 - A convenience StructSchema generated from TupleType via DataTypeDataSchemaMapper; named using DATA_SCHEMA_KSML_NAMESPACE and the TupleType.toString().
 - Fields are auto-generated as elem0, elem1, ..., one per tuple subtype; requires at least one element.
 
-3.13 Schema ↔ DataType mapping
+3.13 LogicalSchema
+- Decorates a base primitive schema with a LogicalType (io.axual.ksml.data.schema.logical), mirroring Avro's model where a logical type is attached to a base Schema (for example decimal on bytes, uuid on string).
+- type() reports the base primitive's type, so assignability and logical-unaware notations treat it as the base; it is never a shared primitive singleton, so reference-equality checks against those singletons do not match it and force mappers to handle it explicitly.
+- logicalType() exposes the LogicalType (name, baseSchema, representationType, representationSchema, validate); the representation is what the runtime and user code see (string for decimal and uuid, int for date/time-millis, long for the other temporal types).
+- The standard scalar logical types and their names live in LogicalTypeConstants; decimal is parameterised, so it has its own DecimalLogicalType.
+- isAssignableFrom accepts a decimal whose precision grew at the same scale; narrowing the precision or changing the scale is rejected.
+- Produced and consumed by AvroSchemaMapper (Avro logicalType) and JsonSchemaMapper (JSON Schema format: uuid); DataTypeDataSchemaMapper maps it to its representation DataType.
+- Notations that have no logical types (PROTOBUF, XML) unwrap it to baseSchema() at the top of their schema mapper, so they behave as they did before logical types existed.
+
+3.14 Schema ↔ DataType mapping
 - DataTypeDataSchemaMapper bridges between DataType and DataSchema:
   - toDataSchema(DataType) and fromDataSchema(DataSchema) convert between representations (used by ConvertUtil, NativeDataObjectMapper, and struct field conversion).
   - StructType.fieldType uses the mapper to resolve field schema to field DataType.
@@ -396,7 +405,7 @@ This section describes the internal schema model used by ksml-data. Schemas capt
   - inferDataTypeFromNativeMap uses expected StructSchema to choose StructType; defaults to schemaless StructType otherwise.
   - convertMapToDataStruct uses StructType/StructSchema to convert map entries into typed DataStruct fields.
 
-3.14 Guidance for refactoring/AI tools (Schema)
+3.15 Guidance for refactoring/AI tools (Schema)
 - Keep assignability rules symmetric where intended (mutual for equality) and carefully document any asymmetry (eg. FixedSchema size >= other.size, EnumSchema superset semantics).
 - Preserve StructSchema.SCHEMALESS as a unique singleton and normalize it to null in StructType constructor as current code does (StructType treats SCHEMALESS as null schema).
 - When adding a new schema class, update DataTypeDataSchemaMapper and any notation-specific mappers; add tests under src/test/java/io/axual/ksml/data/schema.
@@ -519,7 +528,7 @@ This section documents the Serde components under io.axual.ksml.data.serde and c
 5.1 Overview
 - Serde<Object> components are used at Kafka boundaries to translate between bytes and objects. In KSML, serdes either:
   - Bridge native Java values and KSML DataObjects (DataObjectSerde, StringSerde), or
-  - Wrap/decorate existing serdes for cross-cutting behavior (HeaderFilterSerde, ConfigInjectionSerde, WrappedSerde), or
+  - Wrap/decorate existing serdes for cross-cutting behavior (ConfigInjectionSerde, WrappedSerde), or
   - Provide simple leaf serdes (NullSerde, ByteSerde), or
   - Orchestrate multiple serdes for union types (UnionSerde).
 - Relationship to mappers:
@@ -548,36 +557,31 @@ This section documents the Serde components under io.axual.ksml.data.serde and c
 - Deserialization: null/empty -> DataNull.INSTANCE; otherwise try each member deserializer; first successful and type-compatible result wins; else throws DataException.
 - Configuration: configure(...) cascades to all member serializers/deserializers.
 
-5.5 HeaderFilterSerde
-- Purpose: Decorator that filters specific record headers during serialize/deserialize.
-- Behavior: After delegate calls, removes any headers whose keys are in filteredHeaders; for deserialization creates a filtered copy of headers before delegating.
-- Usage: Wrap another Serde when hiding/removing sensitive headers; see HeaderFilterSerdeTest.
-
-5.6 ConfigInjectionSerializer, ConfigInjectionDeserializer, ConfigInjectionSerde
+5.5 ConfigInjectionSerializer, ConfigInjectionDeserializer, ConfigInjectionSerde
 - Purpose: Allow injecting or mutating configuration maps before delegating to underlying serializer/deserializer.
 - Pattern: modifyConfigs(configs, isKey) protected hook point; ConfigInjectionSerde wires both sides.
 - Behavior: All deserialize/serialize overloads delegate to the underlying implementations; only configure(...) is intercepted.
 - Example: ConfigInjectionDeserializerTest demonstrates injecting extra config entries.
 
-5.7 WrappedSerde
+5.6 WrappedSerde
 - Purpose: Simple wrapper that exposes a delegate’s serializer and deserializer while centralizing configure/close delegation.
 - Behavior: serializer()/deserializer() return wrapper instances that call through to the delegate’s serializer/deserializer; configure propagates to both.
 - Usage: Useful for adapting/transporting a Serde while unifying configuration.
 
-5.8 NullSerde
+5.7 NullSerde
 - Purpose: Represent KSML DataNull over Kafka.
 - Serialization: always returns null bytes.
 - Deserialization: null or empty byte[] -> Null.NULL sentinel (data.value layer); otherwise throws DataException.
 
-5.9 ByteSerde
+5.8 ByteSerde
 - Purpose: Serialize/deserialize a single Java Byte.
 - Serialization: null -> null bytes; otherwise single-byte array with the value.
 - Deserialization: null/empty -> null; otherwise first byte as Byte.
 
-5.10 SerdeSupplier
+5.9 SerdeSupplier
 - Purpose: Strategy to supply a Serde for a given DataType and key/value role; used by UnionSerde to obtain member serdes.
 
-5.11 Guidance and gotchas (Serde)
+5.10 Guidance and gotchas (Serde)
 - Keep DataObjectSerde the main bridge when you need to combine native and boundary mappings. Prefer composing with dedicated boundary mappers rather than embedding conversion logic in serdes.
 - Always validate types against the expected DataType where applicable; leverage DataType.isAssignableFrom for DataObject and native.
 - Wrap errors in DataException with clear context; follow DataObjectSerde’s pattern so tests remain consistent.

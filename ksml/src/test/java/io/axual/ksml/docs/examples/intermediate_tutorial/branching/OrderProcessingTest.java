@@ -20,8 +20,8 @@ package io.axual.ksml.docs.examples.intermediate_tutorial.branching;
  * =========================LICENSE_END==================================
  */
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import io.axual.ksml.testutil.KSMLTest;
 import io.axual.ksml.testutil.KSMLTestExtension;
 import io.axual.ksml.testutil.KSMLTopic;
@@ -33,11 +33,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
 @ExtendWith(KSMLTestExtension.class)
+@SuppressWarnings("java:S2187")
 public class OrderProcessingTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -65,9 +65,9 @@ public class OrderProcessingTest {
         // Test international (non-US/EU)
         inputTopic.pipeInput("k3", createOrder("basic", "APAC", 300.00));
         
-        assertEquals(1, priorityOutput.readValuesToList().size());
-        assertEquals(1, regionalOutput.readValuesToList().size());  
-        assertEquals(1, internationalOutput.readValuesToList().size());
+        assertThat(priorityOutput.readValuesToList().size()).isEqualTo(1);
+        assertThat(regionalOutput.readValuesToList().size()).isEqualTo(1);
+        assertThat(internationalOutput.readValuesToList().size()).isEqualTo(1);
     }
 
     @KSMLTest(topology = "docs-examples/intermediate-tutorial/branching/processor-order-processing.yaml")
@@ -78,8 +78,8 @@ public class OrderProcessingTest {
         // Test just over boundary: $1000.01 should be priority
         inputTopic.pipeInput("k2", createOrder("premium", "US", 1000.01));
         
-        assertEquals(1, priorityOutput.readValuesToList().size());
-        assertEquals(1, regionalOutput.readValuesToList().size());
+        assertThat(priorityOutput.readValuesToList().size()).isEqualTo(1);
+        assertThat(regionalOutput.readValuesToList().size()).isEqualTo(1);
     }
 
     @KSMLTest(topology = "docs-examples/intermediate-tutorial/branching/processor-order-processing.yaml")
@@ -89,9 +89,9 @@ public class OrderProcessingTest {
         String result = priorityOutput.readValue();
         JsonNode order = objectMapper.readTree(result);
         
-        assertEquals("priority", order.get("processing_tier").asText());
-        assertEquals(4, order.get("sla_hours").asInt());
-        assertNotNull(order.get("processed_at"));
+        assertThat(order.get("processing_tier").asString()).isEqualTo("priority");
+        assertThat(order.get("sla_hours").asInt()).isEqualTo(4);
+        assertThat(order.get("processed_at")).isNotNull();
     }
     
     private String createOrder(String customerType, String region, double totalAmount) throws Exception {

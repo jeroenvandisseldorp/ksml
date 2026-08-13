@@ -20,8 +20,8 @@ package io.axual.ksml.docs.examples.intermediate_tutorial.state_stores;
  * =========================LICENSE_END==================================
  */
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import io.axual.ksml.testutil.KSMLTest;
 import io.axual.ksml.testutil.KSMLTestExtension;
 import io.axual.ksml.testutil.KSMLTopic;
@@ -62,6 +62,7 @@ import static org.assertj.core.api.Assertions.offset;
  */
 @Slf4j
 @ExtendWith(KSMLTestExtension.class)
+@SuppressWarnings("java:S2187")
 public class InlineStoreTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();

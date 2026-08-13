@@ -20,6 +20,7 @@ package io.axual.ksml.data.schema;
  * =========================LICENSE_END==================================
  */
 
+import io.axual.ksml.data.compare.EqualityFlags;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -51,18 +52,30 @@ class MapSchemaTest {
         final var mapOfFloat = new MapSchema(DataSchema.FLOAT_SCHEMA);
         final var mapOfDouble = new MapSchema(DataSchema.DOUBLE_SCHEMA);
 
-        // integer group: integer accepts from long
+        // integer group: long accepts int (widening), int does not accept long (narrowing)
         assertThat(mapOfInt.isAssignableFrom(mapOfInt).isAssignable()).isTrue();
-        assertThat(mapOfInt.isAssignableFrom(mapOfLong).isAssignable()).isTrue();
+        assertThat(mapOfInt.isAssignableFrom(mapOfLong).isAssignable()).isFalse();
+        // widening direction: long accepts int
+        assertThat(mapOfLong.isAssignableFrom(mapOfInt).isAssignable()).isTrue();
         assertThat(mapOfInt.isAssignableFrom(mapOfString).isAssignable()).isFalse();
 
-        // floating group: float/double accept from each other
-        assertThat(mapOfFloat.isAssignableFrom(mapOfDouble).isAssignable()).isTrue();
+        // floating group: double accepts float (widening), float does not accept double (narrowing)
+        assertThat(mapOfFloat.isAssignableFrom(mapOfDouble).isAssignable()).isFalse();
         assertThat(mapOfDouble.isAssignableFrom(mapOfFloat).isAssignable()).isTrue();
 
         // Non-map should not be assignable
         assertThat(mapOfInt.isAssignableFrom(DataSchema.STRING_SCHEMA).isAssignable()).isFalse();
         // Null not assignable
         assertThat(mapOfInt.isAssignableFrom(null).isAssignable()).isFalse();
+    }
+
+    @Test
+    @DisplayName("Deep equals compares the value schema")
+    void deepEquals() {
+        final var mapOfInt = new MapSchema(DataSchema.INTEGER_SCHEMA);
+
+        assertThat(mapOfInt.equals(new MapSchema(DataSchema.INTEGER_SCHEMA), EqualityFlags.EMPTY).isEqual()).isTrue();
+        assertThat(mapOfInt.equals(new MapSchema(DataSchema.STRING_SCHEMA), EqualityFlags.EMPTY).isNotEqual()).isTrue();
+        assertThat(mapOfInt.equals(DataSchema.STRING_SCHEMA, EqualityFlags.EMPTY).isNotEqual()).isTrue();
     }
 }

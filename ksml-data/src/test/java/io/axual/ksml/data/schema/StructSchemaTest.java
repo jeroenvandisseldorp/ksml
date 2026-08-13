@@ -20,6 +20,7 @@ package io.axual.ksml.data.schema;
  * =========================LICENSE_END==================================
  */
 
+import io.axual.ksml.data.compare.EqualityFlags;
 import io.axual.ksml.data.object.DataString;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,7 +38,7 @@ class StructSchemaTest {
     }
 
     private static StructSchema.Field optionalStringWithDefault(String name) {
-        return new StructSchema.Field(name, DataSchema.STRING_SCHEMA, null, 0, true, false, new DataString("n/a"));
+        return new StructSchema.Field(name, DataSchema.STRING_SCHEMA, null, 0, false, false, new DataString("n/a"));
     }
 
     @Test
@@ -62,11 +63,17 @@ class StructSchemaTest {
                 optionalStringWithDefault("name")
         ));
 
-        // Other has id as long (compatible) and omits name (allowed due to default)
+        // Other has id as short (widening: int←short) and omits name (allowed due to default)
         final var other1 = new StructSchema("ns", "PersonOther", null, List.of(
-                new StructSchema.Field("id", DataSchema.LONG_SCHEMA, null, 0)
+                new StructSchema.Field("id", DataSchema.SHORT_SCHEMA, null, 0)
         ));
         assertThat(target.isAssignableFrom(other1).isAssignable()).isTrue();
+
+        // Other has id as long (narrowing: int←long is not allowed)
+        final var other1Long = new StructSchema("ns", "PersonOther", null, List.of(
+                new StructSchema.Field("id", DataSchema.LONG_SCHEMA, null, 0)
+        ));
+        assertThat(target.isAssignableFrom(other1Long).isAssignable()).isFalse();
 
         // Missing required id -> not assignable
         final var other2 = new StructSchema("ns", "PersonOther", null, List.of(
@@ -329,5 +336,30 @@ class StructSchemaTest {
 
         assertThat(schema2.additionalFieldsAllowed()).isTrue();
         assertThat(schema2.additionalFieldsSchema()).isEqualTo(DataSchema.ANY_SCHEMA);
+    }
+
+    @Test
+    @DisplayName("field(name) returns the matching field and null when absent; field(index) returns by position")
+    void fieldLookup() {
+        final var schema = new StructSchema("ns", "Person", null, List.of(requiredInt("id"), optionalStringWithDefault("name")));
+
+        final var idField = schema.field("id");
+        assertThat(idField).isNotNull();
+        assertThat(idField.name()).isEqualTo("id");
+        assertThat(schema.field("missing")).isNull();
+        assertThat(schema.field(1).name()).isEqualTo("name");
+    }
+
+    @Test
+    @DisplayName("Deep equals(Object, EqualityFlags): equal fields are equal; differing fields, null and foreign types are not")
+    void deepEquals() {
+        final var base = new StructSchema("ns", "Person", null, List.of(requiredInt("id")));
+        final var same = new StructSchema("ns", "Person", null, List.of(requiredInt("id")));
+        final var different = new StructSchema("ns", "Person", null, List.of(requiredInt("other")));
+
+        assertThat(base.equals(same, EqualityFlags.EMPTY).isEqual()).isTrue();
+        assertThat(base.equals(different, EqualityFlags.EMPTY).isNotEqual()).isTrue();
+        assertThat(base.equals(null, EqualityFlags.EMPTY).isNotEqual()).isTrue();
+        assertThat(base.equals(DataSchema.STRING_SCHEMA, EqualityFlags.EMPTY).isNotEqual()).isTrue();
     }
 }

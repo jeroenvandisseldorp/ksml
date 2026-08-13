@@ -20,7 +20,7 @@ package io.axual.ksml;
  * =========================LICENSE_END==================================
  */
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
 import io.axual.ksml.data.mapper.DataObjectFlattener;
 import io.axual.ksml.data.mapper.DataTypeFlattener;
@@ -46,6 +46,7 @@ import io.stoatflow.testutils.TopologyTestDriver;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.graalvm.home.Version;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIf;
@@ -54,12 +55,13 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Basic stream run test.
  * See {@link io.axual.ksml.testutil.KSMLTestExtension} for a solution that abstracts away the boilerplate code.
  */
+@Slf4j
 @EnabledIf(value = "onGraalVM", disabledReason = "This test needs GraalVM to run")
 class BasicStreamRunTest {
     private final StreamsBuilder streamsBuilder = new StreamsBuilder();
@@ -75,9 +77,9 @@ class BasicStreamRunTest {
         try {
             final var schemaDirectoryURI = ClassLoader.getSystemResource("schemas").toURI();
             final var schemaDirectory = schemaDirectoryURI.getPath();
-            System.out.println("schemaDirectory = " + schemaDirectory);
+            log.info("schemaDirectory = {}", schemaDirectory);
             ExecutionContext.INSTANCE.schemaLibrary().schemaDirectory(schemaDirectory);
-        } catch (URISyntaxException e) {
+        } catch (URISyntaxException _) {
             // Ignore
         }
     }
@@ -92,15 +94,15 @@ class BasicStreamRunTest {
         var topologyGenerator = new TopologyGenerator("some.app.id");
         final var topology = topologyGenerator.create(streamsBuilder, definitions);
         final TopologyDescription description = topology.describe();
-        System.out.println(description);
+        log.info("{}", description);
 
         try (TopologyTestDriver driver = new TopologyTestDriver(topology)) {
             TestInputTopic<String, String> inputTopic = driver.createInputTopic("ksml_sensordata_avro", new StringSerializer(), new StringSerializer());
             var outputTopic = driver.createOutputTopic("ksml_sensordata_copy", new StringDeserializer(), new StringDeserializer());
             inputTopic.pipeInput("key1", "value1");
             var keyValue = outputTopic.readKeyValue();
-            assertEquals("key1", keyValue.key);
-            assertEquals("value1", keyValue.value);
+            assertThat(keyValue.key).isEqualTo("key1");
+            assertThat(keyValue.value).isEqualTo("value1");
         }
     }
 
@@ -120,7 +122,7 @@ class BasicStreamRunTest {
         var topologyGenerator = new TopologyGenerator("some.app.id");
         final var topology = topologyGenerator.create(streamsBuilder, definitions);
         final TopologyDescription description = topology.describe();
-        System.out.println(description);
+        log.info("{}", description);
 
         try (final var driver = new TopologyTestDriver(topology);
              final var serde = avroNotation.serde(new StructType(), false)) {
@@ -133,8 +135,8 @@ class BasicStreamRunTest {
             avroInputTopic.pipeInput("key1", dataObject);
             if (!outputTopic.isEmpty()) {
                 var keyValue = outputTopic.readKeyValue();
-                assertEquals("key1", keyValue.key);
-                System.out.printf("Output topic key=%s, value=%s%n", keyValue.key, keyValue.value);
+                assertThat(keyValue.key).isEqualTo("key1");
+                log.info("Output topic key={}, value={}", keyValue.key, keyValue.value);
             }
         }
     }

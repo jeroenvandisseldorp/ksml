@@ -67,7 +67,7 @@ public class JoinWithGlobalTableOperation extends BaseOperation {
         final var userJoiner = valueJoinerWithKey(joiner, tags);
         final var named = namedOf();
         final KStream<Object, Object> output = named != null
-                ? input.stream.join(otherGlobalKTable.globalTable, userSel, userJoiner)
+                ? input.stream.join(otherGlobalKTable.globalTable, userSel, userJoiner, named)
                 : input.stream.join(otherGlobalKTable.globalTable, userSel, userJoiner);
         return new KStreamWrapper(output, k, rv);
     }

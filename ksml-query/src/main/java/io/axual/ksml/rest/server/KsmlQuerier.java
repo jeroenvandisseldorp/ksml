@@ -57,7 +57,7 @@ public interface KsmlQuerier {
      * @param storeQueryParameters the parameters to find the correct store
      * @param <T>                  the type of Store to return
      * @return the Store found
-     * @throws org.apache.kafka.streams.errors.UnknownStateStoreException if the store does not exist
+     * @throws io.stoatflow.core.exception.UnknownStateStoreException if the store does not exist
      */
     <T> T store(StoreQueryParameters<T> storeQueryParameters);
 

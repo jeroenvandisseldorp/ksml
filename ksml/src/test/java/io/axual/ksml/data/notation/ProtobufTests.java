@@ -21,7 +21,7 @@ package io.axual.ksml.data.notation;
  */
 
 import io.axual.ksml.data.compare.EqualityFlags;
-import io.axual.ksml.data.notation.jsonschema.apicurio.MockApicurioSchemaRegistryClient;
+import io.axual.ksml.notation.MockApicurioSchemaRegistryClient;
 import io.axual.ksml.data.notation.protobuf.ProtobufDataObjectMapper;
 import io.axual.ksml.data.notation.protobuf.ProtobufNotation;
 import io.axual.ksml.data.notation.protobuf.ProtobufSchemaMapper;
@@ -38,25 +38,21 @@ class ProtobufTests {
             IGNORE_ENUM_SCHEMA_DEFAULT_VALUE,
             IGNORE_STRUCT_SCHEMA_DOC
     );
+    private final NotationTestRunner runner = new NotationTestRunner(TestData.Variant.PROTOBUF);
 
     @Test
     void apicurioSchemaTest() {
-        NotationTestRunner.schemaTest(ProtobufNotation.NOTATION_NAME, new ProtobufSchemaMapper(new ApicurioProtobufFileElementDescriptorMapper()), PROTOBUF_EQUALITY_FLAGS);
+        runner.schemaTest(ProtobufNotation.NOTATION_NAME, new ProtobufSchemaMapper(new ApicurioProtobufFileElementDescriptorMapper()), PROTOBUF_EQUALITY_FLAGS);
     }
 
     @Test
     void confluentSchemaTest() {
-        NotationTestRunner.schemaTest(ProtobufNotation.NOTATION_NAME, new ProtobufSchemaMapper(new ConfluentProtobufFileElementDescriptorMapper()), PROTOBUF_EQUALITY_FLAGS);
+        runner.schemaTest(ProtobufNotation.NOTATION_NAME, new ProtobufSchemaMapper(new ConfluentProtobufFileElementDescriptorMapper()), PROTOBUF_EQUALITY_FLAGS);
     }
 
     @Test
     void apicurioDataTest() {
-        NotationTestRunner.dataTest(ProtobufNotation.NOTATION_NAME, new ProtobufDataObjectMapper(new ApicurioProtobufFileElementDescriptorMapper()), PROTOBUF_EQUALITY_FLAGS);
-    }
-
-    @Test
-    void confluentDataTest() {
-//        NotationTestRunner.dataTest(ProtobufNotation.NOTATION_NAME, new ProtobufDataObjectMapper(new ConfluentProtobufDescriptorFileElementMapper()));
+        runner.dataTest(ProtobufNotation.NOTATION_NAME, new ProtobufDataObjectMapper(new ApicurioProtobufFileElementDescriptorMapper()), PROTOBUF_EQUALITY_FLAGS);
     }
 
     @Test
@@ -65,54 +61,6 @@ class ProtobufTests {
         final var provider = new ApicurioProtobufNotationProvider(registryClient);
         final var notationContext = new NotationContext(registryClient.configs());
         final var notation = provider.createNotation(notationContext);
-        NotationTestRunner.serdeTest(notation, true, PROTOBUF_EQUALITY_FLAGS);
+        runner.serdeTest(notation, true, PROTOBUF_EQUALITY_FLAGS);
     }
-
-    @Test
-    void confluentSerdeTest() {
-//        final var registryClient = new MockConfluentSchemaRegistryClient();
-//        final var provider = new ConfluentProtobufNotationProvider(registryClient);
-//        final var notationContext = new NotationContext(registryClient.configs());
-//        final var notation = provider.createNotation(notationContext);
-//        NotationTestRunner.serdeTest(notation, true, PROTOBUF_EQUALITY_FLAGS);
-    }
-
-//    @Test
-//    void testSchemaMapper() {
-//        // This method checks for code completeness of ProtobufSchemaMapper. It will warn if schema translation to
-//        // DataSchema and back gives deltas between ProtobufSchemas.
-//        final String name = "sensor_data";
-//        final String schemaIn =
-//                """
-//                            syntax = "proto3";
-//                            package io.axual.ksml.example;
-//                            message sensor_data {
-//                              string name = 1;
-//                              int64 timestamp = 2;
-//                              string value = 3;
-//                              SensorType type = 4;
-//                              string unit = 5;
-//                              optional string color = 6;
-//                              optional string city = 7;
-//                              optional string owner = 8;
-//                              enum SensorType {
-//                                UNSPECIFIED = 0;
-//                                AREA = 1;
-//                                HUMIDITY = 2;
-//                                LENGTH = 3;
-//                                STATE = 4;
-//                                TEMPERATURE = 5;
-//                              }
-//                            }
-//                        """;
-//        final var mapper = new ProtobufSchemaMapper();
-//        final var proto = new io.apicurio.registry.serde.protobuf.ProtobufSchemaParser<>().parseSchema(schemaIn.getBytes(), Collections.emptyMap());
-//        final var internalSchema = mapper.toDataSchema(name, proto);
-//        final var out = mapper.fromDataSchema(internalSchema);
-//        final var outFe = out.protoFileElement();
-//        final var schemaOut = outFe.toSchema();
-//        final var checker = new ProtobufCompatibilityCheckerLibrary(new ProtobufFile(schemaIn), new ProtobufFile(schemaOut));
-//        final var diffs = checker.findDifferences();
-//        assertTrue(diffs.isEmpty(), "PROTOBUF schema {} in/out is not compatible: " + name);
-//    }
 }

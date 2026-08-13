@@ -20,9 +20,9 @@ package io.axual.ksml.testrunner;
  * =========================LICENSE_END==================================
  */
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
@@ -47,9 +47,16 @@ import java.util.Map;
  */
 public class TestDefinitionSchemaGenerator {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper()
-            .enable(SerializationFeature.INDENT_OUTPUT);
+    // INDENT_OUTPUT keeps the generated docs/ksml-test-spec.json human-readable and consistent with the
+    // other generated spec files (Jackson 3 no longer pretty-prints by default).
+    private static final JsonMapper MAPPER = JsonMapper.builder()
+            .enable(SerializationFeature.INDENT_OUTPUT)
+            .build();
+    private static final String DESCRIPTION = "description";
+    private static final String TYPE_OBJECT = "object";
+    private static final String REQUIRED = "required";
 
+    @SuppressWarnings("java:S106")
     public static void main(String[] args) throws IOException {
         var schema = generateSchema();
         var outputPath = args.length > 0
@@ -60,12 +67,12 @@ public class TestDefinitionSchemaGenerator {
         System.out.println("Generated schema: " + outputPath);
     }
 
-    static String generateSchema() throws IOException {
+    static String generateSchema() {
         var root = buildRecordSchema(TestSuiteDefinition.class);
         root.put("$schema", "http://json-schema.org/draft-07/schema#");
         root.put("title", "KSML Test Suite Definition");
         // Override the type-level description to read more like a top-level title than a record blurb
-        root.put("description", "Schema for KSML test runner YAML suite definition files");
+        root.put(DESCRIPTION, "Schema for KSML test runner YAML suite definition files");
         return MAPPER.writeValueAsString(root);
     }
 
@@ -75,12 +82,12 @@ public class TestDefinitionSchemaGenerator {
      */
     private static ObjectNode buildRecordSchema(Class<?> recordClass) {
         var schema = MAPPER.createObjectNode();
-        schema.put("type", "object");
+        schema.put("type", TYPE_OBJECT);
         schema.put("additionalProperties", false);
 
         var typeAnnotation = recordClass.getAnnotation(JsonSchema.class);
         if (typeAnnotation != null && !typeAnnotation.description().isEmpty()) {
-            schema.put("description", typeAnnotation.description());
+            schema.put(DESCRIPTION, typeAnnotation.description());
         }
 
         var properties = schema.putObject("properties");
@@ -98,31 +105,35 @@ public class TestDefinitionSchemaGenerator {
         }
 
         if (!required.isEmpty()) {
-            var arr = schema.putArray("required");
+            var arr = schema.putArray(REQUIRED);
             required.forEach(arr::add);
         }
 
         // Apply type-level structural constraints (oneOfRequired / anyOfRequired)
         if (typeAnnotation != null) {
-            if (typeAnnotation.oneOfRequired().length > 0) {
-                var oneOf = schema.putArray("oneOf");
-                for (var fieldName : typeAnnotation.oneOfRequired()) {
-                    var variant = MAPPER.createObjectNode();
-                    variant.putArray("required").add(fieldName);
-                    oneOf.add(variant);
-                }
-            }
-            if (typeAnnotation.anyOfRequired().length > 0) {
-                var anyOf = schema.putArray("anyOf");
-                for (var fieldName : typeAnnotation.anyOfRequired()) {
-                    var variant = MAPPER.createObjectNode();
-                    variant.putArray("required").add(fieldName);
-                    anyOf.add(variant);
-                }
-            }
+            applyTypeAnnotationConstraints(schema, typeAnnotation);
         }
 
         return schema;
+    }
+
+    private static void applyTypeAnnotationConstraints(ObjectNode schema, JsonSchema typeAnnotation) {
+        if (typeAnnotation.oneOfRequired().length > 0) {
+            var oneOf = schema.putArray("oneOf");
+            for (var fieldName : typeAnnotation.oneOfRequired()) {
+                var variant = MAPPER.createObjectNode();
+                variant.putArray(REQUIRED).add(fieldName);
+                oneOf.add(variant);
+            }
+        }
+        if (typeAnnotation.anyOfRequired().length > 0) {
+            var anyOf = schema.putArray("anyOf");
+            for (var fieldName : typeAnnotation.anyOfRequired()) {
+                var variant = MAPPER.createObjectNode();
+                variant.putArray(REQUIRED).add(fieldName);
+                anyOf.add(variant);
+            }
+        }
     }
 
     /**
@@ -161,7 +172,7 @@ public class TestDefinitionSchemaGenerator {
             return schema;
         }
         if (Map.class.isAssignableFrom(rawType)) {
-            var schema = MAPPER.createObjectNode().put("type", "object");
+            var schema = MAPPER.createObjectNode().put("type", TYPE_OBJECT);
             var valueType = resolveMapValueType(genericType);
             if (valueType instanceof Class<?> valueClass && valueClass.isRecord()) {
                 // Map<String, SomeRecord> → patternProperties keyed by the shared identifier regex
@@ -176,7 +187,7 @@ public class TestDefinitionSchemaGenerator {
             return buildRecordSchema(rawType);
         }
         // Fallback: untyped object
-        return MAPPER.createObjectNode().put("type", "object");
+        return MAPPER.createObjectNode().put("type", TYPE_OBJECT);
     }
 
     private static ObjectNode buildItemSchema(Type itemType) {
@@ -191,7 +202,7 @@ public class TestDefinitionSchemaGenerator {
 
     private static void applyComponentAnnotation(ObjectNode schema, JsonSchema annotation) {
         if (!annotation.description().isEmpty()) {
-            schema.put("description", annotation.description());
+            schema.put(DESCRIPTION, annotation.description());
         }
         if (!annotation.defaultValue().isEmpty()) {
             schema.put("default", annotation.defaultValue());

@@ -15,18 +15,30 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.pull_request.head.repo.fork == true
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
+
+      # Fork PRs skip build-and-test.yml, whose docker-build-test job is the only
+      # place on that path that fetches these tarballs. Runs before the build so a
+      # bad version fails in seconds instead of after the merge.
+      - name: Check GraalVM JDK tarballs exist
+        run: scripts/graalvm-tarballs.sh check
+
+      # Same JVM the Docker image ships, from the same single source. Note "graalvm"
+      # would be Oracle GraalVM, a different product under a different licence.
+      - name: Read GraalVM version
+        id: graalvm
+        run: echo "version=$(cat .graalvm-jdk-version)" >> "$GITHUB_OUTPUT"
 
       - name: Set up GraalVM
         uses: actions/setup-java@v5
         with:
-          distribution: graalvm
-          java-version: '25'
+          distribution: graalvm-community
+          java-version: ${{ steps.graalvm.outputs.version }}
           cache: maven
 
       - name: Build and test
         timeout-minutes: 60
-        run: mvn clean verify -DskipITs=false --no-transfer-progress
+        run: mvn -T1C clean verify -DskipITs=false --no-transfer-progress
         env:
           TESTCONTAINERS_RYUK_DISABLED: false
 
@@ -46,7 +58,7 @@ jobs:
           printf '%s' "$BASE_REF"  > pr-metadata/base-ref
 
       - name: Upload Sonar inputs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: sonar-inputs-${{ github.event.pull_request.head.sha }}
           retention-days: 1

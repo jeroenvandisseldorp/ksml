@@ -4,7 +4,7 @@ package io.axual.ksml.data.notation.avro;
  * ========================LICENSE_START=================================
  * KSML
  * %%
- * Copyright (C) 2021 - 2025 Axual B.V.
+ * Copyright (C) 2021 - 2026 Axual B.V.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,14 +23,18 @@ package io.axual.ksml.data.notation.avro;
 import io.axual.ksml.data.notation.avro.test.AvroTestUtil;
 import io.axual.ksml.data.object.DataBoolean;
 import io.axual.ksml.data.object.DataNull;
+import io.axual.ksml.data.object.DataString;
 import io.axual.ksml.data.schema.DataSchema;
 import io.axual.ksml.data.schema.EnumSchema;
 import io.axual.ksml.data.schema.FixedSchema;
 import io.axual.ksml.data.schema.ListSchema;
+import io.axual.ksml.data.schema.LogicalSchema;
 import io.axual.ksml.data.schema.MapSchema;
 import io.axual.ksml.data.schema.StructSchema;
 import io.axual.ksml.data.schema.UnionSchema;
+import io.axual.ksml.data.schema.logical.DecimalLogicalType;
 import org.apache.avro.JsonProperties;
+import org.apache.avro.LogicalTypes;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.assertj.core.api.InstanceOfAssertFactories;
@@ -42,8 +46,10 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static io.axual.ksml.data.notation.avro.test.AvroTestUtil.SCHEMA_COLLECTIONS;
@@ -65,29 +71,31 @@ class AvroSchemaMapperTest {
     private final AvroSchemaMapper schemaMapper = new AvroSchemaMapper();
 
     private StructSchema toKsmlStruct(Schema avroSchema) {
-        var mappedSchema = schemaMapper.toDataSchema(avroSchema.getNamespace(), avroSchema.getName(), avroSchema);
+        final var mappedSchema = schemaMapper.toDataSchema(avroSchema.getNamespace(), avroSchema.getName(), avroSchema);
         assertThat(mappedSchema).isInstanceOf(StructSchema.class);
         return (StructSchema) mappedSchema;
     }
 
     @Test
-    void basicAvroSchemaTypeConversion() {
-        var avroSchema = Schema.create(Schema.Type.NULL);
-        var mappedDataSchema = schemaMapper.toDataSchema(null, null, avroSchema);
-        var remappedAvroSchema = schemaMapper.fromDataSchema(mappedDataSchema);
+    @DisplayName("Avro null type maps to KSML and back to the same Avro schema")
+    void nullType_avroToKsmlToAvro_roundTrips() {
+        final var avroSchema = Schema.create(Schema.Type.NULL);
+        final var mappedDataSchema = schemaMapper.toDataSchema(null, null, avroSchema);
+        final var remappedAvroSchema = schemaMapper.fromDataSchema(mappedDataSchema);
 
         assertThat(remappedAvroSchema).isEqualTo(avroSchema);
     }
 
     @Test
+    @DisplayName("Primitives record maps Avro→KSML→Avro stably with each primitive field typed correctly")
     void primitivesRecord_avroToKsml_roundTripsToSameKsml() {
         // Arrange
-        var avroPrimitives = AvroTestUtil.loadSchema(SCHEMA_PRIMITIVES);
+        final var avroPrimitives = AvroTestUtil.loadSchema(SCHEMA_PRIMITIVES);
 
         // Act
-        var ksmlSchema1 = toKsmlStruct(avroPrimitives);
-        var backToAvro = schemaMapper.fromDataSchema(ksmlSchema1);
-        var ksmlSchema2 = toKsmlStruct(backToAvro);
+        final var ksmlSchema1 = toKsmlStruct(avroPrimitives);
+        final var backToAvro = schemaMapper.fromDataSchema(ksmlSchema1);
+        final var ksmlSchema2 = toKsmlStruct(backToAvro);
 
         // Assert
         assertThat(ksmlSchema2).isEqualTo(ksmlSchema1);
@@ -102,12 +110,13 @@ class AvroSchemaMapperTest {
     }
 
     @Test
+    @DisplayName("Collections and unions map to the expected KSML structure and round-trip stably")
     void collectionsAndUnions_avroToKsml_expectedStructure_andRoundTripStable() {
         // Arrange
-        var avroCollections = AvroTestUtil.loadSchema(SCHEMA_COLLECTIONS);
+        final var avroCollections = AvroTestUtil.loadSchema(SCHEMA_COLLECTIONS);
 
         // Act
-        var ksml = toKsmlStruct(avroCollections);
+        final var ksml = toKsmlStruct(avroCollections);
 
         // Assert structure
         assertThat(ksml.name()).isEqualTo("Collections");
@@ -115,87 +124,127 @@ class AvroSchemaMapperTest {
         assertThat(ksml.fields()).hasSize(4);
 
         // strs: array of strings, required
-        var strs = ksml.field("strs");
+        final var strs = ksml.field("strs");
         assertThat(strs.required()).isTrue();
         assertThat(strs.schema()).isInstanceOf(ListSchema.class);
         assertThat(((ListSchema) strs.schema()).valueSchema()).isEqualTo(DataSchema.STRING_SCHEMA);
 
         // intMap: map of ints, required
-        var intMap = ksml.field("intMap");
+        final var intMap = ksml.field("intMap");
         assertThat(intMap.required()).isTrue();
         assertThat(intMap.schema()).isInstanceOf(MapSchema.class);
         assertThat(((MapSchema) intMap.schema()).valueSchema()).isEqualTo(DataSchema.INTEGER_SCHEMA);
 
         // singleUnion: [null, string, int, record X, enum Y] with default null -> optional
-        var singleUnion = ksml.field("singleUnion");
+        final var singleUnion = ksml.field("singleUnion");
 
         assertThat(singleUnion.required()).isFalse();
         assertThat(singleUnion.schema()).isInstanceOf(UnionSchema.class);
-        var singleUnionSchema = (UnionSchema) singleUnion.schema();
+        final var singleUnionSchema = (UnionSchema) singleUnion.schema();
         assertThat(singleUnionSchema.members()).hasSize(4);
-        // Ensure record X and enum Y are present among union member schemas
-        var hasRecordX = false;
-        var hasEnumY = false;
-        var hasString = false;
-        var hasInt = false;
-        var hasNull = false;
-        for (var member : singleUnionSchema.members()) {
-            var ms = member.schema();
-            if (ms == DataSchema.STRING_SCHEMA) hasString = true;
-            if (ms == DataSchema.INTEGER_SCHEMA) hasInt = true;
-            if (ms == DataSchema.NULL_SCHEMA) hasNull = true;
-            if (ms instanceof StructSchema s && s.name().equals("X")) hasRecordX = true;
-            if (ms instanceof EnumSchema e && e.name().equals("Y")) hasEnumY = true;
-        }
-        assertThat(hasNull).as("The null schema in the union should be filtered out").isFalse();
-        assertThat(hasString).isTrue();
-        assertThat(hasInt).isTrue();
-        assertThat(hasRecordX).isTrue();
-        assertThat(hasEnumY).isTrue();
+        final var singleUnionMemberSchemas = Arrays.stream(singleUnionSchema.members())
+                .map(UnionSchema.Member::schema)
+                .toList();
+        assertThat(singleUnionMemberSchemas)
+                .as("null schema should be filtered out of the union, and record X and enum Y should be members")
+                .doesNotContain(DataSchema.NULL_SCHEMA)
+                .contains(DataSchema.STRING_SCHEMA, DataSchema.INTEGER_SCHEMA)
+                .anyMatch(s -> s instanceof StructSchema x && x.name().equals("X"))
+                .anyMatch(s -> s instanceof EnumSchema e && e.name().equals("Y"));
 
         // unionList: array of union(null|string|int|X|Y), required
-        var unionList = ksml.field("unionList");
+        final var unionList = ksml.field("unionList");
         assertThat(unionList.required()).isTrue();
         assertThat(unionList.schema()).isInstanceOf(ListSchema.class);
-        var listValue = ((ListSchema) unionList.schema()).valueSchema();
+        final var listValue = ((ListSchema) unionList.schema()).valueSchema();
         assertThat(listValue).isInstanceOf(UnionSchema.class);
-        var unionListValue = (UnionSchema) listValue;
+        final var unionListValue = (UnionSchema) listValue;
         assertThat(unionListValue.members()).hasSize(4);
 
         // Round-trip stability
-        var backToAvro = schemaMapper.fromDataSchema(ksml);
-        var ksmlAgain = toKsmlStruct(backToAvro);
+        final var backToAvro = schemaMapper.fromDataSchema(ksml);
+        final var ksmlAgain = toKsmlStruct(backToAvro);
         assertThat(ksmlAgain).isEqualTo(ksml);
     }
 
     @Test
-    void logicalTypes_avroToKsml_mapsToUnderlyingPrimitives_andRoundTripStable() {
-        // Arrange: logical types schema uses Avro logicalType annotations; mapper maps to base primitive schemas
-        var avroLogical = AvroTestUtil.loadSchema(SCHEMA_LOGICAL_TYPES);
+    @DisplayName("Avro logical types are preserved as LogicalSchema and round-trip stably")
+    void logicalTypes_avroToKsml_preservesLogicalType_andRoundTripStable() {
+        final var avroLogical = AvroTestUtil.loadSchema(SCHEMA_LOGICAL_TYPES);
 
-        // Act
-        var ksml = toKsmlStruct(avroLogical);
+        final var ksml = toKsmlStruct(avroLogical);
 
-        // Assert underlying primitive schemas
-        assertThat(ksml.field("date").schema()).isEqualTo(DataSchema.INTEGER_SCHEMA); // date -> int
-        assertThat(ksml.field("timeMillis").schema()).isEqualTo(DataSchema.INTEGER_SCHEMA); // time-millis -> int
-        assertThat(ksml.field("tsMillis").schema()).isEqualTo(DataSchema.LONG_SCHEMA); // timestamp-millis -> long
-        assertThat(ksml.field("uuid").schema()).isEqualTo(DataSchema.STRING_SCHEMA); // uuid -> string
-        assertThat(ksml.field("decimal").schema()).isEqualTo(DataSchema.BYTES_SCHEMA); // decimal -> bytes
+        assertThat(ksml.field("date").schema()).isInstanceOf(LogicalSchema.class);
+        assertThat(((LogicalSchema) ksml.field("date").schema()).logicalType().name()).isEqualTo("date");
+        assertThat(((LogicalSchema) ksml.field("timeMillis").schema()).logicalType().name()).isEqualTo("time-millis");
+        assertThat(((LogicalSchema) ksml.field("tsMillis").schema()).logicalType().name()).isEqualTo("timestamp-millis");
+        assertThat(((LogicalSchema) ksml.field("uuid").schema()).logicalType().name()).isEqualTo("uuid");
 
-        // Round-trip
-        var backToAvro = schemaMapper.fromDataSchema(ksml);
-        var again = toKsmlStruct(backToAvro);
+        final var decimalSchema = (LogicalSchema) ksml.field("decimal").schema();
+        assertThat(decimalSchema.logicalType()).isInstanceOf(DecimalLogicalType.class);
+        assertThat(((DecimalLogicalType) decimalSchema.logicalType()).precision()).isEqualTo(10);
+        assertThat(((DecimalLogicalType) decimalSchema.logicalType()).scale()).isEqualTo(2);
+        assertThat(decimalSchema.baseSchema()).isEqualTo(DataSchema.BYTES_SCHEMA);
+
+        final var backToAvro = schemaMapper.fromDataSchema(ksml);
+        assertThat(backToAvro.getField("decimal").schema().getLogicalType())
+                .isInstanceOf(org.apache.avro.LogicalTypes.Decimal.class);
+        assertThat(backToAvro.getField("uuid").schema().getLogicalType().getName()).isEqualTo("uuid");
+
+        final var again = toKsmlStruct(backToAvro);
         assertThat(again).isEqualTo(ksml);
     }
 
+    @ParameterizedTest
+    @DisplayName("Every supported Avro logical type round-trips through the schema mapper")
+    @MethodSource("allAvroLogicalTypes")
+    void allLogicalTypes_avroToKsmlToAvro_preservesLogicalType(Schema avroLogical, String expectedName) {
+        final var ksml = schemaMapper.toDataSchema(avroLogical);
+        assertThat(ksml).isInstanceOf(LogicalSchema.class);
+        assertThat(((LogicalSchema) ksml).logicalType().name()).isEqualTo(expectedName);
+
+        final var back = schemaMapper.fromDataSchema(ksml);
+        assertThat(back.getLogicalType()).as("logical type preserved back to Avro").isNotNull();
+        assertThat(back.getLogicalType().getName()).isEqualTo(expectedName);
+    }
+
+    private static Stream<Arguments> allAvroLogicalTypes() {
+        return Stream.of(
+                Arguments.of(LogicalTypes.uuid().addToSchema(Schema.create(Schema.Type.STRING)), "uuid"),
+                Arguments.of(LogicalTypes.date().addToSchema(Schema.create(Schema.Type.INT)), "date"),
+                Arguments.of(LogicalTypes.timeMillis().addToSchema(Schema.create(Schema.Type.INT)), "time-millis"),
+                Arguments.of(LogicalTypes.timeMicros().addToSchema(Schema.create(Schema.Type.LONG)), "time-micros"),
+                Arguments.of(LogicalTypes.timestampMillis().addToSchema(Schema.create(Schema.Type.LONG)), "timestamp-millis"),
+                Arguments.of(LogicalTypes.timestampMicros().addToSchema(Schema.create(Schema.Type.LONG)), "timestamp-micros"),
+                Arguments.of(LogicalTypes.localTimestampMillis().addToSchema(Schema.create(Schema.Type.LONG)), "local-timestamp-millis"),
+                Arguments.of(LogicalTypes.localTimestampMicros().addToSchema(Schema.create(Schema.Type.LONG)), "local-timestamp-micros"),
+                Arguments.of(LogicalTypes.decimal(10, 2).addToSchema(Schema.create(Schema.Type.BYTES)), "decimal"));
+    }
+
     @Test
+    @DisplayName("Logical types inside a list and a map are preserved by the schema mapper")
+    void logicalTypesInCollections_roundTrip() {
+        final var arrayOfDecimal = Schema.createArray(LogicalTypes.decimal(10, 2).addToSchema(Schema.create(Schema.Type.BYTES)));
+        final var ksmlList = schemaMapper.toDataSchema(arrayOfDecimal);
+        assertThat(ksmlList).isInstanceOf(ListSchema.class);
+        assertThat(((ListSchema) ksmlList).valueSchema()).isInstanceOf(LogicalSchema.class);
+        assertThat(schemaMapper.fromDataSchema(ksmlList).getElementType().getLogicalType().getName()).isEqualTo("decimal");
+
+        final var mapOfUuid = Schema.createMap(LogicalTypes.uuid().addToSchema(Schema.create(Schema.Type.STRING)));
+        final var ksmlMap = schemaMapper.toDataSchema(mapOfUuid);
+        assertThat(ksmlMap).isInstanceOf(MapSchema.class);
+        assertThat(((MapSchema) ksmlMap).valueSchema()).isInstanceOf(LogicalSchema.class);
+        assertThat(schemaMapper.fromDataSchema(ksmlMap).getValueType().getLogicalType().getName()).isEqualTo("uuid");
+    }
+
+    @Test
+    @DisplayName("Optional Avro fields map to optional KSML fields and round-trip to null-first unions")
     void optionalFields_avroToKsml_optionalAndTypes_andRoundTripStable() {
-        var avro = AvroTestUtil.loadSchema(SCHEMA_OPTIONAL);
-        var ksml = (StructSchema) schemaMapper.toDataSchema(avro.getNamespace(), avro.getName(), avro);
+        final var avro = AvroTestUtil.loadSchema(SCHEMA_OPTIONAL);
+        final var ksml = (StructSchema) schemaMapper.toDataSchema(avro.getNamespace(), avro.getName(), avro);
 
         // All fields should be optional
-        for (var f : ksml.fields()) {
+        for (final var f : ksml.fields()) {
             assertThat(f.required()).isFalse();
         }
 
@@ -240,13 +289,13 @@ class AvroSchemaMapperTest {
                 .returns(expectedOptEnum, StructSchema.Field::schema);
 
         // Round-trip back to Avro and check defaults & union w/ null
-        var back = schemaMapper.fromDataSchema(ksml);
+        final var back = schemaMapper.fromDataSchema(ksml);
         assertThat(back).isEqualTo(avro);
-        var ksmlAgain = (StructSchema) schemaMapper.toDataSchema(back.getNamespace(), back.getName(), back);
+        final var ksmlAgain = (StructSchema) schemaMapper.toDataSchema(back.getNamespace(), back.getName(), back);
         assertThat(ksmlAgain).isEqualTo(ksml);
 
         // In back schema, all fields should be union with null first and default null
-        for (var af : back.getFields()) {
+        for (final var af : back.getFields()) {
             assertThat(af)
                     .as("Verifying field %s", af.name())
                     .returns(true, Schema.Field::hasDefaultValue)
@@ -258,10 +307,9 @@ class AvroSchemaMapperTest {
         }
     }
 
-
     @Test
     @DisplayName("Verify null and null schema avro conversions")
-    void nullAvroSchemaToKsmlSchemaConversion() {
+    void nullAndNullSchema_avroToKsml_mapToNullSchema() {
         final var softly = new SoftAssertions();
 
         softly.assertThat(schemaMapper.toDataSchema(null))
@@ -276,7 +324,7 @@ class AvroSchemaMapperTest {
 
     @Test
     @DisplayName("Verify null and null schema ksml data schema conversions")
-    void nullKsmlSchemaToAvroSchemaConversion() {
+    void nullAndNullSchema_ksmlToAvro_mapToNullSchema() {
         final var softly = new SoftAssertions();
 
         final var expectedAvroNullSchema = Schema.create(Schema.Type.NULL);
@@ -291,8 +339,9 @@ class AvroSchemaMapperTest {
     }
 
     @ParameterizedTest
-    @MethodSource
-    void avroSchemaToKsmlSchemaConversion(Schema avroSchema, DataSchema expectedDataSchema) {
+    @DisplayName("Avro schema converts to the expected KSML data schema and back")
+    @MethodSource("avroSchemaToKsmlSchemaConversion")
+    void schema_avroToKsml_matchesExpectedAndRoundTrips(Schema avroSchema, DataSchema expectedDataSchema) {
         final var convertedDataSchema = schemaMapper.toDataSchema(avroSchema);
         assertThat(convertedDataSchema)
                 .as("Verify conversion to KSML Data Schema")
@@ -304,8 +353,9 @@ class AvroSchemaMapperTest {
     }
 
     @ParameterizedTest
-    @MethodSource
-    void ksmlSchemaToAvroSchemaConversion(DataSchema dataSchema, Schema expectedAvroSchema) {
+    @DisplayName("KSML data schema converts to the expected Avro schema and back")
+    @MethodSource("ksmlSchemaToAvroSchemaConversion")
+    void schema_ksmlToAvro_matchesExpectedAndRoundTrips(DataSchema dataSchema, Schema expectedAvroSchema) {
         final var convertedAvroSchema = schemaMapper.fromDataSchema(dataSchema);
         assertThat(convertedAvroSchema)
                 .as("Verify conversion to Avro Schema")
@@ -316,7 +366,7 @@ class AvroSchemaMapperTest {
                 .isEqualTo(dataSchema);
     }
 
-    public static Stream<Arguments> avroSchemaToKsmlSchemaConversion() {
+    private static Stream<Arguments> avroSchemaToKsmlSchemaConversion() {
         return getSchemaTestData().stream()
                 .map(testData -> Arguments.of(
                                 named(testData.description, testData.avroSchema()), testData.ksmlDataSchema()
@@ -324,7 +374,7 @@ class AvroSchemaMapperTest {
                 );
     }
 
-    public static Stream<Arguments> ksmlSchemaToAvroSchemaConversion() {
+    private static Stream<Arguments> ksmlSchemaToAvroSchemaConversion() {
         return getSchemaTestData().stream()
                 .map(testData -> Arguments.of(
                                 named(testData.description, testData.ksmlDataSchema()), testData.avroSchema()
@@ -467,10 +517,9 @@ class AvroSchemaMapperTest {
     }
 
     @Test
-    @DisplayName("Optional AVRO field without explicit null default")
-    void testOptionalFieldWithoutNullDefault() {
-        // Test optional field with no default value, using JSON to create a union type without specifying a default
-        String schemaJson = """
+    @DisplayName("Optional AVRO field without explicit default has no default value")
+    void optionalFieldWithoutDefault_avroToKsml_hasNoDefaultValue() {
+        final String schemaJson = """
                 {
                   "type": "record",
                   "name": "Test",
@@ -482,27 +531,27 @@ class AvroSchemaMapperTest {
                   ]
                 }
                 """;
-        Schema avroSchema = new Schema.Parser().parse(schemaJson);
+        final Schema avroSchema = new Schema.Parser().parse(schemaJson);
 
-        DataSchema ksmlSchema = schemaMapper.toDataSchema(avroSchema);
-        StructSchema structSchema = (StructSchema) ksmlSchema;
-        StructSchema.Field field = structSchema.field("optionalField");
+        final DataSchema ksmlSchema = schemaMapper.toDataSchema(avroSchema);
+        final StructSchema structSchema = (StructSchema) ksmlSchema;
+        final StructSchema.Field field = structSchema.field("optionalField");
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(field.required())
                     .as("Field should not be required")
                     .isFalse();
             softly.assertThat(field.defaultValue())
-                    .as("Default value should be null (no default specified)")
+                    .as("No default defined in Avro schema — defaultValue should be null")
                     .isNull();
         });
     }
 
     @Test
     @DisplayName("Optional AVRO field with explicit null default")
-    void testOptionalFieldWithExplicitNullDefault() {
+    void optionalFieldWithExplicitNullDefault_avroToKsml_defaultsToDataNull() {
         // Create a schema with an explicit null default using JSON
-        String schemaJson = """
+        final String schemaJson = """
                 {
                   "type": "record",
                   "name": "Test",
@@ -515,11 +564,11 @@ class AvroSchemaMapperTest {
                   ]
                 }
                 """;
-        Schema avroSchema = new Schema.Parser().parse(schemaJson);
+        final Schema avroSchema = new Schema.Parser().parse(schemaJson);
 
-        DataSchema ksmlSchema = schemaMapper.toDataSchema(avroSchema);
-        StructSchema structSchema = (StructSchema) ksmlSchema;
-        StructSchema.Field field = structSchema.field("optionalField");
+        final DataSchema ksmlSchema = schemaMapper.toDataSchema(avroSchema);
+        final StructSchema structSchema = (StructSchema) ksmlSchema;
+        final StructSchema.Field field = structSchema.field("optionalField");
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(field.required())
@@ -598,7 +647,7 @@ class AvroSchemaMapperTest {
         // and Avro's Schema.Field constructor would have already thrown above.
         final var innerField = back.getField("inner");
         assertThat(innerField.hasDefaultValue()).isTrue();
-        assertThat(innerField.defaultVal()).isInstanceOf(java.util.Map.class);
+        assertThat(innerField.defaultVal()).isInstanceOf(Map.class);
     }
 
     @Test
@@ -637,15 +686,11 @@ class AvroSchemaMapperTest {
 
         // Pull out the default map for the "id" field.
         @SuppressWarnings("unchecked")
-        final var defaultMap = (java.util.Map<String, Object>) back.getField("id").defaultVal();
+        final var defaultMap = (Map<String, Object>) back.getField("id").defaultVal();
 
-        // Plain string default — should be the string "x".
-        assertThat(defaultMap.get("content")).isEqualTo("x");
-
-        // The important assertion: the null inside the default must be Avro's
-        // null sentinel, NOT a raw Java null. A raw null here is what makes
-        // Avro crash when it tries to JSON-encode the default.
-        assertThat(defaultMap.get("typeCode")).isEqualTo(JsonProperties.NULL_VALUE);
+        assertThat(defaultMap)
+                .containsEntry("content", "x")
+                .containsEntry("typeCode", JsonProperties.NULL_VALUE);
     }
 
     @Test
@@ -692,36 +737,26 @@ class AvroSchemaMapperTest {
         final var back = schemaMapper.fromDataSchema(ksml);
 
         // Empty array default should be a plain Java List.
-        assertThat(back.getField("tags").defaultVal()).isInstanceOf(java.util.List.class);
+        assertThat(back.getField("tags").defaultVal()).isInstanceOf(List.class);
 
         // The "items" default is a list with two records in it.
         @SuppressWarnings("unchecked")
-        final var items = (java.util.List<Object>) back.getField("items").defaultVal();
+        final var items = (List<Object>) back.getField("items").defaultVal();
         assertThat(items).hasSize(2);
 
         // Each item should have been turned into a plain Java Map.
-        assertThat(items.getFirst()).isInstanceOf(java.util.Map.class);
+        assertThat(items.getFirst()).isInstanceOf(Map.class);
 
         // And the null inside each record must be Avro's null sentinel — same
         // rule as the previous test, but reached through the list branch.
         @SuppressWarnings("unchecked")
-        final var first = (java.util.Map<String, Object>) items.getFirst();
-        assertThat(first.get("v")).isEqualTo(JsonProperties.NULL_VALUE);
+        final var first = (Map<String, Object>) items.getFirst();
+        assertThat(first).containsEntry("v", JsonProperties.NULL_VALUE);
     }
 
     @Test
     @DisplayName("End-to-end: a deep schema like the original Enexis report survives the round-trip")
     void recordDefault_roundTrips() {
-        // A trimmed copy of the schema from the original bug report. It combines
-        // everything the previous tests cover, in one realistic shape:
-        //   - top-level record field with default {}
-        //   - record inside that with its own default {}
-        //   - a named-type reference (OpenIDType) used twice, also with default {}
-        //   - a union field "typeCode" with default null
-        //   - an array-of-records field with default []
-        //
-        // If any one piece of the fix breaks, this test will fail too. Think of
-        // it as the "does the real-world case work end-to-end" check.
         final var schemaJson = """
                 {
                   "type": "record",
@@ -789,4 +824,118 @@ class AvroSchemaMapperTest {
         final var ksml2 = schemaMapper.toDataSchema(back.getNamespace(), back.getName(), back);
         assertThat(ksml2).isEqualTo(ksml);
     }
+
+    @Test
+    @DisplayName("Optional field with null default produces null-first union")
+    void optionalField_nullDefault_producesNullFirstUnion() {
+        final var ksml = StructSchema.builder()
+                .namespace("ns").name("Test")
+                .field(new StructSchema.Field("country", DataSchema.STRING_SCHEMA, null, NO_TAG, false, false, DataNull.INSTANCE))
+                .additionalFieldsAllowed(false)
+                .build();
+
+        final var avro = schemaMapper.fromDataSchema(ksml);
+        final var field = avro.getField("country");
+
+        assertThat(field.schema().getType()).isEqualTo(Schema.Type.UNION);
+        assertThat(field.schema().getTypes().getFirst().getType()).isEqualTo(Schema.Type.NULL);
+        assertThat(field.defaultVal()).isEqualTo(JsonProperties.NULL_VALUE);
+    }
+
+    @Test
+    @DisplayName("Optional field with non-null default produces value-type-first union")
+    void optionalField_nonNullDefault_producesValueTypeFirstUnion() {
+        final var ksml = StructSchema.builder()
+                .namespace("ns").name("Test")
+                .field(new StructSchema.Field("country", DataSchema.STRING_SCHEMA, null, NO_TAG, false, false, new DataString("US")))
+                .additionalFieldsAllowed(false)
+                .build();
+
+        final var avro = schemaMapper.fromDataSchema(ksml);
+        final var field = avro.getField("country");
+
+        assertThat(field.schema().getType()).isEqualTo(Schema.Type.UNION);
+        assertThat(field.schema().getTypes().getFirst().getType()).isEqualTo(Schema.Type.STRING);
+        assertThat(field.schema().getTypes().get(1).getType()).isEqualTo(Schema.Type.NULL);
+        assertThat(field.defaultVal()).isEqualTo("US");
+    }
+
+    @Test
+    @DisplayName("DESCENDING and IGNORE field sort orders round-trip correctly in both directions")
+    void fieldOrderDescending_roundTrips() {
+        final var avroSchema = new Schema.Parser().parse("""
+                {
+                  "type": "record",
+                  "name": "Ordered",
+                  "namespace": "io.axual.test",
+                  "fields": [
+                    {"name": "asc",  "type": "string", "order": "ascending"},
+                    {"name": "desc", "type": "string", "order": "descending"},
+                    {"name": "ign",  "type": "string", "order": "ignore"}
+                  ]
+                }
+                """);
+
+        final var ksml = (StructSchema) schemaMapper.toDataSchema(avroSchema);
+        assertThat(ksml.field("asc").order()).isEqualTo(StructSchema.Field.Order.ASCENDING);
+        assertThat(ksml.field("desc").order()).isEqualTo(StructSchema.Field.Order.DESCENDING);
+        assertThat(ksml.field("ign").order()).isEqualTo(StructSchema.Field.Order.IGNORE);
+
+        final var back = schemaMapper.fromDataSchema(ksml);
+        assertThat(back.getField("asc").order()).isEqualTo(Schema.Field.Order.ASCENDING);
+        assertThat(back.getField("desc").order()).isEqualTo(Schema.Field.Order.DESCENDING);
+        assertThat(back.getField("ign").order()).isEqualTo(Schema.Field.Order.IGNORE);
+    }
+
+    @Test
+    @DisplayName("Map field with non-null map default exercises the DataMap branch of toJsonShapedDefault")
+    void mapFieldWithMapDefault_roundTrips() {
+        final var avroSchema = new Schema.Parser().parse("""
+                {
+                  "type": "record",
+                  "name": "WithMapDefault",
+                  "namespace": "io.axual.test",
+                  "fields": [{
+                    "name": "config",
+                    "type": {"type": "map", "values": "string"},
+                    "default": {"k1": "v1", "k2": "v2"}
+                  }]
+                }
+                """);
+
+        final var ksml = schemaMapper.toDataSchema(avroSchema);
+        // fromDataSchema calls toJsonShapedDefault(DataMap) — must not throw
+        final var back = schemaMapper.fromDataSchema(ksml);
+
+        assertThat(back.getField("config").hasDefaultValue()).isTrue();
+        @SuppressWarnings("unchecked")
+        final var defaultMap = (Map<String, Object>) back.getField("config").defaultVal();
+        assertThat(defaultMap).containsEntry("k1", "v1").containsEntry("k2", "v2");
+    }
+
+    @Test
+    @DisplayName("List field with non-null list default exercises the DataList branch of toJsonShapedDefault")
+    void listFieldWithListDefault_roundTrips() {
+        final var avroSchema = new Schema.Parser().parse("""
+                {
+                  "type": "record",
+                  "name": "WithListDefault",
+                  "namespace": "io.axual.test",
+                  "fields": [{
+                    "name": "tags",
+                    "type": {"type": "array", "items": "string"},
+                    "default": ["alpha", "beta"]
+                  }]
+                }
+                """);
+
+        final var ksml = schemaMapper.toDataSchema(avroSchema);
+        final var back = schemaMapper.fromDataSchema(ksml);
+
+        assertThat(back.getField("tags").hasDefaultValue()).isTrue();
+        @SuppressWarnings("unchecked")
+        final var defaultList = (List<Object>) back.getField("tags").defaultVal();
+        assertThat(defaultList).containsExactly("alpha", "beta");
+    }
+
 }

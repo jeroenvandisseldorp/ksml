@@ -80,7 +80,7 @@ Use this configuration when working with Confluent Schema Registry or when you n
 
     ```yaml
     {%
-      include "../../../ksml-integration-tests/src/test/resources/docs-examples/beginner-tutorial/different-data-formats/avro/confluent_avro/ksml-runner.yaml"
+      include "../../../ksml-integration-tests/src/test/resources/docs-examples/beginner-tutorial/different-data-formats/avro-confluent/confluent_avro/ksml-runner.yaml"
     %}
     ```
 
@@ -104,9 +104,9 @@ Use this configuration when working with Apicurio Schema Registry's native capab
 
 **Key features:**
 
-- Uses Apicurio native API (`/apis/registry/v2`)
+- Uses Apicurio native API (`/apis/registry/v3`)
 - Apicurio-specific features and configuration options
-- **KSML 1.1.0 supports `/v2` endpoint only** (does not support `/v3` endpoint)
+- **KSML 2.0.0 supports `/v3` endpoint only** (does not support `/v2` endpoint)
 
 **Important Notes:**
 
@@ -156,7 +156,7 @@ This processor transforms Avro data (uppercases sensor names) while maintaining 
 
     ```yaml
     {%
-      include "../../../ksml-integration-tests/src/test/resources/docs-examples/beginner-tutorial/different-data-formats/avro/processor-avro-transform.yaml"
+      include "../../../ksml-integration-tests/src/test/resources/docs-examples/beginner-tutorial/different-data-formats/avro-confluent/processor-avro-transform.yaml"
     %} 
     ```
 

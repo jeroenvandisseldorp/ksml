@@ -28,10 +28,11 @@ import io.stoatflow.testutils.TestOutputTopic;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
 @ExtendWith({KSMLTestExtension.class})
+@SuppressWarnings("java:S2187")
 class KSMLCopyTest {
 
     @KSMLTopic(topic = "ksml_sensordata_avro")
@@ -45,8 +46,8 @@ class KSMLCopyTest {
         log.debug("testCopying()");
 
         inputTopic.pipeInput("key1", "value1");
-        assertFalse(outputTopic.isEmpty(), "record should be copied");
+        assertThat(outputTopic.isEmpty()).as("record should be copied").isFalse();
         var keyValue = outputTopic.readKeyValue();
-        System.out.printf("Output topic key=%s, value=%s%n", keyValue.key, keyValue.value);
+        log.info("Output topic key={}, value={}", keyValue.key, keyValue.value);
     }
 }

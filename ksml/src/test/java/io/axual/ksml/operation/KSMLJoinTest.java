@@ -25,15 +25,18 @@ import io.axual.ksml.testutil.KSMLTestExtension;
 import io.axual.ksml.testutil.KSMLTopic;
 import io.stoatflow.testutils.TestInputTopic;
 import io.stoatflow.testutils.TestOutputTopic;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.generic.GenericRecord;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.List;
 
 import static io.axual.ksml.testutil.JsonVerifier.verifyJson;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
+@Slf4j
 @ExtendWith(KSMLTestExtension.class)
+@SuppressWarnings("java:S2187")
 public class KSMLJoinTest {
 
     @KSMLTopic(topic = "ksml_sensordata_avro", valueSerde = KSMLTopic.SerdeType.AVRO)
@@ -75,10 +78,10 @@ public class KSMLJoinTest {
                 .build().toRecord());
 
         // we should see alerts containing the alert that was triggered, joined with the sensor data that triggered it
-        assertEquals(2, sensorAlerts.getQueueSize());
+        assertThat(sensorAlerts.getQueueSize()).isEqualTo(2);
         List<String> valuesList = sensorAlerts.readValuesToList();
         String alert1 = valuesList.getFirst();
-        System.out.println("alert1 = " + alert1);
+        log.info("alert1 = {}", alert1);
         verifyJson(alert1)
                 .hasNode("alert").withChild("type").withTextValue("HUMIDITY")
                 .hasNode("alert").withChild("alertAbove").withTextValue("50")

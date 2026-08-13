@@ -34,7 +34,7 @@ import static io.axual.ksml.data.schema.DataSchemaFlag.IGNORE_UNION_SCHEMA_MEMBE
 import static io.axual.ksml.data.schema.DataSchemaFlag.IGNORE_UNION_SCHEMA_MEMBER_TAG;
 import static io.axual.ksml.data.type.DataTypeFlag.IGNORE_UNION_TYPE_MEMBER_NAME;
 import static io.axual.ksml.data.type.DataTypeFlag.IGNORE_UNION_TYPE_MEMBER_TAG;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class CsvTests {
     private static final EqualityFlags CSV_EQUALITY_FLAGS = new EqualityFlags(
@@ -46,24 +46,25 @@ class CsvTests {
             IGNORE_UNION_TYPE_MEMBER_NAME,
             IGNORE_UNION_TYPE_MEMBER_TAG
     );
+    private final NotationTestRunner runner = new NotationTestRunner(TestData.Variant.FULL);
 
     @Test
     void schemaTest() {
-        NotationTestRunner.schemaTest(CsvNotation.NOTATION_NAME, new CsvSchemaMapper(), (input, output) -> {
+        runner.schemaTest(CsvNotation.NOTATION_NAME, new CsvSchemaMapper(), (input, output) -> {
             // Check the conversion
             final var inputFieldNames = ((StructSchema) input).fields().stream().map(StructSchema.Field::name).toArray(String[]::new);
             final var outputFieldNames = ((StructSchema) output).fields().stream().map(StructSchema.Field::name).toArray(String[]::new);
-            assertArrayEquals(inputFieldNames, outputFieldNames, "Input schema field names should match output schema field names");
+            assertThat(outputFieldNames).as("Input schema field names should match output schema field names").isEqualTo(inputFieldNames);
         });
     }
 
     @Test
     void dataTest() {
-        NotationTestRunner.dataTest(CsvNotation.NOTATION_NAME, new CsvDataObjectMapper(), CSV_EQUALITY_FLAGS);
+        runner.dataTest(CsvNotation.NOTATION_NAME, new CsvDataObjectMapper(), CSV_EQUALITY_FLAGS);
     }
 
     @Test
     void serdeTest() {
-        NotationTestRunner.serdeTest(new CsvNotation(), true, CSV_EQUALITY_FLAGS);
+        runner.serdeTest(new CsvNotation(), true, CSV_EQUALITY_FLAGS);
     }
 }

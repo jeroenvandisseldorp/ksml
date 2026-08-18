@@ -108,7 +108,7 @@
         <victools.version>5.0.0</victools.version>
         <wire.version>6.4.1</wire.version>
 
-        <stoatflow.version>1.0.0-beta.8</stoatflow.version>
+        <stoatflow.version>1.0.0-rc.1</stoatflow.version>
 
         <!-- KSML schema generation -->
         <ksml.schema.output.file>docs/ksml-language-spec.json</ksml.schema.output.file>

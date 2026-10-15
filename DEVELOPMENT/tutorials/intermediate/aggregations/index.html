@@ -3007,6 +3007,54 @@
 </code></pre></div>
 </details>
 <h2 id="core-aggregation-concepts">Core Aggregation Concepts</h2>
+<p>Every aggregation in KSML follows the same flow: group the messages by key, optionally split them into time windows, and then aggregate them. The aggregation keeps its running result in a state store and emits an updated result for each change. If the store caches updates, the topic only gets the latest result at each commit (by default every 30 seconds). You turn the results back into a stream with <code>toStream</code> to write them to a topic:</p>
+<pre class="mermaid"><code>%%{init: {'themeVariables': {'textColor': '#000000', 'nodeTextColor': '#000000', 'primaryTextColor': '#000000'}}}%%
+
+graph LR
+    %% Input
+    InputTopic[(Input topic)]
+
+    %% Pipeline Operations
+    Group[&lt;code&gt;groupByKey&lt;/code&gt;&lt;br/&gt;or &lt;code&gt;groupBy&lt;/code&gt;]
+    Window[&lt;code&gt;windowByTime&lt;/code&gt;&lt;br/&gt;or &lt;code&gt;windowBySession&lt;/code&gt;]
+    Aggregate[&lt;code&gt;count&lt;/code&gt;, &lt;code&gt;reduce&lt;/code&gt;&lt;br/&gt;or &lt;code&gt;aggregate&lt;/code&gt;]
+    ToStream[&lt;code&gt;toStream&lt;/code&gt;]
+
+    %% State
+    Store[(State store)]
+    Changelog[(Changelog topic)]
+
+    %% Output
+    OutputTopic[(Output topic)]
+
+    %% Data Flow
+    InputTopic --&gt; Group
+    Group --&gt;|"regular"| Aggregate
+    Group -.-&gt;|"windowed"| Window
+    Window -.-&gt; Aggregate
+    Aggregate --&gt;|"updated result"| ToStream
+    ToStream --&gt; OutputTopic
+    Aggregate &lt;--&gt;|"read &amp; update"| Store
+    Store -.-&gt;|"every change"| Changelog
+
+    %% Styling
+    classDef topic fill:#e1f5ff,stroke:#0277bd,stroke-width:2px,color:#000
+    classDef errorTopic fill:#ffebee,stroke:#b71c1c,stroke-width:2px,color:#000
+    classDef operation fill:#fff9c4,stroke:#f57f17,stroke-width:2px,color:#000
+    classDef store fill:#ede7f6,stroke:#5e35b1,stroke-width:2px,color:#000
+    classDef external fill:#e0f2f1,stroke:#00695c,stroke-width:2px,color:#000
+    classDef message fill:#ffffff,stroke:#616161,stroke-width:1px,color:#000
+    classDef result fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px,color:#000
+    classDef partial fill:#fff3e0,stroke:#ef6c00,stroke-width:2px,color:#000
+    classDef dropped fill:#ffcdd2,stroke:#c62828,stroke-width:2px,color:#000
+    classDef alert fill:#fce4ec,stroke:#ad1457,stroke-width:2px,color:#000
+    classDef note fill:#f5f5f5,stroke:#9e9e9e,stroke-width:1px,stroke-dasharray:3 3,color:#616161
+    classDef host fill:#f5f5f5,stroke:#616161,stroke-width:2px,stroke-dasharray:5 5,color:#000
+
+
+    class InputTopic,OutputTopic,Changelog topic
+    class Group,Window,Aggregate,ToStream operation
+    class Store store</code></pre>
 <h3 id="grouping-requirements">Grouping Requirements</h3>
 <p>All aggregations require data to be grouped by key first:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Group by existing key</span>
@@ -3015,7 +3063,7 @@
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1"># Group by new key using mapper function</span>
 <a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">groupBy</span>
 <a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span><span class="nt">mapper</span><span class="p">:</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="nt">expression</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">value.get(&quot;category&quot;)</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="nt">expression</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">value.get("category")</span>
 <a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">    </span><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">string</span>
 </code></pre></div>
 <p><strong>Kafka Streams equivalents:</strong></p>
@@ -3055,7 +3103,7 @@
 <p><strong>Initializer Function</strong>
 Creates the initial state value when a key is seen for the first time.
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nt">initializer</span><span class="p">:</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">expression</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="s">&quot;count&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;sum&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">}</span><span class="w">  </span><span class="c1"># Initial state</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">expression</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="s">"count"</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"sum"</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">}</span><span class="w">  </span><span class="c1"># Initial state</span>
 <a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">json</span>
 </code></pre></div></p>
 <p><strong>Aggregator Function</strong>
@@ -3065,8 +3113,8 @@ Updates the aggregate state by combining the current aggregate with a new incomi
 <a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="no"># aggregatedValue: current aggregate</span>
 <a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="no"># value: new record to add</span>
 <a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">    </span><span class="no">result = {</span>
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">      </span><span class="no">&quot;count&quot;: aggregatedValue[&quot;count&quot;] + 1,</span>
-<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">      </span><span class="no">&quot;sum&quot;: aggregatedValue[&quot;sum&quot;] + value[&quot;amount&quot;]</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">      </span><span class="no">"count": aggregatedValue["count"] + 1,</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">      </span><span class="no">"sum": aggregatedValue["sum"] + value["amount"]</span>
 <a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">    </span><span class="no">}</span>
 <a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">  </span><span class="nt">expression</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">result</span>
 <a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">  </span><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">json</span>
@@ -3129,8 +3177,8 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">      </span><span class="no">import random</span>
 <a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">      </span><span class="no">import time</span>
 <a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">      </span><span class="no">user_counter = 0</span>
-<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">      </span><span class="no">users = [&quot;alice&quot;, &quot;bob&quot;, &quot;charlie&quot;, &quot;david&quot;, &quot;eve&quot;, &quot;frank&quot;, &quot;grace&quot;, &quot;henry&quot;]</span>
-<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">      </span><span class="no">actions = [&quot;login&quot;, &quot;view&quot;, &quot;click&quot;, &quot;purchase&quot;, &quot;logout&quot;, &quot;search&quot;, &quot;share&quot;, &quot;comment&quot;]</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">      </span><span class="no">users = ["alice", "bob", "charlie", "david", "eve", "frank", "grace", "henry"]</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">      </span><span class="no">actions = ["login", "view", "click", "purchase", "logout", "search", "share", "comment"]</span>
 <a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">    </span><span class="nt">code</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
 <a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="w">      </span><span class="no">global user_counter, users, actions</span>
 <a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>
@@ -3140,9 +3188,9 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a>
 <a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a><span class="w">      </span><span class="no"># Generate action event</span>
 <a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a><span class="w">      </span><span class="no">value = {</span>
-<a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a><span class="w">        </span><span class="no">&quot;user_id&quot;: user,</span>
-<a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a><span class="w">        </span><span class="no">&quot;action&quot;: random.choice(actions),</span>
-<a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a><span class="w">        </span><span class="no">&quot;timestamp&quot;: int(time.time() * 1000)</span>
+<a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a><span class="w">        </span><span class="no">"user_id": user,</span>
+<a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a><span class="w">        </span><span class="no">"action": random.choice(actions),</span>
+<a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a><span class="w">        </span><span class="no">"timestamp": int(time.time() * 1000)</span>
 <a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a><span class="w">      </span><span class="no">}</span>
 <a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a>
 <a id="__codelineno-7-24" name="__codelineno-7-24" href="#__codelineno-7-24"></a><span class="w">      </span><span class="no"># Use user_id as key</span>
@@ -3185,7 +3233,7 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-8-21" name="__codelineno-8-21" href="#__codelineno-8-21"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">peek</span>
 <a id="__codelineno-8-22" name="__codelineno-8-22" href="#__codelineno-8-22"></a><span class="w">        </span><span class="nt">forEach</span><span class="p">:</span>
 <a id="__codelineno-8-23" name="__codelineno-8-23" href="#__codelineno-8-23"></a><span class="w">          </span><span class="nt">code</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
-<a id="__codelineno-8-24" name="__codelineno-8-24" href="#__codelineno-8-24"></a><span class="w">            </span><span class="no">log.info(&quot;User {} has performed {} actions&quot;, key, value)</span>
+<a id="__codelineno-8-24" name="__codelineno-8-24" href="#__codelineno-8-24"></a><span class="w">            </span><span class="no">log.info("User {} has performed {} actions", key, value)</span>
 <a id="__codelineno-8-25" name="__codelineno-8-25" href="#__codelineno-8-25"></a><span class="w">    </span><span class="nt">to</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">user_action_counts</span>
 </code></pre></div>
 </details>
@@ -3197,6 +3245,62 @@ Combines two values of the same type into a single value, used when no initializ
 <li>Increments the counter for each message</li>
 <li>Outputs the current count as a KTable</li>
 </ol>
+<p>The diagram below follows five example actions through the pipeline. Unlike a windowed count, the count for a user never resets: every new action updates the stored count. This store caches updates, so the topic gets the latest count about every 30 seconds:</p>
+<pre class="mermaid"><code>%%{init: {'themeVariables': {'textColor': '#000000', 'nodeTextColor': '#000000', 'primaryTextColor': '#000000'}}}%%
+
+graph TB
+    %% Input topic with five actions
+    Topic[(user_actions)]
+    Actions@{ shape: docs, label: "&lt;b&gt;alice&lt;/b&gt;: login&lt;br/&gt;&lt;b&gt;bob&lt;/b&gt;: view&lt;br/&gt;&lt;b&gt;alice&lt;/b&gt;: click&lt;br/&gt;&lt;b&gt;alice&lt;/b&gt;: purchase&lt;br/&gt;&lt;b&gt;bob&lt;/b&gt;: logout" }
+
+    %% Step 1: group by key
+    Group[&lt;code&gt;groupByKey&lt;/code&gt;]
+    subgraph ByKey["Grouped by key"]
+        Alice@{ shape: docs, label: "&lt;b&gt;key: alice&lt;/b&gt;&lt;br/&gt;login, click, purchase" }
+        Bob@{ shape: docs, label: "&lt;b&gt;key: bob&lt;/b&gt;&lt;br/&gt;view, logout" }
+    end
+
+    %% Step 2: running count per key
+    Count[&lt;code&gt;count&lt;/code&gt;]
+    subgraph Counts["Running count per key, updated with every action"]
+        AliceCount["&lt;b&gt;alice&lt;/b&gt;&lt;br/&gt;count 1, then 2, then 3"]
+        BobCount["&lt;b&gt;bob&lt;/b&gt;&lt;br/&gt;count 1, then 2"]
+    end
+
+    %% Step 3: write to the output topic
+    Convert["&lt;code&gt;toStream&lt;/code&gt; + &lt;code&gt;convertValue&lt;/code&gt;&lt;br/&gt;into string"]
+    Output[(user_action_counts)]
+
+    %% Data Flow
+    Topic --&gt; Actions
+    Actions --&gt; Group
+    Group --&gt; Alice &amp; Bob
+    Alice &amp; Bob --&gt; Count
+    Count --&gt; AliceCount &amp; BobCount
+    AliceCount &amp; BobCount --&gt; Convert
+    Convert --&gt;|"latest message for alice&lt;br/&gt;key: alice, value: 3"| Output
+
+    %% Styling
+    classDef topic fill:#e1f5ff,stroke:#0277bd,stroke-width:2px,color:#000
+    classDef errorTopic fill:#ffebee,stroke:#b71c1c,stroke-width:2px,color:#000
+    classDef operation fill:#fff9c4,stroke:#f57f17,stroke-width:2px,color:#000
+    classDef store fill:#ede7f6,stroke:#5e35b1,stroke-width:2px,color:#000
+    classDef external fill:#e0f2f1,stroke:#00695c,stroke-width:2px,color:#000
+    classDef message fill:#ffffff,stroke:#616161,stroke-width:1px,color:#000
+    classDef result fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px,color:#000
+    classDef partial fill:#fff3e0,stroke:#ef6c00,stroke-width:2px,color:#000
+    classDef dropped fill:#ffcdd2,stroke:#c62828,stroke-width:2px,color:#000
+    classDef alert fill:#fce4ec,stroke:#ad1457,stroke-width:2px,color:#000
+    classDef note fill:#f5f5f5,stroke:#9e9e9e,stroke-width:1px,stroke-dasharray:3 3,color:#616161
+    classDef host fill:#f5f5f5,stroke:#616161,stroke-width:2px,stroke-dasharray:5 5,color:#000
+
+
+    class Topic,Output topic
+    class Group,Count,Convert operation
+    class Actions,Alice,Bob message
+    class AliceCount,BobCount result
+    style ByKey fill:none,stroke:#616161,stroke-dasharray:5 5
+    style Counts fill:none,stroke:#616161,stroke-dasharray:5 5</code></pre>
 <h2 id="reduce-example">Reduce Example</h2>
 <p>The <code>reduce</code> operation combines values without initialization, making it perfect for operations like summing, finding minimums/maximums, or concatenating strings. This section shows two approaches: a simple binary format for efficiency, and a JSON format for human readability.</p>
 <h3 id="simple-reduce-binary-format">Simple Reduce (Binary Format)</h3>
@@ -3214,6 +3318,63 @@ Combines two values of the same type into a single value, used when no initializ
 <li><code>reduce</code> operation for stateful aggregation</li>
 <li>Binary data types for processing efficiency</li>
 </ul>
+<p>The diagram below follows four example transactions (amounts in cents) through the pipeline. The reducer has no initial value: the first amount for an account is stored as is, and every next amount is added to it:</p>
+<pre class="mermaid"><code>%%{init: {'themeVariables': {'textColor': '#000000', 'nodeTextColor': '#000000', 'primaryTextColor': '#000000'}}}%%
+
+graph TB
+    %% Input topic with four transactions
+    Topic[(financial_transactions)]
+    Transactions@{ shape: docs, label: "&lt;b&gt;ACC001&lt;/b&gt;: 1500&lt;br/&gt;&lt;b&gt;ACC002&lt;/b&gt;: 2000&lt;br/&gt;&lt;b&gt;ACC001&lt;/b&gt;: 500&lt;br/&gt;&lt;b&gt;ACC001&lt;/b&gt;: 3000" }
+
+    %% Step 1: group by key
+    Group[&lt;code&gt;groupByKey&lt;/code&gt;]
+    subgraph ByKey["Grouped by key"]
+        Acc1@{ shape: docs, label: "&lt;b&gt;key: ACC001&lt;/b&gt;&lt;br/&gt;1500, 500, 3000" }
+        Acc2@{ shape: doc, label: "&lt;b&gt;key: ACC002&lt;/b&gt;&lt;br/&gt;2000" }
+    end
+
+    %% Step 2: combine values pairwise
+    Reduce["&lt;code&gt;reduce&lt;/code&gt;&lt;br/&gt;sum_amounts: value1 + value2"]
+    subgraph Totals["Running total per key"]
+        Acc1Total["&lt;b&gt;ACC001&lt;/b&gt;&lt;br/&gt;1500 (first value, stored as is)&lt;br/&gt;1500 + 500 = 2000&lt;br/&gt;2000 + 3000 = 5000"]
+        Acc2Total["&lt;b&gt;ACC002&lt;/b&gt;&lt;br/&gt;2000 (first value, stored as is)"]
+    end
+
+    %% Step 3: write to the output topic
+    ToStream[&lt;code&gt;toStream&lt;/code&gt;]
+    Output[(transaction_sums)]
+
+    %% Data Flow
+    Topic --&gt; Transactions
+    Transactions --&gt; Group
+    Group --&gt; Acc1 &amp; Acc2
+    Acc1 &amp; Acc2 --&gt; Reduce
+    Reduce --&gt; Acc1Total &amp; Acc2Total
+    Acc1Total &amp; Acc2Total --&gt; ToStream
+    ToStream --&gt;|"latest message for ACC001&lt;br/&gt;key: ACC001, value: 5000"| Output
+
+    %% Styling
+    classDef topic fill:#e1f5ff,stroke:#0277bd,stroke-width:2px,color:#000
+    classDef errorTopic fill:#ffebee,stroke:#b71c1c,stroke-width:2px,color:#000
+    classDef operation fill:#fff9c4,stroke:#f57f17,stroke-width:2px,color:#000
+    classDef store fill:#ede7f6,stroke:#5e35b1,stroke-width:2px,color:#000
+    classDef external fill:#e0f2f1,stroke:#00695c,stroke-width:2px,color:#000
+    classDef message fill:#ffffff,stroke:#616161,stroke-width:1px,color:#000
+    classDef result fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px,color:#000
+    classDef partial fill:#fff3e0,stroke:#ef6c00,stroke-width:2px,color:#000
+    classDef dropped fill:#ffcdd2,stroke:#c62828,stroke-width:2px,color:#000
+    classDef alert fill:#fce4ec,stroke:#ad1457,stroke-width:2px,color:#000
+    classDef note fill:#f5f5f5,stroke:#9e9e9e,stroke-width:1px,stroke-dasharray:3 3,color:#616161
+    classDef host fill:#f5f5f5,stroke:#616161,stroke-width:2px,stroke-dasharray:5 5,color:#000
+
+
+    class Topic,Output topic
+    class Group,Reduce,ToStream operation
+    class Transactions,Acc1,Acc2 message
+    class Acc1Total,Acc2Total result
+    style ByKey fill:none,stroke:#616161,stroke-dasharray:5 5
+    style Totals fill:none,stroke:#616161,stroke-dasharray:5 5</code></pre>
+<p>The JSON version below works the same way, with one <code>transformValue</code> before grouping to extract <code>amount_cents</code> from each message, and one after <code>toStream</code> to format the total as JSON.</p>
 <details class="info">
 <summary>Simple producer (binary long values) - click to expand</summary>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nt">functions</span><span class="p">:</span>
@@ -3222,7 +3383,7 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">    </span><span class="nt">globalCode</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
 <a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">      </span><span class="no">import random</span>
 <a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">      </span><span class="no">account_counter = 0</span>
-<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">      </span><span class="no">accounts = [&quot;ACC001&quot;, &quot;ACC002&quot;, &quot;ACC003&quot;, &quot;ACC004&quot;, &quot;ACC005&quot;]</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">      </span><span class="no">accounts = ["ACC001", "ACC002", "ACC003", "ACC004", "ACC005"]</span>
 <a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">    </span><span class="nt">code</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
 <a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="w">      </span><span class="no">global account_counter, accounts</span>
 <a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>
@@ -3278,18 +3439,18 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-10-26" name="__codelineno-10-26" href="#__codelineno-10-26"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">peek</span>
 <a id="__codelineno-10-27" name="__codelineno-10-27" href="#__codelineno-10-27"></a><span class="w">        </span><span class="nt">forEach</span><span class="p">:</span>
 <a id="__codelineno-10-28" name="__codelineno-10-28" href="#__codelineno-10-28"></a><span class="w">          </span><span class="nt">code</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
-<a id="__codelineno-10-29" name="__codelineno-10-29" href="#__codelineno-10-29"></a><span class="w">            </span><span class="no">log.info(&quot;Account {} total: {}&quot;, key, value)</span>
+<a id="__codelineno-10-29" name="__codelineno-10-29" href="#__codelineno-10-29"></a><span class="w">            </span><span class="no">log.info("Account {} total: {}", key, value)</span>
 <a id="__codelineno-10-30" name="__codelineno-10-30" href="#__codelineno-10-30"></a><span class="w">    </span><span class="nt">to</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">transaction_sums</span>
 </code></pre></div>
 </details>
 <p><strong>Verifying the results:</strong></p>
 <p>Since binary data isn't human-readable in Kowl UI, use command-line tools to verify:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1"># Check current totals</span>
-<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>kcat<span class="w"> </span>-b<span class="w"> </span>localhost:9092<span class="w"> </span>-t<span class="w"> </span>transaction_sums<span class="w"> </span>-C<span class="w"> </span>-o<span class="w"> </span>end<span class="w"> </span>-c<span class="w"> </span><span class="m">5</span><span class="w"> </span>-f<span class="w"> </span><span class="s1">&#39;Key: %k, Total: %s\n&#39;</span><span class="w"> </span>-s<span class="w"> </span><span class="nv">value</span><span class="o">=</span>Q
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>kcat<span class="w"> </span>-b<span class="w"> </span>localhost:9092<span class="w"> </span>-t<span class="w"> </span>transaction_sums<span class="w"> </span>-C<span class="w"> </span>-o<span class="w"> </span>end<span class="w"> </span>-c<span class="w"> </span><span class="m">5</span><span class="w"> </span>-f<span class="w"> </span><span class="s1">'Key: %k, Total: %s\n'</span><span class="w"> </span>-s<span class="w"> </span><span class="nv">value</span><span class="o">=</span>Q
 <a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>
 <a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="c1"># Verify by summing all transactions for one account</span>
-<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>kcat<span class="w"> </span>-b<span class="w"> </span>localhost:9092<span class="w"> </span>-t<span class="w"> </span>financial_transactions<span class="w"> </span>-C<span class="w"> </span>-o<span class="w"> </span>beginning<span class="w"> </span>-f<span class="w"> </span><span class="s1">&#39;%k,%s\n&#39;</span><span class="w"> </span>-s<span class="w"> </span><span class="nv">value</span><span class="o">=</span>Q<span class="w"> </span>-e<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="w">  </span>grep<span class="w"> </span><span class="s2">&quot;ACC001&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>cut<span class="w"> </span>-d<span class="s1">&#39;,&#39;</span><span class="w"> </span>-f2<span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span><span class="s1">&#39;{sum += $1} END {print &quot;Sum:&quot;, sum}&#39;</span>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>kcat<span class="w"> </span>-b<span class="w"> </span>localhost:9092<span class="w"> </span>-t<span class="w"> </span>financial_transactions<span class="w"> </span>-C<span class="w"> </span>-o<span class="w"> </span>beginning<span class="w"> </span>-f<span class="w"> </span><span class="s1">'%k,%s\n'</span><span class="w"> </span>-s<span class="w"> </span><span class="nv">value</span><span class="o">=</span>Q<span class="w"> </span>-e<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="w">  </span>grep<span class="w"> </span><span class="s2">"ACC001"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>cut<span class="w"> </span>-d<span class="s1">','</span><span class="w"> </span>-f2<span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span><span class="s1">'{sum += $1} END {print "Sum:", sum}'</span>
 </code></pre></div>
 <blockquote>
 <p><strong>Note:</strong> Binary formats like <code>long</code> are common in production for performance and storage efficiency.</p>
@@ -3311,7 +3472,7 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">      </span><span class="no">import random</span>
 <a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="w">      </span><span class="no">import time</span>
 <a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="w">      </span><span class="no">account_counter = 0</span>
-<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="w">      </span><span class="no">accounts = [&quot;ACC001&quot;, &quot;ACC002&quot;, &quot;ACC003&quot;, &quot;ACC004&quot;, &quot;ACC005&quot;]</span>
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="w">      </span><span class="no">accounts = ["ACC001", "ACC002", "ACC003", "ACC004", "ACC005"]</span>
 <a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="w">    </span><span class="nt">code</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
 <a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a><span class="w">      </span><span class="no">global account_counter, accounts</span>
 <a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a>
@@ -3324,11 +3485,11 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-12-18" name="__codelineno-12-18" href="#__codelineno-12-18"></a>
 <a id="__codelineno-12-19" name="__codelineno-12-19" href="#__codelineno-12-19"></a><span class="w">      </span><span class="no"># Create human-readable JSON structure</span>
 <a id="__codelineno-12-20" name="__codelineno-12-20" href="#__codelineno-12-20"></a><span class="w">      </span><span class="no">value = {</span>
-<a id="__codelineno-12-21" name="__codelineno-12-21" href="#__codelineno-12-21"></a><span class="w">        </span><span class="no">&quot;account_id&quot;: account,</span>
-<a id="__codelineno-12-22" name="__codelineno-12-22" href="#__codelineno-12-22"></a><span class="w">        </span><span class="no">&quot;amount_cents&quot;: amount_cents,</span>
-<a id="__codelineno-12-23" name="__codelineno-12-23" href="#__codelineno-12-23"></a><span class="w">        </span><span class="no">&quot;amount_dollars&quot;: round(amount_cents / 100.0, 2),</span>
-<a id="__codelineno-12-24" name="__codelineno-12-24" href="#__codelineno-12-24"></a><span class="w">        </span><span class="no">&quot;transaction_id&quot;: f&quot;TXN{account_counter:06d}&quot;,</span>
-<a id="__codelineno-12-25" name="__codelineno-12-25" href="#__codelineno-12-25"></a><span class="w">        </span><span class="no">&quot;timestamp&quot;: int(time.time() * 1000)</span>
+<a id="__codelineno-12-21" name="__codelineno-12-21" href="#__codelineno-12-21"></a><span class="w">        </span><span class="no">"account_id": account,</span>
+<a id="__codelineno-12-22" name="__codelineno-12-22" href="#__codelineno-12-22"></a><span class="w">        </span><span class="no">"amount_cents": amount_cents,</span>
+<a id="__codelineno-12-23" name="__codelineno-12-23" href="#__codelineno-12-23"></a><span class="w">        </span><span class="no">"amount_dollars": round(amount_cents / 100.0, 2),</span>
+<a id="__codelineno-12-24" name="__codelineno-12-24" href="#__codelineno-12-24"></a><span class="w">        </span><span class="no">"transaction_id": f"TXN{account_counter:06d}",</span>
+<a id="__codelineno-12-25" name="__codelineno-12-25" href="#__codelineno-12-25"></a><span class="w">        </span><span class="no">"timestamp": int(time.time() * 1000)</span>
 <a id="__codelineno-12-26" name="__codelineno-12-26" href="#__codelineno-12-26"></a><span class="w">      </span><span class="no">}</span>
 <a id="__codelineno-12-27" name="__codelineno-12-27" href="#__codelineno-12-27"></a>
 <a id="__codelineno-12-28" name="__codelineno-12-28" href="#__codelineno-12-28"></a><span class="w">      </span><span class="no"># Use account_id as key</span>
@@ -3365,7 +3526,7 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a><span class="w">    </span><span class="nt">code</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
 <a id="__codelineno-13-16" name="__codelineno-13-16" href="#__codelineno-13-16"></a><span class="w">      </span><span class="no"># Extract amount_cents from JSON transaction</span>
 <a id="__codelineno-13-17" name="__codelineno-13-17" href="#__codelineno-13-17"></a><span class="w">      </span><span class="no">if value is not None:</span>
-<a id="__codelineno-13-18" name="__codelineno-13-18" href="#__codelineno-13-18"></a><span class="w">        </span><span class="no">amount = value.get(&quot;amount_cents&quot;, 0)</span>
+<a id="__codelineno-13-18" name="__codelineno-13-18" href="#__codelineno-13-18"></a><span class="w">        </span><span class="no">amount = value.get("amount_cents", 0)</span>
 <a id="__codelineno-13-19" name="__codelineno-13-19" href="#__codelineno-13-19"></a><span class="w">      </span><span class="no">else:</span>
 <a id="__codelineno-13-20" name="__codelineno-13-20" href="#__codelineno-13-20"></a><span class="w">        </span><span class="no">amount = 0</span>
 <a id="__codelineno-13-21" name="__codelineno-13-21" href="#__codelineno-13-21"></a><span class="w">    </span><span class="nt">expression</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">amount</span>
@@ -3385,13 +3546,13 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-13-35" name="__codelineno-13-35" href="#__codelineno-13-35"></a><span class="w">      </span><span class="no"># Convert long cents to JSON format for human readability</span>
 <a id="__codelineno-13-36" name="__codelineno-13-36" href="#__codelineno-13-36"></a><span class="w">      </span><span class="no">if value is not None:</span>
 <a id="__codelineno-13-37" name="__codelineno-13-37" href="#__codelineno-13-37"></a><span class="w">        </span><span class="no">result = {</span>
-<a id="__codelineno-13-38" name="__codelineno-13-38" href="#__codelineno-13-38"></a><span class="w">          </span><span class="no">&quot;total_cents&quot;: value,</span>
-<a id="__codelineno-13-39" name="__codelineno-13-39" href="#__codelineno-13-39"></a><span class="w">          </span><span class="no">&quot;total_dollars&quot;: round(value / 100.0, 2)</span>
+<a id="__codelineno-13-38" name="__codelineno-13-38" href="#__codelineno-13-38"></a><span class="w">          </span><span class="no">"total_cents": value,</span>
+<a id="__codelineno-13-39" name="__codelineno-13-39" href="#__codelineno-13-39"></a><span class="w">          </span><span class="no">"total_dollars": round(value / 100.0, 2)</span>
 <a id="__codelineno-13-40" name="__codelineno-13-40" href="#__codelineno-13-40"></a><span class="w">        </span><span class="no">}</span>
 <a id="__codelineno-13-41" name="__codelineno-13-41" href="#__codelineno-13-41"></a><span class="w">      </span><span class="no">else:</span>
 <a id="__codelineno-13-42" name="__codelineno-13-42" href="#__codelineno-13-42"></a><span class="w">        </span><span class="no">result = {</span>
-<a id="__codelineno-13-43" name="__codelineno-13-43" href="#__codelineno-13-43"></a><span class="w">          </span><span class="no">&quot;total_cents&quot;: 0,</span>
-<a id="__codelineno-13-44" name="__codelineno-13-44" href="#__codelineno-13-44"></a><span class="w">          </span><span class="no">&quot;total_dollars&quot;: 0.0</span>
+<a id="__codelineno-13-43" name="__codelineno-13-43" href="#__codelineno-13-43"></a><span class="w">          </span><span class="no">"total_cents": 0,</span>
+<a id="__codelineno-13-44" name="__codelineno-13-44" href="#__codelineno-13-44"></a><span class="w">          </span><span class="no">"total_dollars": 0.0</span>
 <a id="__codelineno-13-45" name="__codelineno-13-45" href="#__codelineno-13-45"></a><span class="w">        </span><span class="no">}</span>
 <a id="__codelineno-13-46" name="__codelineno-13-46" href="#__codelineno-13-46"></a><span class="w">    </span><span class="nt">expression</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">result</span>
 <a id="__codelineno-13-47" name="__codelineno-13-47" href="#__codelineno-13-47"></a><span class="w">    </span><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">json</span>
@@ -3403,9 +3564,9 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-13-53" name="__codelineno-13-53" href="#__codelineno-13-53"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">peek</span>
 <a id="__codelineno-13-54" name="__codelineno-13-54" href="#__codelineno-13-54"></a><span class="w">        </span><span class="nt">forEach</span><span class="p">:</span>
 <a id="__codelineno-13-55" name="__codelineno-13-55" href="#__codelineno-13-55"></a><span class="w">          </span><span class="nt">code</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
-<a id="__codelineno-13-56" name="__codelineno-13-56" href="#__codelineno-13-56"></a><span class="w">            </span><span class="no">amount_dollars = value.get(&quot;amount_dollars&quot;, 0) if value else 0</span>
-<a id="__codelineno-13-57" name="__codelineno-13-57" href="#__codelineno-13-57"></a><span class="w">            </span><span class="no">txn_id = value.get(&quot;transaction_id&quot;, &quot;N/A&quot;) if value else &quot;N/A&quot;</span>
-<a id="__codelineno-13-58" name="__codelineno-13-58" href="#__codelineno-13-58"></a><span class="w">            </span><span class="no">log.info(&quot;Processing transaction {} for account {}: ${}&quot;, txn_id, key, amount_dollars)</span>
+<a id="__codelineno-13-56" name="__codelineno-13-56" href="#__codelineno-13-56"></a><span class="w">            </span><span class="no">amount_dollars = value.get("amount_dollars", 0) if value else 0</span>
+<a id="__codelineno-13-57" name="__codelineno-13-57" href="#__codelineno-13-57"></a><span class="w">            </span><span class="no">txn_id = value.get("transaction_id", "N/A") if value else "N/A"</span>
+<a id="__codelineno-13-58" name="__codelineno-13-58" href="#__codelineno-13-58"></a><span class="w">            </span><span class="no">log.info("Processing transaction {} for account {}: ${}", txn_id, key, amount_dollars)</span>
 <a id="__codelineno-13-59" name="__codelineno-13-59" href="#__codelineno-13-59"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">transformValue</span>
 <a id="__codelineno-13-60" name="__codelineno-13-60" href="#__codelineno-13-60"></a><span class="w">        </span><span class="nt">mapper</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">extract_amount</span>
 <a id="__codelineno-13-61" name="__codelineno-13-61" href="#__codelineno-13-61"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">groupByKey</span>
@@ -3417,8 +3578,8 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-13-67" name="__codelineno-13-67" href="#__codelineno-13-67"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">peek</span>
 <a id="__codelineno-13-68" name="__codelineno-13-68" href="#__codelineno-13-68"></a><span class="w">        </span><span class="nt">forEach</span><span class="p">:</span>
 <a id="__codelineno-13-69" name="__codelineno-13-69" href="#__codelineno-13-69"></a><span class="w">          </span><span class="nt">code</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
-<a id="__codelineno-13-70" name="__codelineno-13-70" href="#__codelineno-13-70"></a><span class="w">            </span><span class="no">total_dollars = value.get(&quot;total_dollars&quot;, 0) if value else 0</span>
-<a id="__codelineno-13-71" name="__codelineno-13-71" href="#__codelineno-13-71"></a><span class="w">            </span><span class="no">log.info(&quot;Account {} running total: ${}&quot;, key, total_dollars)</span>
+<a id="__codelineno-13-70" name="__codelineno-13-70" href="#__codelineno-13-70"></a><span class="w">            </span><span class="no">total_dollars = value.get("total_dollars", 0) if value else 0</span>
+<a id="__codelineno-13-71" name="__codelineno-13-71" href="#__codelineno-13-71"></a><span class="w">            </span><span class="no">log.info("Account {} running total: ${}", key, total_dollars)</span>
 <a id="__codelineno-13-72" name="__codelineno-13-72" href="#__codelineno-13-72"></a><span class="w">    </span><span class="nt">to</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">transaction_sums</span>
 </code></pre></div>
 </details>
@@ -3460,7 +3621,7 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="w">    </span><span class="nt">globalCode</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
 <a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="w">      </span><span class="no">import random</span>
 <a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="w">      </span><span class="no">customer_counter = 0</span>
-<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="w">      </span><span class="no">customers = [&quot;CUST001&quot;, &quot;CUST002&quot;, &quot;CUST003&quot;, &quot;CUST004&quot;, &quot;CUST005&quot;]</span>
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="w">      </span><span class="no">customers = ["CUST001", "CUST002", "CUST003", "CUST004", "CUST005"]</span>
 <a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a><span class="w">    </span><span class="nt">code</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
 <a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a><span class="w">      </span><span class="no">global customer_counter, customers</span>
 <a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a>
@@ -3527,18 +3688,18 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-15-37" name="__codelineno-15-37" href="#__codelineno-15-37"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">peek</span>
 <a id="__codelineno-15-38" name="__codelineno-15-38" href="#__codelineno-15-38"></a><span class="w">        </span><span class="nt">forEach</span><span class="p">:</span>
 <a id="__codelineno-15-39" name="__codelineno-15-39" href="#__codelineno-15-39"></a><span class="w">          </span><span class="nt">code</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
-<a id="__codelineno-15-40" name="__codelineno-15-40" href="#__codelineno-15-40"></a><span class="w">            </span><span class="no">log.info(&quot;Customer {} total: {}&quot;, key, value)</span>
+<a id="__codelineno-15-40" name="__codelineno-15-40" href="#__codelineno-15-40"></a><span class="w">            </span><span class="no">log.info("Customer {} total: {}", key, value)</span>
 <a id="__codelineno-15-41" name="__codelineno-15-41" href="#__codelineno-15-41"></a><span class="w">    </span><span class="nt">to</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">payment_totals</span>
 </code></pre></div>
 </details>
 <p><strong>Verifying the results:</strong></p>
 <p>Since binary data isn't human-readable in Kowl UI, use command-line tools to verify:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="c1"># Check current totals (convert cents to dollars)</span>
-<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>kcat<span class="w"> </span>-b<span class="w"> </span>localhost:9092<span class="w"> </span>-t<span class="w"> </span>payment_totals<span class="w"> </span>-C<span class="w"> </span>-o<span class="w"> </span>end<span class="w"> </span>-c<span class="w"> </span><span class="m">5</span><span class="w"> </span>-f<span class="w"> </span><span class="s1">&#39;Key: %k, Total cents: %s\n&#39;</span><span class="w"> </span>-s<span class="w"> </span><span class="nv">value</span><span class="o">=</span>Q
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>kcat<span class="w"> </span>-b<span class="w"> </span>localhost:9092<span class="w"> </span>-t<span class="w"> </span>payment_totals<span class="w"> </span>-C<span class="w"> </span>-o<span class="w"> </span>end<span class="w"> </span>-c<span class="w"> </span><span class="m">5</span><span class="w"> </span>-f<span class="w"> </span><span class="s1">'Key: %k, Total cents: %s\n'</span><span class="w"> </span>-s<span class="w"> </span><span class="nv">value</span><span class="o">=</span>Q
 <a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>
 <a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="c1"># Calculate expected total for one customer</span>
-<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>kcat<span class="w"> </span>-b<span class="w"> </span>localhost:9092<span class="w"> </span>-t<span class="w"> </span>payment_amounts<span class="w"> </span>-C<span class="w"> </span>-o<span class="w"> </span>beginning<span class="w"> </span>-f<span class="w"> </span><span class="s1">&#39;%k,%s\n&#39;</span><span class="w"> </span>-s<span class="w"> </span><span class="nv">value</span><span class="o">=</span>Q<span class="w"> </span>-e<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="w">  </span>grep<span class="w"> </span><span class="s2">&quot;CUST001&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>cut<span class="w"> </span>-d<span class="s1">&#39;,&#39;</span><span class="w"> </span>-f2<span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span><span class="s1">&#39;{sum += $1} END {print &quot;Expected:&quot;, sum}&#39;</span>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>kcat<span class="w"> </span>-b<span class="w"> </span>localhost:9092<span class="w"> </span>-t<span class="w"> </span>payment_amounts<span class="w"> </span>-C<span class="w"> </span>-o<span class="w"> </span>beginning<span class="w"> </span>-f<span class="w"> </span><span class="s1">'%k,%s\n'</span><span class="w"> </span>-s<span class="w"> </span><span class="nv">value</span><span class="o">=</span>Q<span class="w"> </span>-e<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="w">  </span>grep<span class="w"> </span><span class="s2">"CUST001"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>cut<span class="w"> </span>-d<span class="s1">','</span><span class="w"> </span>-f2<span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span><span class="s1">'{sum += $1} END {print "Expected:", sum}'</span>
 </code></pre></div>
 <h3 id="complex-aggregate-json-format">Complex Aggregate (JSON Format)</h3>
 <p>This example shows advanced aggregation with comprehensive statistics using JSON for human readability.</p>
@@ -3557,6 +3718,62 @@ Combines two values of the same type into a single value, used when no initializ
 <li><strong>Calculates average</strong>: Dynamically computes the average amount per customer</li>
 <li><strong>Outputs comprehensive stats</strong>: Produces JSON messages with complete payment statistics</li>
 </ol>
+<p>The diagram below follows four example payments through the pipeline. The initializer creates an empty statistics object for each new account, and the aggregator updates all fields with every payment:</p>
+<pre class="mermaid"><code>%%{init: {'themeVariables': {'textColor': '#000000', 'nodeTextColor': '#000000', 'primaryTextColor': '#000000'}}}%%
+
+graph TB
+    %% Input topic with four payments
+    Topic[(payment_stream)]
+    Payments@{ shape: docs, label: "&lt;b&gt;ACC001&lt;/b&gt;: amount 25.00&lt;br/&gt;&lt;b&gt;ACC002&lt;/b&gt;: amount 40.00&lt;br/&gt;&lt;b&gt;ACC001&lt;/b&gt;: amount 75.00&lt;br/&gt;&lt;b&gt;ACC001&lt;/b&gt;: amount 50.00" }
+
+    %% Step 1: group by key
+    Group[&lt;code&gt;groupByKey&lt;/code&gt;]
+    subgraph ByKey["Grouped by key"]
+        Acc1@{ shape: docs, label: "&lt;b&gt;key: ACC001&lt;/b&gt;&lt;br/&gt;25.00, 75.00, 50.00" }
+        Acc2@{ shape: doc, label: "&lt;b&gt;key: ACC002&lt;/b&gt;&lt;br/&gt;40.00" }
+    end
+
+    %% Step 2: update statistics per key
+    Aggregate["&lt;code&gt;aggregate&lt;/code&gt;&lt;br/&gt;init_stats + update_stats"]
+    subgraph Stats["Statistics per key, updated with every payment"]
+        Acc1Stats["&lt;b&gt;ACC001&lt;/b&gt;&lt;br/&gt;start: count 0, total 0.0&lt;br/&gt;&lt;br/&gt;&lt;b&gt;+ 25.00&lt;/b&gt;: count 1, total 25.00&lt;br/&gt;min 25.00, max 25.00, avg 25.00&lt;br/&gt;&lt;br/&gt;&lt;b&gt;+ 75.00&lt;/b&gt;: count 2, total 100.00&lt;br/&gt;min 25.00, max 75.00, avg 50.00&lt;br/&gt;&lt;br/&gt;&lt;b&gt;+ 50.00&lt;/b&gt;: count 3, total 150.00&lt;br/&gt;min 25.00, max 75.00, avg 50.00"]
+        Acc2Stats["&lt;b&gt;ACC002&lt;/b&gt;&lt;br/&gt;start: count 0, total 0.0&lt;br/&gt;&lt;br/&gt;&lt;b&gt;+ 40.00&lt;/b&gt;: count 1, total 40.00&lt;br/&gt;min 40.00, max 40.00, avg 40.00"]
+    end
+
+    %% Step 3: write to the output topic
+    ToStream[&lt;code&gt;toStream&lt;/code&gt;]
+    Output[(payment_statistics)]
+
+    %% Data Flow
+    Topic --&gt; Payments
+    Payments --&gt; Group
+    Group --&gt; Acc1 &amp; Acc2
+    Acc1 &amp; Acc2 --&gt; Aggregate
+    Aggregate --&gt; Acc1Stats &amp; Acc2Stats
+    Acc1Stats &amp; Acc2Stats --&gt; ToStream
+    ToStream --&gt;|"latest message for ACC001&lt;br/&gt;key: ACC001&lt;br/&gt;value: {count: 3, total_amount: 150.0, min_amount: 25.0,&lt;br/&gt;max_amount: 75.0, average_amount: 50.0}"| Output
+
+    %% Styling
+    classDef topic fill:#e1f5ff,stroke:#0277bd,stroke-width:2px,color:#000
+    classDef errorTopic fill:#ffebee,stroke:#b71c1c,stroke-width:2px,color:#000
+    classDef operation fill:#fff9c4,stroke:#f57f17,stroke-width:2px,color:#000
+    classDef store fill:#ede7f6,stroke:#5e35b1,stroke-width:2px,color:#000
+    classDef external fill:#e0f2f1,stroke:#00695c,stroke-width:2px,color:#000
+    classDef message fill:#ffffff,stroke:#616161,stroke-width:1px,color:#000
+    classDef result fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px,color:#000
+    classDef partial fill:#fff3e0,stroke:#ef6c00,stroke-width:2px,color:#000
+    classDef dropped fill:#ffcdd2,stroke:#c62828,stroke-width:2px,color:#000
+    classDef alert fill:#fce4ec,stroke:#ad1457,stroke-width:2px,color:#000
+    classDef note fill:#f5f5f5,stroke:#9e9e9e,stroke-width:1px,stroke-dasharray:3 3,color:#616161
+    classDef host fill:#f5f5f5,stroke:#616161,stroke-width:2px,stroke-dasharray:5 5,color:#000
+
+
+    class Topic,Output topic
+    class Group,Aggregate,ToStream operation
+    class Payments,Acc1,Acc2 message
+    class Acc1Stats,Acc2Stats result
+    style ByKey fill:none,stroke:#616161,stroke-dasharray:5 5
+    style Stats fill:none,stroke:#616161,stroke-dasharray:5 5</code></pre>
 <details class="info">
 <summary>JSON payment events producer (click to expand)</summary>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="nt">functions</span><span class="p">:</span>
@@ -3566,7 +3783,7 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="w">      </span><span class="no">import random</span>
 <a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a><span class="w">      </span><span class="no">import time</span>
 <a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a><span class="w">      </span><span class="no">account_counter = 0</span>
-<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a><span class="w">      </span><span class="no">accounts = [&quot;ACC001&quot;, &quot;ACC002&quot;, &quot;ACC003&quot;, &quot;ACC004&quot;, &quot;ACC005&quot;, &quot;ACC006&quot;]</span>
+<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a><span class="w">      </span><span class="no">accounts = ["ACC001", "ACC002", "ACC003", "ACC004", "ACC005", "ACC006"]</span>
 <a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a><span class="w">    </span><span class="nt">code</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
 <a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a><span class="w">      </span><span class="no">global account_counter, accounts</span>
 <a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a>
@@ -3576,10 +3793,10 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-17-15" name="__codelineno-17-15" href="#__codelineno-17-15"></a>
 <a id="__codelineno-17-16" name="__codelineno-17-16" href="#__codelineno-17-16"></a><span class="w">      </span><span class="no"># Generate payment event</span>
 <a id="__codelineno-17-17" name="__codelineno-17-17" href="#__codelineno-17-17"></a><span class="w">      </span><span class="no">value = {</span>
-<a id="__codelineno-17-18" name="__codelineno-17-18" href="#__codelineno-17-18"></a><span class="w">        </span><span class="no">&quot;account_id&quot;: account,</span>
-<a id="__codelineno-17-19" name="__codelineno-17-19" href="#__codelineno-17-19"></a><span class="w">        </span><span class="no">&quot;amount&quot;: round(random.uniform(5.0, 500.0), 2),</span>
-<a id="__codelineno-17-20" name="__codelineno-17-20" href="#__codelineno-17-20"></a><span class="w">        </span><span class="no">&quot;currency&quot;: &quot;USD&quot;,</span>
-<a id="__codelineno-17-21" name="__codelineno-17-21" href="#__codelineno-17-21"></a><span class="w">        </span><span class="no">&quot;timestamp&quot;: int(time.time() * 1000)</span>
+<a id="__codelineno-17-18" name="__codelineno-17-18" href="#__codelineno-17-18"></a><span class="w">        </span><span class="no">"account_id": account,</span>
+<a id="__codelineno-17-19" name="__codelineno-17-19" href="#__codelineno-17-19"></a><span class="w">        </span><span class="no">"amount": round(random.uniform(5.0, 500.0), 2),</span>
+<a id="__codelineno-17-20" name="__codelineno-17-20" href="#__codelineno-17-20"></a><span class="w">        </span><span class="no">"currency": "USD",</span>
+<a id="__codelineno-17-21" name="__codelineno-17-21" href="#__codelineno-17-21"></a><span class="w">        </span><span class="no">"timestamp": int(time.time() * 1000)</span>
 <a id="__codelineno-17-22" name="__codelineno-17-22" href="#__codelineno-17-22"></a><span class="w">      </span><span class="no">}</span>
 <a id="__codelineno-17-23" name="__codelineno-17-23" href="#__codelineno-17-23"></a>
 <a id="__codelineno-17-24" name="__codelineno-17-24" href="#__codelineno-17-24"></a><span class="w">      </span><span class="no"># Use account_id as key</span>
@@ -3617,10 +3834,10 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-18-16" name="__codelineno-18-16" href="#__codelineno-18-16"></a><span class="w">    </span><span class="nt">code</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
 <a id="__codelineno-18-17" name="__codelineno-18-17" href="#__codelineno-18-17"></a><span class="w">      </span><span class="no"># Initialize statistics</span>
 <a id="__codelineno-18-18" name="__codelineno-18-18" href="#__codelineno-18-18"></a><span class="w">      </span><span class="no">return {</span>
-<a id="__codelineno-18-19" name="__codelineno-18-19" href="#__codelineno-18-19"></a><span class="w">        </span><span class="no">&quot;count&quot;: 0,</span>
-<a id="__codelineno-18-20" name="__codelineno-18-20" href="#__codelineno-18-20"></a><span class="w">        </span><span class="no">&quot;total_amount&quot;: 0.0,</span>
-<a id="__codelineno-18-21" name="__codelineno-18-21" href="#__codelineno-18-21"></a><span class="w">        </span><span class="no">&quot;min_amount&quot;: None,</span>
-<a id="__codelineno-18-22" name="__codelineno-18-22" href="#__codelineno-18-22"></a><span class="w">        </span><span class="no">&quot;max_amount&quot;: None</span>
+<a id="__codelineno-18-19" name="__codelineno-18-19" href="#__codelineno-18-19"></a><span class="w">        </span><span class="no">"count": 0,</span>
+<a id="__codelineno-18-20" name="__codelineno-18-20" href="#__codelineno-18-20"></a><span class="w">        </span><span class="no">"total_amount": 0.0,</span>
+<a id="__codelineno-18-21" name="__codelineno-18-21" href="#__codelineno-18-21"></a><span class="w">        </span><span class="no">"min_amount": None,</span>
+<a id="__codelineno-18-22" name="__codelineno-18-22" href="#__codelineno-18-22"></a><span class="w">        </span><span class="no">"max_amount": None</span>
 <a id="__codelineno-18-23" name="__codelineno-18-23" href="#__codelineno-18-23"></a><span class="w">      </span><span class="no">}</span>
 <a id="__codelineno-18-24" name="__codelineno-18-24" href="#__codelineno-18-24"></a>
 <a id="__codelineno-18-25" name="__codelineno-18-25" href="#__codelineno-18-25"></a><span class="w">  </span><span class="nt">update_stats</span><span class="p">:</span>
@@ -3629,12 +3846,12 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-18-28" name="__codelineno-18-28" href="#__codelineno-18-28"></a><span class="w">    </span><span class="nt">code</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
 <a id="__codelineno-18-29" name="__codelineno-18-29" href="#__codelineno-18-29"></a><span class="w">      </span><span class="no"># Update payment statistics</span>
 <a id="__codelineno-18-30" name="__codelineno-18-30" href="#__codelineno-18-30"></a><span class="w">      </span><span class="no">if value and aggregatedValue:</span>
-<a id="__codelineno-18-31" name="__codelineno-18-31" href="#__codelineno-18-31"></a><span class="w">        </span><span class="no">amount = value.get(&quot;amount&quot;, 0.0)</span>
-<a id="__codelineno-18-32" name="__codelineno-18-32" href="#__codelineno-18-32"></a><span class="w">        </span><span class="no">count = aggregatedValue.get(&quot;count&quot;, 0) + 1</span>
-<a id="__codelineno-18-33" name="__codelineno-18-33" href="#__codelineno-18-33"></a><span class="w">        </span><span class="no">total_amount = aggregatedValue.get(&quot;total_amount&quot;, 0.0) + amount</span>
+<a id="__codelineno-18-31" name="__codelineno-18-31" href="#__codelineno-18-31"></a><span class="w">        </span><span class="no">amount = value.get("amount", 0.0)</span>
+<a id="__codelineno-18-32" name="__codelineno-18-32" href="#__codelineno-18-32"></a><span class="w">        </span><span class="no">count = aggregatedValue.get("count", 0) + 1</span>
+<a id="__codelineno-18-33" name="__codelineno-18-33" href="#__codelineno-18-33"></a><span class="w">        </span><span class="no">total_amount = aggregatedValue.get("total_amount", 0.0) + amount</span>
 <a id="__codelineno-18-34" name="__codelineno-18-34" href="#__codelineno-18-34"></a>
-<a id="__codelineno-18-35" name="__codelineno-18-35" href="#__codelineno-18-35"></a><span class="w">        </span><span class="no">current_min = aggregatedValue.get(&quot;min_amount&quot;)</span>
-<a id="__codelineno-18-36" name="__codelineno-18-36" href="#__codelineno-18-36"></a><span class="w">        </span><span class="no">current_max = aggregatedValue.get(&quot;max_amount&quot;)</span>
+<a id="__codelineno-18-35" name="__codelineno-18-35" href="#__codelineno-18-35"></a><span class="w">        </span><span class="no">current_min = aggregatedValue.get("min_amount")</span>
+<a id="__codelineno-18-36" name="__codelineno-18-36" href="#__codelineno-18-36"></a><span class="w">        </span><span class="no">current_max = aggregatedValue.get("max_amount")</span>
 <a id="__codelineno-18-37" name="__codelineno-18-37" href="#__codelineno-18-37"></a>
 <a id="__codelineno-18-38" name="__codelineno-18-38" href="#__codelineno-18-38"></a><span class="w">        </span><span class="no">if current_min is None or amount &lt; current_min:</span>
 <a id="__codelineno-18-39" name="__codelineno-18-39" href="#__codelineno-18-39"></a><span class="w">          </span><span class="no">min_amount = amount</span>
@@ -3647,11 +3864,11 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-18-46" name="__codelineno-18-46" href="#__codelineno-18-46"></a><span class="w">          </span><span class="no">max_amount = current_max</span>
 <a id="__codelineno-18-47" name="__codelineno-18-47" href="#__codelineno-18-47"></a>
 <a id="__codelineno-18-48" name="__codelineno-18-48" href="#__codelineno-18-48"></a><span class="w">        </span><span class="no">return {</span>
-<a id="__codelineno-18-49" name="__codelineno-18-49" href="#__codelineno-18-49"></a><span class="w">          </span><span class="no">&quot;count&quot;: count,</span>
-<a id="__codelineno-18-50" name="__codelineno-18-50" href="#__codelineno-18-50"></a><span class="w">          </span><span class="no">&quot;total_amount&quot;: total_amount,</span>
-<a id="__codelineno-18-51" name="__codelineno-18-51" href="#__codelineno-18-51"></a><span class="w">          </span><span class="no">&quot;min_amount&quot;: min_amount,</span>
-<a id="__codelineno-18-52" name="__codelineno-18-52" href="#__codelineno-18-52"></a><span class="w">          </span><span class="no">&quot;max_amount&quot;: max_amount,</span>
-<a id="__codelineno-18-53" name="__codelineno-18-53" href="#__codelineno-18-53"></a><span class="w">          </span><span class="no">&quot;average_amount&quot;: round(total_amount / count, 2)</span>
+<a id="__codelineno-18-49" name="__codelineno-18-49" href="#__codelineno-18-49"></a><span class="w">          </span><span class="no">"count": count,</span>
+<a id="__codelineno-18-50" name="__codelineno-18-50" href="#__codelineno-18-50"></a><span class="w">          </span><span class="no">"total_amount": total_amount,</span>
+<a id="__codelineno-18-51" name="__codelineno-18-51" href="#__codelineno-18-51"></a><span class="w">          </span><span class="no">"min_amount": min_amount,</span>
+<a id="__codelineno-18-52" name="__codelineno-18-52" href="#__codelineno-18-52"></a><span class="w">          </span><span class="no">"max_amount": max_amount,</span>
+<a id="__codelineno-18-53" name="__codelineno-18-53" href="#__codelineno-18-53"></a><span class="w">          </span><span class="no">"average_amount": round(total_amount / count, 2)</span>
 <a id="__codelineno-18-54" name="__codelineno-18-54" href="#__codelineno-18-54"></a><span class="w">        </span><span class="no">}</span>
 <a id="__codelineno-18-55" name="__codelineno-18-55" href="#__codelineno-18-55"></a><span class="w">      </span><span class="no">return aggregatedValue</span>
 <a id="__codelineno-18-56" name="__codelineno-18-56" href="#__codelineno-18-56"></a>
@@ -3672,12 +3889,12 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-18-71" name="__codelineno-18-71" href="#__codelineno-18-71"></a><span class="w">        </span><span class="nt">forEach</span><span class="p">:</span>
 <a id="__codelineno-18-72" name="__codelineno-18-72" href="#__codelineno-18-72"></a><span class="w">          </span><span class="nt">code</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
 <a id="__codelineno-18-73" name="__codelineno-18-73" href="#__codelineno-18-73"></a><span class="w">            </span><span class="no">if value:</span>
-<a id="__codelineno-18-74" name="__codelineno-18-74" href="#__codelineno-18-74"></a><span class="w">              </span><span class="no">count = value.get(&quot;count&quot;, 0)</span>
-<a id="__codelineno-18-75" name="__codelineno-18-75" href="#__codelineno-18-75"></a><span class="w">              </span><span class="no">total = round(value.get(&quot;total_amount&quot;, 0), 2)</span>
-<a id="__codelineno-18-76" name="__codelineno-18-76" href="#__codelineno-18-76"></a><span class="w">              </span><span class="no">avg = value.get(&quot;average_amount&quot;, 0)</span>
-<a id="__codelineno-18-77" name="__codelineno-18-77" href="#__codelineno-18-77"></a><span class="w">              </span><span class="no">min_amt = value.get(&quot;min_amount&quot;, 0)</span>
-<a id="__codelineno-18-78" name="__codelineno-18-78" href="#__codelineno-18-78"></a><span class="w">              </span><span class="no">max_amt = value.get(&quot;max_amount&quot;, 0)</span>
-<a id="__codelineno-18-79" name="__codelineno-18-79" href="#__codelineno-18-79"></a><span class="w">              </span><span class="no">log.info(&quot;Customer {} - Count: {}, Total: ${}, Avg: ${}, Min: ${}, Max: ${}&quot;, </span>
+<a id="__codelineno-18-74" name="__codelineno-18-74" href="#__codelineno-18-74"></a><span class="w">              </span><span class="no">count = value.get("count", 0)</span>
+<a id="__codelineno-18-75" name="__codelineno-18-75" href="#__codelineno-18-75"></a><span class="w">              </span><span class="no">total = round(value.get("total_amount", 0), 2)</span>
+<a id="__codelineno-18-76" name="__codelineno-18-76" href="#__codelineno-18-76"></a><span class="w">              </span><span class="no">avg = value.get("average_amount", 0)</span>
+<a id="__codelineno-18-77" name="__codelineno-18-77" href="#__codelineno-18-77"></a><span class="w">              </span><span class="no">min_amt = value.get("min_amount", 0)</span>
+<a id="__codelineno-18-78" name="__codelineno-18-78" href="#__codelineno-18-78"></a><span class="w">              </span><span class="no">max_amt = value.get("max_amount", 0)</span>
+<a id="__codelineno-18-79" name="__codelineno-18-79" href="#__codelineno-18-79"></a><span class="w">              </span><span class="no">log.info("Customer {} - Count: {}, Total: ${}, Avg: ${}, Min: ${}, Max: ${}", </span>
 <a id="__codelineno-18-80" name="__codelineno-18-80" href="#__codelineno-18-80"></a><span class="w">                       </span><span class="no">key, count, total, avg, min_amt, max_amt)</span>
 <a id="__codelineno-18-81" name="__codelineno-18-81" href="#__codelineno-18-81"></a><span class="w">    </span><span class="nt">to</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">payment_statistics</span>
 </code></pre></div>
@@ -3689,6 +3906,54 @@ Combines two values of the same type into a single value, used when no initializ
 <li><strong>Aggregator</strong>: Updates state with each new value</li>
 <li><strong>Result</strong>: Continuously updated aggregate in state store</li>
 </ol>
+<p>The diagram below shows how this works for the simple sum example, with three payments arriving for the same customer. The initializer runs once for the first payment, and every payment after that updates the stored total and emits it:</p>
+<pre class="mermaid"><code>%%{init: {'themeVariables': {'textColor': '#000000', 'nodeTextColor': '#000000', 'primaryTextColor': '#000000'}}}%%
+
+graph LR
+    %% Incoming payments for one key
+    Payment1[/"CUST001: 5000"/]
+    Payment2[/"CUST001: 2500"/]
+    Payment3[/"CUST001: 1000"/]
+
+    %% Aggregation steps
+    Init["&lt;code&gt;initializer&lt;/code&gt;&lt;br/&gt;total = 0"]
+    Step1["&lt;code&gt;aggregator&lt;/code&gt;&lt;br/&gt;0 + 5000 = 5000"]
+    Step2["&lt;code&gt;aggregator&lt;/code&gt;&lt;br/&gt;5000 + 2500 = 7500"]
+    Step3["&lt;code&gt;aggregator&lt;/code&gt;&lt;br/&gt;7500 + 1000 = 8500"]
+
+    %% Output
+    OutputTopic[(payment_totals)]
+
+    %% Data Flow
+    Init --&gt; Step1
+    Payment1 --&gt; Step1
+    Step1 --&gt;|"state: 5000"| Step2
+    Payment2 --&gt; Step2
+    Step2 --&gt;|"state: 7500"| Step3
+    Payment3 --&gt; Step3
+    Step1 -.-&gt;|"emit 5000"| OutputTopic
+    Step2 -.-&gt;|"emit 7500"| OutputTopic
+    Step3 -.-&gt;|"emit 8500"| OutputTopic
+
+    %% Styling
+    classDef topic fill:#e1f5ff,stroke:#0277bd,stroke-width:2px,color:#000
+    classDef errorTopic fill:#ffebee,stroke:#b71c1c,stroke-width:2px,color:#000
+    classDef operation fill:#fff9c4,stroke:#f57f17,stroke-width:2px,color:#000
+    classDef store fill:#ede7f6,stroke:#5e35b1,stroke-width:2px,color:#000
+    classDef external fill:#e0f2f1,stroke:#00695c,stroke-width:2px,color:#000
+    classDef message fill:#ffffff,stroke:#616161,stroke-width:1px,color:#000
+    classDef result fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px,color:#000
+    classDef partial fill:#fff3e0,stroke:#ef6c00,stroke-width:2px,color:#000
+    classDef dropped fill:#ffcdd2,stroke:#c62828,stroke-width:2px,color:#000
+    classDef alert fill:#fce4ec,stroke:#ad1457,stroke-width:2px,color:#000
+    classDef note fill:#f5f5f5,stroke:#9e9e9e,stroke-width:1px,stroke-dasharray:3 3,color:#616161
+    classDef host fill:#f5f5f5,stroke:#616161,stroke-width:2px,stroke-dasharray:5 5,color:#000
+
+
+    class OutputTopic topic
+    class Init,Step1,Step2,Step3 operation
+    class Payment1,Payment2,Payment3 external</code></pre>
+<p>With caching enabled on the store, Kafka Streams may combine several updates and emit only the latest total.</p>
 <h2 id="windowed-aggregations">Windowed Aggregations</h2>
 <p>Aggregations can be windowed to compute time-based analytics:</p>
 <h3 id="window-types">Window Types</h3>
@@ -3734,6 +3999,74 @@ Combines two values of the same type into a single value, used when no initializ
 <li>Transforming WindowedString keys using <code>map</code> with <code>keyValueMapper</code></li>
 <li>Complex aggregation state using JSON</li>
 </ul>
+<p>The diagram below follows four example readings through the pipeline. Each sensor's readings are split into 30-second windows, and every window gets its own statistics. Every reading sends updated statistics for its window, and the diagram shows the last one:</p>
+<pre class="mermaid"><code>%%{init: {'themeVariables': {'textColor': '#000000', 'nodeTextColor': '#000000', 'primaryTextColor': '#000000'}}}%%
+
+graph TB
+    %% Input topic with four readings
+    Topic[(sensor_temperatures)]
+    Readings@{ shape: docs, label: "&lt;b&gt;temp001&lt;/b&gt;: 24.5 at 18:58:05&lt;br/&gt;&lt;b&gt;temp002&lt;/b&gt;: 31.2 at 18:58:10&lt;br/&gt;&lt;b&gt;temp001&lt;/b&gt;: 26.3 at 18:58:20&lt;br/&gt;&lt;b&gt;temp001&lt;/b&gt;: 22.7 at 18:58:40" }
+
+    %% Step 1: group by key
+    Group[&lt;code&gt;groupByKey&lt;/code&gt;]
+    subgraph ByKey["Grouped by key"]
+        Temp1@{ shape: docs, label: "&lt;b&gt;key: temp001&lt;/b&gt;&lt;br/&gt;24.5, 26.3, 22.7" }
+        Temp2@{ shape: doc, label: "&lt;b&gt;key: temp002&lt;/b&gt;&lt;br/&gt;31.2" }
+    end
+
+    %% Step 2: split each group into 30-second windows
+    Window["&lt;code&gt;windowByTime&lt;/code&gt;&lt;br/&gt;tumbling 30s"]
+    subgraph ByWindow["Grouped by key and window"]
+        Temp1W1@{ shape: docs, label: "&lt;b&gt;temp001&lt;/b&gt; 18:58:00 to 18:58:30&lt;br/&gt;24.5, 26.3" }
+        Temp1W2@{ shape: doc, label: "&lt;b&gt;temp001&lt;/b&gt; 18:58:30 to 18:59:00&lt;br/&gt;22.7" }
+        Temp2W1@{ shape: doc, label: "&lt;b&gt;temp002&lt;/b&gt; 18:58:00 to 18:58:30&lt;br/&gt;31.2" }
+    end
+
+    %% Step 3: statistics per key and window
+    Aggregate["&lt;code&gt;aggregate&lt;/code&gt;&lt;br/&gt;init_stats + update_stats"]
+    subgraph Stats["Latest result per key and window"]
+        Temp1W1Stats["&lt;b&gt;temp001&lt;/b&gt; 18:58:00 to 18:58:30&lt;br/&gt;count 2, avg 25.4, min 24.5, max 26.3"]
+        Temp1W2Stats["&lt;b&gt;temp001&lt;/b&gt; 18:58:30 to 18:59:00&lt;br/&gt;count 1, avg 22.7, min 22.7, max 22.7"]
+        Temp2W1Stats["&lt;b&gt;temp002&lt;/b&gt; 18:58:00 to 18:58:30&lt;br/&gt;count 1, avg 31.2, min 31.2, max 31.2"]
+    end
+
+    %% Step 4: replace the windowed key with a string key
+    Map["&lt;code&gt;toStream&lt;/code&gt; + &lt;code&gt;map&lt;/code&gt;&lt;br/&gt;transform_window_key"]
+    Output[(sensor_window_stats)]
+
+    %% Data Flow
+    Topic --&gt; Readings
+    Readings --&gt; Group
+    Group --&gt; Temp1 &amp; Temp2
+    Temp1 &amp; Temp2 --&gt; Window
+    Window --&gt; Temp1W1 &amp; Temp1W2 &amp; Temp2W1
+    Temp1W1 &amp; Temp1W2 &amp; Temp2W1 --&gt; Aggregate
+    Aggregate --&gt; Temp1W1Stats &amp; Temp1W2Stats &amp; Temp2W1Stats
+    Temp1W1Stats &amp; Temp1W2Stats &amp; Temp2W1Stats --&gt; Map
+    Map --&gt;|"key: temp001_...T18:58:00Z_...T18:58:30Z&lt;br/&gt;value: {sensor_id: temp001, window_start, window_end,&lt;br/&gt;stats: {count: 2, avg: 25.4, min: 24.5, max: 26.3}}"| Output
+
+    %% Styling
+    classDef topic fill:#e1f5ff,stroke:#0277bd,stroke-width:2px,color:#000
+    classDef errorTopic fill:#ffebee,stroke:#b71c1c,stroke-width:2px,color:#000
+    classDef operation fill:#fff9c4,stroke:#f57f17,stroke-width:2px,color:#000
+    classDef store fill:#ede7f6,stroke:#5e35b1,stroke-width:2px,color:#000
+    classDef external fill:#e0f2f1,stroke:#00695c,stroke-width:2px,color:#000
+    classDef message fill:#ffffff,stroke:#616161,stroke-width:1px,color:#000
+    classDef result fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px,color:#000
+    classDef partial fill:#fff3e0,stroke:#ef6c00,stroke-width:2px,color:#000
+    classDef dropped fill:#ffcdd2,stroke:#c62828,stroke-width:2px,color:#000
+    classDef alert fill:#fce4ec,stroke:#ad1457,stroke-width:2px,color:#000
+    classDef note fill:#f5f5f5,stroke:#9e9e9e,stroke-width:1px,stroke-dasharray:3 3,color:#616161
+    classDef host fill:#f5f5f5,stroke:#616161,stroke-width:2px,stroke-dasharray:5 5,color:#000
+
+
+    class Topic,Output topic
+    class Group,Window,Aggregate,Map operation
+    class Readings,Temp1,Temp2,Temp1W1,Temp1W2,Temp2W1 message
+    class Temp1W1Stats,Temp1W2Stats,Temp2W1Stats result
+    style ByKey fill:none,stroke:#616161,stroke-dasharray:5 5
+    style ByWindow fill:none,stroke:#616161,stroke-dasharray:5 5
+    style Stats fill:none,stroke:#616161,stroke-dasharray:5 5</code></pre>
 <details class="info">
 <summary>Temperature sensor producer (click to expand)</summary>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="nt">functions</span><span class="p">:</span>
@@ -3743,7 +4076,7 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a><span class="w">      </span><span class="no">import random</span>
 <a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a><span class="w">      </span><span class="no">import time</span>
 <a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a><span class="w">      </span><span class="no">sensor_counter = 0</span>
-<a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a><span class="w">      </span><span class="no">sensors = [&quot;temp001&quot;, &quot;temp002&quot;, &quot;temp003&quot;]</span>
+<a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a><span class="w">      </span><span class="no">sensors = ["temp001", "temp002", "temp003"]</span>
 <a id="__codelineno-22-9" name="__codelineno-22-9" href="#__codelineno-22-9"></a><span class="w">    </span><span class="nt">code</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
 <a id="__codelineno-22-10" name="__codelineno-22-10" href="#__codelineno-22-10"></a><span class="w">      </span><span class="no">global sensor_counter, sensors</span>
 <a id="__codelineno-22-11" name="__codelineno-22-11" href="#__codelineno-22-11"></a>
@@ -3787,10 +4120,10 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-23-14" name="__codelineno-23-14" href="#__codelineno-23-14"></a><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">initializer</span>
 <a id="__codelineno-23-15" name="__codelineno-23-15" href="#__codelineno-23-15"></a><span class="w">    </span><span class="nt">code</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
 <a id="__codelineno-23-16" name="__codelineno-23-16" href="#__codelineno-23-16"></a><span class="w">      </span><span class="no">stats = {</span>
-<a id="__codelineno-23-17" name="__codelineno-23-17" href="#__codelineno-23-17"></a><span class="w">        </span><span class="no">&quot;count&quot;: 0,</span>
-<a id="__codelineno-23-18" name="__codelineno-23-18" href="#__codelineno-23-18"></a><span class="w">        </span><span class="no">&quot;sum&quot;: 0.0,</span>
-<a id="__codelineno-23-19" name="__codelineno-23-19" href="#__codelineno-23-19"></a><span class="w">        </span><span class="no">&quot;min&quot;: None,</span>
-<a id="__codelineno-23-20" name="__codelineno-23-20" href="#__codelineno-23-20"></a><span class="w">        </span><span class="no">&quot;max&quot;: None</span>
+<a id="__codelineno-23-17" name="__codelineno-23-17" href="#__codelineno-23-17"></a><span class="w">        </span><span class="no">"count": 0,</span>
+<a id="__codelineno-23-18" name="__codelineno-23-18" href="#__codelineno-23-18"></a><span class="w">        </span><span class="no">"sum": 0.0,</span>
+<a id="__codelineno-23-19" name="__codelineno-23-19" href="#__codelineno-23-19"></a><span class="w">        </span><span class="no">"min": None,</span>
+<a id="__codelineno-23-20" name="__codelineno-23-20" href="#__codelineno-23-20"></a><span class="w">        </span><span class="no">"max": None</span>
 <a id="__codelineno-23-21" name="__codelineno-23-21" href="#__codelineno-23-21"></a><span class="w">      </span><span class="no">}</span>
 <a id="__codelineno-23-22" name="__codelineno-23-22" href="#__codelineno-23-22"></a><span class="w">    </span><span class="nt">expression</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">stats</span>
 <a id="__codelineno-23-23" name="__codelineno-23-23" href="#__codelineno-23-23"></a><span class="w">    </span><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">json</span>
@@ -3802,17 +4135,17 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-23-29" name="__codelineno-23-29" href="#__codelineno-23-29"></a><span class="w">      </span><span class="no">temp_value = float(value)</span>
 <a id="__codelineno-23-30" name="__codelineno-23-30" href="#__codelineno-23-30"></a>
 <a id="__codelineno-23-31" name="__codelineno-23-31" href="#__codelineno-23-31"></a><span class="w">      </span><span class="no"># Update count and sum</span>
-<a id="__codelineno-23-32" name="__codelineno-23-32" href="#__codelineno-23-32"></a><span class="w">      </span><span class="no">aggregatedValue[&quot;count&quot;] += 1</span>
-<a id="__codelineno-23-33" name="__codelineno-23-33" href="#__codelineno-23-33"></a><span class="w">      </span><span class="no">aggregatedValue[&quot;sum&quot;] += temp_value</span>
+<a id="__codelineno-23-32" name="__codelineno-23-32" href="#__codelineno-23-32"></a><span class="w">      </span><span class="no">aggregatedValue["count"] += 1</span>
+<a id="__codelineno-23-33" name="__codelineno-23-33" href="#__codelineno-23-33"></a><span class="w">      </span><span class="no">aggregatedValue["sum"] += temp_value</span>
 <a id="__codelineno-23-34" name="__codelineno-23-34" href="#__codelineno-23-34"></a>
 <a id="__codelineno-23-35" name="__codelineno-23-35" href="#__codelineno-23-35"></a><span class="w">      </span><span class="no"># Update min/max</span>
-<a id="__codelineno-23-36" name="__codelineno-23-36" href="#__codelineno-23-36"></a><span class="w">      </span><span class="no">if aggregatedValue[&quot;min&quot;] is None or temp_value &lt; aggregatedValue[&quot;min&quot;]:</span>
-<a id="__codelineno-23-37" name="__codelineno-23-37" href="#__codelineno-23-37"></a><span class="w">        </span><span class="no">aggregatedValue[&quot;min&quot;] = temp_value</span>
-<a id="__codelineno-23-38" name="__codelineno-23-38" href="#__codelineno-23-38"></a><span class="w">      </span><span class="no">if aggregatedValue[&quot;max&quot;] is None or temp_value &gt; aggregatedValue[&quot;max&quot;]:</span>
-<a id="__codelineno-23-39" name="__codelineno-23-39" href="#__codelineno-23-39"></a><span class="w">        </span><span class="no">aggregatedValue[&quot;max&quot;] = temp_value</span>
+<a id="__codelineno-23-36" name="__codelineno-23-36" href="#__codelineno-23-36"></a><span class="w">      </span><span class="no">if aggregatedValue["min"] is None or temp_value &lt; aggregatedValue["min"]:</span>
+<a id="__codelineno-23-37" name="__codelineno-23-37" href="#__codelineno-23-37"></a><span class="w">        </span><span class="no">aggregatedValue["min"] = temp_value</span>
+<a id="__codelineno-23-38" name="__codelineno-23-38" href="#__codelineno-23-38"></a><span class="w">      </span><span class="no">if aggregatedValue["max"] is None or temp_value &gt; aggregatedValue["max"]:</span>
+<a id="__codelineno-23-39" name="__codelineno-23-39" href="#__codelineno-23-39"></a><span class="w">        </span><span class="no">aggregatedValue["max"] = temp_value</span>
 <a id="__codelineno-23-40" name="__codelineno-23-40" href="#__codelineno-23-40"></a>
 <a id="__codelineno-23-41" name="__codelineno-23-41" href="#__codelineno-23-41"></a><span class="w">      </span><span class="no"># Calculate average</span>
-<a id="__codelineno-23-42" name="__codelineno-23-42" href="#__codelineno-23-42"></a><span class="w">      </span><span class="no">aggregatedValue[&quot;avg&quot;] = round(aggregatedValue[&quot;sum&quot;] / aggregatedValue[&quot;count&quot;], 2)</span>
+<a id="__codelineno-23-42" name="__codelineno-23-42" href="#__codelineno-23-42"></a><span class="w">      </span><span class="no">aggregatedValue["avg"] = round(aggregatedValue["sum"] / aggregatedValue["count"], 2)</span>
 <a id="__codelineno-23-43" name="__codelineno-23-43" href="#__codelineno-23-43"></a>
 <a id="__codelineno-23-44" name="__codelineno-23-44" href="#__codelineno-23-44"></a><span class="w">      </span><span class="no">result = aggregatedValue</span>
 <a id="__codelineno-23-45" name="__codelineno-23-45" href="#__codelineno-23-45"></a><span class="w">    </span><span class="nt">expression</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">result</span>
@@ -3822,19 +4155,19 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-23-49" name="__codelineno-23-49" href="#__codelineno-23-49"></a><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">keyValueMapper</span>
 <a id="__codelineno-23-50" name="__codelineno-23-50" href="#__codelineno-23-50"></a><span class="w">    </span><span class="nt">code</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
 <a id="__codelineno-23-51" name="__codelineno-23-51" href="#__codelineno-23-51"></a><span class="w">      </span><span class="no"># Extract window information from the WindowedString key</span>
-<a id="__codelineno-23-52" name="__codelineno-23-52" href="#__codelineno-23-52"></a><span class="w">      </span><span class="no">sensor_id = key[&quot;key&quot;]</span>
-<a id="__codelineno-23-53" name="__codelineno-23-53" href="#__codelineno-23-53"></a><span class="w">      </span><span class="no">window_start = key[&quot;startTime&quot;]</span>
-<a id="__codelineno-23-54" name="__codelineno-23-54" href="#__codelineno-23-54"></a><span class="w">      </span><span class="no">window_end = key[&quot;endTime&quot;]</span>
+<a id="__codelineno-23-52" name="__codelineno-23-52" href="#__codelineno-23-52"></a><span class="w">      </span><span class="no">sensor_id = key["key"]</span>
+<a id="__codelineno-23-53" name="__codelineno-23-53" href="#__codelineno-23-53"></a><span class="w">      </span><span class="no">window_start = key["startTime"]</span>
+<a id="__codelineno-23-54" name="__codelineno-23-54" href="#__codelineno-23-54"></a><span class="w">      </span><span class="no">window_end = key["endTime"]</span>
 <a id="__codelineno-23-55" name="__codelineno-23-55" href="#__codelineno-23-55"></a>
 <a id="__codelineno-23-56" name="__codelineno-23-56" href="#__codelineno-23-56"></a><span class="w">      </span><span class="no"># Create a new string key with window info</span>
-<a id="__codelineno-23-57" name="__codelineno-23-57" href="#__codelineno-23-57"></a><span class="w">      </span><span class="no">new_key = f&quot;{sensor_id}_{window_start}_{window_end}&quot;</span>
+<a id="__codelineno-23-57" name="__codelineno-23-57" href="#__codelineno-23-57"></a><span class="w">      </span><span class="no">new_key = f"{sensor_id}_{window_start}_{window_end}"</span>
 <a id="__codelineno-23-58" name="__codelineno-23-58" href="#__codelineno-23-58"></a>
 <a id="__codelineno-23-59" name="__codelineno-23-59" href="#__codelineno-23-59"></a><span class="w">      </span><span class="no"># Add window metadata to the value</span>
 <a id="__codelineno-23-60" name="__codelineno-23-60" href="#__codelineno-23-60"></a><span class="w">      </span><span class="no">new_value = {</span>
-<a id="__codelineno-23-61" name="__codelineno-23-61" href="#__codelineno-23-61"></a><span class="w">        </span><span class="no">&quot;sensor_id&quot;: sensor_id,</span>
-<a id="__codelineno-23-62" name="__codelineno-23-62" href="#__codelineno-23-62"></a><span class="w">        </span><span class="no">&quot;window_start&quot;: window_start,</span>
-<a id="__codelineno-23-63" name="__codelineno-23-63" href="#__codelineno-23-63"></a><span class="w">        </span><span class="no">&quot;window_end&quot;: window_end,</span>
-<a id="__codelineno-23-64" name="__codelineno-23-64" href="#__codelineno-23-64"></a><span class="w">        </span><span class="no">&quot;stats&quot;: value</span>
+<a id="__codelineno-23-61" name="__codelineno-23-61" href="#__codelineno-23-61"></a><span class="w">        </span><span class="no">"sensor_id": sensor_id,</span>
+<a id="__codelineno-23-62" name="__codelineno-23-62" href="#__codelineno-23-62"></a><span class="w">        </span><span class="no">"window_start": window_start,</span>
+<a id="__codelineno-23-63" name="__codelineno-23-63" href="#__codelineno-23-63"></a><span class="w">        </span><span class="no">"window_end": window_end,</span>
+<a id="__codelineno-23-64" name="__codelineno-23-64" href="#__codelineno-23-64"></a><span class="w">        </span><span class="no">"stats": value</span>
 <a id="__codelineno-23-65" name="__codelineno-23-65" href="#__codelineno-23-65"></a><span class="w">      </span><span class="no">}</span>
 <a id="__codelineno-23-66" name="__codelineno-23-66" href="#__codelineno-23-66"></a><span class="w">    </span><span class="nt">expression</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(new_key, new_value)</span>
 <a id="__codelineno-23-67" name="__codelineno-23-67" href="#__codelineno-23-67"></a><span class="w">    </span><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(string, json)</span>
@@ -3843,14 +4176,14 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-23-70" name="__codelineno-23-70" href="#__codelineno-23-70"></a><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">forEach</span>
 <a id="__codelineno-23-71" name="__codelineno-23-71" href="#__codelineno-23-71"></a><span class="w">    </span><span class="nt">code</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
 <a id="__codelineno-23-72" name="__codelineno-23-72" href="#__codelineno-23-72"></a><span class="w">      </span><span class="no"># Log the transformed results</span>
-<a id="__codelineno-23-73" name="__codelineno-23-73" href="#__codelineno-23-73"></a><span class="w">      </span><span class="no">sensor_id = value[&quot;sensor_id&quot;]</span>
-<a id="__codelineno-23-74" name="__codelineno-23-74" href="#__codelineno-23-74"></a><span class="w">      </span><span class="no">window_start = value[&quot;window_start&quot;]</span>
-<a id="__codelineno-23-75" name="__codelineno-23-75" href="#__codelineno-23-75"></a><span class="w">      </span><span class="no">window_end = value[&quot;window_end&quot;]</span>
-<a id="__codelineno-23-76" name="__codelineno-23-76" href="#__codelineno-23-76"></a><span class="w">      </span><span class="no">stats = value[&quot;stats&quot;]</span>
+<a id="__codelineno-23-73" name="__codelineno-23-73" href="#__codelineno-23-73"></a><span class="w">      </span><span class="no">sensor_id = value["sensor_id"]</span>
+<a id="__codelineno-23-74" name="__codelineno-23-74" href="#__codelineno-23-74"></a><span class="w">      </span><span class="no">window_start = value["window_start"]</span>
+<a id="__codelineno-23-75" name="__codelineno-23-75" href="#__codelineno-23-75"></a><span class="w">      </span><span class="no">window_end = value["window_end"]</span>
+<a id="__codelineno-23-76" name="__codelineno-23-76" href="#__codelineno-23-76"></a><span class="w">      </span><span class="no">stats = value["stats"]</span>
 <a id="__codelineno-23-77" name="__codelineno-23-77" href="#__codelineno-23-77"></a>
-<a id="__codelineno-23-78" name="__codelineno-23-78" href="#__codelineno-23-78"></a><span class="w">      </span><span class="no">log.info(&quot;Sensor {} | Window [{} - {}] | Stats: {} readings, avg: {}C, min: {}C, max: {}C&quot;, </span>
+<a id="__codelineno-23-78" name="__codelineno-23-78" href="#__codelineno-23-78"></a><span class="w">      </span><span class="no">log.info("Sensor {} | Window [{} - {}] | Stats: {} readings, avg: {}C, min: {}C, max: {}C", </span>
 <a id="__codelineno-23-79" name="__codelineno-23-79" href="#__codelineno-23-79"></a><span class="w">               </span><span class="no">sensor_id, window_start, window_end, </span>
-<a id="__codelineno-23-80" name="__codelineno-23-80" href="#__codelineno-23-80"></a><span class="w">               </span><span class="no">stats[&quot;count&quot;], stats[&quot;avg&quot;], stats[&quot;min&quot;], stats[&quot;max&quot;])</span>
+<a id="__codelineno-23-80" name="__codelineno-23-80" href="#__codelineno-23-80"></a><span class="w">               </span><span class="no">stats["count"], stats["avg"], stats["min"], stats["max"])</span>
 <a id="__codelineno-23-81" name="__codelineno-23-81" href="#__codelineno-23-81"></a>
 <a id="__codelineno-23-82" name="__codelineno-23-82" href="#__codelineno-23-82"></a><span class="nt">pipelines</span><span class="p">:</span>
 <a id="__codelineno-23-83" name="__codelineno-23-83" href="#__codelineno-23-83"></a><span class="w">  </span><span class="nt">windowed_temperature_stats</span><span class="p">:</span>
@@ -3898,15 +4231,15 @@ Combines two values of the same type into a single value, used when no initializ
 </ul>
 <p>Example output message:
 <div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="p">{</span>
-<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="w">  </span><span class="nt">&quot;sensor_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;temp001&quot;</span><span class="p">,</span>
-<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a><span class="w">  </span><span class="nt">&quot;window_start&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-08-12T18:58:00Z&quot;</span><span class="p">,</span>
-<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a><span class="w">  </span><span class="nt">&quot;window_end&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-08-12T18:58:30Z&quot;</span><span class="p">,</span>
-<a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a><span class="w">  </span><span class="nt">&quot;stats&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a><span class="w">    </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
-<a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a><span class="w">    </span><span class="nt">&quot;avg&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">24.5</span><span class="p">,</span>
-<a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a><span class="w">    </span><span class="nt">&quot;min&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">19.6</span><span class="p">,</span>
-<a id="__codelineno-24-9" name="__codelineno-24-9" href="#__codelineno-24-9"></a><span class="w">    </span><span class="nt">&quot;max&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">28.7</span><span class="p">,</span>
-<a id="__codelineno-24-10" name="__codelineno-24-10" href="#__codelineno-24-10"></a><span class="w">    </span><span class="nt">&quot;sum&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">73.5</span>
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="w">  </span><span class="nt">"sensor_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"temp001"</span><span class="p">,</span>
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a><span class="w">  </span><span class="nt">"window_start"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-08-12T18:58:00Z"</span><span class="p">,</span>
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a><span class="w">  </span><span class="nt">"window_end"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-08-12T18:58:30Z"</span><span class="p">,</span>
+<a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a><span class="w">  </span><span class="nt">"stats"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a><span class="w">    </span><span class="nt">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a><span class="w">    </span><span class="nt">"avg"</span><span class="p">:</span><span class="w"> </span><span class="mf">24.5</span><span class="p">,</span>
+<a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a><span class="w">    </span><span class="nt">"min"</span><span class="p">:</span><span class="w"> </span><span class="mf">19.6</span><span class="p">,</span>
+<a id="__codelineno-24-9" name="__codelineno-24-9" href="#__codelineno-24-9"></a><span class="w">    </span><span class="nt">"max"</span><span class="p">:</span><span class="w"> </span><span class="mf">28.7</span><span class="p">,</span>
+<a id="__codelineno-24-10" name="__codelineno-24-10" href="#__codelineno-24-10"></a><span class="w">    </span><span class="nt">"sum"</span><span class="p">:</span><span class="w"> </span><span class="mf">73.5</span>
 <a id="__codelineno-24-11" name="__codelineno-24-11" href="#__codelineno-24-11"></a><span class="w">  </span><span class="p">}</span>
 <a id="__codelineno-24-12" name="__codelineno-24-12" href="#__codelineno-24-12"></a><span class="p">}</span>
 </code></pre></div></p>
@@ -3918,7 +4251,7 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a><span class="w">  </span>--from-beginning<span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a><span class="w">  </span>--max-messages<span class="w"> </span><span class="m">10</span><span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a><span class="w">  </span>--property<span class="w"> </span>print.key<span class="o">=</span><span class="nb">true</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-25-7" name="__codelineno-25-7" href="#__codelineno-25-7"></a><span class="w">  </span>--property<span class="w"> </span>key.separator<span class="o">=</span><span class="s2">&quot; | &quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-25-7" name="__codelineno-25-7" href="#__codelineno-25-7"></a><span class="w">  </span>--property<span class="w"> </span>key.separator<span class="o">=</span><span class="s2">" | "</span><span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-25-8" name="__codelineno-25-8" href="#__codelineno-25-8"></a><span class="w">  </span>--key-deserializer<span class="w"> </span>org.apache.kafka.common.serialization.StringDeserializer<span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-25-9" name="__codelineno-25-9" href="#__codelineno-25-9"></a><span class="w">  </span>--value-deserializer<span class="w"> </span>org.apache.kafka.common.serialization.DoubleDeserializer
 </code></pre></div>
@@ -3930,9 +4263,9 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-26-5" name="__codelineno-26-5" href="#__codelineno-26-5"></a>temp002 | 29.8
 </code></pre></div></p>
 <h2 id="advanced-cogroup-operation">Advanced: Cogroup Operation</h2>
-<p>Cogroup allows combining multiple grouped streams into a single aggregation. This is useful when you need to aggregate data from different sources into one unified result.</p>
+<p>Cogroup is meant to combine several grouped streams into one aggregation, with a separate aggregator for each stream. KSML supports only one stream in a <code>cogroup</code> today (see <a href="https://github.com/Axual/ksml/issues/728">#728</a>), so the example below uses one stream.</p>
 <details class="info">
-<summary>Orders, Refunds, and Bonuses Producer (click to expand)</summary>
+<summary>Customer orders producer (click to expand)</summary>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="nt">functions</span><span class="p">:</span>
 <a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a><span class="w">  </span><span class="nt">generate_order</span><span class="p">:</span>
 <a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">generator</span>
@@ -3940,7 +4273,7 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-27-5" name="__codelineno-27-5" href="#__codelineno-27-5"></a><span class="w">      </span><span class="no">import random</span>
 <a id="__codelineno-27-6" name="__codelineno-27-6" href="#__codelineno-27-6"></a><span class="w">      </span><span class="no">import time</span>
 <a id="__codelineno-27-7" name="__codelineno-27-7" href="#__codelineno-27-7"></a><span class="w">      </span><span class="no">order_counter = 0</span>
-<a id="__codelineno-27-8" name="__codelineno-27-8" href="#__codelineno-27-8"></a><span class="w">      </span><span class="no">customers = [&quot;alice&quot;, &quot;bob&quot;, &quot;charlie&quot;, &quot;diana&quot;, &quot;eve&quot;]</span>
+<a id="__codelineno-27-8" name="__codelineno-27-8" href="#__codelineno-27-8"></a><span class="w">      </span><span class="no">customers = ["alice", "bob", "charlie", "diana", "eve"]</span>
 <a id="__codelineno-27-9" name="__codelineno-27-9" href="#__codelineno-27-9"></a><span class="w">    </span><span class="nt">code</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
 <a id="__codelineno-27-10" name="__codelineno-27-10" href="#__codelineno-27-10"></a><span class="w">      </span><span class="no">global order_counter, customers</span>
 <a id="__codelineno-27-11" name="__codelineno-27-11" href="#__codelineno-27-11"></a>
@@ -3948,10 +4281,10 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-27-13" name="__codelineno-27-13" href="#__codelineno-27-13"></a><span class="w">      </span><span class="no">customer = random.choice(customers)</span>
 <a id="__codelineno-27-14" name="__codelineno-27-14" href="#__codelineno-27-14"></a>
 <a id="__codelineno-27-15" name="__codelineno-27-15" href="#__codelineno-27-15"></a><span class="w">      </span><span class="no">value = {</span>
-<a id="__codelineno-27-16" name="__codelineno-27-16" href="#__codelineno-27-16"></a><span class="w">        </span><span class="no">&quot;order_id&quot;: f&quot;ORD{order_counter:04d}&quot;,</span>
-<a id="__codelineno-27-17" name="__codelineno-27-17" href="#__codelineno-27-17"></a><span class="w">        </span><span class="no">&quot;customer&quot;: customer,</span>
-<a id="__codelineno-27-18" name="__codelineno-27-18" href="#__codelineno-27-18"></a><span class="w">        </span><span class="no">&quot;amount&quot;: round(random.uniform(10, 500), 2),</span>
-<a id="__codelineno-27-19" name="__codelineno-27-19" href="#__codelineno-27-19"></a><span class="w">        </span><span class="no">&quot;timestamp&quot;: int(time.time() * 1000)</span>
+<a id="__codelineno-27-16" name="__codelineno-27-16" href="#__codelineno-27-16"></a><span class="w">        </span><span class="no">"order_id": f"ORD{order_counter:04d}",</span>
+<a id="__codelineno-27-17" name="__codelineno-27-17" href="#__codelineno-27-17"></a><span class="w">        </span><span class="no">"customer": customer,</span>
+<a id="__codelineno-27-18" name="__codelineno-27-18" href="#__codelineno-27-18"></a><span class="w">        </span><span class="no">"amount": round(random.uniform(10, 500), 2),</span>
+<a id="__codelineno-27-19" name="__codelineno-27-19" href="#__codelineno-27-19"></a><span class="w">        </span><span class="no">"timestamp": int(time.time() * 1000)</span>
 <a id="__codelineno-27-20" name="__codelineno-27-20" href="#__codelineno-27-20"></a><span class="w">      </span><span class="no">}</span>
 <a id="__codelineno-27-21" name="__codelineno-27-21" href="#__codelineno-27-21"></a>
 <a id="__codelineno-27-22" name="__codelineno-27-22" href="#__codelineno-27-22"></a><span class="w">      </span><span class="no">key = customer</span>
@@ -3986,9 +4319,9 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-28-14" name="__codelineno-28-14" href="#__codelineno-28-14"></a><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">initializer</span>
 <a id="__codelineno-28-15" name="__codelineno-28-15" href="#__codelineno-28-15"></a><span class="w">    </span><span class="nt">code</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
 <a id="__codelineno-28-16" name="__codelineno-28-16" href="#__codelineno-28-16"></a><span class="w">      </span><span class="no">result = {</span>
-<a id="__codelineno-28-17" name="__codelineno-28-17" href="#__codelineno-28-17"></a><span class="w">        </span><span class="no">&quot;total_amount&quot;: 0.0,</span>
-<a id="__codelineno-28-18" name="__codelineno-28-18" href="#__codelineno-28-18"></a><span class="w">        </span><span class="no">&quot;order_count&quot;: 0,</span>
-<a id="__codelineno-28-19" name="__codelineno-28-19" href="#__codelineno-28-19"></a><span class="w">        </span><span class="no">&quot;customer&quot;: &quot;&quot;</span>
+<a id="__codelineno-28-17" name="__codelineno-28-17" href="#__codelineno-28-17"></a><span class="w">        </span><span class="no">"total_amount": 0.0,</span>
+<a id="__codelineno-28-18" name="__codelineno-28-18" href="#__codelineno-28-18"></a><span class="w">        </span><span class="no">"order_count": 0,</span>
+<a id="__codelineno-28-19" name="__codelineno-28-19" href="#__codelineno-28-19"></a><span class="w">        </span><span class="no">"customer": ""</span>
 <a id="__codelineno-28-20" name="__codelineno-28-20" href="#__codelineno-28-20"></a><span class="w">      </span><span class="no">}</span>
 <a id="__codelineno-28-21" name="__codelineno-28-21" href="#__codelineno-28-21"></a><span class="w">    </span><span class="nt">expression</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">result</span>
 <a id="__codelineno-28-22" name="__codelineno-28-22" href="#__codelineno-28-22"></a><span class="w">    </span><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">json</span>
@@ -3998,9 +4331,9 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-28-26" name="__codelineno-28-26" href="#__codelineno-28-26"></a><span class="w">    </span><span class="nt">code</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
 <a id="__codelineno-28-27" name="__codelineno-28-27" href="#__codelineno-28-27"></a><span class="w">      </span><span class="no"># Add order amount and increment count</span>
 <a id="__codelineno-28-28" name="__codelineno-28-28" href="#__codelineno-28-28"></a><span class="w">      </span><span class="no">if value is not None:</span>
-<a id="__codelineno-28-29" name="__codelineno-28-29" href="#__codelineno-28-29"></a><span class="w">        </span><span class="no">aggregatedValue[&quot;total_amount&quot;] = aggregatedValue.get(&quot;total_amount&quot;, 0) + value.get(&quot;amount&quot;, 0)</span>
-<a id="__codelineno-28-30" name="__codelineno-28-30" href="#__codelineno-28-30"></a><span class="w">        </span><span class="no">aggregatedValue[&quot;order_count&quot;] = aggregatedValue.get(&quot;order_count&quot;, 0) + 1</span>
-<a id="__codelineno-28-31" name="__codelineno-28-31" href="#__codelineno-28-31"></a><span class="w">        </span><span class="no">aggregatedValue[&quot;customer&quot;] = key</span>
+<a id="__codelineno-28-29" name="__codelineno-28-29" href="#__codelineno-28-29"></a><span class="w">        </span><span class="no">aggregatedValue["total_amount"] = aggregatedValue.get("total_amount", 0) + value.get("amount", 0)</span>
+<a id="__codelineno-28-30" name="__codelineno-28-30" href="#__codelineno-28-30"></a><span class="w">        </span><span class="no">aggregatedValue["order_count"] = aggregatedValue.get("order_count", 0) + 1</span>
+<a id="__codelineno-28-31" name="__codelineno-28-31" href="#__codelineno-28-31"></a><span class="w">        </span><span class="no">aggregatedValue["customer"] = key</span>
 <a id="__codelineno-28-32" name="__codelineno-28-32" href="#__codelineno-28-32"></a>
 <a id="__codelineno-28-33" name="__codelineno-28-33" href="#__codelineno-28-33"></a><span class="w">      </span><span class="no">result = aggregatedValue</span>
 <a id="__codelineno-28-34" name="__codelineno-28-34" href="#__codelineno-28-34"></a><span class="w">    </span><span class="nt">expression</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">result</span>
@@ -4023,23 +4356,66 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-28-51" name="__codelineno-28-51" href="#__codelineno-28-51"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">peek</span>
 <a id="__codelineno-28-52" name="__codelineno-28-52" href="#__codelineno-28-52"></a><span class="w">        </span><span class="nt">forEach</span><span class="p">:</span>
 <a id="__codelineno-28-53" name="__codelineno-28-53" href="#__codelineno-28-53"></a><span class="w">          </span><span class="nt">code</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
-<a id="__codelineno-28-54" name="__codelineno-28-54" href="#__codelineno-28-54"></a><span class="w">            </span><span class="no">log.info(&quot;CUSTOMER ORDER TOTALS - Customer: {}, Total: ${}, Count: {}&quot;,</span>
+<a id="__codelineno-28-54" name="__codelineno-28-54" href="#__codelineno-28-54"></a><span class="w">            </span><span class="no">log.info("CUSTOMER ORDER TOTALS - Customer: {}, Total: ${}, Count: {}",</span>
 <a id="__codelineno-28-55" name="__codelineno-28-55" href="#__codelineno-28-55"></a><span class="w">                     </span><span class="no">key,</span>
-<a id="__codelineno-28-56" name="__codelineno-28-56" href="#__codelineno-28-56"></a><span class="w">                     </span><span class="no">value.get(&quot;total_amount&quot;, 0),</span>
-<a id="__codelineno-28-57" name="__codelineno-28-57" href="#__codelineno-28-57"></a><span class="w">                     </span><span class="no">value.get(&quot;order_count&quot;, 0))</span>
+<a id="__codelineno-28-56" name="__codelineno-28-56" href="#__codelineno-28-56"></a><span class="w">                     </span><span class="no">value.get("total_amount", 0),</span>
+<a id="__codelineno-28-57" name="__codelineno-28-57" href="#__codelineno-28-57"></a><span class="w">                     </span><span class="no">value.get("order_count", 0))</span>
 <a id="__codelineno-28-58" name="__codelineno-28-58" href="#__codelineno-28-58"></a><span class="w">    </span><span class="nt">to</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">customer_totals</span>
 </code></pre></div>
 </details>
 <h3 id="how-cogroup-works">How Cogroup Works</h3>
-<p>The cogroup operation:</p>
+<p>The cogroup pipeline:</p>
 <ol>
-<li>Groups each stream independently by key</li>
-<li>Combines the grouped streams using cogroup operations</li>
-<li>Each stream contributes to the aggregate with its own aggregator function</li>
-<li>Final aggregate operation computes the combined result</li>
+<li>Groups the stream by key with <code>groupByKey</code></li>
+<li>Adds the grouped stream to the cogroup with its own aggregator function</li>
+<li>Runs the final <code>aggregate</code> operation, which uses the initializer to compute the result</li>
 </ol>
+<p>The example above uses only one stream, <code>customer_orders</code>. KSML does not support more than one stream in a <code>cogroup</code> yet (see <a href="https://github.com/Axual/ksml/issues/728">#728</a>). The diagram below follows two example orders through the pipeline:</p>
+<pre class="mermaid"><code>%%{init: {'themeVariables': {'textColor': '#000000', 'nodeTextColor': '#000000', 'primaryTextColor': '#000000'}}}%%
+
+graph LR
+    %% Input topic with example orders
+    Topic[(customer_orders)]
+    Orders@{ shape: docs, label: "&lt;b&gt;key: alice&lt;/b&gt; amount 50.0&lt;br/&gt;&lt;b&gt;key: alice&lt;/b&gt; amount 30.0" }
+
+    %% Grouping and cogrouping
+    Group[&lt;code&gt;groupByKey&lt;/code&gt;]
+    Cogroup["&lt;code&gt;cogroup&lt;/code&gt;&lt;br/&gt;aggregator: aggregate_orders"]
+    Aggregate["&lt;code&gt;aggregate&lt;/code&gt;&lt;br/&gt;initializer: init_order_stats"]
+
+    %% State and output
+    Store[(customer_totals_store)]
+    Result["&lt;b&gt;alice&lt;/b&gt;&lt;br/&gt;total_amount: 80.0&lt;br/&gt;order_count: 2"]
+    OutputTopic[(customer_totals)]
+
+    %% Data Flow
+    Topic --&gt; Orders --&gt; Group --&gt; Cogroup --&gt; Aggregate
+    Aggregate &lt;--&gt;|"one result per key"| Store
+    Aggregate --&gt; Result
+    Result --&gt;|"&lt;code&gt;toStream&lt;/code&gt;"| OutputTopic
+
+    %% Styling
+    classDef topic fill:#e1f5ff,stroke:#0277bd,stroke-width:2px,color:#000
+    classDef errorTopic fill:#ffebee,stroke:#b71c1c,stroke-width:2px,color:#000
+    classDef operation fill:#fff9c4,stroke:#f57f17,stroke-width:2px,color:#000
+    classDef store fill:#ede7f6,stroke:#5e35b1,stroke-width:2px,color:#000
+    classDef external fill:#e0f2f1,stroke:#00695c,stroke-width:2px,color:#000
+    classDef message fill:#ffffff,stroke:#616161,stroke-width:1px,color:#000
+    classDef result fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px,color:#000
+    classDef partial fill:#fff3e0,stroke:#ef6c00,stroke-width:2px,color:#000
+    classDef dropped fill:#ffcdd2,stroke:#c62828,stroke-width:2px,color:#000
+    classDef alert fill:#fce4ec,stroke:#ad1457,stroke-width:2px,color:#000
+    classDef note fill:#f5f5f5,stroke:#9e9e9e,stroke-width:1px,stroke-dasharray:3 3,color:#616161
+    classDef host fill:#f5f5f5,stroke:#616161,stroke-width:2px,stroke-dasharray:5 5,color:#000
+
+
+    class Topic,OutputTopic topic
+    class Group,Cogroup,Aggregate operation
+    class Store store
+    class Orders message
+    class Result result</code></pre>
 <blockquote>
-<p><strong>Note:</strong> Cogroup is an advanced feature that requires careful coordination between multiple streams. Ensure all streams are properly grouped and that aggregator functions handle null values appropriately.</p>
+<p><strong>Note:</strong> A second <code>cogroup</code> step in the same pipeline fails at startup with a <code>TopologyException</code>. Make sure the aggregator function handles null values.</p>
 </blockquote>
 <h2 id="complex-example-regional-sales-analytics">Complex Example: Regional Sales Analytics</h2>
 <p>This example demonstrates rekeying (changing the grouping key) and windowed aggregation to calculate regional sales statistics:</p>
@@ -4053,7 +4429,7 @@ Combines two values of the same type into a single value, used when no initializ
 </ol>
 <p><strong>Key KSML concepts demonstrated:</strong></p>
 <ul>
-<li><code>map</code> with <code>keyValueMapper</code> to change the message key (rekeying)</li>
+<li><code>selectKey</code> to change the message key (rekeying)</li>
 <li><code>groupByKey</code> after rekeying to group by the new key</li>
 <li><code>windowByTime</code> for time-based regional analytics</li>
 <li>Complex aggregation state with nested data structures</li>
@@ -4068,8 +4444,8 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-29-5" name="__codelineno-29-5" href="#__codelineno-29-5"></a><span class="w">      </span><span class="no">import random</span>
 <a id="__codelineno-29-6" name="__codelineno-29-6" href="#__codelineno-29-6"></a><span class="w">      </span><span class="no">import time</span>
 <a id="__codelineno-29-7" name="__codelineno-29-7" href="#__codelineno-29-7"></a><span class="w">      </span><span class="no">product_counter = 0</span>
-<a id="__codelineno-29-8" name="__codelineno-29-8" href="#__codelineno-29-8"></a><span class="w">      </span><span class="no">products = [&quot;laptop&quot;, &quot;phone&quot;, &quot;tablet&quot;, &quot;monitor&quot;, &quot;keyboard&quot;, &quot;mouse&quot;, &quot;headphones&quot;, &quot;webcam&quot;]</span>
-<a id="__codelineno-29-9" name="__codelineno-29-9" href="#__codelineno-29-9"></a><span class="w">      </span><span class="no">regions = [&quot;North&quot;, &quot;South&quot;, &quot;East&quot;, &quot;West&quot;, &quot;Central&quot;]</span>
+<a id="__codelineno-29-8" name="__codelineno-29-8" href="#__codelineno-29-8"></a><span class="w">      </span><span class="no">products = ["laptop", "phone", "tablet", "monitor", "keyboard", "mouse", "headphones", "webcam"]</span>
+<a id="__codelineno-29-9" name="__codelineno-29-9" href="#__codelineno-29-9"></a><span class="w">      </span><span class="no">regions = ["North", "South", "East", "West", "Central"]</span>
 <a id="__codelineno-29-10" name="__codelineno-29-10" href="#__codelineno-29-10"></a><span class="w">    </span><span class="nt">code</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
 <a id="__codelineno-29-11" name="__codelineno-29-11" href="#__codelineno-29-11"></a><span class="w">      </span><span class="no">global product_counter, products, regions</span>
 <a id="__codelineno-29-12" name="__codelineno-29-12" href="#__codelineno-29-12"></a>
@@ -4079,11 +4455,11 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-29-16" name="__codelineno-29-16" href="#__codelineno-29-16"></a>
 <a id="__codelineno-29-17" name="__codelineno-29-17" href="#__codelineno-29-17"></a><span class="w">      </span><span class="no"># Generate sale event</span>
 <a id="__codelineno-29-18" name="__codelineno-29-18" href="#__codelineno-29-18"></a><span class="w">      </span><span class="no">value = {</span>
-<a id="__codelineno-29-19" name="__codelineno-29-19" href="#__codelineno-29-19"></a><span class="w">        </span><span class="no">&quot;product_id&quot;: product,</span>
-<a id="__codelineno-29-20" name="__codelineno-29-20" href="#__codelineno-29-20"></a><span class="w">        </span><span class="no">&quot;region&quot;: random.choice(regions),</span>
-<a id="__codelineno-29-21" name="__codelineno-29-21" href="#__codelineno-29-21"></a><span class="w">        </span><span class="no">&quot;amount&quot;: round(random.uniform(10, 1000), 2),</span>
-<a id="__codelineno-29-22" name="__codelineno-29-22" href="#__codelineno-29-22"></a><span class="w">        </span><span class="no">&quot;quantity&quot;: random.randint(1, 5),</span>
-<a id="__codelineno-29-23" name="__codelineno-29-23" href="#__codelineno-29-23"></a><span class="w">        </span><span class="no">&quot;timestamp&quot;: int(time.time() * 1000)</span>
+<a id="__codelineno-29-19" name="__codelineno-29-19" href="#__codelineno-29-19"></a><span class="w">        </span><span class="no">"product_id": product,</span>
+<a id="__codelineno-29-20" name="__codelineno-29-20" href="#__codelineno-29-20"></a><span class="w">        </span><span class="no">"region": random.choice(regions),</span>
+<a id="__codelineno-29-21" name="__codelineno-29-21" href="#__codelineno-29-21"></a><span class="w">        </span><span class="no">"amount": round(random.uniform(10, 1000), 2),</span>
+<a id="__codelineno-29-22" name="__codelineno-29-22" href="#__codelineno-29-22"></a><span class="w">        </span><span class="no">"quantity": random.randint(1, 5),</span>
+<a id="__codelineno-29-23" name="__codelineno-29-23" href="#__codelineno-29-23"></a><span class="w">        </span><span class="no">"timestamp": int(time.time() * 1000)</span>
 <a id="__codelineno-29-24" name="__codelineno-29-24" href="#__codelineno-29-24"></a><span class="w">      </span><span class="no">}</span>
 <a id="__codelineno-29-25" name="__codelineno-29-25" href="#__codelineno-29-25"></a>
 <a id="__codelineno-29-26" name="__codelineno-29-26" href="#__codelineno-29-26"></a><span class="w">      </span><span class="no"># Use product_id as key</span>
@@ -4120,40 +4496,40 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-30-15" name="__codelineno-30-15" href="#__codelineno-30-15"></a><span class="w">    </span><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">string</span>
 <a id="__codelineno-30-16" name="__codelineno-30-16" href="#__codelineno-30-16"></a><span class="w">    </span><span class="nt">code</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
 <a id="__codelineno-30-17" name="__codelineno-30-17" href="#__codelineno-30-17"></a><span class="w">      </span><span class="no"># Extract region from the sale event and use it as the new key</span>
-<a id="__codelineno-30-18" name="__codelineno-30-18" href="#__codelineno-30-18"></a><span class="w">      </span><span class="no">return value.get(&quot;region&quot;, &quot;unknown&quot;)</span>
+<a id="__codelineno-30-18" name="__codelineno-30-18" href="#__codelineno-30-18"></a><span class="w">      </span><span class="no">return value.get("region", "unknown")</span>
 <a id="__codelineno-30-19" name="__codelineno-30-19" href="#__codelineno-30-19"></a>
 <a id="__codelineno-30-20" name="__codelineno-30-20" href="#__codelineno-30-20"></a><span class="w">  </span><span class="nt">initialize_sales_stats</span><span class="p">:</span>
 <a id="__codelineno-30-21" name="__codelineno-30-21" href="#__codelineno-30-21"></a><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">initializer</span>
 <a id="__codelineno-30-22" name="__codelineno-30-22" href="#__codelineno-30-22"></a><span class="w">    </span><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">json</span>
 <a id="__codelineno-30-23" name="__codelineno-30-23" href="#__codelineno-30-23"></a><span class="w">    </span><span class="nt">code</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
-<a id="__codelineno-30-24" name="__codelineno-30-24" href="#__codelineno-30-24"></a><span class="w">      </span><span class="no">return {&quot;total_sales&quot;: 0.0, &quot;total_quantity&quot;: 0, &quot;transaction_count&quot;: 0, &quot;products&quot;: {}}</span>
+<a id="__codelineno-30-24" name="__codelineno-30-24" href="#__codelineno-30-24"></a><span class="w">      </span><span class="no">return {"total_sales": 0.0, "total_quantity": 0, "transaction_count": 0, "products": {}}</span>
 <a id="__codelineno-30-25" name="__codelineno-30-25" href="#__codelineno-30-25"></a>
 <a id="__codelineno-30-26" name="__codelineno-30-26" href="#__codelineno-30-26"></a><span class="w">  </span><span class="nt">aggregate_sales</span><span class="p">:</span>
 <a id="__codelineno-30-27" name="__codelineno-30-27" href="#__codelineno-30-27"></a><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aggregator</span>
 <a id="__codelineno-30-28" name="__codelineno-30-28" href="#__codelineno-30-28"></a><span class="w">    </span><span class="nt">code</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
 <a id="__codelineno-30-29" name="__codelineno-30-29" href="#__codelineno-30-29"></a><span class="w">      </span><span class="no"># Initialize aggregatedValue if None (first aggregation)</span>
 <a id="__codelineno-30-30" name="__codelineno-30-30" href="#__codelineno-30-30"></a><span class="w">      </span><span class="no">if aggregatedValue is None:</span>
-<a id="__codelineno-30-31" name="__codelineno-30-31" href="#__codelineno-30-31"></a><span class="w">        </span><span class="no">aggregatedValue = {&quot;total_sales&quot;: 0.0, &quot;total_quantity&quot;: 0, &quot;transaction_count&quot;: 0, &quot;products&quot;: {}}</span>
+<a id="__codelineno-30-31" name="__codelineno-30-31" href="#__codelineno-30-31"></a><span class="w">        </span><span class="no">aggregatedValue = {"total_sales": 0.0, "total_quantity": 0, "transaction_count": 0, "products": {}}</span>
 <a id="__codelineno-30-32" name="__codelineno-30-32" href="#__codelineno-30-32"></a>
 <a id="__codelineno-30-33" name="__codelineno-30-33" href="#__codelineno-30-33"></a><span class="w">      </span><span class="no"># Extract data from the sale</span>
-<a id="__codelineno-30-34" name="__codelineno-30-34" href="#__codelineno-30-34"></a><span class="w">      </span><span class="no">product_id = value.get(&quot;product_id&quot;, &quot;unknown&quot;)</span>
-<a id="__codelineno-30-35" name="__codelineno-30-35" href="#__codelineno-30-35"></a><span class="w">      </span><span class="no">amount = value.get(&quot;amount&quot;, 0)</span>
-<a id="__codelineno-30-36" name="__codelineno-30-36" href="#__codelineno-30-36"></a><span class="w">      </span><span class="no">quantity = value.get(&quot;quantity&quot;, 0)</span>
+<a id="__codelineno-30-34" name="__codelineno-30-34" href="#__codelineno-30-34"></a><span class="w">      </span><span class="no">product_id = value.get("product_id", "unknown")</span>
+<a id="__codelineno-30-35" name="__codelineno-30-35" href="#__codelineno-30-35"></a><span class="w">      </span><span class="no">amount = value.get("amount", 0)</span>
+<a id="__codelineno-30-36" name="__codelineno-30-36" href="#__codelineno-30-36"></a><span class="w">      </span><span class="no">quantity = value.get("quantity", 0)</span>
 <a id="__codelineno-30-37" name="__codelineno-30-37" href="#__codelineno-30-37"></a>
 <a id="__codelineno-30-38" name="__codelineno-30-38" href="#__codelineno-30-38"></a><span class="w">      </span><span class="no"># Update aggregated values</span>
-<a id="__codelineno-30-39" name="__codelineno-30-39" href="#__codelineno-30-39"></a><span class="w">      </span><span class="no">aggregatedValue[&quot;total_sales&quot;] += amount</span>
-<a id="__codelineno-30-40" name="__codelineno-30-40" href="#__codelineno-30-40"></a><span class="w">      </span><span class="no">aggregatedValue[&quot;total_quantity&quot;] += quantity</span>
-<a id="__codelineno-30-41" name="__codelineno-30-41" href="#__codelineno-30-41"></a><span class="w">      </span><span class="no">aggregatedValue[&quot;transaction_count&quot;] += 1</span>
+<a id="__codelineno-30-39" name="__codelineno-30-39" href="#__codelineno-30-39"></a><span class="w">      </span><span class="no">aggregatedValue["total_sales"] += amount</span>
+<a id="__codelineno-30-40" name="__codelineno-30-40" href="#__codelineno-30-40"></a><span class="w">      </span><span class="no">aggregatedValue["total_quantity"] += quantity</span>
+<a id="__codelineno-30-41" name="__codelineno-30-41" href="#__codelineno-30-41"></a><span class="w">      </span><span class="no">aggregatedValue["transaction_count"] += 1</span>
 <a id="__codelineno-30-42" name="__codelineno-30-42" href="#__codelineno-30-42"></a>
 <a id="__codelineno-30-43" name="__codelineno-30-43" href="#__codelineno-30-43"></a><span class="w">      </span><span class="no"># Track per-product statistics</span>
-<a id="__codelineno-30-44" name="__codelineno-30-44" href="#__codelineno-30-44"></a><span class="w">      </span><span class="no">if product_id not in aggregatedValue[&quot;products&quot;]:</span>
-<a id="__codelineno-30-45" name="__codelineno-30-45" href="#__codelineno-30-45"></a><span class="w">        </span><span class="no">aggregatedValue[&quot;products&quot;][product_id] = {&quot;sales&quot;: 0.0, &quot;quantity&quot;: 0}</span>
+<a id="__codelineno-30-44" name="__codelineno-30-44" href="#__codelineno-30-44"></a><span class="w">      </span><span class="no">if product_id not in aggregatedValue["products"]:</span>
+<a id="__codelineno-30-45" name="__codelineno-30-45" href="#__codelineno-30-45"></a><span class="w">        </span><span class="no">aggregatedValue["products"][product_id] = {"sales": 0.0, "quantity": 0}</span>
 <a id="__codelineno-30-46" name="__codelineno-30-46" href="#__codelineno-30-46"></a>
-<a id="__codelineno-30-47" name="__codelineno-30-47" href="#__codelineno-30-47"></a><span class="w">      </span><span class="no">aggregatedValue[&quot;products&quot;][product_id][&quot;sales&quot;] += amount</span>
-<a id="__codelineno-30-48" name="__codelineno-30-48" href="#__codelineno-30-48"></a><span class="w">      </span><span class="no">aggregatedValue[&quot;products&quot;][product_id][&quot;quantity&quot;] += quantity</span>
+<a id="__codelineno-30-47" name="__codelineno-30-47" href="#__codelineno-30-47"></a><span class="w">      </span><span class="no">aggregatedValue["products"][product_id]["sales"] += amount</span>
+<a id="__codelineno-30-48" name="__codelineno-30-48" href="#__codelineno-30-48"></a><span class="w">      </span><span class="no">aggregatedValue["products"][product_id]["quantity"] += quantity</span>
 <a id="__codelineno-30-49" name="__codelineno-30-49" href="#__codelineno-30-49"></a>
 <a id="__codelineno-30-50" name="__codelineno-30-50" href="#__codelineno-30-50"></a><span class="w">      </span><span class="no"># Calculate average sale</span>
-<a id="__codelineno-30-51" name="__codelineno-30-51" href="#__codelineno-30-51"></a><span class="w">      </span><span class="no">aggregatedValue[&quot;avg_sale&quot;] = round(aggregatedValue[&quot;total_sales&quot;] / aggregatedValue[&quot;transaction_count&quot;], 2)</span>
+<a id="__codelineno-30-51" name="__codelineno-30-51" href="#__codelineno-30-51"></a><span class="w">      </span><span class="no">aggregatedValue["avg_sale"] = round(aggregatedValue["total_sales"] / aggregatedValue["transaction_count"], 2)</span>
 <a id="__codelineno-30-52" name="__codelineno-30-52" href="#__codelineno-30-52"></a>
 <a id="__codelineno-30-53" name="__codelineno-30-53" href="#__codelineno-30-53"></a><span class="w">      </span><span class="no">return aggregatedValue</span>
 <a id="__codelineno-30-54" name="__codelineno-30-54" href="#__codelineno-30-54"></a><span class="w">    </span><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">json</span>
@@ -4163,16 +4539,16 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-30-58" name="__codelineno-30-58" href="#__codelineno-30-58"></a><span class="w">    </span><span class="nt">resultType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">json</span>
 <a id="__codelineno-30-59" name="__codelineno-30-59" href="#__codelineno-30-59"></a><span class="w">    </span><span class="nt">code</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
 <a id="__codelineno-30-60" name="__codelineno-30-60" href="#__codelineno-30-60"></a><span class="w">      </span><span class="no"># Extract window information from the WindowedString key</span>
-<a id="__codelineno-30-61" name="__codelineno-30-61" href="#__codelineno-30-61"></a><span class="w">      </span><span class="no">region = key[&quot;key&quot;]</span>
-<a id="__codelineno-30-62" name="__codelineno-30-62" href="#__codelineno-30-62"></a><span class="w">      </span><span class="no">window_start = key[&quot;startTime&quot;]</span>
-<a id="__codelineno-30-63" name="__codelineno-30-63" href="#__codelineno-30-63"></a><span class="w">      </span><span class="no">window_end = key[&quot;endTime&quot;]</span>
+<a id="__codelineno-30-61" name="__codelineno-30-61" href="#__codelineno-30-61"></a><span class="w">      </span><span class="no">region = key["key"]</span>
+<a id="__codelineno-30-62" name="__codelineno-30-62" href="#__codelineno-30-62"></a><span class="w">      </span><span class="no">window_start = key["startTime"]</span>
+<a id="__codelineno-30-63" name="__codelineno-30-63" href="#__codelineno-30-63"></a><span class="w">      </span><span class="no">window_end = key["endTime"]</span>
 <a id="__codelineno-30-64" name="__codelineno-30-64" href="#__codelineno-30-64"></a>
 <a id="__codelineno-30-65" name="__codelineno-30-65" href="#__codelineno-30-65"></a><span class="w">      </span><span class="no"># Add window metadata to the value</span>
 <a id="__codelineno-30-66" name="__codelineno-30-66" href="#__codelineno-30-66"></a><span class="w">      </span><span class="no">return {</span>
-<a id="__codelineno-30-67" name="__codelineno-30-67" href="#__codelineno-30-67"></a><span class="w">        </span><span class="no">&quot;region&quot;: region,</span>
-<a id="__codelineno-30-68" name="__codelineno-30-68" href="#__codelineno-30-68"></a><span class="w">        </span><span class="no">&quot;window_start&quot;: window_start,</span>
-<a id="__codelineno-30-69" name="__codelineno-30-69" href="#__codelineno-30-69"></a><span class="w">        </span><span class="no">&quot;window_end&quot;: window_end,</span>
-<a id="__codelineno-30-70" name="__codelineno-30-70" href="#__codelineno-30-70"></a><span class="w">        </span><span class="no">&quot;stats&quot;: value</span>
+<a id="__codelineno-30-67" name="__codelineno-30-67" href="#__codelineno-30-67"></a><span class="w">        </span><span class="no">"region": region,</span>
+<a id="__codelineno-30-68" name="__codelineno-30-68" href="#__codelineno-30-68"></a><span class="w">        </span><span class="no">"window_start": window_start,</span>
+<a id="__codelineno-30-69" name="__codelineno-30-69" href="#__codelineno-30-69"></a><span class="w">        </span><span class="no">"window_end": window_end,</span>
+<a id="__codelineno-30-70" name="__codelineno-30-70" href="#__codelineno-30-70"></a><span class="w">        </span><span class="no">"stats": value</span>
 <a id="__codelineno-30-71" name="__codelineno-30-71" href="#__codelineno-30-71"></a><span class="w">      </span><span class="no">}</span>
 <a id="__codelineno-30-72" name="__codelineno-30-72" href="#__codelineno-30-72"></a>
 <a id="__codelineno-30-73" name="__codelineno-30-73" href="#__codelineno-30-73"></a><span class="nt">pipelines</span><span class="p">:</span>
@@ -4205,10 +4581,10 @@ Combines two values of the same type into a single value, used when no initializ
 <a id="__codelineno-30-100" name="__codelineno-30-100" href="#__codelineno-30-100"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">peek</span>
 <a id="__codelineno-30-101" name="__codelineno-30-101" href="#__codelineno-30-101"></a><span class="w">        </span><span class="nt">forEach</span><span class="p">:</span>
 <a id="__codelineno-30-102" name="__codelineno-30-102" href="#__codelineno-30-102"></a><span class="w">          </span><span class="nt">code</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
-<a id="__codelineno-30-103" name="__codelineno-30-103" href="#__codelineno-30-103"></a><span class="w">            </span><span class="no">region = value[&quot;region&quot;]</span>
-<a id="__codelineno-30-104" name="__codelineno-30-104" href="#__codelineno-30-104"></a><span class="w">            </span><span class="no">stats = value[&quot;stats&quot;]</span>
-<a id="__codelineno-30-105" name="__codelineno-30-105" href="#__codelineno-30-105"></a><span class="w">            </span><span class="no">log.info(&quot;Region {} sales (1-min window): ${} from {} transactions&quot;, </span>
-<a id="__codelineno-30-106" name="__codelineno-30-106" href="#__codelineno-30-106"></a><span class="w">                     </span><span class="no">region, stats[&quot;total_sales&quot;], stats[&quot;transaction_count&quot;])</span>
+<a id="__codelineno-30-103" name="__codelineno-30-103" href="#__codelineno-30-103"></a><span class="w">            </span><span class="no">region = value["region"]</span>
+<a id="__codelineno-30-104" name="__codelineno-30-104" href="#__codelineno-30-104"></a><span class="w">            </span><span class="no">stats = value["stats"]</span>
+<a id="__codelineno-30-105" name="__codelineno-30-105" href="#__codelineno-30-105"></a><span class="w">            </span><span class="no">log.info("Region {} sales (1-min window): ${} from {} transactions", </span>
+<a id="__codelineno-30-106" name="__codelineno-30-106" href="#__codelineno-30-106"></a><span class="w">                     </span><span class="no">region, stats["total_sales"], stats["transaction_count"])</span>
 <a id="__codelineno-30-107" name="__codelineno-30-107" href="#__codelineno-30-107"></a><span class="w">    </span><span class="c1"># Output to region-specific topic</span>
 <a id="__codelineno-30-108" name="__codelineno-30-108" href="#__codelineno-30-108"></a><span class="w">    </span><span class="nt">to</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sales_by_region</span>
 </code></pre></div>
@@ -4216,12 +4592,86 @@ Combines two values of the same type into a single value, used when no initializ
 <p><strong>Pipeline flow:</strong></p>
 <ol>
 <li><strong>Input</strong>: Sales events with product_id as key</li>
-<li><strong>Rekey</strong>: Map operation changes key to region</li>
+<li><strong>Rekey</strong>: <code>selectKey</code> changes the key to the region</li>
 <li><strong>Group</strong>: Group by the new region key</li>
 <li><strong>Window</strong>: Apply 1-minute tumbling windows</li>
 <li><strong>Aggregate</strong>: Calculate regional statistics per window</li>
 <li><strong>Output</strong>: Windowed regional sales summaries</li>
 </ol>
+<p>The diagram below follows four example sales through the pipeline. The messages arrive keyed by product, so the pipeline first replaces the key with the region. Only then can <code>groupByKey</code> collect all sales of one region together. Every sale sends an updated result for its region and window, and the diagram shows the last one:</p>
+<pre class="mermaid"><code>%%{init: {'themeVariables': {'textColor': '#000000', 'nodeTextColor': '#000000', 'primaryTextColor': '#000000'}}}%%
+
+graph TB
+    %% Input topic with four sales, keyed by product
+    Topic[(retail_sales)]
+    Sales@{ shape: docs, label: "&lt;b&gt;key: laptop&lt;/b&gt; North, 1200.00 at 10:00:10&lt;br/&gt;&lt;b&gt;key: phone&lt;/b&gt; South, 800.00 at 10:00:20&lt;br/&gt;&lt;b&gt;key: tablet&lt;/b&gt; North, 500.00 at 10:00:40&lt;br/&gt;&lt;b&gt;key: mouse&lt;/b&gt; North, 25.00 at 10:01:15" }
+
+    %% Step 1: rekey by region
+    SelectKey["&lt;code&gt;selectKey&lt;/code&gt;&lt;br/&gt;extract_region"]
+    Rekeyed@{ shape: docs, label: "&lt;b&gt;key: North&lt;/b&gt; laptop, 1200.00&lt;br/&gt;&lt;b&gt;key: South&lt;/b&gt; phone, 800.00&lt;br/&gt;&lt;b&gt;key: North&lt;/b&gt; tablet, 500.00&lt;br/&gt;&lt;b&gt;key: North&lt;/b&gt; mouse, 25.00" }
+
+    %% Step 2: group by the new key
+    Group[&lt;code&gt;groupByKey&lt;/code&gt;]
+    subgraph ByKey["Grouped by region"]
+        North@{ shape: docs, label: "&lt;b&gt;key: North&lt;/b&gt;&lt;br/&gt;laptop, tablet, mouse" }
+        South@{ shape: doc, label: "&lt;b&gt;key: South&lt;/b&gt;&lt;br/&gt;phone" }
+    end
+
+    %% Step 3: split each region into 1-minute windows
+    Window["&lt;code&gt;windowByTime&lt;/code&gt;&lt;br/&gt;tumbling 1m"]
+    subgraph ByWindow["Grouped by region and window"]
+        NorthW1@{ shape: docs, label: "&lt;b&gt;North&lt;/b&gt; 10:00 to 10:01&lt;br/&gt;laptop, tablet" }
+        NorthW2@{ shape: doc, label: "&lt;b&gt;North&lt;/b&gt; 10:01 to 10:02&lt;br/&gt;mouse" }
+        SouthW1@{ shape: doc, label: "&lt;b&gt;South&lt;/b&gt; 10:00 to 10:01&lt;br/&gt;phone" }
+    end
+
+    %% Step 4: sales statistics per region and window
+    Aggregate["&lt;code&gt;aggregate&lt;/code&gt;&lt;br/&gt;aggregate_sales"]
+    subgraph Stats["Latest result per region and window"]
+        NorthW1Stats["&lt;b&gt;North&lt;/b&gt; 10:00 to 10:01&lt;br/&gt;total_sales 1700.00, transactions 2&lt;br/&gt;products: laptop, tablet"]
+        NorthW2Stats["&lt;b&gt;North&lt;/b&gt; 10:01 to 10:02&lt;br/&gt;total_sales 25.00, transactions 1&lt;br/&gt;products: mouse"]
+        SouthW1Stats["&lt;b&gt;South&lt;/b&gt; 10:00 to 10:01&lt;br/&gt;total_sales 800.00, transactions 1&lt;br/&gt;products: phone"]
+    end
+
+    %% Step 5: write to the output topic
+    Convert["&lt;code&gt;toStream&lt;/code&gt; + &lt;code&gt;convertKey&lt;/code&gt;&lt;br/&gt;+ &lt;code&gt;transformValue&lt;/code&gt; transform_window_key"]
+    Output[(sales_by_region)]
+
+    %% Data Flow
+    Topic --&gt; Sales
+    Sales --&gt; SelectKey
+    SelectKey --&gt; Rekeyed
+    Rekeyed --&gt; Group
+    Group --&gt; North &amp; South
+    North &amp; South --&gt; Window
+    Window --&gt; NorthW1 &amp; NorthW2 &amp; SouthW1
+    NorthW1 &amp; NorthW2 &amp; SouthW1 --&gt; Aggregate
+    Aggregate --&gt; NorthW1Stats &amp; NorthW2Stats &amp; SouthW1Stats
+    NorthW1Stats &amp; NorthW2Stats &amp; SouthW1Stats --&gt; Convert
+    Convert --&gt;|"key: {key: North, startTime: 10:00, endTime: 10:01, ...}&lt;br/&gt;value: {region: North, window_start, window_end, stats: {...}}"| Output
+
+    %% Styling
+    classDef topic fill:#e1f5ff,stroke:#0277bd,stroke-width:2px,color:#000
+    classDef errorTopic fill:#ffebee,stroke:#b71c1c,stroke-width:2px,color:#000
+    classDef operation fill:#fff9c4,stroke:#f57f17,stroke-width:2px,color:#000
+    classDef store fill:#ede7f6,stroke:#5e35b1,stroke-width:2px,color:#000
+    classDef external fill:#e0f2f1,stroke:#00695c,stroke-width:2px,color:#000
+    classDef message fill:#ffffff,stroke:#616161,stroke-width:1px,color:#000
+    classDef result fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px,color:#000
+    classDef partial fill:#fff3e0,stroke:#ef6c00,stroke-width:2px,color:#000
+    classDef dropped fill:#ffcdd2,stroke:#c62828,stroke-width:2px,color:#000
+    classDef alert fill:#fce4ec,stroke:#ad1457,stroke-width:2px,color:#000
+    classDef note fill:#f5f5f5,stroke:#9e9e9e,stroke-width:1px,stroke-dasharray:3 3,color:#616161
+    classDef host fill:#f5f5f5,stroke:#616161,stroke-width:2px,stroke-dasharray:5 5,color:#000
+
+
+    class Topic,Output topic
+    class SelectKey,Group,Window,Aggregate,Convert operation
+    class Sales,Rekeyed,North,South,NorthW1,NorthW2,SouthW1 message
+    class NorthW1Stats,NorthW2Stats,SouthW1Stats result
+    style ByKey fill:none,stroke:#616161,stroke-dasharray:5 5
+    style ByWindow fill:none,stroke:#616161,stroke-dasharray:5 5
+    style Stats fill:none,stroke:#616161,stroke-dasharray:5 5</code></pre>
 <h2 id="performance-considerations">Performance Considerations</h2>
 <h3 id="state-store-types">State Store Types</h3>
 <p><strong>RocksDB (default)</strong></p>

@@ -189,7 +189,8 @@ public class ProcessorContextProxy implements AbstractProxy {
             if (type.dataType().isAssignableFrom(result).isNotAssignable())
                 result = CONVERTER.convert(DEFAULT_NOTATION, result, type);
         } catch (RuntimeException e) {
-            throw PythonErrors.typeError("forward " + role + " for " + targetName + " must be " + type + ", got " + PythonErrors.typeName(object));
+            throw PythonErrors.typeError("forward " + role + " for " + targetName + " must be " + type
+                    + ", got " + PythonErrors.typeName(object) + ": " + e.getMessage());
         }
         if (!(result instanceof DataNull) && type.dataType().isAssignableFrom(result.type()).isNotAssignable())
             throw PythonErrors.typeError("forward " + role + " for " + targetName + " must be " + type + ", got " + result.type());

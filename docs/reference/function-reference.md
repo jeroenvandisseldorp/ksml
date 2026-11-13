@@ -945,8 +945,9 @@ Runs on a schedule, set by a [`punctuate`](operation-reference.md#punctuate) ope
 | timestamp | long | The punctuation time, in milliseconds since the epoch |
 
 The punctuation context is available in the code as the variable `context`, like the state stores are available by
-their names. It is used to forward records (see the methods below). Do not use `context` as the name of a global
-variable or a store in a punctuator: KSML sets it on every call.
+their names. It is used to forward records (see the methods below). Do not use `context` or `stores` as global names
+in any function: all functions share their globals, and KSML sets these names during calls. For example, a function
+that runs during a punctuator's `context.forward` sees the punctuation context as `context`.
 
 #### Return Value
 

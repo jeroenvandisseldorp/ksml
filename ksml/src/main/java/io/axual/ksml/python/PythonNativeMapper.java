@@ -107,8 +107,7 @@ public class PythonNativeMapper {
                 final var result = polyglotExpectedNumberToNative(expected, object);
                 if (result != null) return result;
             }
-            // Without a numeric expected type, read an int as a long and a float as a double. An int too
-            // large for a long fits in a double too, but would lose precision, so asLong() rejects it.
+            // No numeric type expected: int -> long (too large fails), float -> double
             if (object.fitsInLong() || object.fitsInBigInteger()) return object.asLong();
             return object.asDouble();
         } catch (ClassCastException | UnsupportedOperationException e) {
@@ -123,9 +122,20 @@ public class PythonNativeMapper {
      * @return the converted value, or {@code null} if {@code expected} names no known numeric type
      */
     private Object polyglotExpectedNumberToNative(DataType expected, Value object) {
-        if (expected == DataByte.DATATYPE) return object.asByte();
-        if (expected == DataShort.DATATYPE) return object.asShort();
-        if (expected == DataInteger.DATATYPE) return object.asInt();
+        // An int out of range gets an error that names the valid range
+        final var isLong = object.fitsInLong();
+        if (expected == DataByte.DATATYPE) {
+            if (isLong) NumericRangeChecker.requireByteRange(object.asLong());
+            return object.asByte();
+        }
+        if (expected == DataShort.DATATYPE) {
+            if (isLong) NumericRangeChecker.requireShortRange(object.asLong());
+            return object.asShort();
+        }
+        if (expected == DataInteger.DATATYPE) {
+            if (isLong) NumericRangeChecker.requireIntRange(object.asLong());
+            return object.asInt();
+        }
         if (expected == DataLong.DATATYPE) return object.asLong();
         // asFloat() rejects any double that a float can not hold exactly, such as 3.14
         if (expected == DataFloat.DATATYPE)

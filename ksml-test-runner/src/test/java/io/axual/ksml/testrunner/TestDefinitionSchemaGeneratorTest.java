@@ -159,6 +159,38 @@ class TestDefinitionSchemaGeneratorTest {
     }
 
     @Test
+    void produceBlockConstraintsAcceptAndRejectTheRightFieldSets() {
+        var produceItem = root.at(TEST_SCHEMA_POINTER + "/properties/produce/items");
+        assertTrue(satisfiesRequiredConstraints(produceItem, java.util.Set.of("to", "messages")));
+        assertTrue(satisfiesRequiredConstraints(produceItem, java.util.Set.of("to", "generator", "count")));
+        assertTrue(satisfiesRequiredConstraints(produceItem, java.util.Set.of("to", "advanceWallClockTime")));
+        assertTrue(satisfiesRequiredConstraints(produceItem, java.util.Set.of("to", "messages", "advanceWallClockTime")));
+        // count alone produces nothing
+        assertFalse(satisfiesRequiredConstraints(produceItem, java.util.Set.of("to", "count")));
+        assertFalse(satisfiesRequiredConstraints(produceItem, java.util.Set.of("to", "messages", "generator")));
+        assertFalse(satisfiesRequiredConstraints(produceItem, java.util.Set.of("messages")));
+    }
+
+    /** Evaluates the required, anyOf and not keywords of an object schema for an object with these fields. */
+    private static boolean satisfiesRequiredConstraints(JsonNode schema, java.util.Set<String> fields) {
+        if (!hasAll(schema.get("required"), fields)) return false;
+        if (schema.has("anyOf")) {
+            var anyMatch = false;
+            for (var variant : schema.get("anyOf")) anyMatch |= hasAll(variant.get("required"), fields);
+            if (!anyMatch) return false;
+        }
+        return !schema.has("not") || !hasAll(schema.at("/not/required"), fields);
+    }
+
+    private static boolean hasAll(JsonNode required, java.util.Set<String> fields) {
+        if (required == null) return true;
+        for (var name : required) {
+            if (!fields.contains(name.asString())) return false;
+        }
+        return true;
+    }
+
+    @Test
     void assertBlockAnyOfBetweenOnAndStores() {
         var assertItem = root.at(TEST_SCHEMA_POINTER + "/properties/assert/items");
         assertEquals("object", assertItem.get("type").asString());

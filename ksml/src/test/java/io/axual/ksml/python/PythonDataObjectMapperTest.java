@@ -265,15 +265,16 @@ class PythonDataObjectMapperTest {
     @Test
     @DisplayName("PythonNativeMapper.fromPython(DataType, Value): GraalVM overflow wrapped as DataException")
     void fromPython_typedNumeric_overflowFailsLoudly() {
-        // Python int 300 does not fit in a Java byte; GraalVM's Value.asByte() throws
-        // UnsupportedOperationException which is now wrapped as DataException naming the expected
-        // KSML type and the offending value.
+        // Python int 300 does not fit in a Java byte; the error names the value and the valid range
         Value val = context.eval("python", "300");
         final var native_ = new PythonNativeMapper();
         assertThatCode(() -> native_.fromPython(DataByte.DATATYPE, val))
                 .isInstanceOf(DataException.class)
-                .hasMessageContaining("does not fit in expected type")
-                .hasMessageContaining("300");
+                .hasMessageContaining("Value 300 exceeds BYTE range [-128, 127]");
+        // A float with a fraction is not an int at all
+        assertThatCode(() -> native_.fromPython(DataByte.DATATYPE, context.eval("python", "1.5")))
+                .isInstanceOf(DataException.class)
+                .hasMessageContaining("does not fit in expected type byte");
     }
 
     @Test
@@ -294,7 +295,7 @@ class PythonDataObjectMapperTest {
         Value val = context.eval("python", "300");
         assertThatCode(() -> mapper.toDataObject(DataByte.DATATYPE, val))
                 .isInstanceOf(DataException.class)
-                .hasMessageContaining("300 does not fit in expected type byte");
+                .hasMessageContaining("exceeds BYTE range [-128, 127]");
     }
 
     @Test

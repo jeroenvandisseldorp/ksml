@@ -81,10 +81,14 @@ public class PunctuateProcessor extends OperationProcessor {
             try {
                 action.apply(stores, timestamp, proxy);
             } catch (RuntimeException e) {
+                // An error of a later operation goes to Kafka Streams as it is, so its handling is not changed
+                if (proxy.downstreamError() != null) throw proxy.downstreamError();
                 throw new ExecutionException("Error in punctuate operation '" + name() + "' during the punctuation at timestamp " + timestamp + ", not while processing a record: " + e.getMessage(), e);
             } finally {
                 proxy.invalidate();
             }
+            // Python code may have caught the error with try/except
+            if (proxy.downstreamError() != null) throw proxy.downstreamError();
         });
     }
 

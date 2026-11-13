@@ -27,13 +27,16 @@ import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.operation.processor.OperationProcessorSupplier;
 import io.axual.ksml.operation.processor.PunctuateProcessor;
 import io.axual.ksml.proxy.context.ProcessorContextProxy;
+import io.axual.ksml.stream.CogroupedKStreamWrapper;
 import io.axual.ksml.stream.GlobalKTableWrapper;
 import io.axual.ksml.stream.KGroupedStreamWrapper;
 import io.axual.ksml.stream.KGroupedTableWrapper;
 import io.axual.ksml.stream.KStreamWrapper;
 import io.axual.ksml.stream.KTableWrapper;
+import io.axual.ksml.stream.SessionWindowedCogroupedKStreamWrapper;
 import io.axual.ksml.stream.SessionWindowedKStreamWrapper;
 import io.axual.ksml.stream.StreamWrapper;
+import io.axual.ksml.stream.TimeWindowedCogroupedKStreamWrapper;
 import io.axual.ksml.stream.TimeWindowedKStreamWrapper;
 import io.axual.ksml.user.UserPunctuator;
 import org.apache.kafka.streams.kstream.KStream;
@@ -95,8 +98,7 @@ public class PunctuateOperation extends BaseOperation {
         final var userPunctuator = new UserPunctuator(userFunction, tags);
         final var stores = allStoreNames.toArray(String[]::new);
 
-        // Input records and records forwarded without a name only go to the next operation. When side paths may
-        // follow, the next operation gets a pass-through node with a known name, so the processor can address it.
+        // With named targets after this operation, the next operation gets a named pass-through node so forward can reach it
         final var nextName = namedOperationsFollow ? name + "-next" : null;
         namedTargets = new HashMap<>();
         final var schedule = new PunctuateProcessor.Schedule(interval, punctuationType,
@@ -128,7 +130,9 @@ public class PunctuateOperation extends BaseOperation {
         final var sideName = name + "-to-" + target.name;
         final var side = output.peek((key, value) -> {
         }, Named.as(sideName));
-        namedTargets.putIfAbsent(target.definedName(), new ProcessorContextProxy.Target(sideName, input.keyType().flatten().userType(), input.valueType().flatten().userType()));
+        if (namedTargets.containsKey(target.definedName()))
+            throw topologyError("Operation name '" + target.definedName() + "' is used twice after punctuate '" + name + "'");
+        namedTargets.put(target.definedName(), new ProcessorContextProxy.Target(sideName, input.keyType().flatten().userType(), input.valueType().flatten().userType()));
         return new KStreamWrapper(input.stream.merge(side, Named.as(sideName + "-merge")), input.keyType(), input.valueType());
     }
 
@@ -159,6 +163,21 @@ public class PunctuateOperation extends BaseOperation {
 
     @Override
     public StreamWrapper apply(TimeWindowedKStreamWrapper input, TopologyBuildContext context) {
+        throw needsStream(input);
+    }
+
+    @Override
+    public StreamWrapper apply(CogroupedKStreamWrapper input, TopologyBuildContext context) {
+        throw needsStream(input);
+    }
+
+    @Override
+    public StreamWrapper apply(SessionWindowedCogroupedKStreamWrapper input, TopologyBuildContext context) {
+        throw needsStream(input);
+    }
+
+    @Override
+    public StreamWrapper apply(TimeWindowedCogroupedKStreamWrapper input, TopologyBuildContext context) {
         throw needsStream(input);
     }
 

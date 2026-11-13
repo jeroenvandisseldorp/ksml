@@ -33,6 +33,12 @@ public final class OperationChain {
     private OperationChain() {
     }
 
+    /** Applies the operations to the cursor. */
+    public static StreamWrapper apply(StreamWrapper cursor, List<StreamOperation> operations, TopologyBuildContext context) {
+        return apply(cursor, operations, context, (operation, result) -> {
+        });
+    }
+
     /**
      * Applies the operations to the cursor.
      *
@@ -55,6 +61,8 @@ public final class OperationChain {
                 punctuate.namedOperationsFollow(operations.subList(index + 1, operations.size()).stream().anyMatch(OperationChain::isNamed));
             cursor = cursor.apply(operation, context);
             if (operation instanceof PunctuateOperation punctuate) punctuates.add(punctuate);
+            // Records from before a repartition topic must not be merged with records after it
+            if (operation instanceof RepartitionOperation) punctuates.clear();
             applied.accept(operation, cursor);
         }
         return cursor;

@@ -129,7 +129,7 @@ class UserPunctuatorTest {
     }
 
     @Test
-    @DisplayName("a function with more than two required parameters can not be a punctuator")
+    @DisplayName("a function with more than one required parameter can not be a punctuator")
     void tooManyParameters() {
         final var function = new UserFunction("ns", "fn", UserTestSupport.params(3), null, (String[]) null);
         final var tags = tags();

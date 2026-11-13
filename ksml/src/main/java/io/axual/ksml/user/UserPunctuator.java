@@ -30,10 +30,12 @@ import io.axual.ksml.store.StateStores;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 public class UserPunctuator extends Invoker {
-    private boolean warnedAboutResult = false;
+    // One punctuator serves all tasks on all stream threads
+    private final AtomicBoolean warnedAboutResult = new AtomicBoolean();
 
     public UserPunctuator(UserFunction function, MetricTags tags) {
         super(function, tags, KSMLDSL.Functions.TYPE_PUNCTUATOR);
@@ -48,14 +50,13 @@ public class UserPunctuator extends Invoker {
         final var injections = new HashMap<String, Object>(UserFunction.withStores(stores));
         injections.put(UserFunction.INJECT_CONTEXT, context);
         final var result = timeExecutionOf(() -> function.call(injections, new DataLong(timestamp)));
-        if (result != null && !(result instanceof DataNull) && !warnedAboutResult) {
-            warnedAboutResult = true;
+        if (result != null && !(result instanceof DataNull) && warnedAboutResult.compareAndSet(false, true)) {
             log.warn("Punctuator {} returned a value, which is ignored: punctuators emit records with context.forward", function.name);
         }
     }
 
     /** Whether the warning about a returned value was logged. */
     boolean warnedAboutResult() {
-        return warnedAboutResult;
+        return warnedAboutResult.get();
     }
 }

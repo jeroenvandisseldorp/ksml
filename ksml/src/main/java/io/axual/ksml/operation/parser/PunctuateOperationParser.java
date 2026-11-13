@@ -21,6 +21,7 @@ package io.axual.ksml.operation.parser;
  */
 
 import io.axual.ksml.data.schema.EnumSchema;
+import io.axual.ksml.definition.PunctuatorDefinition;
 import io.axual.ksml.definition.parser.PunctuatorDefinitionParser;
 import io.axual.ksml.dsl.KSMLDSL;
 import io.axual.ksml.exception.TopologyException;
@@ -65,10 +66,16 @@ public class PunctuateOperationParser extends OperationParser<PunctuateOperation
                         throw new TopologyException("Punctuate operation needs a function of type " + KSMLDSL.Functions.TYPE_PUNCTUATOR + ", but function '" + punctuator.name() + "' has type " + punctuator.type());
                     if (interval.toMillis() < 1)
                         throw new TopologyException("Punctuate interval must be at least 1 millisecond, got " + interval);
-                    final var type = Punctuate.PUNCTUATION_TYPE_STREAM_TIME.equals(punctuationType)
-                            ? PunctuationType.STREAM_TIME
-                            : PunctuationType.WALL_CLOCK_TIME;
-                    return new PunctuateOperation(operationConfig(name, tags), interval, type, punctuator, stores);
+                    final var type = switch (punctuationType) {
+                        case Punctuate.PUNCTUATION_TYPE_STREAM_TIME -> PunctuationType.STREAM_TIME;
+                        case Punctuate.PUNCTUATION_TYPE_WALL_CLOCK_TIME -> PunctuationType.WALL_CLOCK_TIME;
+                        default -> throw new TopologyException("Unknown punctuationType: " + punctuationType);
+                    };
+                    // A function without a type in the functions section is generic: apply the punctuator rules to it
+                    final var function = KSMLDSL.Functions.TYPE_GENERIC.equals(punctuator.type())
+                            ? new PunctuatorDefinition(punctuator)
+                            : punctuator;
+                    return new PunctuateOperation(operationConfig(name, tags), interval, type, function, stores);
                 });
     }
 

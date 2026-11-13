@@ -24,6 +24,8 @@ import io.axual.ksml.definition.StateStoreDefinition;
 import io.axual.ksml.exception.ExecutionException;
 import io.axual.ksml.proxy.store.ProxyUtil;
 import io.axual.ksml.store.StateStores;
+import lombok.AccessLevel;
+import lombok.Getter;
 import org.apache.kafka.streams.processor.StateStore;
 import org.apache.kafka.streams.processor.api.Processor;
 import org.apache.kafka.streams.processor.api.ProcessorContext;
@@ -33,6 +35,7 @@ import java.util.function.Function;
 
 public abstract class OperationProcessor implements Processor<Object, Object, Object, Object> {
     protected ProcessorContext<Object, Object> context;
+    @Getter(AccessLevel.PROTECTED)
     private final String name;
     private final String[] storeNames;
     protected final StateStores stores = new StateStores();
@@ -43,10 +46,6 @@ public abstract class OperationProcessor implements Processor<Object, Object, Ob
     protected OperationProcessor(String name, String[] storeNames) {
         this.name = name;
         this.storeNames = storeNames;
-    }
-
-    protected String name() {
-        return name;
     }
 
     /** Sets where {@link #init} looks up the definitions, and so the declared types, of the stores it wraps. */
@@ -76,11 +75,12 @@ public abstract class OperationProcessor implements Processor<Object, Object, Ob
 
     /** Runs an action, such as a punctuation, with the given timestamp as the time for Python writes to timestamped stores. */
     protected final void runAt(long timestamp, Runnable action) {
+        final var previous = currentTimestamp;
         try {
             currentTimestamp = timestamp;
             action.run();
         } finally {
-            currentTimestamp = null;
+            currentTimestamp = previous;
         }
     }
 

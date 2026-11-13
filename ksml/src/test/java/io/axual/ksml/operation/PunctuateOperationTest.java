@@ -45,6 +45,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import tools.jackson.databind.JsonNode;
 
 import java.nio.charset.StandardCharsets;
@@ -521,7 +523,96 @@ class PunctuateOperationTest {
                           code: pass
                     to: output
                 """.formatted(wallClock("pass").indent(6))).describe().toString();
-        assertThat(description).doesNotContain("flush-to-counted", "flush-to-as_table", "flush-to-other_peek");
+        assertThat(description).contains("Processor: test_flush-next");
+        assertThat(description).doesNotContain("flush-to-test_counted", "flush-to-test_back_to_stream", "flush-to-test_other_peek");
+        // toTable after toStream has a stream input, so it does get a side path
+        assertThat(description).contains("Processor: test_flush-to-test_as_table ");
+    }
+
+    @Test
+    @DisplayName("operations after a repartition get no side path")
+    void noSidePathsAfterRepartition() {
+        final var description = topology(pipeline(wallClock("pass") + """
+                - type: transformValue
+                  name: before
+                  mapper:
+                    expression: value
+                    resultType: long
+                - type: repartition
+                  numberOfPartitions: 2
+                - type: transformValue
+                  name: after
+                  mapper:
+                    expression: value
+                    resultType: long
+                """)).describe().toString();
+        assertThat(description).contains("Processor: test_flush-to-test_before ");
+        assertThat(description).doesNotContain("flush-to-test_after");
+    }
+
+    @Test
+    @DisplayName("an error of an operation after punctuate is not wrapped as an error of the punctuator")
+    void downstreamErrorNotWrapped() {
+        start(pipeline(wallClock("context.forward('a', 1)") + """
+                - type: filter
+                  name: failing
+                  if:
+                    code: raise ValueError('filter failed')
+                """));
+        assertThatThrownBy(this::tick)
+                .hasStackTraceContaining("filter failed")
+                .satisfies(e -> assertThat(stackTrace(e)).doesNotContain("Error in punctuate operation"));
+    }
+
+    private static String stackTrace(Throwable throwable) {
+        final var writer = new java.io.StringWriter();
+        throwable.printStackTrace(new java.io.PrintWriter(writer));
+        return writer.toString();
+    }
+
+    @Test
+    @DisplayName("punctuate works inside a branch, and can forward to a named operation in the branch")
+    void punctuateInBranch() {
+        start(STREAMS + """
+                pipelines:
+                  main:
+                    from: input
+                    branch:
+                      - if:
+                          expression: True
+                        via:
+                %s
+                          - type: transformValue
+                            name: double
+                            mapper:
+                              expression: value * 2
+                              resultType: long
+                          - type: transformValue
+                            name: plus_one
+                            mapper:
+                              expression: value + 1
+                              resultType: long
+                        to: output
+                """.formatted(wallClock("context.forward('p', 10, to='plus_one')").indent(10)));
+        tick();
+        input.pipeInput("i", 5L);
+        assertThat(output.readKeyValuesToList()).containsExactly(KeyValue.pair("p", 11L), KeyValue.pair("i", 11L));
+    }
+
+    @Test
+    @DisplayName("two operations with the same name after punctuate are rejected")
+    void duplicateTargetName() {
+        final var yaml = pipeline(wallClock("pass") + """
+                - type: peek
+                  name: same
+                  forEach:
+                    code: pass
+                - type: peek
+                  name: same
+                  forEach:
+                    code: pass
+                """);
+        assertThatThrownBy(() -> topology(yaml)).hasStackTraceContaining("Operation name 'same' is used twice after punctuate");
     }
 
     private static final String FULL_OPERATION = """
@@ -532,8 +623,8 @@ class PunctuateOperationTest {
                 code: pass
             """;
 
-    @org.junit.jupiter.params.ParameterizedTest
-    @org.junit.jupiter.params.provider.ValueSource(strings = {"interval", "punctuationType", "punctuator"})
+    @ParameterizedTest
+    @ValueSource(strings = {"interval", "punctuationType", "punctuator"})
     @DisplayName("a punctuate operation without a required field is rejected, naming the field")
     void missingField(String field) {
         final var operation = FULL_OPERATION.lines()
@@ -578,5 +669,44 @@ class PunctuateOperationTest {
                     to: output
                 """;
         assertThatThrownBy(() -> topology(yaml)).hasStackTraceContaining("needs a function of type punctuator, but function 'is_big' has type predicate");
+    }
+
+    private static String withFunction(String function) {
+        return STREAMS + """
+                functions:
+                %s
+                pipelines:
+                  main:
+                    from: input
+                    via:
+                      - type: punctuate
+                        name: flush
+                        interval: 1m
+                        punctuationType: wallClockTime
+                        punctuator: emit
+                    to: output
+                """.formatted(function.indent(2));
+    }
+
+    @Test
+    @DisplayName("a function without a type gets the punctuator rules: it receives the timestamp")
+    void genericFunctionAsPunctuator() {
+        start(withFunction("""
+                emit:
+                  code: context.forward('tick', timestamp)
+                """));
+        tick();
+        assertThat(output.readValue()).isEqualTo(START.plus(Duration.ofMinutes(1)).toEpochMilli());
+    }
+
+    @Test
+    @DisplayName("a function without a type that declares a resultType is rejected as a punctuator")
+    void genericFunctionWithResultType() {
+        final var yaml = withFunction("""
+                emit:
+                  expression: 1
+                  resultType: long
+                """);
+        assertThatThrownBy(() -> topology(yaml)).hasStackTraceContaining("can not return a result");
     }
 }

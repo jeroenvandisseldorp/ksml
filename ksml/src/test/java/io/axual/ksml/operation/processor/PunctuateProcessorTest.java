@@ -25,6 +25,7 @@ import io.axual.ksml.data.object.DataString;
 import io.axual.ksml.exception.ExecutionException;
 import io.axual.ksml.proxy.context.ProcessorContextProxy;
 import io.axual.ksml.type.UserType;
+import org.apache.kafka.streams.errors.TaskMigratedException;
 import org.apache.kafka.streams.processor.Cancellable;
 import org.apache.kafka.streams.processor.PunctuationType;
 import org.apache.kafka.streams.processor.Punctuator;
@@ -46,6 +47,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -117,16 +120,17 @@ class PunctuateProcessorTest {
         punctuator.punctuate(2000L);
         assertThat(proxies).hasSize(2).doesNotHaveDuplicates();
         @SuppressWarnings("unchecked") final ArgumentCaptor<Record<Object, Object>> captor = ArgumentCaptor.forClass(Record.class);
-        verify(context, org.mockito.Mockito.times(2)).forward(captor.capture(), eq("flush-next"));
+        verify(context, times(2)).forward(captor.capture(), eq("flush-next"));
         assertThat(captor.getAllValues()).extracting(Record::timestamp).containsExactly(1000L, 2000L);
         assertThatThrownBy(proxies.get(0)::taskId).hasMessageContaining("no longer valid");
     }
 
     @Test
-    @DisplayName("an error in the punctuator names the operation and the timestamp, and the context is still invalidated")
+    @DisplayName("an error in the punctuator names the operation and the timestamp, the context is still invalidated, and earlier forwards stay")
     void errorWrapped() {
         final var processor = processor(NEXT, (stores, timestamp, proxy) -> {
             proxies.add(proxy);
+            proxy.forward("a", timestamp, null, null, null);
             throw new IllegalStateException("boom");
         });
         final var punctuator = init(processor);
@@ -135,6 +139,32 @@ class PunctuateProcessorTest {
                 .hasMessageContaining("Error in punctuate operation 'flush' during the punctuation at timestamp 1000, not while processing a record: boom")
                 .hasCauseInstanceOf(IllegalStateException.class);
         assertThatThrownBy(proxies.get(0)::taskId).hasMessageContaining("no longer valid");
-        verify(context, org.mockito.Mockito.never()).forward(any(Record.class), any(String.class));
+        verify(context).forward(any(Record.class), eq("flush-next"));
+    }
+
+    @Test
+    @DisplayName("an error of a later operation during forward is rethrown unchanged")
+    void downstreamErrorNotWrapped() {
+        final var error = new TaskMigratedException("fenced");
+        doThrow(error).when(context).forward(any(Record.class), eq("flush-next"));
+        final var processor = processor(NEXT, (stores, timestamp, proxy) -> proxy.forward("a", timestamp, null, null, null));
+        final var punctuator = init(processor);
+        assertThatThrownBy(() -> punctuator.punctuate(1000L)).isSameAs(error);
+    }
+
+    @Test
+    @DisplayName("an error of a later operation is rethrown, also when the punctuator caught it")
+    void caughtDownstreamErrorStillThrown() {
+        final var error = new TaskMigratedException("fenced");
+        doThrow(error).when(context).forward(any(Record.class), eq("flush-next"));
+        final var processor = processor(NEXT, (stores, timestamp, proxy) -> {
+            try {
+                proxy.forward("a", timestamp, null, null, null);
+            } catch (RuntimeException e) {
+                // swallowed, as Python code with try/except could do
+            }
+        });
+        final var punctuator = init(processor);
+        assertThatThrownBy(() -> punctuator.punctuate(1000L)).isSameAs(error);
     }
 }

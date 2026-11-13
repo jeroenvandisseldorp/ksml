@@ -32,6 +32,7 @@ import io.axual.ksml.python.PythonDataObjectMapper;
 import io.axual.ksml.python.PythonErrors;
 import io.axual.ksml.python.PythonNativeMapper;
 import io.axual.ksml.type.UserType;
+import lombok.Getter;
 import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.apache.kafka.streams.processor.api.ProcessorContext;
@@ -40,18 +41,11 @@ import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Value;
 
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.TreeSet;
 
 import static io.axual.ksml.type.UserType.DEFAULT_NOTATION;
 
-/**
- * Python view of a Kafka Streams {@link ProcessorContext}, injected into a function as {@code context}. Only the
- * methods annotated with {@link HostAccess.Export} are visible from Python, so for example {@code schedule},
- * {@code getStateStore} and {@code appConfigs} raise an AttributeError. Python code sees the proxy through the class
- * {@link io.axual.ksml.python.PythonContext#PROCESSOR_CONTEXT_CLASS}, which adds keyword arguments to {@code forward}.
- * <p>
- * The proxy is only usable until {@link #invalidate()} is called, when the function call that received it returns.
- */
+/** Python view of a ProcessorContext, injected as {@code context}. Only exported methods are visible, and only until {@link #invalidate()}. */
 public class ProcessorContextProxy implements AbstractProxy {
     private static final PythonNativeMapper NATIVE_MAPPER = new PythonNativeMapper();
     private static final PythonDataObjectMapper DATA_OBJECT_MAPPER = new PythonDataObjectMapper(true);
@@ -73,6 +67,12 @@ public class ProcessorContextProxy implements AbstractProxy {
     private final Target next;
     private final Map<String, Target> namedTargets;
     private boolean valid = true;
+    /**
+     * The first error that an operation after the punctuator threw during {@code forward}. It must reach Kafka
+     * Streams unchanged, also when Python code caught it.
+     */
+    @Getter
+    private RuntimeException downstreamError;
 
     /**
      * Creates a context proxy.
@@ -86,7 +86,7 @@ public class ProcessorContextProxy implements AbstractProxy {
         this.context = context;
         this.defaultTimestamp = defaultTimestamp;
         this.next = next;
-        this.namedTargets = new TreeMap<>(namedTargets);
+        this.namedTargets = namedTargets;
     }
 
     /** Makes every later call fail, so a context kept by Python after the function call does nothing. */
@@ -120,8 +120,13 @@ public class ProcessorContextProxy implements AbstractProxy {
                 toType(value, target.valueType(), "value", targetName),
                 toTimestamp(timestamp),
                 toHeaders(headers));
-        if (target.childName() != null) context.forward(record, target.childName());
-        else context.forward(record);
+        try {
+            if (target.childName() != null) context.forward(record, target.childName());
+            else context.forward(record);
+        } catch (RuntimeException e) {
+            if (downstreamError == null) downstreamError = e;
+            throw e;
+        }
     }
 
     /** Asks Kafka Streams to commit the task at its next opportunity. */
@@ -170,7 +175,7 @@ public class ProcessorContextProxy implements AbstractProxy {
         if (NATIVE_MAPPER.fromPython(to) instanceof String name) {
             if (namedTargets.containsKey(name)) return name;
             throw PythonErrors.valueError("forward can not send to '" + name + "', valid names are: "
-                    + (namedTargets.isEmpty() ? "none" : String.join(", ", namedTargets.keySet())));
+                    + (namedTargets.isEmpty() ? "none" : String.join(", ", new TreeSet<>(namedTargets.keySet()))));
         }
         throw PythonErrors.typeError("forward to must be an operation name, got " + PythonErrors.typeName(to));
     }

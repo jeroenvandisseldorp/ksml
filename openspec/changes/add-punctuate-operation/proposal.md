@@ -20,7 +20,7 @@ Kafka Streams lets a processor schedule a `Punctuator` that runs on a wall-clock
 - The KSML test runner gets a way to advance wall-clock time in a test, so `wallClockTime` punctuators can be tested. Stream-time punctuators can already be tested by producing records with timestamps.
 - JSON schema (`docs/ksml-language-spec.json`), operation and function reference docs, an example and release notes are updated.
 
-No breaking changes. Existing definitions behave the same.
+No breaking changes for KSML definitions. Java code that overrides `UserFunction.call` must override the new `call(Map, ...)`; callers of the old `call(StateStores, ...)` still compile, as it is kept as a deprecated method.
 
 ## Capabilities
 

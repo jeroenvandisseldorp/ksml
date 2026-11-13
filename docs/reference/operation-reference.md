@@ -1055,7 +1055,6 @@ punctuator can send new records down the pipeline with `context.forward`.
 | `interval`        | Duration | Yes      | The time between two punctuations, at least 1 millisecond, for example `30s` or `1m`               |
 | `punctuationType` | String   | Yes      | `wallClockTime` or `streamTime`, see below                                                          |
 | `punctuator`      | Object   | Yes      | A [punctuator](function-reference.md#punctuator) function, inline or by name                        |
-| `stores`          | Array    | No       | Names of state stores the punctuator uses, in addition to the `stores` of the function             |
 | `forwardTo`       | Array    | No       | Names of operations further down the pipeline that the punctuator sends records to, see below      |
 | `name`            | String   | No       | The name of the operation                                                                           |
 
@@ -1084,17 +1083,17 @@ operations in between. The name must be listed in `forwardTo`. An operation in `
 
 - come after the `punctuate` operation in the same `via` list,
 - have a `name`,
-- take a stream as input. Operations after a `groupBy`, `groupByKey`, `windowBy...` or `toTable` can not be a
-  target until a `toStream` turns the result back into a stream, and
-- not come after a `repartition`, because a record sent past the repartition topic would reach a task that
-  does not own its key.
+- not come after a `repartition`, `groupBy`, `groupByKey`, `toTable` or a join with a stream or table. Kafka
+  Streams repartitions before each of these, because `punctuate` may change keys. A record sent past the
+  repartition topic would reach a task that does not own its key.
 
-Operations in other pipelines, inside a `branch`, and the pipeline's `to` can not be a target. KSML stops at startup
+Operations in other pipelines, in a `branch` that the `punctuate` is not in, and the pipeline's `to` can not be a
+target. KSML stops at startup
 when a name in `forwardTo` is not a valid target. A `to` that is not in `forwardTo` raises an error that lists the
 valid names. The key and value must fit the input types of the target.
 
-For each operation in `forwardTo`, KSML adds a pass-through node and a merge right before it when it builds the
-topology. Records from the input still pass every operation once.
+When `forwardTo` is not empty, KSML adds one pass-through node after `punctuate`, and a pass-through node and a
+merge before each target. Records from the input still pass every operation once.
 
 #### Things to keep in mind
 

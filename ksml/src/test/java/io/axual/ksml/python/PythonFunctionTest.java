@@ -25,6 +25,8 @@ import io.axual.ksml.data.object.DataInteger;
 import io.axual.ksml.data.object.DataLong;
 import io.axual.ksml.data.object.DataNull;
 import io.axual.ksml.data.object.DataString;
+import io.axual.ksml.data.object.DataTuple;
+import io.axual.ksml.data.type.TupleType;
 import io.axual.ksml.definition.FunctionDefinition;
 import io.axual.ksml.definition.ParameterDefinition;
 import io.axual.ksml.definition.PythonSource;
@@ -176,6 +178,19 @@ class PythonFunctionTest {
         assertThatThrownBy(() -> function.call(Map.of("unknown", 1)))
                 .isInstanceOf(ExecutionException.class)
                 .hasMessageContaining("can not inject unknown variable 'unknown'");
+    }
+
+    @Test
+    void returnsKeyValueTupleWithNoneKey() {
+        // As a keyValueTransformer does: a None key stays a typed null, the value keeps its type
+        final var tupleType = new UserType(UserType.DEFAULT_NOTATION, new TupleType(DataString.DATATYPE, DataLong.DATATYPE));
+        final var definition = FunctionDefinition.as(KSMLDSL.Functions.TYPE_GENERIC, "pair", new ParameterDefinition[0], PythonSource.of(null, null, "(None, 5)"), tupleType, null);
+        final var result = PythonFunction.forFunction(context, "test", "pair", definition).call();
+        assertThat(result).isInstanceOf(DataTuple.class);
+        assertThat(tupleType.dataType().isAssignableFrom(result).isAssignable()).isTrue();
+        final var elements = ((DataTuple) result).elements();
+        assertThat(elements.get(0).type()).isEqualTo(DataString.DATATYPE);
+        assertThat(elements.get(1)).isEqualTo(new DataLong(5L));
     }
 
     @Test

@@ -59,8 +59,9 @@ public final class OperationChain {
             } else {
                 cursor = cursor.apply(operation, context);
             }
-            // Records from before a repartition topic must not be merged with records after it
-            if (operation instanceof RepartitionOperation) {
+            // Records from before a repartition topic must not be merged with records after it. As punctuate
+            // re-keys, Kafka Streams also repartitions before grouping, joins and toTable.
+            if (repartitions(operation) || !(cursor instanceof KStreamWrapper)) {
                 punctuates.forEach(PunctuateOperation.SidePaths::checkAllFound);
                 punctuates.clear();
             }
@@ -70,12 +71,18 @@ public final class OperationChain {
         return cursor;
     }
 
+    /** Whether the operation reads its input from a repartition topic; joins with a global table do not. */
+    private static boolean repartitions(StreamOperation operation) {
+        return operation instanceof RepartitionOperation
+                || operation instanceof JoinWithStreamOperation || operation instanceof JoinWithTableOperation
+                || operation instanceof LeftJoinWithStreamOperation || operation instanceof LeftJoinWithTableOperation
+                || operation instanceof OuterJoinWithStreamOperation || operation instanceof OuterJoinWithTableOperation;
+    }
+
     /** Merges a side path from each punctuate operation that forwards to the target into its input. */
     private static StreamWrapper addSidePaths(List<PunctuateOperation.SidePaths> punctuates, BaseOperation target, StreamWrapper input) {
-        if (!(input instanceof KStreamWrapper stream)) {
-            for (final var punctuate : punctuates) punctuate.checkStreamInput(target, input);
-            return input;
-        }
+        // A punctuate operation is only kept while the input is a stream
+        if (!(input instanceof KStreamWrapper stream)) return input;
         var merged = stream;
         for (final var punctuate : punctuates) {
             if (punctuate.targets(target)) merged = punctuate.sidePathTo(target, merged);

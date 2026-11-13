@@ -5,7 +5,7 @@ Lets a KSML pipeline run a Python function on a wall-clock or stream-time schedu
 ## ADDED Requirements
 
 ### Requirement: Punctuate operation
-A pipeline SHALL accept an operation with `type: punctuate` in its `via` list when the input is a stream. The operation SHALL require `interval`, `punctuationType` and `punctuator`, and SHALL accept optional `stores`, `forwardTo` and `name`. Records that reach the operation SHALL be forwarded unchanged, with the same key, value, timestamp and headers.
+A pipeline SHALL accept an operation with `type: punctuate` in its `via` list when the input is a stream. The operation SHALL require `interval`, `punctuationType` and `punctuator`, and SHALL accept optional `forwardTo` and `name`. Records that reach the operation SHALL be forwarded unchanged, with the same key, value, timestamp and headers.
 
 #### Scenario: Records pass through
 - **WHEN** a stream pipeline contains a `punctuate` operation and a record arrives
@@ -121,7 +121,7 @@ The `context` SHALL only be usable during the punctuator call that received it.
 - **THEN** records forwarded by the punctuator SHALL pass through the `filter` like records from the input
 
 ### Requirement: Forwarding to a named operation
-`context.forward` SHALL accept an optional `to` argument with the name of an operation. The record SHALL then go directly to that operation, skipping the operations in between. The `punctuate` operation SHALL list its targets by name in `forwardTo`. Each target SHALL come after the `punctuate` operation in the same pipeline's `via` list, before any `repartition`, have a `name`, and take a stream as input. Without `to`, the record SHALL go to the next operation. Operations not listed in `forwardTo` SHALL NOT change the topology, also when they have a `name`.
+`context.forward` SHALL accept an optional `to` argument with the name of an operation. The record SHALL then go directly to that operation, skipping the operations in between. The `punctuate` operation SHALL list its targets by name in `forwardTo`. Each target SHALL come after the `punctuate` operation in the same pipeline's `via` list, before any `repartition`, `groupBy`, `groupByKey`, `toTable` or join with a stream or table, and have a `name`. Without `to`, the record SHALL go to the next operation. Operations not listed in `forwardTo` SHALL NOT change the topology, also when they have a `name`.
 
 #### Scenario: Skip operations
 - **WHEN** the `via` list is `punctuate` with `forwardTo: [enrich]`, `transformValue` named `compute`, `transformValue` named `enrich`, and the punctuator calls `context.forward("a", 10, to="enrich")`
@@ -132,7 +132,7 @@ The `context` SHALL only be usable during the punctuator call that received it.
 - **THEN** records from the input SHALL still pass through every operation in order, and SHALL reach the named operation exactly once
 
 #### Scenario: Unreachable name in forwardTo
-- **WHEN** `forwardTo` names an operation that does not exist in the pipeline, comes before the `punctuate` operation, comes after a `repartition`, is in another pipeline, or takes a table or grouped stream as input
+- **WHEN** `forwardTo` names an operation that does not exist in the pipeline, comes before the `punctuate` operation, comes after a `repartition`, a grouping, `toTable` or a join with a stream or table, or is in another pipeline
 - **THEN** KSML SHALL reject the definition at startup with an error naming the operation
 
 #### Scenario: Name not in forwardTo
@@ -163,7 +163,7 @@ The key and value passed to `context.forward` SHALL match the input key and valu
 - **THEN** `forward` SHALL raise a Python error, and the record SHALL NOT be forwarded
 
 ### Requirement: State store access during a punctuation
-A punctuator SHALL have access to the stores listed in the operation's `stores` and in the function's `stores`, with the same Python store methods as other functions. Writes to a timestamped store without an explicit timestamp SHALL use the punctuation timestamp.
+A punctuator SHALL have access to the stores listed in the function's `stores`, with the same Python store methods as other functions. Writes to a timestamped store without an explicit timestamp SHALL use the punctuation timestamp.
 
 #### Scenario: Read and clear a store
 - **WHEN** an earlier operation adds to key-value store `totals`, and the punctuator iterates over `totals`, forwards each entry and deletes it
@@ -174,7 +174,7 @@ A punctuator SHALL have access to the stores listed in the operation's `stores` 
 - **THEN** the entry SHALL be stored with the punctuation timestamp
 
 #### Scenario: Undeclared store
-- **WHEN** a punctuator uses a store that is not listed in the operation's or the function's `stores`
+- **WHEN** a punctuator uses a store that is not listed in the function's `stores`
 - **THEN** the store SHALL NOT be available to the function
 
 ### Requirement: Errors in a punctuator

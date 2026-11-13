@@ -57,9 +57,8 @@ public class PunctuateOperationParser extends OperationParser<PunctuateOperation
                 FieldParsers.durationField(Punctuate.INTERVAL, "The time between two punctuations, at least 1 millisecond"),
                 FieldParsers.enumField(Punctuate.PUNCTUATION_TYPE, PUNCTUATION_TYPE_SCHEMA),
                 functionField(Punctuate.PUNCTUATOR, "The function that is called on each punctuation", new PunctuatorDefinitionParser(false)),
-                FieldParsers.optional(FieldParsers.listField(Punctuate.STORES, "store-name", "store", "The names of the state stores the punctuator uses, in addition to those of the function", new StringValueParser())),
                 FieldParsers.optional(FieldParsers.listField(Punctuate.FORWARD_TO, "operation-name", "operation", "The names of operations further down the pipeline that the punctuator forwards records to with forward(..., to=...)", new StringValueParser())),
-                (name, interval, punctuationType, punctuator, stores, forwardTo, tags) -> {
+                (name, interval, punctuationType, punctuator, forwardTo, tags) -> {
                     requireField(interval, Punctuate.INTERVAL);
                     requireField(punctuationType, Punctuate.PUNCTUATION_TYPE);
                     requireField(punctuator, Punctuate.PUNCTUATOR);
@@ -67,16 +66,15 @@ public class PunctuateOperationParser extends OperationParser<PunctuateOperation
                         throw new TopologyException("Punctuate operation needs a function of type " + KSMLDSL.Functions.TYPE_PUNCTUATOR + ", but function '" + punctuator.name() + "' has type " + punctuator.type());
                     if (interval.toMillis() < 1)
                         throw new TopologyException("Punctuate interval must be at least 1 millisecond, got " + interval);
-                    final var type = switch (punctuationType) {
-                        case Punctuate.PUNCTUATION_TYPE_STREAM_TIME -> PunctuationType.STREAM_TIME;
-                        case Punctuate.PUNCTUATION_TYPE_WALL_CLOCK_TIME -> PunctuationType.WALL_CLOCK_TIME;
-                        default -> throw new TopologyException("Unknown punctuationType: " + punctuationType);
-                    };
+                    // enumField already rejects other values
+                    final var type = Punctuate.PUNCTUATION_TYPE_STREAM_TIME.equals(punctuationType)
+                            ? PunctuationType.STREAM_TIME
+                            : PunctuationType.WALL_CLOCK_TIME;
                     // A function without a type in the functions section is generic: apply the punctuator rules to it
                     final var function = KSMLDSL.Functions.TYPE_GENERIC.equals(punctuator.type())
                             ? new PunctuatorDefinition(punctuator)
                             : punctuator;
-                    return new PunctuateOperation(operationConfig(name, tags), interval, type, function, stores, forwardTo);
+                    return new PunctuateOperation(operationConfig(name, tags), interval, type, function, forwardTo);
                 });
     }
 

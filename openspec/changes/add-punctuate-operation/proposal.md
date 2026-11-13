@@ -9,7 +9,7 @@ Kafka Streams lets a processor schedule a `Punctuator` that runs on a wall-clock
   - `interval`: the duration between calls (KSML duration syntax, for example `30s` or `1m`).
   - `punctuationType`: `wallClockTime` or `streamTime`, as in Kafka Streams' `PunctuationType`. Required, with no default.
   - `punctuator`: a function, inline or by name.
-  - `stores`: the state stores the function may use, as for other stateful operations.
+  - `forwardTo`: the named operations further down that the punctuator may send records to.
 - A new function type `punctuator`. It is called with the punctuation `timestamp` and a `context` object, may read and write the attached stores, and returns nothing.
 - The `context` object gives the punctuator a selection of Kafka Streams' `ProcessorContext`:
   - `forward(key, value, timestamp=None, headers=None, to=None)` sends a record to the next operation, or with `to` to a named operation further down the same pipeline that the operation lists in `forwardTo`. The timestamp defaults to the punctuation timestamp. Headers use the same format as in `metadataTransformer`.

@@ -61,15 +61,13 @@ public class PunctuateOperation extends BaseOperation {
     private final Duration interval;
     private final PunctuationType punctuationType;
     private final FunctionDefinition punctuator;
-    private final List<String> storeNames;
     private final Set<String> forwardTo;
 
-    public PunctuateOperation(OperationConfig config, Duration interval, PunctuationType punctuationType, FunctionDefinition punctuator, List<String> storeNames, List<String> forwardTo) {
+    public PunctuateOperation(OperationConfig config, Duration interval, PunctuationType punctuationType, FunctionDefinition punctuator, List<String> forwardTo) {
         super(config);
         this.interval = interval;
         this.punctuationType = punctuationType;
         this.punctuator = punctuator;
-        this.storeNames = storeNames != null ? storeNames : List.of();
         this.forwardTo = forwardTo != null ? Collections.unmodifiableSet(new LinkedHashSet<>(forwardTo)) : Set.of();
     }
 
@@ -84,6 +82,9 @@ public class PunctuateOperation extends BaseOperation {
 
     @Override
     public StreamWrapper apply(KStreamWrapper input, TopologyBuildContext context) {
+        // Only OperationChain connects the operations in forwardTo
+        if (!forwardTo.isEmpty())
+            throw topologyError("Punctuate with forwardTo must be applied through OperationChain");
         return applyWithSidePaths(input, context).next();
     }
 
@@ -97,14 +98,14 @@ public class PunctuateOperation extends BaseOperation {
          */
 
         checkNotNull(punctuator, PUNCTUATOR_NAME.toLowerCase());
+        // The side path node names are made from the operation name
+        if (name == null && !forwardTo.isEmpty())
+            throw topologyError("Punctuate with forwardTo needs a valid name");
         final var k = input.keyType().flatten();
         final var v = input.valueType().flatten();
-        final var allStoreNames = new LinkedHashSet<>(punctuator.storeNames());
-        allStoreNames.addAll(storeNames);
-        final var function = punctuator.withStoreNames(List.copyOf(allStoreNames));
-        final var userFunction = userFunctionOf(context, PUNCTUATOR_NAME, function, DataNull.DATATYPE, superOf(DataLong.DATATYPE));
+        final var userFunction = userFunctionOf(context, PUNCTUATOR_NAME, punctuator, DataNull.DATATYPE, superOf(DataLong.DATATYPE));
         final var userPunctuator = new UserPunctuator(userFunction, tags);
-        final var stores = allStoreNames.toArray(String[]::new);
+        final var stores = punctuator.storeNames().toArray(String[]::new);
 
         // With targets, the next operation gets a named pass-through node so records can be sent to it alone
         final var nextName = !forwardTo.isEmpty() ? name + "-next" : null;
@@ -160,18 +161,12 @@ public class PunctuateOperation extends BaseOperation {
             return new KStreamWrapper(input.stream.merge(side, Named.as(sideName + "-merge")), input.keyType(), input.valueType());
         }
 
-        /** Fails when the operation is a target, because it does not take a stream as input. */
-        void checkStreamInput(BaseOperation operation, StreamWrapper input) {
-            if (targets(operation))
-                throw topologyError("Punctuate '" + name + "' can not forward to '" + operation.definedName() + "': it takes " + input + " as input, not a stream");
-        }
-
         /** Fails when an operation in {@code forwardTo} was not found. */
         void checkAllFound() {
             final var missing = forwardTo.stream().filter(target -> !namedTargets.containsKey(target)).toList();
             if (!missing.isEmpty())
                 throw topologyError("Punctuate '" + name + "' can not forward to " + String.join(", ", missing)
-                        + ": forwardTo can only name operations after it in the same pipeline, before any repartition");
+                        + ": forwardTo can only name operations after it in the same pipeline, before any repartition, grouping, join or toTable");
         }
     }
 

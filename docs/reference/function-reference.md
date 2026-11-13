@@ -945,9 +945,10 @@ Runs on a schedule, set by a [`punctuate`](operation-reference.md#punctuate) ope
 | timestamp | long | The punctuation time, in milliseconds since the epoch |
 
 The punctuation context is available in the code as the variable `context`, like the state stores are available by
-their names. It is used to forward records (see the methods below). Do not use `context` or `stores` as global names
-in any function: all functions share their globals, and KSML sets these names during calls. For example, a function
-that runs during a punctuator's `context.forward` sees the punctuation context as `context`.
+their names. It is used to forward records (see the methods below).
+
+KSML sets `context` and `stores` during each call, and all functions share them. Do not use these names for your
+own variables, parameters or stores. A function called during `context.forward` sees the punctuator's `context`.
 
 #### Return Value
 
@@ -983,13 +984,9 @@ The arguments of `forward`:
 The `context` can only be used during the call that received it. Keeping it, for example in a global variable, and
 calling it later raises a `RuntimeError`.
 
-`context` and `stores` are read-only globals during a call. A parameter, local variable or store with the same name
-hides them in that function, so a punctuator must not use these names, and no function should assign to them.
-
 #### State stores and timestamps
 
-A punctuator can use the stores listed in its own `stores` and in the `stores` of the `punctuate` operation, with
-the same methods as other functions. A write to a timestamped store without a timestamp uses the punctuation
+A punctuator can use the stores listed in its `stores`, with the same methods as other functions. A write to a timestamped store without a timestamp uses the punctuation
 `timestamp`. To clear entries, collect their keys while iterating and delete them after the loop, as in the example
 below.
 

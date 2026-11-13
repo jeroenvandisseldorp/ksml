@@ -144,8 +144,7 @@ public class PythonFunction extends UserFunction {
             if (resultType != null && resultType.dataType() != DataNull.DATATYPE) {
                 DataObject result = dataObjectMapper.toDataObject(resultType.dataType(), pyResult);
                 logCall(parameters, result);
-                // Convert only values that do not fit yet; converting again copies all collections
-                if (converter != null && resultType.dataType().isAssignableFrom(result).isNotAssignable())
+                if (converter != null)
                     result = converter.convert(DEFAULT_NOTATION, result, resultType);
                 checkType(resultType.dataType(), result);
                 return result;
@@ -233,7 +232,7 @@ public class PythonFunction extends UserFunction {
         // most calls, so that takes a shorter path.
         final var pyCallerCode = "def " + name + "_caller(_ksml_injected, *args):\n" +
                 "  global " + INJECT_STORES + "\n" +
-                "  if len(_ksml_injected) == 1:\n" +
+                "  if _ksml_injected.keys() == {\"" + INJECT_STORES + "\"}:\n" +
                 "    _ksml_previous = " + INJECT_STORES + "\n" +
                 "    " + INJECT_STORES + " = _ksml_injected[\"" + INJECT_STORES + "\"]\n" +
                 "    try:\n" +

@@ -17,11 +17,10 @@ functions:
     stores: [totals]
     code: |
       keys = []
-      with totals.all() as entries:
-        for e in entries:
-          context.forward(e["key"], e["value"],
-                          headers=[{"key": "task", "value": context.taskId()}])
-          keys.append(e["key"])
+      for e in totals.all():
+        context.forward(e["key"], e["value"],
+                        headers=[{"key": "task", "value": context.taskId()}])
+        keys.append(e["key"])
       for k in keys:
         totals.delete(k)
 
@@ -99,10 +98,11 @@ The proxy has a `valid` flag that `PunctuateProcessor` clears when the call retu
 The class takes the `ProcessorContext` and a default timestamp, not punctuation-specific state, so a later change can pass a `context` to other function types without a redesign.
 
 **D7 — The punctuator function type.**
-New `PunctuatorDefinition` (type `punctuator`, built-in parameter `timestamp` of type `long`, custom parameters merged as in `ForEachActionDefinition`, `validateNoResultTypeDefined()`; it then sets an internal result type `UNKNOWN`, so `PythonFunction` hands back a returned value and `UserPunctuator` can warn about it) and `UserPunctuator`, which calls the function with the timestamp, and injects the store proxies and the context proxy.
+New `PunctuatorDefinition` (type `punctuator`, built-in parameter `timestamp` of type `long`, custom parameters merged as in `ForEachActionDefinition`, `validateNoResultTypeDefined()`; a returned value is ignored and not converted, as for `forEach`) and `UserPunctuator`, which calls the function with the timestamp, and injects the store proxies and the context proxy.
 *Injection:* `UserFunction.call` takes a map from variable name to injected object as its first argument, instead of only the state stores: `stores` (`INJECT_STORES`) for the store proxies and `context` (`INJECT_CONTEXT`) for the context proxy. `PythonFunction` declares the injectable names (`stores`, `context`) as Python globals that start as `None` (with `globals().setdefault`, so a value set by `globalCode` is kept), without a `global` statement in the function, and rejects unknown names. The generated caller takes the arguments as `*args`, so no parameter name clashes with its own names. A call sets only the variables its caller injects, with `globals().update(...)`, and leaves the others as they are. The generated caller saves the globals it sets and restores them when it returns, because a call can run inside another one: a `filter` after `punctuate` runs during `context.forward`, and must not change the punctuator's `context`.
-*Consequence:* `context` and `stores` are read-only globals during a call. A parameter, local variable or store with the same name hides them in that function, so a punctuator must not use these names. The docs say so. A function that runs during `context.forward`, such as a `filter` after `punctuate`, can read the punctuator's `context`; it can not overwrite it.
-*Alternative:* `context` as a second parameter, passed as a `DataObject` wrapper around the proxy. Rejected: it needs a fake data type for a Java object, and the call API already had a way to hand objects to Python next to the parameters. A returned value is ignored and not converted, as for `forEach`, so it can never make a punctuation fail. A new constant `KSMLDSL.Functions.TYPE_PUNCTUATOR` and `KSMLDSL.Operations.PUNCTUATE`, plus `INTERVAL` and `PUNCTUATION_TYPE` field names, are added, so the parser and JSON schema use them.
+*Consequence:* KSML sets `context` and `stores` during each call, so user code must not use these names for its own variables, parameters or stores. The docs say so. A function that runs during `context.forward`, such as a `filter` after `punctuate`, can read the punctuator's `context`; it can not overwrite it.
+*Alternative:* `context` as a second parameter, passed as a `DataObject` wrapper around the proxy. Rejected: it needs a fake data type for a Java object, and the call API already had a way to hand objects to Python next to the parameters.
+A new constant `KSMLDSL.Functions.TYPE_PUNCTUATOR` and `KSMLDSL.Operations.PUNCTUATE`, plus `INTERVAL` and `PUNCTUATION_TYPE` field names, are added, so the parser and JSON schema use them.
 
 **D8 — Errors are wrapped with context and rethrown.**
 `PunctuateProcessor.punctuate` catches an exception from the Python call, wraps it in an `ExecutionException` whose message names the operation and the punctuation timestamp, and rethrows. Kafka Streams then handles it like an exception from `process`, which keeps the outcome the same as for other functions (spec: "Errors in a punctuator"). Records already passed to `forward` stay forwarded, as in a Java `Punctuator`. An exception that an operation after `punctuate` throws during `forward` is not wrapped: `ProcessorContextProxy` remembers it and `PunctuateProcessor` rethrows it unchanged, also when the punctuator caught it, so Kafka Streams handles exceptions such as `TaskMigratedException` as usual. For the same reason `PythonFunction` rethrows a `KafkaException` from Java code that Python called unchanged.
@@ -128,7 +128,7 @@ input ─► punctuate ──(main)──► compute ─► merge ─► enrich 
 
 Targets are listed explicitly in `forwardTo`, because only the user knows which operations the punctuator sends to. Without the list, adding a `name` to any operation after a `punctuate` would add nodes, which changes the generated names, and so the store and internal topic names, of later unnamed stateful operations: a small edit could silently lose state.
 *Cost:* one merge node per operation in `forwardTo`. A merge is a pass-through, so the cost per record is small. A name in `forwardTo` that is not a valid target is found at startup; a `to` that is not in `forwardTo` is found at runtime, with an error that lists the valid names.
-*Not targetable:* operations whose input is a table or a grouped or windowed stream (a merge needs two `KStream`s), operations after a `repartition` (a record would skip the repartition topic and reach a task that does not own its key), operations in other pipelines or inside `branch` sub-pipelines, and the pipeline's `to`. Two operations with the same name after a `punctuate` are rejected at startup. These can be added later if needed.
+*Not targetable:* operations after a `repartition`, `groupBy`, `groupByKey`, `toTable` or a join with a stream or table. As `punctuate` re-keys (D1), Kafka Streams repartitions before each of these, and a record would skip the repartition topic and reach a task that does not own its key. Also operations in other pipelines or in a `branch` the `punctuate` is not in, and the pipeline's `to`. Two operations with the same name after a `punctuate` are rejected at startup. These can be added later if needed.
 *Alternative:* every named stream operation after a `punctuate` is a target, without `forwardTo` (the first version of this design). Rejected in review: `name` would change the topology shape, which it never did before in KSML.
 *Alternative:* one shared side path, merged before every target, with a header to filter on. Rejected: every target would need a filter, and the header would have to be removed again before output.
 

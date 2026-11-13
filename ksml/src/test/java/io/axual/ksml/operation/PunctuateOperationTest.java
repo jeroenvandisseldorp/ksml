@@ -292,7 +292,7 @@ class PunctuateOperationTest {
                 - type: toStream
                 """);
         assertThatThrownBy(() -> topology(afterTable))
-                .hasStackTraceContaining("Punctuate 'test_flush' can not forward to 'counted': it takes");
+                .hasStackTraceContaining("Punctuate 'test_flush' can not forward to counted: forwardTo can only name operations after it in the same pipeline, before any repartition, grouping");
         final var unknown = pipeline(wallClock("pass", "nothing") + """
                 - type: transformValue
                   name: compute
@@ -329,8 +329,8 @@ class PunctuateOperationTest {
                 - type: punctuate
                   interval: 1m
                   punctuationType: wallClockTime
-                  stores: [totals]
                   punctuator:
+                    stores: [totals]
                     code: |
                       keys = []
                       for e in totals.all():
@@ -519,8 +519,8 @@ class PunctuateOperationTest {
     }
 
     @Test
-    @DisplayName("an operation after groupBy and toTable can be a target once it takes a stream again; one in another pipeline can not")
-    void sidePathsAfterGroupingOrInOtherPipelines() {
+    @DisplayName("an operation after a grouping, which repartitions after punctuate, or in another pipeline can not be a target")
+    void noSidePathsAfterGroupingOrInOtherPipelines() {
         final var yaml = STREAMS + """
                 pipelines:
                   main:
@@ -543,9 +543,10 @@ class PunctuateOperationTest {
                           code: pass
                     to: output
                 """;
-        final var description = topology(yaml.formatted(wallClock("pass", "as_table").indent(6))).describe().toString();
-        // toTable after toStream has a stream input, so it can be a target
-        assertThat(description).contains("Processor: test_flush-next", "Processor: test_flush-to-test_as_table ");
+        // Kafka Streams repartitions before groupByKey, so a record sent to as_table would skip the repartition topic
+        final var afterGrouping = yaml.formatted(wallClock("pass", "as_table").indent(6));
+        assertThatThrownBy(() -> topology(afterGrouping))
+                .hasStackTraceContaining("can not forward to as_table: forwardTo can only name operations after it in the same pipeline, before any repartition, grouping, join or toTable");
         final var otherPipeline = yaml.formatted(wallClock("pass", "other_peek").indent(6));
         assertThatThrownBy(() -> topology(otherPipeline)).hasStackTraceContaining("can not forward to other_peek");
     }
@@ -571,6 +572,37 @@ class PunctuateOperationTest {
         assertThat(description).contains("Processor: test_flush-to-test_before ");
         assertThat(description).doesNotContain("flush-to-test_after");
         assertThatThrownBy(() -> topology(pipeline(wallClock("pass", "after") + via)))
+                .hasStackTraceContaining("can not forward to after: forwardTo can only name operations after it in the same pipeline, before any repartition");
+    }
+
+    @Test
+    @DisplayName("an operation after a join with a table can not be a target, because the join repartitions after punctuate")
+    void noSidePathsAfterJoin() {
+        final var yaml = STREAMS + """
+                tables:
+                  lookup:
+                    topic: lookup
+                    keyType: string
+                    valueType: long
+                pipelines:
+                  main:
+                    from: input
+                    via:
+                %s
+                      - type: join
+                        table: lookup
+                        valueJoiner:
+                          expression: value1 + value2
+                          resultType: long
+                      - type: transformValue
+                        name: after
+                        mapper:
+                          expression: value
+                          resultType: long
+                    to: output
+                """;
+        final var afterJoin = yaml.formatted(wallClock("pass", "after").indent(6));
+        assertThatThrownBy(() -> topology(afterJoin))
                 .hasStackTraceContaining("can not forward to after: forwardTo can only name operations after it in the same pipeline, before any repartition");
     }
 

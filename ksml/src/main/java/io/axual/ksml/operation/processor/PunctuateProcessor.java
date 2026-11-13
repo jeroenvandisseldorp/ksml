@@ -23,6 +23,7 @@ package io.axual.ksml.operation.processor;
 import io.axual.ksml.exception.ExecutionException;
 import io.axual.ksml.proxy.context.ProcessorContextProxy;
 import io.axual.ksml.store.StateStores;
+import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.streams.processor.Cancellable;
 import org.apache.kafka.streams.processor.PunctuationType;
 import org.apache.kafka.streams.processor.api.ProcessorContext;
@@ -80,10 +81,13 @@ public class PunctuateProcessor extends OperationProcessor {
             final var proxy = new ProcessorContextProxy(context, timestamp, schedule.next(), schedule.namedTargets());
             try {
                 action.apply(stores, timestamp, proxy);
+            } catch (KafkaException e) {
+                // Kafka Streams handles its own exceptions, such as TaskMigratedException
+                throw proxy.downstreamError() != null ? proxy.downstreamError() : e;
             } catch (RuntimeException e) {
                 // An error of a later operation goes to Kafka Streams as it is, so its handling is not changed
                 if (proxy.downstreamError() != null) throw proxy.downstreamError();
-                throw new ExecutionException("Error in punctuate operation '" + name() + "' during the punctuation at timestamp " + timestamp + ", not while processing a record: " + e.getMessage(), e);
+                throw new ExecutionException("Error in punctuate '" + name() + "' at timestamp " + timestamp + ": " + e.getMessage(), e);
             } finally {
                 proxy.invalidate();
             }

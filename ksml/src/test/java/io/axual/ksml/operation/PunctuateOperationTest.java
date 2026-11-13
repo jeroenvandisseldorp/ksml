@@ -359,7 +359,7 @@ class PunctuateOperationTest {
     void wrongValueType() {
         start(pipeline(wallClock("context.forward('a', 'ten')")));
         assertThatThrownBy(this::tick)
-                .hasStackTraceContaining("punctuate operation")
+                .hasStackTraceContaining("Error in punctuate 'test_flush'")
                 .hasStackTraceContaining("forward value for the next operation must be");
         assertThat(output.isEmpty()).isTrue();
     }
@@ -384,8 +384,7 @@ class PunctuateOperationTest {
                     code: seen.put(key, value)
                 """));
         assertThatThrownBy(this::tick)
-                .hasStackTraceContaining("Error in punctuate operation 'test_flush'")
-                .hasStackTraceContaining("during the punctuation at timestamp " + START.plus(Duration.ofMinutes(1)).toEpochMilli())
+                .hasStackTraceContaining("Error in punctuate 'test_flush' at timestamp " + START.plus(Duration.ofMinutes(1)).toEpochMilli())
                 .hasStackTraceContaining("boom");
         assertThat(driver.<String, Object>getKeyValueStore("seen").get("a")).isNotNull();
     }
@@ -563,7 +562,7 @@ class PunctuateOperationTest {
                 """));
         assertThatThrownBy(this::tick)
                 .hasStackTraceContaining("filter failed")
-                .satisfies(e -> assertThat(stackTrace(e)).doesNotContain("Error in punctuate operation"));
+                .satisfies(e -> assertThat(stackTrace(e)).doesNotContain("Error in punctuate"));
     }
 
     private static String stackTrace(Throwable throwable) {

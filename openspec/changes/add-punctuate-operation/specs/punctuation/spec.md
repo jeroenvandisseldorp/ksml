@@ -174,7 +174,7 @@ A punctuator SHALL have access to the stores listed in the operation's `stores` 
 - **THEN** the store SHALL NOT be available to the function
 
 ### Requirement: Errors in a punctuator
-An exception raised by a punctuator SHALL be handled the same way as an exception raised by a function in another pipeline operation, under the same error handling configuration. The log message SHALL name the `punctuate` operation and SHALL state that the error happened during a punctuation, not while processing a record. Records forwarded before the exception SHALL stay forwarded.
+An exception raised by a punctuator SHALL be handled the same way as an exception raised by a function in another pipeline operation, under the same error handling configuration. The log message SHALL name the `punctuate` operation and the timestamp of the punctuation. Records forwarded before the exception SHALL stay forwarded.
 
 #### Scenario: Same outcome as other functions
 - **WHEN** a punctuator raises an exception, and a `transformValue` mapper raising an exception under the same configuration would stop Kafka Streams

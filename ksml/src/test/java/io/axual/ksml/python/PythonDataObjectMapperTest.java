@@ -129,6 +129,18 @@ class PythonDataObjectMapperTest {
     }
 
     @Test
+    @DisplayName("toDataObject - a Python bool stays a bool when any type is expected")
+    void toDataObjectBooleanWithUnknownType() {
+        final var val = context.eval("python", "True");
+        assertThat(mapper.toDataObject(DataType.UNKNOWN, val)).isEqualTo(new DataBoolean(true));
+        final var list = (DataList) mapper.toDataObject(new ListType(DataType.UNKNOWN), context.eval("python", "[True, False]"));
+        assertThat(list.get(0)).isEqualTo(new DataBoolean(true));
+        assertThat(list.get(1)).isEqualTo(new DataBoolean(false));
+        final var union = new UnionType(new UnionType.Member(DataBoolean.DATATYPE), new UnionType.Member(DataString.DATATYPE));
+        assertThat(mapper.toDataObject(union, val)).isEqualTo(new DataBoolean(true));
+    }
+
+    @Test
     @DisplayName("toDataObject - Integer")
     void toDataObjectInteger() {
         Value val = context.eval("python", "42");

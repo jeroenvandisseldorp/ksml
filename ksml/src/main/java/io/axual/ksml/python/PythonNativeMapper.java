@@ -21,7 +21,6 @@ package io.axual.ksml.python;
  */
 
 import io.axual.ksml.data.exception.DataException;
-import io.axual.ksml.data.object.DataBoolean;
 import io.axual.ksml.data.object.DataByte;
 import io.axual.ksml.data.object.DataBytes;
 import io.axual.ksml.data.object.DataDouble;
@@ -73,8 +72,8 @@ public class PythonNativeMapper {
 
     private Object polyglotValueToNative(DataType expected, Value object) {
         if (object.isNull()) return null;
-        if (object.isBoolean() && (expected == null || expected == DataBoolean.DATATYPE))
-            return object.asBoolean();
+        // A Python bool is never a number in GraalPy, so read it as a bool and let the caller check the type
+        if (object.isBoolean()) return object.asBoolean();
 
         if (object.isNumber()) return polyglotNumberToNative(expected, object);
 

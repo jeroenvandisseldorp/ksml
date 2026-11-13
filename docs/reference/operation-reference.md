@@ -1084,7 +1084,9 @@ operations in between. An operation can be a target when it:
 - comes after the `punctuate` operation in the same `via` list,
 - has a `name`, and
 - takes a stream as input. Operations after a `groupBy`, `groupByKey`, `windowBy...` or `toTable` can not be a
-  target until a `toStream` turns the result back into a stream.
+  target until a `toStream` turns the result back into a stream, and
+- does not come after a `repartition`, because a record sent past the repartition topic would reach a task that
+  does not own its key.
 
 Operations in other pipelines, inside a `branch`, and the pipeline's `to` can not be a target. A name that is not a
 target raises an error that lists the valid names. The key and value must fit the input types of the target.
@@ -1113,8 +1115,11 @@ pipelines:
   flush_totals:
     from: orders
     via:
-      - type: transformValue
-        mapper: add_to_total     # writes to the totals store
+      - type: peek
+        forEach: add_to_total    # writes to the totals store
+      - type: filter             # only totals go to the output
+        if:
+          expression: False
       - type: punctuate
         name: flush
         interval: 1m

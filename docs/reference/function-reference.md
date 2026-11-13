@@ -288,7 +288,7 @@ A function that returns `None` gives Kafka Streams a real `null`:
 
 ## Function Types Overview
 
-Below is a table with all 21 function types in KSML.
+Below is a table with all 22 function types in KSML.
 
 | Function Type                                                           | Purpose                                          | Used In                                     |
 |-------------------------------------------------------------------------|--------------------------------------------------|---------------------------------------------|
@@ -981,6 +981,9 @@ The arguments of `forward`:
 The `context` can only be used during the call that received it. Keeping it, for example in a global variable, and
 calling it later raises a `RuntimeError`.
 
+`context` and `stores` are read-only globals during a call. A parameter, local variable or store with the same name
+hides them in that function, so a punctuator must not use these names, and no function should assign to them.
+
 #### State stores and timestamps
 
 A punctuator can use the stores listed in its own `stores` and in the `stores` of the `punctuate` operation, with
@@ -998,10 +1001,9 @@ functions:
       - totals
     code: |
       keys = []
-      with totals.all() as entries:
-        for e in entries:
-          context.forward(e["key"], e["value"], headers=[{"key": "task", "value": context.taskId()}])
-          keys.append(e["key"])
+      for e in totals.all():
+        context.forward(e["key"], e["value"], headers=[{"key": "task", "value": context.taskId()}])
+        keys.append(e["key"])
       for k in keys:
         totals.delete(k)
 ```

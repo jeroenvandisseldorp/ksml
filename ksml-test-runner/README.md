@@ -118,7 +118,7 @@ Each produce block targets one stream by reference:
 | `messages` | * | List of messages with `key`, `value`, and optional `timestamp` (epoch millis). |
 | `generator` | * | Generator function (KSML generator syntax). Mutually exclusive with `messages`. |
 | `count` | no | Number of times to invoke the generator (default `1`). |
-| `advanceWallClockTime` | * | Duration, such as `1m` or `30s`. After producing the block's messages, advances the wall-clock time of the test by this amount, so wall-clock punctuations that become due run. |
+| `advanceWallClockTime` | * | Duration, such as `1m` or `30s` (a bare number is milliseconds). Moves the test's wall-clock time forward after the block's messages, so due wall-clock punctuations run. |
 
 \* At least one of `messages`, `generator` or `advanceWallClockTime` must be present, and not both `messages` and `generator`.
 
@@ -127,8 +127,8 @@ declare the stream under `streams:` and reference it via `to:`.
 
 #### Testing wall-clock punctuations
 
-A [`punctuate`](../docs/reference/operation-reference.md#punctuate) operation with `punctuationType: wallClockTime` runs when system time passes, which a test does
-not do by itself. Set `advanceWallClockTime` on a produce block to move the wall-clock time of the test forward
+A [`punctuate`](../docs/reference/operation-reference.md#punctuate) operation with `punctuationType: wallClockTime` runs as system time passes.
+In a test, time does not pass by itself. Set `advanceWallClockTime` on a produce block to move the wall-clock time of the test forward
 after the block's messages are produced. Punctuations that become due run before the next produce block and before
 the assertions. A block with only `to` and `advanceWallClockTime` produces nothing and only moves the time.
 Stream-time punctuations need no extra field: the message `timestamp`s drive stream time.

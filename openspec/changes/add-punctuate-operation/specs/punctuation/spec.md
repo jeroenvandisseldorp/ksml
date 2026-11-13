@@ -132,7 +132,7 @@ The `context` SHALL only be usable during the punctuator call that received it.
 - **THEN** records from the input SHALL still pass through every operation in order, and SHALL reach the named operation exactly once
 
 #### Scenario: Unknown or unreachable name
-- **WHEN** `to` names an operation that does not exist in the pipeline, comes before the `punctuate` operation, is in another pipeline, or takes a table or grouped stream as input
+- **WHEN** `to` names an operation that does not exist in the pipeline, comes before the `punctuate` operation, comes after a `repartition`, is in another pipeline, or takes a table or grouped stream as input
 - **THEN** `forward` SHALL raise a Python error that lists the valid target names, and no record SHALL be forwarded
 
 #### Scenario: Unnamed operation

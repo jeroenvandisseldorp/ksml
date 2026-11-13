@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 
-/** Applies the operations of a pipeline in order, and connects punctuate operations to named operations after them. */
+/** Applies the operations of a pipeline in order, and connects punctuate operations to the operations in their forwardTo. */
 public final class OperationChain {
     private OperationChain() {
     }
@@ -49,26 +49,37 @@ public final class OperationChain {
      * @return the result of the last operation
      */
     public static StreamWrapper apply(StreamWrapper cursor, List<StreamOperation> operations, TopologyBuildContext context, BiConsumer<StreamOperation, StreamWrapper> applied) {
-        final var punctuates = new ArrayList<PunctuateOperation>();
-        for (var index = 0; index < operations.size(); index++) {
-            final var operation = operations.get(index);
-            // A named operation with a stream input after a punctuate operation gets a side path from it
-            if (!punctuates.isEmpty() && cursor instanceof KStreamWrapper stream && isNamed(operation)) {
-                for (final var punctuate : punctuates) stream = punctuate.sidePathTo((BaseOperation) operation, stream);
-                cursor = stream;
+        final var punctuates = new ArrayList<PunctuateOperation.SidePaths>();
+        for (final var operation : operations) {
+            if (operation instanceof BaseOperation target) cursor = addSidePaths(punctuates, target, cursor);
+            if (operation instanceof PunctuateOperation punctuate && cursor instanceof KStreamWrapper stream) {
+                final var result = punctuate.applyWithSidePaths(stream, context);
+                punctuates.add(result.sidePaths());
+                cursor = result.next();
+            } else {
+                cursor = cursor.apply(operation, context);
             }
-            if (operation instanceof PunctuateOperation punctuate)
-                punctuate.namedOperationsFollow(operations.subList(index + 1, operations.size()).stream().anyMatch(OperationChain::isNamed));
-            cursor = cursor.apply(operation, context);
-            if (operation instanceof PunctuateOperation punctuate) punctuates.add(punctuate);
             // Records from before a repartition topic must not be merged with records after it
-            if (operation instanceof RepartitionOperation) punctuates.clear();
+            if (operation instanceof RepartitionOperation) {
+                punctuates.forEach(PunctuateOperation.SidePaths::checkAllFound);
+                punctuates.clear();
+            }
             applied.accept(operation, cursor);
         }
+        punctuates.forEach(PunctuateOperation.SidePaths::checkAllFound);
         return cursor;
     }
 
-    private static boolean isNamed(StreamOperation operation) {
-        return operation instanceof BaseOperation baseOperation && baseOperation.definedName() != null;
+    /** Merges a side path from each punctuate operation that forwards to the target into its input. */
+    private static StreamWrapper addSidePaths(List<PunctuateOperation.SidePaths> punctuates, BaseOperation target, StreamWrapper input) {
+        if (!(input instanceof KStreamWrapper stream)) {
+            for (final var punctuate : punctuates) punctuate.checkStreamInput(target, input);
+            return input;
+        }
+        var merged = stream;
+        for (final var punctuate : punctuates) {
+            if (punctuate.targets(target)) merged = punctuate.sidePathTo(target, merged);
+        }
+        return merged;
     }
 }

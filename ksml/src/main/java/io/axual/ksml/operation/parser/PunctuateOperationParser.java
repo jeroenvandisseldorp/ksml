@@ -52,13 +52,14 @@ public class PunctuateOperationParser extends OperationParser<PunctuateOperation
         return FieldParsers.structsParser(
                 PunctuateOperation.class,
                 "",
-                "Run a punctuator on a schedule, which can forward records to the next operation; records from the stream pass unchanged",
+                "Run a punctuator on a schedule, which can forward records to the next operation or to the operations in forwardTo; records from the stream pass unchanged",
                 operationNameField(),
                 FieldParsers.durationField(Punctuate.INTERVAL, "The time between two punctuations, at least 1 millisecond"),
                 FieldParsers.enumField(Punctuate.PUNCTUATION_TYPE, PUNCTUATION_TYPE_SCHEMA),
                 functionField(Punctuate.PUNCTUATOR, "The function that is called on each punctuation", new PunctuatorDefinitionParser(false)),
                 FieldParsers.optional(FieldParsers.listField(Punctuate.STORES, "store-name", "store", "The names of the state stores the punctuator uses, in addition to those of the function", new StringValueParser())),
-                (name, interval, punctuationType, punctuator, stores, tags) -> {
+                FieldParsers.optional(FieldParsers.listField(Punctuate.FORWARD_TO, "operation-name", "operation", "The names of operations further down the pipeline that the punctuator forwards records to with forward(..., to=...)", new StringValueParser())),
+                (name, interval, punctuationType, punctuator, stores, forwardTo, tags) -> {
                     requireField(interval, Punctuate.INTERVAL);
                     requireField(punctuationType, Punctuate.PUNCTUATION_TYPE);
                     requireField(punctuator, Punctuate.PUNCTUATOR);
@@ -75,7 +76,7 @@ public class PunctuateOperationParser extends OperationParser<PunctuateOperation
                     final var function = KSMLDSL.Functions.TYPE_GENERIC.equals(punctuator.type())
                             ? new PunctuatorDefinition(punctuator)
                             : punctuator;
-                    return new PunctuateOperation(operationConfig(name, tags), interval, type, function, stores);
+                    return new PunctuateOperation(operationConfig(name, tags), interval, type, function, stores, forwardTo);
                 });
     }
 

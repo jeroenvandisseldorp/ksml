@@ -12,7 +12,7 @@ Kafka Streams lets a processor schedule a `Punctuator` that runs on a wall-clock
   - `stores`: the state stores the function may use, as for other stateful operations.
 - A new function type `punctuator`. It is called with the punctuation `timestamp` and a `context` object, may read and write the attached stores, and returns nothing.
 - The `context` object gives the punctuator a selection of Kafka Streams' `ProcessorContext`:
-  - `forward(key, value, timestamp=None, headers=None, to=None)` sends a record to the next operation, or with `to` to any named operation further down the same pipeline. The timestamp defaults to the punctuation timestamp. Headers use the same format as in `metadataTransformer`.
+  - `forward(key, value, timestamp=None, headers=None, to=None)` sends a record to the next operation, or with `to` to a named operation further down the same pipeline that the operation lists in `forwardTo`. The timestamp defaults to the punctuation timestamp. Headers use the same format as in `metadataTransformer`.
   - `commit()`, `currentSystemTimeMs()`, `currentStreamTimeMs()`, `applicationId()` and `taskId()`.
   - Methods that could break KSML's guarantees are not exposed: scheduling, store lookup by name, the application config, serdes and metrics.
 - Records passed to `context.forward` are checked against the key and value types of the stream.

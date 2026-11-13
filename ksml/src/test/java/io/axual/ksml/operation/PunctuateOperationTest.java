@@ -157,15 +157,21 @@ class PunctuateOperationTest {
     }
 
     private static String wallClock(String code) {
+        return wallClock(code, "");
+    }
+
+    /** A wall-clock punctuate operation named flush, with these forwardTo names separated by commas. */
+    private static String wallClock(String code, String forwardTo) {
         return """
                 - type: punctuate
                   name: flush
                   interval: 1m
                   punctuationType: wallClockTime
+                  forwardTo: [%s]
                   punctuator:
                     code: |
                 %s
-                """.formatted(code.indent(6));
+                """.formatted(forwardTo, code.indent(6));
     }
 
     private void tick() {
@@ -229,7 +235,7 @@ class PunctuateOperationTest {
         assertThat(output.readKeyValuesToList()).containsExactly(KeyValue.pair("keep", 1L), KeyValue.pair("keep", 4L));
     }
 
-    private static final String SKIP = wallClock("context.forward('p', 'x', to='enrich')") + """
+    private static final String SKIP = wallClock("context.forward('p', 'x', to='enrich')", "enrich") + """
             - type: transformValue
               name: compute
               mapper:
@@ -257,31 +263,45 @@ class PunctuateOperationTest {
     }
 
     @Test
-    @DisplayName("forward to an unknown or unreachable name raises an error listing the valid names")
+    @DisplayName("forward to a name that is not in forwardTo raises an error listing the valid names")
     void forwardToUnknownName() {
-        start(pipeline(wallClock("context.forward('p', 1, to='nothing')") + """
+        start(pipeline(wallClock("context.forward('p', 1, to='other')", "compute") + """
                 - type: transformValue
                   name: compute
                   mapper:
                     expression: value
                     resultType: long
                 - type: transformValue
-                  mapper:
-                    expression: value
-                    resultType: long
-                - type: groupByKey
-                - type: count
-                  name: counted
-                - type: toStream
-                - type: transformValue
-                  name: after_table
+                  name: other
                   mapper:
                     expression: value
                     resultType: long
                 """));
         assertThatThrownBy(this::tick)
-                .hasStackTraceContaining("forward can not send to 'nothing', valid names are: after_table, compute");
+                .hasStackTraceContaining("forward can not send to 'other', valid names are: compute");
         assertThat(output.isEmpty()).isTrue();
+    }
+
+    @Test
+    @DisplayName("a forwardTo name that is not a later stream operation in the pipeline is rejected at startup")
+    void forwardToUnreachableName() {
+        final var afterTable = pipeline(wallClock("pass", "counted") + """
+                - type: groupByKey
+                - type: count
+                  name: counted
+                - type: toStream
+                """);
+        assertThatThrownBy(() -> topology(afterTable))
+                .hasStackTraceContaining("Punctuate 'test_flush' can not forward to 'counted': it takes");
+        final var unknown = pipeline(wallClock("pass", "nothing") + """
+                - type: transformValue
+                  name: compute
+                  mapper:
+                    expression: value
+                    resultType: long
+                """);
+        assertThatThrownBy(() -> topology(unknown))
+                .hasStackTraceContaining("Punctuate 'test_flush' can not forward to nothing: forwardTo can only name operations after it");
     }
 
     @Test
@@ -475,21 +495,22 @@ class PunctuateOperationTest {
     }
 
     @Test
-    @DisplayName("named stream operations after punctuate get a side path and a merge; others do not")
+    @DisplayName("operations in forwardTo get a side path and a merge; other named operations do not")
     void sidePaths() {
         final var description = topology(pipeline(SKIP)).describe().toString();
         assertThat(description).contains(
-                "Processor: test_flush-next", "Processor: test_flush-to-test_compute ", "Processor: test_flush-to-test_compute-merge",
-                "Processor: test_flush-to-test_enrich ", "Processor: test_flush-to-test_enrich-merge");
-        // Only the named operations: two side paths, each with its merge
-        assertThat(description.split("Processor: test_flush-to-")).hasSize(5);
+                "Processor: test_flush-next", "Processor: test_flush-to-test_enrich ", "Processor: test_flush-to-test_enrich-merge");
+        assertThat(description).doesNotContain("flush-to-test_compute");
+        // One side path with its merge
+        assertThat(description.split("Processor: test_flush-to-")).hasSize(3);
     }
 
     @Test
-    @DisplayName("without named operations after it, punctuate adds no extra nodes")
+    @DisplayName("without forwardTo, punctuate adds no extra nodes, also before named operations")
     void noSidePaths() {
         final var description = topology(pipeline(wallClock("pass") + """
                 - type: transformValue
+                  name: compute
                   mapper:
                     expression: value
                     resultType: long
@@ -498,9 +519,9 @@ class PunctuateOperationTest {
     }
 
     @Test
-    @DisplayName("operations after groupBy or toTable and in other pipelines get no side path")
-    void noSidePathsAfterGroupingOrInOtherPipelines() {
-        final var description = topology(STREAMS + """
+    @DisplayName("an operation after groupBy and toTable can be a target once it takes a stream again; one in another pipeline can not")
+    void sidePathsAfterGroupingOrInOtherPipelines() {
+        final var yaml = STREAMS + """
                 pipelines:
                   main:
                     from: input
@@ -508,9 +529,7 @@ class PunctuateOperationTest {
                 %s
                       - type: groupByKey
                       - type: count
-                        name: counted
                       - type: toStream
-                        name: back_to_stream
                       - type: toTable
                         name: as_table
                       - type: toStream
@@ -523,17 +542,18 @@ class PunctuateOperationTest {
                         forEach:
                           code: pass
                     to: output
-                """.formatted(wallClock("pass").indent(6))).describe().toString();
-        assertThat(description).contains("Processor: test_flush-next");
-        assertThat(description).doesNotContain("flush-to-test_counted", "flush-to-test_back_to_stream", "flush-to-test_other_peek");
-        // toTable after toStream has a stream input, so it does get a side path
-        assertThat(description).contains("Processor: test_flush-to-test_as_table ");
+                """;
+        final var description = topology(yaml.formatted(wallClock("pass", "as_table").indent(6))).describe().toString();
+        // toTable after toStream has a stream input, so it can be a target
+        assertThat(description).contains("Processor: test_flush-next", "Processor: test_flush-to-test_as_table ");
+        final var otherPipeline = yaml.formatted(wallClock("pass", "other_peek").indent(6));
+        assertThatThrownBy(() -> topology(otherPipeline)).hasStackTraceContaining("can not forward to other_peek");
     }
 
     @Test
-    @DisplayName("operations after a repartition get no side path")
+    @DisplayName("an operation after a repartition can not be a target")
     void noSidePathsAfterRepartition() {
-        final var description = topology(pipeline(wallClock("pass") + """
+        final var via = """
                 - type: transformValue
                   name: before
                   mapper:
@@ -546,9 +566,12 @@ class PunctuateOperationTest {
                   mapper:
                     expression: value
                     resultType: long
-                """)).describe().toString();
+                """;
+        final var description = topology(pipeline(wallClock("pass", "before") + via)).describe().toString();
         assertThat(description).contains("Processor: test_flush-to-test_before ");
         assertThat(description).doesNotContain("flush-to-test_after");
+        assertThatThrownBy(() -> topology(pipeline(wallClock("pass", "after") + via)))
+                .hasStackTraceContaining("can not forward to after: forwardTo can only name operations after it in the same pipeline, before any repartition");
     }
 
     @Test
@@ -594,7 +617,7 @@ class PunctuateOperationTest {
                               expression: value + 1
                               resultType: long
                         to: output
-                """.formatted(wallClock("context.forward('p', 10, to='plus_one')").indent(10)));
+                """.formatted(wallClock("context.forward('p', 10, to='plus_one')", "plus_one").indent(10)));
         tick();
         input.pipeInput("i", 5L);
         assertThat(output.readKeyValuesToList()).containsExactly(KeyValue.pair("p", 11L), KeyValue.pair("i", 11L));
@@ -603,7 +626,7 @@ class PunctuateOperationTest {
     @Test
     @DisplayName("two operations with the same name after punctuate are rejected")
     void duplicateTargetName() {
-        final var yaml = pipeline(wallClock("pass") + """
+        final var yaml = pipeline(wallClock("pass", "same") + """
                 - type: peek
                   name: same
                   forEach:

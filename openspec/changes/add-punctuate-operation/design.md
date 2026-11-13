@@ -112,28 +112,29 @@ New `PunctuatorDefinition` (type `punctuator`, built-in parameter `timestamp` of
 `ProduceBlock` gets an optional `Duration`. `TestDataProducer` calls `TopologyTestDriver.advanceWallClockTime(duration)` after producing the block's messages. Stream-time punctuations need no new field: message timestamps already drive stream time in the test driver. The constant goes into `KSMLTestDSL.Produce`.
 
 **D10 — Forwarding to a named operation further down: a side path per target.**
-Kafka Streams' `forward(record, childName)` only reaches direct children of a processor node, and a punctuator cannot forward to an operation further down. So KSML makes every possible target a direct child at topology build time:
+Kafka Streams' `forward(record, childName)` only reaches direct children of a processor node, and a punctuator cannot forward to an operation further down. So KSML makes every operation listed in the `forwardTo` field of the `punctuate` operation a direct child at topology build time:
 
 ```
 input ─► punctuate ──(main)──► compute ─► merge ─► enrich ─► ...
                   └──(side: enrich)────────┘
 ```
 
-- `OperationChain` applies the operations of a pipeline (also of a `branch` sub-pipeline) and, after a `punctuate` operation, finds every later operation in the same `via` list that has a `name` and takes a `KStream` as input. Every operation gets a generated name, so `OperationConfig` and `BaseOperation` keep the name as written in the definition (`definedName`) to tell them apart.
-- When a named operation follows, the next operation gets a named pass-through node (`<punctuate name>-next`), so the processor can forward input records to it by child name.
+- `OperationChain` applies the operations of a pipeline (also of a `branch` sub-pipeline) and, after a `punctuate` operation, finds the later operations in the same `via` list whose name is in `forwardTo`. Every operation gets a generated name, so `OperationConfig` and `BaseOperation` keep the name as written in the definition (`definedName`) to match them.
+- `PunctuateOperation` stays immutable like the other operations: applying it returns, next to the output stream, a `SidePaths` object with the build state (the output and the target map). `OperationChain` keeps it while it applies the rest of the pipeline, so a second topology build gets its own targets.
+- When `forwardTo` is not empty, the next operation gets a named pass-through node (`<punctuate name>-next`), so the processor can forward input records to it by child name.
 - For each one, `PunctuateOperation` adds a named pass-through node on the punctuate output (`<punctuate name>-to-<target name>`), and the pipeline builder merges that side stream into the main stream right before the target.
 - `PunctuateProcessor` forwards input records and `forward()` calls without `to` only to the main child, by its child name, so side paths only carry records sent to them. A call with `to` forwards to the side node of that target.
 - The context proxy gets a map from target name to child name and to the target's input key and value types, which it uses for the type check (D2) and to list the valid names in errors.
 
-Every named stream operation becomes a target without extra syntax, because the user asked for every following operation in the pipeline to be reachable and there is no security reason to limit it.
-*Cost:* one merge node per named stream operation after a `punctuate`, also when the punctuator never uses it. A merge is a pass-through, so the cost per record is small. A wrong name is found at runtime, with an error that lists the valid names.
+Targets are listed explicitly in `forwardTo`, because only the user knows which operations the punctuator sends to. Without the list, adding a `name` to any operation after a `punctuate` would add nodes, which changes the generated names, and so the store and internal topic names, of later unnamed stateful operations: a small edit could silently lose state.
+*Cost:* one merge node per operation in `forwardTo`. A merge is a pass-through, so the cost per record is small. A name in `forwardTo` that is not a valid target is found at startup; a `to` that is not in `forwardTo` is found at runtime, with an error that lists the valid names.
 *Not targetable:* operations whose input is a table or a grouped or windowed stream (a merge needs two `KStream`s), operations after a `repartition` (a record would skip the repartition topic and reach a task that does not own its key), operations in other pipelines or inside `branch` sub-pipelines, and the pipeline's `to`. Two operations with the same name after a `punctuate` are rejected at startup. These can be added later if needed.
-*Alternative:* a declared list of targets on the `punctuate` operation. Rejected with the user: it adds syntax without adding safety.
+*Alternative:* every named stream operation after a `punctuate` is a target, without `forwardTo` (the first version of this design). Rejected in review: `name` would change the topology shape, which it never did before in KSML.
 *Alternative:* one shared side path, merged before every target, with a header to filter on. Rejected: every target would need a filter, and the header would have to be removed again before output.
 
 ## Risks / Trade-offs
 
-- **[Risk]** The extra pass-through and merge nodes shift the generated names of later unnamed processors. Adding a `punctuate` operation to an existing pipeline can therefore change the names of internal topics and stores of unnamed stateful operations after it, as any change to a pipeline can. → Document it, and advise naming stateful operations, as the Kafka Streams docs do.
+- **[Risk]** The extra pass-through and merge nodes shift the generated names of later unnamed processors. Adding a `punctuate` operation or changing its `forwardTo` can therefore change the names of internal topics and stores of unnamed stateful operations after it, as any change to a pipeline can. → Document it, and advise naming stateful operations, as the Kafka Streams docs do.
 
 - **[Risk]** When the process error handler is registered with Kafka Streams later, Kafka Streams calls it for punctuation errors with no record. `ErrorHandling.handle(ErrorHandlerContext, Record, Exception)` reads `rec.key()` and would fail. → Make `handle` accept a `null` record as part of this change, with a unit test, so the later work does not hit it.
 - **[Risk]** A slow punctuator blocks the stream thread, so no records are processed and `max.poll.interval.ms` can be exceeded. → Document it, with the advice to keep punctuators short and iterate over stores with the existing iterator API.

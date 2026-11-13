@@ -44,15 +44,17 @@ import org.apache.kafka.streams.kstream.Named;
 import org.apache.kafka.streams.processor.PunctuationType;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Calls a punctuator on a schedule; records pass through unchanged. The punctuator can forward records to the next
- * operation, or to a named operation further down the same pipeline: {@link OperationChain} asks for a side path
- * to each of those with {@link #sidePathTo}.
+ * operation, or to the named operations listed in {@code forwardTo}: {@link OperationChain} asks the
+ * {@link SidePaths} of each applied punctuate operation for a side path to each of those.
  */
 public class PunctuateOperation extends BaseOperation {
     private static final String PUNCTUATOR_NAME = "Punctuator";
@@ -60,27 +62,33 @@ public class PunctuateOperation extends BaseOperation {
     private final PunctuationType punctuationType;
     private final FunctionDefinition punctuator;
     private final List<String> storeNames;
-    // Set by OperationChain before apply: whether a later operation in the pipeline has a name
-    private boolean namedOperationsFollow = false;
-    // The output of the last apply, and the named targets found for it while the rest of the pipeline is built
-    private KStream<Object, Object> output;
-    private Map<String, ProcessorContextProxy.Target> namedTargets;
+    private final Set<String> forwardTo;
 
-    public PunctuateOperation(OperationConfig config, Duration interval, PunctuationType punctuationType, FunctionDefinition punctuator, List<String> storeNames) {
+    public PunctuateOperation(OperationConfig config, Duration interval, PunctuationType punctuationType, FunctionDefinition punctuator, List<String> storeNames, List<String> forwardTo) {
         super(config);
         this.interval = interval;
         this.punctuationType = punctuationType;
         this.punctuator = punctuator;
         this.storeNames = storeNames != null ? storeNames : List.of();
+        this.forwardTo = forwardTo != null ? Collections.unmodifiableSet(new LinkedHashSet<>(forwardTo)) : Set.of();
     }
 
-    /** Sets whether a later operation in the pipeline has a name, and so may become a target of a side path. */
-    void namedOperationsFollow(boolean namedOperationsFollow) {
-        this.namedOperationsFollow = namedOperationsFollow;
+    /**
+     * The result of applying a punctuate operation to a stream.
+     *
+     * @param next      the stream for the next operation
+     * @param sidePaths the side paths to the operations in {@code forwardTo}, added while the rest of the pipeline is built
+     */
+    public record Applied(KStreamWrapper next, SidePaths sidePaths) {
     }
 
     @Override
     public StreamWrapper apply(KStreamWrapper input, TopologyBuildContext context) {
+        return applyWithSidePaths(input, context).next();
+    }
+
+    /** Applies the operation; the returned side paths connect the operations in {@code forwardTo} to it. */
+    public Applied applyWithSidePaths(KStreamWrapper input, TopologyBuildContext context) {
         /*    Kafka Streams method signature:
          *    <KOut, VOut> KStream<KOut, VOut> process(
          *          final ProcessorSupplier<? super K, ? super V, KOut, VOut> processorSupplier,
@@ -98,9 +106,9 @@ public class PunctuateOperation extends BaseOperation {
         final var userPunctuator = new UserPunctuator(userFunction, tags);
         final var stores = allStoreNames.toArray(String[]::new);
 
-        // With named targets after this operation, the next operation gets a named pass-through node so forward can reach it
-        final var nextName = namedOperationsFollow ? name + "-next" : null;
-        namedTargets = new HashMap<>();
+        // With targets, the next operation gets a named pass-through node so records can be sent to it alone
+        final var nextName = !forwardTo.isEmpty() ? name + "-next" : null;
+        final var namedTargets = new HashMap<String, ProcessorContextProxy.Target>();
         final var schedule = new PunctuateProcessor.Schedule(interval, punctuationType,
                 new ProcessorContextProxy.Target(nextName, k.userType(), v.userType()), namedTargets);
         final var supplier = new OperationProcessorSupplier<PunctuateProcessor.PunctuateAction>(
@@ -110,30 +118,61 @@ public class PunctuateOperation extends BaseOperation {
                 stores,
                 storeDefinitions(context, stores));
         final var named = namedOf();
-        output = named != null
+        final KStream<Object, Object> output = named != null
                 ? input.stream.process(supplier, named, stores)
                 : input.stream.process(supplier, stores);
         final var next = nextName != null ? output.peek((key, value) -> {
         }, Named.as(nextName)) : output;
-        return new KStreamWrapper(next, k, v);
+        return new Applied(new KStreamWrapper(next, k, v), new SidePaths(output, namedTargets));
     }
 
-    /**
-     * Makes a named operation further down the pipeline a target of {@code forward(..., to=...)}: adds a
-     * pass-through node on the output of this operation and merges it into the stream right before the target.
-     *
-     * @param target the operation, which has a name
-     * @param input  the stream that the target will be applied to
-     * @return the stream to apply the target to
-     */
-    KStreamWrapper sidePathTo(BaseOperation target, KStreamWrapper input) {
-        final var sideName = name + "-to-" + target.name;
-        final var side = output.peek((key, value) -> {
-        }, Named.as(sideName));
-        if (namedTargets.containsKey(target.definedName()))
-            throw topologyError("Operation name '" + target.definedName() + "' is used twice after punctuate '" + name + "'");
-        namedTargets.put(target.definedName(), new ProcessorContextProxy.Target(sideName, input.keyType().flatten().userType(), input.valueType().flatten().userType()));
-        return new KStreamWrapper(input.stream.merge(side, Named.as(sideName + "-merge")), input.keyType(), input.valueType());
+    /** The side paths of one applied punctuate operation to the operations in its {@code forwardTo}. */
+    public final class SidePaths {
+        private final KStream<Object, Object> output;
+        // Shared with the processor, which reads it only after the topology is built
+        private final Map<String, ProcessorContextProxy.Target> namedTargets;
+
+        private SidePaths(KStream<Object, Object> output, Map<String, ProcessorContextProxy.Target> namedTargets) {
+            this.output = output;
+            this.namedTargets = namedTargets;
+        }
+
+        /** Whether {@code forwardTo} lists the operation. */
+        boolean targets(BaseOperation operation) {
+            return operation.definedName() != null && forwardTo.contains(operation.definedName());
+        }
+
+        /**
+         * Makes the operation a target of {@code forward(..., to=...)}: adds a pass-through node on the output of the
+         * punctuate operation and merges it into the stream right before the target.
+         *
+         * @param target the operation, which {@code forwardTo} lists
+         * @param input  the stream that the target will be applied to
+         * @return the stream to apply the target to
+         */
+        KStreamWrapper sidePathTo(BaseOperation target, KStreamWrapper input) {
+            if (namedTargets.containsKey(target.definedName()))
+                throw topologyError("Operation name '" + target.definedName() + "' is used twice after punctuate '" + name + "'");
+            final var sideName = name + "-to-" + target.name;
+            final var side = output.peek((key, value) -> {
+            }, Named.as(sideName));
+            namedTargets.put(target.definedName(), new ProcessorContextProxy.Target(sideName, input.keyType().flatten().userType(), input.valueType().flatten().userType()));
+            return new KStreamWrapper(input.stream.merge(side, Named.as(sideName + "-merge")), input.keyType(), input.valueType());
+        }
+
+        /** Fails when the operation is a target, because it does not take a stream as input. */
+        void checkStreamInput(BaseOperation operation, StreamWrapper input) {
+            if (targets(operation))
+                throw topologyError("Punctuate '" + name + "' can not forward to '" + operation.definedName() + "': it takes " + input + " as input, not a stream");
+        }
+
+        /** Fails when an operation in {@code forwardTo} was not found. */
+        void checkAllFound() {
+            final var missing = forwardTo.stream().filter(target -> !namedTargets.containsKey(target)).toList();
+            if (!missing.isEmpty())
+                throw topologyError("Punctuate '" + name + "' can not forward to " + String.join(", ", missing)
+                        + ": forwardTo can only name operations after it in the same pipeline, before any repartition");
+        }
     }
 
     @Override

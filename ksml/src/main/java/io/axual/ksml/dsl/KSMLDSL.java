@@ -205,6 +205,7 @@ public class KSMLDSL {
             public static final String PUNCTUATION_TYPE_STREAM_TIME = "streamTime";
             public static final String PUNCTUATOR = "punctuator";
             public static final String STORES = "stores";
+            public static final String FORWARD_TO = "forwardTo";
         }
 
         public static final String PRINT = "print";

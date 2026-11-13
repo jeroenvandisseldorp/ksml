@@ -3538,8 +3538,15 @@
     },
     "PunctuateOperation" : {
       "additionalProperties" : false,
-      "description" : "Run a punctuator on a schedule, which can forward records to the next operation; records from the stream pass unchanged",
+      "description" : "Run a punctuator on a schedule, which can forward records to the next operation or to the operations in forwardTo; records from the stream pass unchanged",
       "properties" : {
+        "forwardTo" : {
+          "description" : "*(optional)* The names of operations further down the pipeline that the punctuator forwards records to with forward(..., to=...)",
+          "items" : {
+            "type" : "string"
+          },
+          "type" : "array"
+        },
         "interval" : {
           "anyOf" : [ {
             "type" : "integer"

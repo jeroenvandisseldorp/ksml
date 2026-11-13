@@ -5,7 +5,7 @@ Lets a KSML pipeline run a Python function on a wall-clock or stream-time schedu
 ## ADDED Requirements
 
 ### Requirement: Punctuate operation
-A pipeline SHALL accept an operation with `type: punctuate` in its `via` list when the input is a stream. The operation SHALL require `interval`, `punctuationType` and `punctuator`, and SHALL accept optional `stores` and `name`. Records that reach the operation SHALL be forwarded unchanged, with the same key, value, timestamp and headers.
+A pipeline SHALL accept an operation with `type: punctuate` in its `via` list when the input is a stream. The operation SHALL require `interval`, `punctuationType` and `punctuator`, and SHALL accept optional `stores`, `forwardTo` and `name`. Records that reach the operation SHALL be forwarded unchanged, with the same key, value, timestamp and headers.
 
 #### Scenario: Records pass through
 - **WHEN** a stream pipeline contains a `punctuate` operation and a record arrives
@@ -121,23 +121,27 @@ The `context` SHALL only be usable during the punctuator call that received it.
 - **THEN** records forwarded by the punctuator SHALL pass through the `filter` like records from the input
 
 ### Requirement: Forwarding to a named operation
-`context.forward` SHALL accept an optional `to` argument with the name of an operation. The record SHALL then go directly to that operation, skipping the operations in between. Every operation that comes after the `punctuate` operation in the same pipeline's `via` list, has a `name`, and takes a stream as input SHALL be a valid target. Without `to`, the record SHALL go to the next operation.
+`context.forward` SHALL accept an optional `to` argument with the name of an operation. The record SHALL then go directly to that operation, skipping the operations in between. The `punctuate` operation SHALL list its targets by name in `forwardTo`. Each target SHALL come after the `punctuate` operation in the same pipeline's `via` list, before any `repartition`, have a `name`, and take a stream as input. Without `to`, the record SHALL go to the next operation. Operations not listed in `forwardTo` SHALL NOT change the topology, also when they have a `name`.
 
 #### Scenario: Skip operations
-- **WHEN** the `via` list is `punctuate`, `transformValue` named `compute`, `transformValue` named `enrich`, and the punctuator calls `context.forward("a", 10, to="enrich")`
+- **WHEN** the `via` list is `punctuate` with `forwardTo: [enrich]`, `transformValue` named `compute`, `transformValue` named `enrich`, and the punctuator calls `context.forward("a", 10, to="enrich")`
 - **THEN** the record SHALL be processed by `enrich` and the operations after it, and SHALL NOT be processed by `compute`
 
 #### Scenario: Input records are not affected
-- **WHEN** a pipeline has a `punctuate` operation and a named operation further down
+- **WHEN** a pipeline has a `punctuate` operation and an operation in its `forwardTo` further down
 - **THEN** records from the input SHALL still pass through every operation in order, and SHALL reach the named operation exactly once
 
-#### Scenario: Unknown or unreachable name
-- **WHEN** `to` names an operation that does not exist in the pipeline, comes before the `punctuate` operation, comes after a `repartition`, is in another pipeline, or takes a table or grouped stream as input
+#### Scenario: Unreachable name in forwardTo
+- **WHEN** `forwardTo` names an operation that does not exist in the pipeline, comes before the `punctuate` operation, comes after a `repartition`, is in another pipeline, or takes a table or grouped stream as input
+- **THEN** KSML SHALL reject the definition at startup with an error naming the operation
+
+#### Scenario: Name not in forwardTo
+- **WHEN** `to` names an operation that is not listed in `forwardTo`
 - **THEN** `forward` SHALL raise a Python error that lists the valid target names, and no record SHALL be forwarded
 
-#### Scenario: Unnamed operation
-- **WHEN** an operation further down the pipeline has no `name`
-- **THEN** it SHALL NOT be a target of `forward(..., to=...)`; it SHALL only be reached as the next operation or through the operations before it
+#### Scenario: Named operation not in forwardTo
+- **WHEN** an operation further down the pipeline has a `name` but is not listed in `forwardTo`
+- **THEN** it SHALL NOT be a target of `forward(..., to=...)`, and the topology SHALL be the same as without its `name`
 
 ### Requirement: Types of forwarded records
 The key and value passed to `context.forward` SHALL match the input key and value types of the operation that receives the record: the stream at the `punctuate` operation without `to`, or the input of the named operation with `to`. The same conversion rules as for the result of other transformer functions SHALL apply. A key or value that does not match SHALL make `forward` raise a Python error, and the record SHALL NOT be forwarded.

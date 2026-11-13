@@ -1056,6 +1056,7 @@ punctuator can send new records down the pipeline with `context.forward`.
 | `punctuationType` | String   | Yes      | `wallClockTime` or `streamTime`, see below                                                          |
 | `punctuator`      | Object   | Yes      | A [punctuator](function-reference.md#punctuator) function, inline or by name                        |
 | `stores`          | Array    | No       | Names of state stores the punctuator uses, in addition to the `stores` of the function             |
+| `forwardTo`       | Array    | No       | Names of operations further down the pipeline that the punctuator sends records to, see below      |
 | `name`            | String   | No       | The name of the operation                                                                           |
 
 `punctuate` needs a stream as input. After a table, use `toStream` first; it can not follow a grouped or windowed
@@ -1079,29 +1080,30 @@ each of the 3 tasks, each with that task's stores.
 the end of the pipeline, such as `to`. Later operations process it like a record from the input.
 
 `context.forward(key, value, to="name")` sends the record directly to the operation with that `name`, skipping the
-operations in between. An operation can be a target when it:
+operations in between. The name must be listed in `forwardTo`. An operation in `forwardTo` must:
 
-- comes after the `punctuate` operation in the same `via` list,
-- has a `name`, and
-- takes a stream as input. Operations after a `groupBy`, `groupByKey`, `windowBy...` or `toTable` can not be a
+- come after the `punctuate` operation in the same `via` list,
+- have a `name`,
+- take a stream as input. Operations after a `groupBy`, `groupByKey`, `windowBy...` or `toTable` can not be a
   target until a `toStream` turns the result back into a stream, and
-- does not come after a `repartition`, because a record sent past the repartition topic would reach a task that
+- not come after a `repartition`, because a record sent past the repartition topic would reach a task that
   does not own its key.
 
-Operations in other pipelines, inside a `branch`, and the pipeline's `to` can not be a target. A name that is not a
-target raises an error that lists the valid names. The key and value must fit the input types of the target.
+Operations in other pipelines, inside a `branch`, and the pipeline's `to` can not be a target. KSML stops at startup
+when a name in `forwardTo` is not a valid target. A `to` that is not in `forwardTo` raises an error that lists the
+valid names. The key and value must fit the input types of the target.
 
-KSML connects every possible target to the `punctuate` operation when it builds the topology, with a pass-through
-node and a merge right before the target. These nodes are added for every named operation after `punctuate`, also
-when the punctuator never sends to it. Records from the input still pass every operation once.
+For each operation in `forwardTo`, KSML adds a pass-through node and a merge right before it when it builds the
+topology. Records from the input still pass every operation once.
 
 #### Things to keep in mind
 
 - Because the punctuator can forward any key, Kafka Streams treats the output of `punctuate` as possibly re-keyed,
   as after `map`. A later `groupByKey` or `join` therefore repartitions.
-- The extra nodes change the generated names of unnamed operations after `punctuate`. For a stateful operation,
-  such as `aggregate` or `count`, that also changes the names of its store and internal topics. Give stateful
-  operations a `name`, so adding or changing a `punctuate` operation does not change them.
+- The extra nodes for `forwardTo` change the generated names of unnamed operations after `punctuate`. For a
+  stateful operation, such as `aggregate` or `count`, that also changes the names of its store and internal topics.
+  Give stateful operations a `name`, so adding a `punctuate` operation or changing its `forwardTo` does not change
+  them.
 - The punctuator runs on the stream thread. No records are processed while it runs, and a long run can exceed
   `max.poll.interval.ms`. Keep punctuators short, and iterate over stores with the store iterators instead of
   loading everything at once.

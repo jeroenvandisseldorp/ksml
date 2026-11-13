@@ -50,9 +50,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import static io.axual.ksml.user.UserTestSupport.tags;
@@ -107,25 +104,15 @@ class UserPunctuatorTest {
                 .containsExactly(
                         tuple(new DataString("a"), new DataLong(1000L)),
                         tuple(new DataString("b"), new DataLong(1001L)));
-        assertThat(punctuator.warnedAboutResult()).isFalse();
     }
 
     @Test
-    @DisplayName("a returned value is not forwarded, and a warning is logged once")
+    @DisplayName("a returned value is ignored, also one that does not convert to a KSML type")
     void returnedValue() {
-        final var punctuator = punctuator("return ('a', 1)");
-        // slf4j-simple writes to System.err
-        final var originalErr = System.err;
-        final var captured = new ByteArrayOutputStream();
-        System.setErr(new PrintStream(captured, true, StandardCharsets.UTF_8));
-        try {
-            punctuator.apply(null, 1000L, proxy());
-            punctuator.apply(null, 2000L, proxy());
-        } finally {
-            System.setErr(originalErr);
-        }
-        assertThat(punctuator.warnedAboutResult()).isTrue();
-        assertThat(captured.toString(StandardCharsets.UTF_8).split("returned a value, which is ignored", -1)).hasSize(2);
+        punctuator("return ('a', 1)").apply(null, 1000L, proxy());
+        punctuator("return True").apply(null, 1000L, proxy());
+        punctuator("return {1, 2}").apply(null, 1000L, proxy());
+        punctuator("return object()").apply(null, 1000L, proxy());
         verifyNoInteractions(context);
     }
 

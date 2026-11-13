@@ -168,11 +168,11 @@ class PythonFunctionTest {
         final var function = PythonFunction.forFunction(context, "test", "injected", definition);
 
         assertThat(function.call()).isEqualTo(new DataString("None"));
-        // An injected variable is set during the call only; a later call that does not inject it does not see it
+        // Stores are set during the call only; a call without stores sees an empty dict
         final var storesDefinition = FunctionDefinition.as(KSMLDSL.Functions.TYPE_GENERIC, "injectedStores", new ParameterDefinition[0], PythonSource.of(null, null, "str(type(stores).__name__)"), stringType, null);
         final var storesFunction = PythonFunction.forFunction(context, "test", "injectedStores", storesDefinition);
         assertThat(storesFunction.call(withStores(new StateStores()))).isEqualTo(new DataString("dict"));
-        assertThat(storesFunction.call()).isEqualTo(new DataString("NoneType"));
+        assertThat(storesFunction.call()).isEqualTo(new DataString("dict"));
         assertThatThrownBy(() -> function.call(Map.of("unknown", 1)))
                 .isInstanceOf(ExecutionException.class)
                 .hasMessageContaining("can not inject unknown variable 'unknown'");
@@ -218,11 +218,11 @@ class PythonFunctionTest {
     }
 
     @Test
-    void nullInjectionsMeansNoInjections() {
+    void nullInjectionsMeansNoStores() {
         final var definition = FunctionDefinition.as(KSMLDSL.Functions.TYPE_GENERIC, "noInjections", new ParameterDefinition[0], PythonSource.of(null, null, "str(stores)"), stringType, null);
         final var function = PythonFunction.forFunction(context, "test", "noInjections", definition);
 
-        assertThat(function.call((Map<String, Object>) null)).isEqualTo(new DataString("None"));
+        assertThat(function.call((Map<String, Object>) null)).isEqualTo(new DataString("{}"));
     }
 
     @Test
@@ -252,9 +252,9 @@ class PythonFunctionTest {
 
         assertThat(outer.call(injections)).isEqualTo(new DataString("True"));
         assertThat(innerResult[0]).isEqualTo(new DataString("0"));
-        // After the outer call, the globals are back to None
+        // After the outer call, the context is back to None; a call without stores gets an empty dict
         final var afterDefinition = FunctionDefinition.as(KSMLDSL.Functions.TYPE_GENERIC, "after", new ParameterDefinition[0], PythonSource.of(null, null, "str(stores) + str(context)"), stringType, null);
-        assertThat(PythonFunction.forFunction(context, "test", "after", afterDefinition).call()).isEqualTo(new DataString("NoneNone"));
+        assertThat(PythonFunction.forFunction(context, "test", "after", afterDefinition).call()).isEqualTo(new DataString("{}None"));
     }
 
     @Test

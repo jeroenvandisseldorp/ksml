@@ -151,16 +151,6 @@ public class UserFunction {
         return call(Map.of(), parameters);
     }
 
-    /**
-     * Calls the function with access to these state stores.
-     *
-     * @deprecated use {@link #call(Map, DataObject...)} with {@link #withStores(StateStores)}
-     */
-    @Deprecated
-    public final DataObject call(StateStores stores, DataObject... parameters) {
-        return call(withStores(stores), parameters);
-    }
-
     /** The injections for a call that has access to these state stores, or to none when {@code stores} is null. */
     public static Map<String, Object> withStores(StateStores stores) {
         return stores != null ? Map.of(INJECT_STORES, stores) : Map.of();

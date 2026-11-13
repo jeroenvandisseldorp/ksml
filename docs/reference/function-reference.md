@@ -950,8 +950,8 @@ variable or a store in a punctuator: KSML sets it on every call.
 
 #### Return Value
 
-None. A punctuator emits records with `context.forward`. A returned value is ignored, and KSML logs a warning the
-first time it happens. A punctuator can not declare a `resultType`.
+None. A punctuator emits records with `context.forward`. A returned value is ignored. A punctuator can not declare a
+`resultType`.
 
 #### Context methods
 

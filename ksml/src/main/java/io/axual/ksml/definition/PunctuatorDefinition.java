@@ -22,7 +22,6 @@ package io.axual.ksml.definition;
 
 
 import io.axual.ksml.dsl.KSMLDSL;
-import io.axual.ksml.type.UserType;
 
 import static io.axual.ksml.definition.DefinitionConstants.PUNCTUATOR_PARAMETERS;
 
@@ -31,8 +30,6 @@ public class PunctuatorDefinition extends FunctionDefinition {
         super(definition
                 .withType(KSMLDSL.Functions.TYPE_PUNCTUATOR)
                 .withParameters(mergeParameters(PUNCTUATOR_PARAMETERS, definition.parameters()))
-                .validateNoResultTypeDefined()
-                // Not declared by the user: lets UserPunctuator see that the code returned a value, and warn
-                .withResultType(UserType.UNKNOWN));
+                .validateNoResultTypeDefined());
     }
 }

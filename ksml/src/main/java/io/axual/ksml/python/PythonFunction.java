@@ -40,6 +40,7 @@ import org.graalvm.polyglot.Value;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -54,6 +55,7 @@ public class PythonFunction extends UserFunction {
     private static final List<String> INJECTABLE_VARIABLES = List.of(INJECT_STORES, INJECT_CONTEXT);
     // Python classes that wrap an injected object before the function sees it
     private static final Map<String, String> INJECTION_WRAPPERS = Map.of(INJECT_CONTEXT, PythonContext.PROCESSOR_CONTEXT_CLASS);
+    private static final Map<String, Object> EMPTY_STORES = Map.of();
     private static final PythonNativeMapper NATIVE_MAPPER = new PythonNativeMapper();
     private static final String QUOTE = "\"";
     private final DataObjectConverter converter;
@@ -121,6 +123,11 @@ public class PythonFunction extends UserFunction {
             if (!INJECTABLE_VARIABLES.contains(variable))
                 throw new ExecutionException("Python function %s.%s - can not inject unknown variable '%s'".formatted(namespace, name, variable));
         }
+        // A function without stores sees an empty dict, not the stores of a call it is nested in
+        if (!injections.containsKey(INJECT_STORES)) {
+            injections = new HashMap<>(injections);
+            injections.put(INJECT_STORES, EMPTY_STORES);
+        }
         var arguments = convertParameters(injections, parameters);
 
         final int iteratorMark = StoreIteratorProxy.beginCall();
@@ -133,13 +140,11 @@ public class PythonFunction extends UserFunction {
                 throw new ExecutionException("Python function %s.%s - Code results in a function instead of a value".formatted(namespace, name));
             }
 
-            // Check if the function is supposed to return a result value
-            if (resultType != null) {
+            // Check if the function is supposed to return a result value; a returned value is ignored otherwise
+            if (resultType != null && resultType.dataType() != DataNull.DATATYPE) {
                 DataObject result = dataObjectMapper.toDataObject(resultType.dataType(), pyResult);
                 logCall(parameters, result);
-                // toDataObject already converts to the result type where it can. Only a value that still does
-                // not fit gets the notations' converters; converting a fitting value would copy every list,
-                // map and struct again.
+                // Convert only values that do not fit yet; converting again copies all collections
                 if (converter != null && resultType.dataType().isAssignableFrom(result).isNotAssignable())
                     result = converter.convert(DEFAULT_NOTATION, result, resultType);
                 checkType(resultType.dataType(), result);
@@ -150,8 +155,7 @@ public class PythonFunction extends UserFunction {
             }
         } catch (PolyglotException e) {
             logCall(parameters, null);
-            // Errors from Kafka Streams code that Python called, such as a store write or context.forward, must reach
-            // Kafka Streams unchanged: it handles exceptions like TaskMigratedException in its own way
+            // Kafka Streams must get its own exceptions unchanged
             if (e.isHostException() && e.asHostException() instanceof KafkaException kafkaError) throw kafkaError;
             throw FatalError.report(new TopologyException("Error while executing function %s.%s : %s".formatted(namespace, name, e.getMessage()), e));
         } catch (Exception e) {
@@ -191,13 +195,11 @@ public class PythonFunction extends UserFunction {
         final var assignStores = definition.storeNames().stream()
                 .map(storeName -> "  " + storeName + " = stores[\"" + storeName + "\"]\n")
                 .collect(Collectors.joining());
-        // Injected variables are read-only globals that start as None. There is no global statement, so a parameter
-        // with the same name still works. setdefault keeps a value that globalCode already set.
+        // Injected globals start as None; setdefault keeps a value set by globalCode
         final var declareGlobals = INJECTABLE_VARIABLES.stream()
                 .map(variable -> "globals().setdefault(\"" + variable + "\", None)\n")
                 .collect(Collectors.joining());
-        // Code to wrap injected objects that Python sees through a Python class; the injected dict is a new Python
-        // dict for every call, so it can be changed in place
+        // Wrap injected objects in their Python class
         final var wrapInjections = INJECTION_WRAPPERS.entrySet().stream()
                 .map(wrapper -> "  if _ksml_injected.get(\"" + wrapper.getKey() + "\") is not None:\n" +
                         "    _ksml_injected[\"" + wrapper.getKey() + "\"] = " + wrapper.getValue() + "(_ksml_injected[\"" + wrapper.getKey() + "\"])\n")
@@ -227,9 +229,17 @@ public class PythonFunction extends UserFunction {
         // Prepare the actual caller for the code
         // Parameters are now pre-converted to Python types by PythonTypeConverter in Java
         // Return value is passed as-is; PythonDataObjectMapper handles GraalVM Value conversion
-        // Restore the injected globals afterwards: calls can nest (context.forward runs later operations). The caller
-        // takes the arguments as *args, so no user parameter name can clash with its own names.
+        // Restore globals after the call, as calls can nest; *args avoids name clashes. Only stores is injected in
+        // most calls, so that takes a shorter path.
         final var pyCallerCode = "def " + name + "_caller(_ksml_injected, *args):\n" +
+                "  global " + INJECT_STORES + "\n" +
+                "  if len(_ksml_injected) == 1:\n" +
+                "    _ksml_previous = " + INJECT_STORES + "\n" +
+                "    " + INJECT_STORES + " = _ksml_injected[\"" + INJECT_STORES + "\"]\n" +
+                "    try:\n" +
+                "      return " + name + "(*args)\n" +
+                "    finally:\n" +
+                "      " + INJECT_STORES + " = _ksml_previous\n" +
                 wrapInjections +
                 "  _ksml_previous = {variable: globals()[variable] for variable in _ksml_injected}\n" +
                 "  globals().update(_ksml_injected)\n" +

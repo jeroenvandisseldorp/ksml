@@ -73,7 +73,7 @@ KSML SHALL provide a function type `punctuator`, usable inline or by name from `
 
 #### Scenario: Returned value is ignored
 - **WHEN** the punctuator code returns a value
-- **THEN** the value SHALL NOT be forwarded, and KSML SHALL log a warning once per operation that punctuators emit records with `context.forward`
+- **THEN** the value SHALL NOT be forwarded or converted, and the punctuation SHALL NOT fail because of it
 
 ### Requirement: Punctuation context methods
 The `context` SHALL offer exactly these methods: `forward`, `commit`, `currentSystemTimeMs`, `currentStreamTimeMs`, `applicationId` and `taskId`. Other `ProcessorContext` methods, such as scheduling, looking up stores by name, the application config, serdes and metrics, SHALL NOT be reachable from Python.

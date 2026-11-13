@@ -59,7 +59,7 @@ class PunctuatorDefinitionParserTest {
     private static void assertPunctuator(FunctionDefinition definition) {
         assertThat(definition).isInstanceOf(PunctuatorDefinition.class);
         assertThat(definition.type()).isEqualTo(KSMLDSL.Functions.TYPE_PUNCTUATOR);
-        assertThat(definition.resultType()).isEqualTo(UserType.UNKNOWN);
+        assertThat(definition.resultType()).isNull();
         assertThat(definition.parameters()).containsExactly(
                 new ParameterDefinition("timestamp", DataLong.DATATYPE),
                 new ParameterDefinition("limit", DataLong.DATATYPE, true, "10"));

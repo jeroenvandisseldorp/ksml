@@ -21,7 +21,7 @@ package io.axual.ksml.operation;
  */
 
 import io.axual.ksml.data.object.DataLong;
-import io.axual.ksml.data.type.DataType;
+import io.axual.ksml.data.object.DataNull;
 import io.axual.ksml.definition.FunctionDefinition;
 import io.axual.ksml.generator.TopologyBuildContext;
 import io.axual.ksml.operation.processor.OperationProcessorSupplier;
@@ -94,7 +94,7 @@ public class PunctuateOperation extends BaseOperation {
         final var allStoreNames = new LinkedHashSet<>(punctuator.storeNames());
         allStoreNames.addAll(storeNames);
         final var function = punctuator.withStoreNames(List.copyOf(allStoreNames));
-        final var userFunction = userFunctionOf(context, PUNCTUATOR_NAME, function, DataType.UNKNOWN, superOf(DataLong.DATATYPE));
+        final var userFunction = userFunctionOf(context, PUNCTUATOR_NAME, function, DataNull.DATATYPE, superOf(DataLong.DATATYPE));
         final var userPunctuator = new UserPunctuator(userFunction, tags);
         final var stores = allStoreNames.toArray(String[]::new);
 

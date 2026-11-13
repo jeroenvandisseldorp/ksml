@@ -21,22 +21,15 @@ package io.axual.ksml.user;
  */
 
 import io.axual.ksml.data.object.DataLong;
-import io.axual.ksml.data.object.DataNull;
 import io.axual.ksml.dsl.KSMLDSL;
 import io.axual.ksml.metric.MetricTags;
 import io.axual.ksml.proxy.context.ProcessorContextProxy;
 import io.axual.ksml.python.Invoker;
 import io.axual.ksml.store.StateStores;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-@Slf4j
 public class UserPunctuator extends Invoker {
-    // One punctuator serves all tasks on all stream threads
-    private final AtomicBoolean warnedAboutResult = new AtomicBoolean();
-
     public UserPunctuator(UserFunction function, MetricTags tags) {
         super(function, tags, KSMLDSL.Functions.TYPE_PUNCTUATOR);
         verifyParameterCount(1);
@@ -49,14 +42,6 @@ public class UserPunctuator extends Invoker {
     public void apply(StateStores stores, long timestamp, ProcessorContextProxy context) {
         final var injections = new HashMap<String, Object>(UserFunction.withStores(stores));
         injections.put(UserFunction.INJECT_CONTEXT, context);
-        final var result = timeExecutionOf(() -> function.call(injections, new DataLong(timestamp)));
-        if (result != null && !(result instanceof DataNull) && warnedAboutResult.compareAndSet(false, true)) {
-            log.warn("Punctuator {} returned a value, which is ignored: punctuators emit records with context.forward", function.name);
-        }
-    }
-
-    /** Whether the warning about a returned value was logged. */
-    boolean warnedAboutResult() {
-        return warnedAboutResult.get();
+        timeExecutionOf(() -> function.call(injections, new DataLong(timestamp)));
     }
 }

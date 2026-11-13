@@ -33,7 +33,9 @@ import io.axual.ksml.execution.FatalError;
 import io.axual.ksml.proxy.store.StoreIteratorProxy;
 import io.axual.ksml.user.UserFunction;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.common.KafkaException;
 import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.PolyglotException;
 import org.graalvm.polyglot.Value;
 
 import java.util.ArrayList;
@@ -48,8 +50,7 @@ import static io.axual.ksml.user.UserFunction.INJECT_STORES;
 
 @Slf4j
 public class PythonFunction extends UserFunction {
-    // The names of the variables a call can inject. Each is a Python global that starts as None. A call sets only the
-    // variables its caller injects, and leaves the others as they are.
+    // The variables a call can inject: Python globals that start as None. A call sets only those it is given.
     private static final List<String> INJECTABLE_VARIABLES = List.of(INJECT_STORES, INJECT_CONTEXT);
     // Python classes that wrap an injected object before the function sees it
     private static final Map<String, String> INJECTION_WRAPPERS = Map.of(INJECT_CONTEXT, PythonContext.PROCESSOR_CONTEXT_CLASS);
@@ -115,6 +116,7 @@ public class PythonFunction extends UserFunction {
         }
 
         // Only the variables that the caller injects are set in Python
+        if (injections == null) injections = Map.of();
         for (final var variable : injections.keySet()) {
             if (!INJECTABLE_VARIABLES.contains(variable))
                 throw new ExecutionException("Python function %s.%s - can not inject unknown variable '%s'".formatted(namespace, name, variable));
@@ -146,6 +148,12 @@ public class PythonFunction extends UserFunction {
                 logCall(parameters, null);
                 return DataNull.INSTANCE;
             }
+        } catch (PolyglotException e) {
+            logCall(parameters, null);
+            // Errors from Kafka Streams code that Python called, such as a store write or context.forward, must reach
+            // Kafka Streams unchanged: it handles exceptions like TaskMigratedException in its own way
+            if (e.isHostException() && e.asHostException() instanceof KafkaException kafkaError) throw kafkaError;
+            throw FatalError.report(new TopologyException("Error while executing function %s.%s : %s".formatted(namespace, name, e.getMessage()), e));
         } catch (Exception e) {
             logCall(parameters, null);
             throw FatalError.report(new TopologyException("Error while executing function %s.%s : %s".formatted(namespace, name, e.getMessage()), e));
@@ -174,8 +182,6 @@ public class PythonFunction extends UserFunction {
 
         // Prepare a list of parameters for the function definition
         String[] defParams = Arrays.stream(definition.parameters()).map(p -> p.name() + (p.isOptional() ? "=None" : "")).toArray(String[]::new);
-        // Prepare a list of parameters for the function calling
-        String[] callParams = Arrays.stream(definition.parameters()).map(ParameterDefinition::name).toArray(String[]::new);
 
         // prepare globalCode from the function definition
         String[] globalCodeLines = getFunctionCode(definition.globalCode(), "");
@@ -185,10 +191,10 @@ public class PythonFunction extends UserFunction {
         final var assignStores = definition.storeNames().stream()
                 .map(storeName -> "  " + storeName + " = stores[\"" + storeName + "\"]\n")
                 .collect(Collectors.joining());
-        // The injected variables are globals, declared as None until a call injects them
-        final var includeGlobals = "  global " + String.join(", ", INJECTABLE_VARIABLES) + "\n";
+        // Injected variables are read-only globals that start as None. There is no global statement, so a parameter
+        // with the same name still works. setdefault keeps a value that globalCode already set.
         final var declareGlobals = INJECTABLE_VARIABLES.stream()
-                .map(variable -> variable + " = None\n")
+                .map(variable -> "globals().setdefault(\"" + variable + "\", None)\n")
                 .collect(Collectors.joining());
         // Code to wrap injected objects that Python sees through a Python class; the injected dict is a new Python
         // dict for every call, so it can be changed in place
@@ -212,7 +218,6 @@ public class PythonFunction extends UserFunction {
 
         // Compose the function (if any) and the return statement together
         final var functionAndExpression = "def " + name + "(" + String.join(",", defParams) + "):\n" +
-                includeGlobals +
                 initFunctionLocalVariables(2, loggerName(namespace, type, name)) +
                 assignStores +
                 initializeOptionalParams +
@@ -222,15 +227,14 @@ public class PythonFunction extends UserFunction {
         // Prepare the actual caller for the code
         // Parameters are now pre-converted to Python types by PythonTypeConverter in Java
         // Return value is passed as-is; PythonDataObjectMapper handles GraalVM Value conversion
-        // The caller sets only the variables it is given, and restores them when it returns: a call can run while
-        // another one is busy, for example a filter after a punctuator calls context.forward, and must not leave its
-        // values to the outer call. Its own names start with _ksml_, so they do not hide a function or parameter.
-        final var pyCallerCode = "def " + name + "_caller(_ksml_injected," + String.join(",", defParams) + "):\n" +
+        // Restore the injected globals afterwards: calls can nest (context.forward runs later operations). The caller
+        // takes the arguments as *args, so no user parameter name can clash with its own names.
+        final var pyCallerCode = "def " + name + "_caller(_ksml_injected, *args):\n" +
                 wrapInjections +
                 "  _ksml_previous = {variable: globals()[variable] for variable in _ksml_injected}\n" +
                 "  globals().update(_ksml_injected)\n" +
                 "  try:\n" +
-                "    return " + name + "(" + String.join(",", callParams) + ")\n" +
+                "    return " + name + "(*args)\n" +
                 "  finally:\n" +
                 "    globals().update(_ksml_previous)\n";
 

@@ -44,6 +44,8 @@ import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import io.confluent.kafka.serializers.KafkaAvroSerializer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.serialization.Deserializer;
+import org.apache.kafka.common.serialization.DoubleDeserializer;
+import org.apache.kafka.common.serialization.DoubleSerializer;
 import org.apache.kafka.common.serialization.IntegerDeserializer;
 import org.apache.kafka.common.serialization.IntegerSerializer;
 import org.apache.kafka.common.serialization.LongDeserializer;
@@ -282,6 +284,7 @@ public class KSMLTopologyTestExtension implements ExecutionCondition, BeforeEach
             case STRING -> new StringSerializer();
             case LONG -> new LongSerializer();
             case INTEGER -> new IntegerSerializer();
+            case DOUBLE -> new DoubleSerializer();
         };
     }
 
@@ -305,6 +308,7 @@ public class KSMLTopologyTestExtension implements ExecutionCondition, BeforeEach
             case STRING -> new StringDeserializer();
             case LONG -> new LongDeserializer();
             case INTEGER -> new IntegerDeserializer();
+            case DOUBLE -> new DoubleDeserializer();
         };
     }
 }

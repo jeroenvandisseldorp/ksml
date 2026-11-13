@@ -49,6 +49,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import tools.jackson.databind.JsonNode;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
@@ -565,8 +567,8 @@ class PunctuateOperationTest {
     }
 
     private static String stackTrace(Throwable throwable) {
-        final var writer = new java.io.StringWriter();
-        throwable.printStackTrace(new java.io.PrintWriter(writer));
+        final var writer = new StringWriter();
+        throwable.printStackTrace(new PrintWriter(writer));
         return writer.toString();
     }
 

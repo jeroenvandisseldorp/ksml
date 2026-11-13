@@ -21,9 +21,12 @@ package io.axual.ksml.parser;
  */
 
 import tools.jackson.databind.JsonNode;
+import io.axual.ksml.data.schema.EnumSchema;
 import io.axual.ksml.exception.ParseException;
 import io.axual.ksml.generator.YAMLObjectMapper;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -36,6 +39,8 @@ class DefinitionParserFieldValidationTest {
     private static class FieldTestParser {
         final StructsParser<Integer> intField = FieldParsers.integerField("value", "test integer field");
         final StructsParser<Long> longField = FieldParsers.longField("value", "test long field");
+        final StructsParser<String> enumField = FieldParsers.enumField("value", new EnumSchema(FieldParsers.SCHEMA_NAMESPACE, "Color", "test enum field",
+                List.of(new EnumSchema.Symbol("red"), new EnumSchema.Symbol("green"))));
     }
 
     private static final FieldTestParser PARSER = new FieldTestParser();
@@ -107,5 +112,21 @@ class DefinitionParserFieldValidationTest {
         // 5000000000 exceeds Integer.MAX_VALUE but is well within Long.MAX_VALUE
         final var node = nodeOf("value: 5000000000");
         assertThatCode(() -> PARSER.longField.parse(node)).doesNotThrowAnyException();
+    }
+
+    // --- enumField ---
+
+    @Test
+    void enumField_throwsForUnknownValueListingTheValidValues() throws Exception {
+        final var node = nodeOf("value: blue");
+        assertThatThrownBy(() -> PARSER.enumField.parse(node))
+                .isInstanceOf(ParseException.class)
+                .hasMessageContaining("Illegal value for enum Color: blue, valid values are: red, green");
+    }
+
+    @Test
+    void enumField_acceptsValidValue() throws Exception {
+        final var node = nodeOf("value: green");
+        assertThatCode(() -> PARSER.enumField.parse(node)).doesNotThrowAnyException();
     }
 }

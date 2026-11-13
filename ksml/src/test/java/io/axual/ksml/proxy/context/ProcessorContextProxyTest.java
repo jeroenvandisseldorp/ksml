@@ -21,6 +21,7 @@ package io.axual.ksml.proxy.context;
  */
 
 import io.axual.ksml.data.exception.DataException;
+import io.axual.ksml.data.object.DataDouble;
 import io.axual.ksml.data.object.DataLong;
 import io.axual.ksml.data.object.DataString;
 import io.axual.ksml.python.PythonContext;
@@ -49,6 +50,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -84,7 +86,7 @@ class ProcessorContextProxyTest {
 
     private Record<Object, Object> forwarded(String childName) {
         @SuppressWarnings("unchecked") final ArgumentCaptor<Record<Object, Object>> captor = ArgumentCaptor.forClass(Record.class);
-        verify(context).forward(captor.capture(), org.mockito.ArgumentMatchers.eq(childName));
+        verify(context).forward(captor.capture(), eq(childName));
         return captor.getValue();
     }
 
@@ -262,8 +264,8 @@ class ProcessorContextProxyTest {
     @Test
     @DisplayName("forward converts a Python float with a fraction to a double value")
     void forwardDouble() {
-        final var doubles = new ProcessorContextProxy.Target("main", STRING, new UserType(io.axual.ksml.data.object.DataDouble.DATATYPE));
+        final var doubles = new ProcessorContextProxy.Target("main", STRING, new UserType(DataDouble.DATATYPE));
         assertThat(python(new ProcessorContextProxy(context, PUNCTUATION_TIME, doubles, Map.of()), "context.forward('a', 1.5)")).isEqualTo("None");
-        assertThat(forwarded("main").value()).isEqualTo(new io.axual.ksml.data.object.DataDouble(1.5));
+        assertThat(forwarded("main").value()).isEqualTo(new DataDouble(1.5));
     }
 }

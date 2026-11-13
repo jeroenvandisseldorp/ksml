@@ -31,20 +31,21 @@ import io.axual.ksml.exception.ExecutionException;
 import io.axual.ksml.exception.TopologyException;
 import io.axual.ksml.store.StateStores;
 import io.axual.ksml.type.UserType;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.streams.KeyValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-@Slf4j
 public class UserFunction {
+    private static final Logger LOG = LoggerFactory.getLogger(UserFunction.class);
     /** Injects the state stores of the call; the function's code reads each store by its name. */
     public static final String INJECT_STORES = "stores";
     /** Injects the Kafka Streams context of the call, such as the punctuation context. */
     public static final String INJECT_CONTEXT = "context";
-    private static final String[] TEMPLATE = {};
+    private static final String[] TEMPLATE = new String[]{};
     public final String name;
     public final String namespace;
     public final ParameterDefinition[] parameters;
@@ -69,7 +70,7 @@ public class UserFunction {
         this.fixedParameterCount = getFixedParameterCount(parameters);
         this.resultType = resultType;
         this.storeNames = storeNames != null ? storeNames : TEMPLATE;
-        log.info("Registered function '{}'", this);
+        LOG.info("Registered function '{}'", this);
     }
 
     @Override
@@ -119,17 +120,17 @@ public class UserFunction {
 
     protected void logCall(DataObject[] parameters, Object result) {
         // Log the called function in debug
-        if (log.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             // Check all parameters and copy them into the interpreter as prefixed globals
             StringBuilder paramsAndValues = new StringBuilder();
             for (int index = 0; index < parameters.length; index++) {
-                paramsAndValues.append(paramsAndValues.isEmpty() ? "" : ", ");
+                paramsAndValues.append(!paramsAndValues.isEmpty() ? ", " : "");
                 paramsAndValues.append(this.parameters[index].name()).append("=").append(parameters[index] != null ? parameters[index].toString(DataObject.Printer.EXTERNAL_ALL_SCHEMA) : "null");
             }
             if (result != null) {
-                log.debug("User function {}.{}({}) returned {}", namespace, name, paramsAndValues, result);
+                LOG.debug("User function {}.{}({}) returned {}", namespace, name, paramsAndValues, result);
             } else {
-                log.debug("User function {}.{}({}) called", namespace, name, paramsAndValues);
+                LOG.debug("User function {}.{}({}) called", namespace, name, paramsAndValues);
             }
         }
     }
@@ -138,7 +139,7 @@ public class UserFunction {
      * Call the user-defined function and return the result.
      *
      * @param injections variables to make available to the function's code, by name, such as {@link #INJECT_STORES}
-     *                   and {@link #INJECT_CONTEXT}; a name that is not given gets its default value.
+     *                   and {@link #INJECT_CONTEXT}; a name that is not given keeps its global value, None by default.
      * @param parameters parameters for the function.
      * @return the result of the call.
      */
@@ -148,6 +149,16 @@ public class UserFunction {
 
     public final DataObject call(DataObject... parameters) {
         return call(Map.of(), parameters);
+    }
+
+    /**
+     * Calls the function with access to these state stores.
+     *
+     * @deprecated use {@link #call(Map, DataObject...)} with {@link #withStores(StateStores)}
+     */
+    @Deprecated
+    public final DataObject call(StateStores stores, DataObject... parameters) {
+        return call(withStores(stores), parameters);
     }
 
     /** The injections for a call that has access to these state stores, or to none when {@code stores} is null. */

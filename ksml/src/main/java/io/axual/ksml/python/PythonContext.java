@@ -46,6 +46,8 @@ public class PythonContext implements AutoCloseable {
     private static final LoggerBridge LOGGER_BRIDGE = new LoggerBridge();
     private static final MetricsBridge METRICS_BRIDGE = new MetricsBridge(Metrics.registry());
     static final String PYTHON = "python";
+    /** The Python class that wraps a {@link io.axual.ksml.proxy.context.ProcessorContextProxy} as {@code context}. */
+    public static final String PROCESSOR_CONTEXT_CLASS = "KSMLProcessorContext";
 
     // With HostAccess.EXPLICIT, only classes with @HostAccess.Export annotations are accessible
     // Java collections (ArrayList, HashMap, TreeMap) are no longer needed since PythonTypeConverter
@@ -137,9 +139,6 @@ public class PythonContext implements AutoCloseable {
         }
         return context.getPolyglotBindings().getMember(callerName);
     }
-
-    /** The Python class that wraps a {@link io.axual.ksml.proxy.context.ProcessorContextProxy} as {@code context}. */
-    public static final String PROCESSOR_CONTEXT_CLASS = "KSMLProcessorContext";
 
     /**
      * Register global code that is used to initialize the loggerBridge and metricsBridge variables, and the Python

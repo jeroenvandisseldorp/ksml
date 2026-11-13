@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static io.axual.ksml.data.schema.DataSchemaConstants.NO_TAG;
 
@@ -180,7 +181,7 @@ public final class FieldParsers {
                         throw new ParseException(node, "Empty value not allowed for enum " + schema.name());
                     if (ListUtil.find(schema.symbols(), symbol -> symbol.name().equals(value)) == null)
                         throw new ParseException(node, "Illegal value for enum " + schema.name() + ": " + value
-                                + ", valid values are: " + String.join(", ", schema.symbols().stream().map(EnumSchema.Symbol::name).toList()));
+                                + ", valid values are: " + schema.symbols().stream().map(EnumSchema.Symbol::name).collect(Collectors.joining(", ")));
                     return value;
                 },
                 schema);

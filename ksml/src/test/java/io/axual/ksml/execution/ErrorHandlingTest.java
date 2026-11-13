@@ -34,9 +34,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
 import static io.axual.ksml.execution.ErrorHandler.HandlerType.CONTINUE_ON_FAIL;
@@ -124,12 +129,22 @@ class ErrorHandlingTest {
                 .isEqualTo(ProcessingExceptionHandler.Result.RESUME);
     }
 
-    @Test
-    @DisplayName("a process handler accepts a missing record, as Kafka Streams passes for an error in a punctuation")
-    void processingWithoutRecord() {
-        errorHandling.setProcessHandler(handler(true, true, CONTINUE_ON_FAIL));
-        assertThat(errorHandling.handle(context, (Record<?, ?>) null, new RuntimeException("boom")).result())
-                .isEqualTo(ProcessingExceptionHandler.Result.RESUME);
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    @DisplayName("a process handler accepts a missing record, as Kafka Streams passes for an error in a punctuation, and logs it as no record")
+    void processingWithoutRecord(boolean logPayload) {
+        errorHandling.setProcessHandler(handler(true, logPayload, CONTINUE_ON_FAIL));
+        // slf4j-simple writes to System.err
+        final var originalErr = System.err;
+        final var captured = new ByteArrayOutputStream();
+        System.setErr(new PrintStream(captured, true, StandardCharsets.UTF_8));
+        try {
+            assertThat(errorHandling.handle(context, (Record<?, ?>) null, new RuntimeException("boom")).result())
+                    .isEqualTo(ProcessingExceptionHandler.Result.RESUME);
+        } finally {
+            System.setErr(originalErr);
+        }
+        assertThat(captured.toString(StandardCharsets.UTF_8)).contains("key=<no record>", "value=<no record>");
     }
 
     @Test

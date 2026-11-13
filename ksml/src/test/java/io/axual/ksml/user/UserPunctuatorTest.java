@@ -50,6 +50,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import static io.axual.ksml.user.UserTestSupport.tags;
@@ -111,9 +114,18 @@ class UserPunctuatorTest {
     @DisplayName("a returned value is not forwarded, and a warning is logged once")
     void returnedValue() {
         final var punctuator = punctuator("return ('a', 1)");
-        punctuator.apply(null, 1000L, proxy());
-        punctuator.apply(null, 2000L, proxy());
+        // slf4j-simple writes to System.err
+        final var originalErr = System.err;
+        final var captured = new ByteArrayOutputStream();
+        System.setErr(new PrintStream(captured, true, StandardCharsets.UTF_8));
+        try {
+            punctuator.apply(null, 1000L, proxy());
+            punctuator.apply(null, 2000L, proxy());
+        } finally {
+            System.setErr(originalErr);
+        }
         assertThat(punctuator.warnedAboutResult()).isTrue();
+        assertThat(captured.toString(StandardCharsets.UTF_8).split("returned a value, which is ignored", -1)).hasSize(2);
         verifyNoInteractions(context);
     }
 

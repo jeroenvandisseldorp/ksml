@@ -119,11 +119,15 @@ public class ErrorHandling {
 
     public ProcessingExceptionHandler.Response handle(ErrorHandlerContext context, Record<?, ?> rec, Exception exception) {
         if (processHandler.log()) {
-            // log record
-            // Kafka Streams passes no record for an error in a punctuation
-            String key = rec == null ? DATA_NO_RECORD : processHandler.logPayload() ? objectToString(rec.key()) : DATA_MASK;
-            String value = rec == null ? DATA_NO_RECORD : processHandler.logPayload() ? objectToString(rec.value()) : DATA_MASK;
-            logError(processExceptionLogger, "Processing", context, key, value, exception);
+            if (rec == null) {
+                // Kafka Streams passes no record for an error in a punctuation
+                logError(processExceptionLogger, "Processing", context, DATA_NO_RECORD, DATA_NO_RECORD, exception);
+            } else {
+                // log record
+                String key = processHandler.logPayload() ? objectToString(rec.key()) : DATA_MASK;
+                String value = processHandler.logPayload() ? objectToString(rec.value()) : DATA_MASK;
+                logError(processExceptionLogger, "Processing", context, key, value, exception);
+            }
         }
         return switch (processHandler.handlerType()) {
             case CONTINUE_ON_FAIL -> ProcessingExceptionHandler.Response.resume();

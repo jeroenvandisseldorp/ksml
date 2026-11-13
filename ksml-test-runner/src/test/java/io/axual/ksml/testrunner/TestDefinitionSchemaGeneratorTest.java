@@ -145,6 +145,11 @@ class TestDefinitionSchemaGeneratorTest {
         }
         assertEquals(java.util.Set.of("messages", "generator", "advanceWallClockTime"), variantRequired);
 
+        // messages and generator must still not be used together
+        var notRequired = new java.util.HashSet<String>();
+        produceItem.at("/not/required").forEach(n -> notRequired.add(n.asString()));
+        assertEquals(java.util.Set.of("messages", "generator"), notRequired);
+
         // advanceWallClockTime is a KSML duration: a number of milliseconds or a string
         var duration = produceItem.at("/properties/advanceWallClockTime/anyOf");
         assertEquals(2, duration.size());

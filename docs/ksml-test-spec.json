@@ -119,7 +119,7 @@
                     }, {
                       "type" : "string"
                     } ],
-                    "description" : "Advances the wall-clock time of the test driver by this KSML duration after producing the block's messages, so wall-clock punctuations that become due run",
+                    "description" : "Duration, such as 1m or 30s (a bare number is milliseconds). Moves the test's wall-clock time forward after the block's messages, so due wall-clock punctuations run",
                     "examples" : [ "1m", "30s" ]
                   }
                 },
@@ -130,7 +130,10 @@
                   "required" : [ "generator" ]
                 }, {
                   "required" : [ "advanceWallClockTime" ]
-                } ]
+                } ],
+                "not" : {
+                  "required" : [ "messages", "generator" ]
+                }
               },
               "description" : "Produce blocks defining test data for this test"
             },

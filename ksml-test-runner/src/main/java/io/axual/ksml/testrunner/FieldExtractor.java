@@ -24,7 +24,10 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.yaml.YAMLFactory;
 
+import io.axual.ksml.parser.DurationParser;
+
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -96,6 +99,32 @@ class FieldExtractor {
             return Optional.empty();
         }
         return Optional.of(node.get(field).asLong());
+    }
+
+    /**
+     * Get an optional KSML duration field (a number of milliseconds or a string such as "1m"), not negative,
+     * returning empty if absent.
+     *
+     * @param errorPrefix the start of the error message, which names the field and where it is
+     */
+    Optional<Duration> optionalDuration(String field, String errorPrefix) {
+        var child = node.get(field);
+        if (child == null || child.isNull()) {
+            return Optional.empty();
+        }
+        if (!child.isString() && !child.isIntegralNumber()) {
+            throw new TestDefinitionException(errorPrefix + "expected a duration such as '1m', got " + child);
+        }
+        Duration result;
+        try {
+            result = DurationParser.parseDuration(child.asString(), false);
+        } catch (RuntimeException e) {
+            throw new TestDefinitionException(errorPrefix + e.getMessage());
+        }
+        if (result.isNegative()) {
+            throw new TestDefinitionException(errorPrefix + "must not be negative, got " + child.asString());
+        }
+        return Optional.of(result);
     }
 
     /**

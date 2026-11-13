@@ -253,7 +253,7 @@ class TestDefinitionParserTest {
     void rejectsNegativeAdvanceWallClockTime() {
         var path = resource("advance-wall-clock-negative.yaml");
         var e = assertThrows(TestDefinitionException.class, () -> parser.parse(path));
-        assertTrue(e.getMessage().contains("Invalid 'advanceWallClockTime' in produce block to 'input' in test 'bad_time_step'"), e.getMessage());
+        assertTrue(e.getMessage().contains("'advanceWallClockTime' in produce block to 'input' in test 'bad_time_step'"), e.getMessage());
         assertTrue(e.getMessage().contains("must not be negative"), e.getMessage());
     }
 
@@ -261,6 +261,6 @@ class TestDefinitionParserTest {
     void rejectsInvalidAdvanceWallClockTime() {
         var path = resource("advance-wall-clock-invalid.yaml");
         var e = assertThrows(TestDefinitionException.class, () -> parser.parse(path));
-        assertTrue(e.getMessage().contains("Invalid 'advanceWallClockTime' in produce block to 'input' in test 'bad_time_step'"), e.getMessage());
+        assertTrue(e.getMessage().contains("'advanceWallClockTime' in produce block to 'input' in test 'bad_time_step'"), e.getMessage());
     }
 }

@@ -96,6 +96,7 @@ class ProcessorContextProxyTest {
      */
     private static String python(ProcessorContextProxy proxy, String call) {
         pythonContext.context().getBindings("python").putMember("proxy", proxy);
+        pythonContext.context().eval("python", ProcessorContextProxy.PYTHON_PROXY.proxyClassCode());
         return pythonContext.context().eval("python", """
                 def run():
                     context = %s(proxy)
@@ -104,7 +105,7 @@ class ProcessorContextProxyTest {
                     except Exception as e:
                         return type(e).__name__ + ": " + str(e)
                 run()
-                """.formatted(PythonContext.PROCESSOR_CONTEXT_CLASS, call)).asString();
+                """.formatted(ProcessorContextProxy.PYTHON_PROXY.proxyClassName(), call)).asString();
     }
 
     @Test

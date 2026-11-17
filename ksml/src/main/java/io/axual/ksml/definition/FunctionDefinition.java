@@ -46,6 +46,8 @@ public class FunctionDefinition extends AbstractDefinition {
     private final String[] code;
     private final String[] expression;
     private final UserType resultType;
+    // The variables that callers of the function set, besides the stores that every function gets
+    private final List<InjectedParameter> injectedParameters;
     private final List<String> storeNames;
 
     public static FunctionDefinition as(String type, String name, List<ParameterDefinition> parameters, PythonSource source, UserType resultType, List<String> storeNames) {
@@ -53,19 +55,19 @@ public class FunctionDefinition extends AbstractDefinition {
     }
 
     public static FunctionDefinition as(String type, String name, ParameterDefinition[] parameters, PythonSource source, UserType resultType, List<String> storeNames) {
-        return new FunctionDefinition(type, name, parameters, source, resultType, storeNames);
+        return new FunctionDefinition(type, name, parameters, source, resultType, List.of(), storeNames);
     }
 
     public FunctionDefinition withType(String type) {
-        return new FunctionDefinition(type, name, parameters, PythonSource.of(globalCode, code, expression), resultType, storeNames);
+        return new FunctionDefinition(type, name, parameters, PythonSource.of(globalCode, code, expression), resultType, injectedParameters, storeNames);
     }
 
     public FunctionDefinition withName(String name) {
-        return new FunctionDefinition(type, name, parameters, PythonSource.of(globalCode, code, expression), resultType, storeNames);
+        return new FunctionDefinition(type, name, parameters, PythonSource.of(globalCode, code, expression), resultType, injectedParameters, storeNames);
     }
 
     public FunctionDefinition withParameters(ParameterDefinition[] parameters) {
-        return new FunctionDefinition(type, name, parameters, PythonSource.of(globalCode, code, expression), resultType, storeNames);
+        return new FunctionDefinition(type, name, parameters, PythonSource.of(globalCode, code, expression), resultType, injectedParameters, storeNames);
     }
 
     public FunctionDefinition withDefaultResultType(DataType defaultResultType) {
@@ -73,11 +75,11 @@ public class FunctionDefinition extends AbstractDefinition {
     }
 
     public FunctionDefinition withDefaultResultType(UserType defaultResultType) {
-        return new FunctionDefinition(type, name, parameters, PythonSource.of(globalCode, code, expression), resultType != null ? resultType : defaultResultType, storeNames);
+        return new FunctionDefinition(type, name, parameters, PythonSource.of(globalCode, code, expression), resultType != null ? resultType : defaultResultType, injectedParameters, storeNames);
     }
 
     public FunctionDefinition withResultType(UserType resultType) {
-        return new FunctionDefinition(type, name, parameters, PythonSource.of(globalCode, code, expression), resultType, storeNames);
+        return new FunctionDefinition(type, name, parameters, PythonSource.of(globalCode, code, expression), resultType, injectedParameters, storeNames);
     }
 
     public FunctionDefinition withDefaultExpression(String expression) {
@@ -85,7 +87,14 @@ public class FunctionDefinition extends AbstractDefinition {
     }
 
     public FunctionDefinition withDefaultExpression(String[] defaultExpression) {
-        return new FunctionDefinition(type, name, parameters, PythonSource.of(globalCode, code, expression != null && !Arrays.equals(EMPTY_STRING_ARRAY, expression) ? expression : defaultExpression), resultType, storeNames);
+        return new FunctionDefinition(type, name, parameters, PythonSource.of(globalCode, code, expression != null && !Arrays.equals(EMPTY_STRING_ARRAY, expression) ? expression : defaultExpression), resultType, injectedParameters, storeNames);
+    }
+
+    public FunctionDefinition withInjectedParameter(InjectedParameter parameter) {
+        if (injectedParameters.stream().anyMatch(existing -> existing.name().equals(parameter.name()))) return this;
+        final var newParameters = new ArrayList<>(injectedParameters);
+        newParameters.add(parameter);
+        return new FunctionDefinition(type, name, parameters, PythonSource.of(globalCode, code, expression), resultType, newParameters, storeNames);
     }
 
     public FunctionDefinition validateNoResultTypeDefined() {
@@ -104,7 +113,7 @@ public class FunctionDefinition extends AbstractDefinition {
         throw new TopologyException(message + ": function=" + name() + ", type=" + type() + ", resultType=" + resultType());
     }
 
-    private FunctionDefinition(String type, String name, ParameterDefinition[] parameters, PythonSource source, UserType resultType, List<String> storeNames) {
+    private FunctionDefinition(String type, String name, ParameterDefinition[] parameters, PythonSource source, UserType resultType, List<InjectedParameter> injectedParameters, List<String> storeNames) {
         Objects.requireNonNull(source, "PythonSource is required");
         this.type = type;
         this.name = name;
@@ -113,6 +122,7 @@ public class FunctionDefinition extends AbstractDefinition {
         this.expression = source.expression() != null ? source.expression().toArray(EMPTY_STRING_ARRAY) : null;
         this.code = source.code().toArray(EMPTY_STRING_ARRAY);
         this.globalCode = source.globalCode().toArray(EMPTY_STRING_ARRAY);
+        this.injectedParameters = injectedParameters != null ? List.copyOf(injectedParameters) : List.of();
         this.storeNames = storeNames != null ? storeNames : EMPTY_STRING_LIST;
     }
 
@@ -124,6 +134,7 @@ public class FunctionDefinition extends AbstractDefinition {
         this.expression = definition.expression;
         this.code = definition.code;
         this.globalCode = definition.globalCode;
+        this.injectedParameters = definition.injectedParameters;
         this.storeNames = definition.storeNames != null ? definition.storeNames : EMPTY_STRING_LIST;
     }
 

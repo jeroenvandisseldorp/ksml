@@ -29,6 +29,7 @@ import io.axual.ksml.data.object.DataTuple;
 import io.axual.ksml.data.type.TupleType;
 import io.axual.ksml.definition.FunctionDefinition;
 import io.axual.ksml.definition.ParameterDefinition;
+import io.axual.ksml.definition.PunctuatorDefinition;
 import io.axual.ksml.definition.PythonSource;
 import io.axual.ksml.dsl.KSMLDSL;
 import io.axual.ksml.exception.ExecutionException;
@@ -47,7 +48,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.util.HashMap;
 import java.util.Map;
 
-import static io.axual.ksml.user.UserFunction.INJECT_CONTEXT;
+import static io.axual.ksml.proxy.context.ProcessorContextProxy.PYTHON_PROXY;
 import static io.axual.ksml.user.UserFunction.withStores;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -166,7 +167,8 @@ class PythonFunctionTest {
 
     @Test
     void injectedVariablesDefaultToNoneAndUnknownNamesAreRejected() {
-        final var definition = FunctionDefinition.as(KSMLDSL.Functions.TYPE_GENERIC, "injected", new ParameterDefinition[0], PythonSource.of(null, null, "str(context)"), stringType, null);
+        final var definition = FunctionDefinition.as(KSMLDSL.Functions.TYPE_GENERIC, "injected", new ParameterDefinition[0], PythonSource.of(null, null, "str(context)"), stringType, null)
+                .withInjectedParameter(PYTHON_PROXY);
         final var function = PythonFunction.forFunction(context, "test", "injected", definition);
 
         assertThat(function.call()).isEqualTo(new DataString("None"));
@@ -178,6 +180,35 @@ class PythonFunctionTest {
         assertThatThrownBy(() -> function.call(Map.of("unknown", 1)))
                 .isInstanceOf(ExecutionException.class)
                 .hasMessageContaining("can not inject unknown variable 'unknown'");
+        // A function only gets the variables that its definition declares, and the stores
+        assertThatThrownBy(() -> storesFunction.call(Map.of(PYTHON_PROXY.name(), 1)))
+                .isInstanceOf(ExecutionException.class)
+                .hasMessageContaining("can not inject unknown variable 'context'");
+    }
+
+    @Test
+    void globalCodeFunctionReadsTheStoresOfTheCall() {
+        final var globalCode = new String[]{"def store_type():", "  return type(stores).__name__"};
+        final var definition = FunctionDefinition.as(KSMLDSL.Functions.TYPE_GENERIC, "helper", new ParameterDefinition[0], PythonSource.of(globalCode, null, new String[]{"store_type()"}), stringType, null);
+        final var function = PythonFunction.forFunction(context, "test", "helper", definition);
+
+        assertThat(function.call(withStores(new StateStores()))).isEqualTo(new DataString("dict"));
+        assertThat(function.call()).isEqualTo(new DataString("dict"));
+    }
+
+    @Test
+    void functionWithoutContextLeavesAGlobalNamedContextAlone() {
+        final var definition = FunctionDefinition.as(KSMLDSL.Functions.TYPE_GENERIC, "own", new ParameterDefinition[0], PythonSource.of("context = 'mine'", null, "context"), stringType, null);
+        final var function = PythonFunction.forFunction(context, "test", "own", definition);
+
+        assertThat(function.call(withStores(new StateStores()))).isEqualTo(new DataString("mine"));
+    }
+
+    @Test
+    void punctuatorDeclaresTheContext() {
+        final var definition = new PunctuatorDefinition(FunctionDefinition.as(KSMLDSL.Functions.TYPE_GENERIC, "tick", new ParameterDefinition[0], PythonSource.of(null, null, "None"), null, null));
+        assertThat(definition.injectedParameters()).containsExactly(PYTHON_PROXY);
+        assertThat(FunctionDefinition.as(KSMLDSL.Functions.TYPE_GENERIC, "plain", new ParameterDefinition[0], PythonSource.of(null, null, "None"), null, null).injectedParameters()).isEmpty();
     }
 
     @Test
@@ -226,7 +257,9 @@ class PythonFunctionTest {
     void globalCodeValueOfAnInjectableVariableSurvivesLaterFunctions() {
         final var ownerDefinition = FunctionDefinition.as(KSMLDSL.Functions.TYPE_GENERIC, "owner", new ParameterDefinition[0], PythonSource.of("context = 'mine'", null, "str(context)"), stringType, null);
         final var owner = PythonFunction.forFunction(context, "test", "owner", ownerDefinition);
-        final var laterDefinition = FunctionDefinition.as(KSMLDSL.Functions.TYPE_GENERIC, "later", new ParameterDefinition[0], PythonSource.of(null, null, "'later'"), stringType, null);
+        // The later function declares context too, so it sets the global to None if it was not set yet
+        final var laterDefinition = FunctionDefinition.as(KSMLDSL.Functions.TYPE_GENERIC, "later", new ParameterDefinition[0], PythonSource.of(null, null, "'later'"), stringType, null)
+                .withInjectedParameter(PYTHON_PROXY);
         PythonFunction.forFunction(context, "test", "later", laterDefinition);
 
         assertThat(owner.call()).isEqualTo(new DataString("mine"));
@@ -260,10 +293,11 @@ class PythonFunctionTest {
                 context.forward('k', 1)
                 result = str(stores is own_stores and context is own_context)
                 """;
-        final var outerDefinition = FunctionDefinition.as(KSMLDSL.Functions.TYPE_GENERIC, "outer", new ParameterDefinition[0], PythonSource.of(null, outerCode, "result"), stringType, null);
+        final var outerDefinition = FunctionDefinition.as(KSMLDSL.Functions.TYPE_GENERIC, "outer", new ParameterDefinition[0], PythonSource.of(null, outerCode, "result"), stringType, null)
+                .withInjectedParameter(PYTHON_PROXY);
         final var outer = PythonFunction.forFunction(context, "test", "outer", outerDefinition);
         final var injections = new HashMap<>(withStores(new StateStores()));
-        injections.put(INJECT_CONTEXT, proxy);
+        injections.put(PYTHON_PROXY.name(), proxy);
 
         assertThat(outer.call(injections)).isEqualTo(new DataString("True"));
         assertThat(innerResult[0]).isEqualTo(new DataString("0"));
@@ -278,10 +312,11 @@ class PythonFunctionTest {
         final var error = new TaskMigratedException("fenced");
         doThrow(error).when(processorContext).commit();
         final var proxy = new ProcessorContextProxy(processorContext, 0L, new ProcessorContextProxy.Target(null, stringType, stringType), Map.of());
-        final var definition = FunctionDefinition.as(KSMLDSL.Functions.TYPE_GENERIC, "committer", new ParameterDefinition[0], PythonSource.of(null, null, "context.commit()"), stringType, null);
+        final var definition = FunctionDefinition.as(KSMLDSL.Functions.TYPE_GENERIC, "committer", new ParameterDefinition[0], PythonSource.of(null, null, "context.commit()"), stringType, null)
+                .withInjectedParameter(PYTHON_PROXY);
         final var function = PythonFunction.forFunction(context, "test", "committer", definition);
 
-        assertThatThrownBy(() -> function.call(Map.of(INJECT_CONTEXT, proxy))).isSameAs(error);
+        assertThatThrownBy(() -> function.call(Map.of(PYTHON_PROXY.name(), proxy))).isSameAs(error);
     }
 
     @Test

@@ -41,7 +41,7 @@ public class UserPunctuator extends Invoker {
      */
     public void apply(StateStores stores, long timestamp, ProcessorContextProxy context) {
         final var injections = new HashMap<String, Object>(UserFunction.withStores(stores));
-        injections.put(UserFunction.INJECT_CONTEXT, context);
+        injections.put(ProcessorContextProxy.PYTHON_PROXY.name(), context);
         timeExecutionOf(() -> function.call(injections, new DataLong(timestamp)));
     }
 }

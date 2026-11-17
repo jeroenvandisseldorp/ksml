@@ -26,6 +26,7 @@ import io.axual.ksml.data.object.DataNull;
 import io.axual.ksml.data.object.DataObject;
 import io.axual.ksml.data.object.DataString;
 import io.axual.ksml.definition.FunctionDefinition;
+import io.axual.ksml.definition.InjectedParameter;
 import io.axual.ksml.definition.ParameterDefinition;
 import io.axual.ksml.exception.ExecutionException;
 import io.axual.ksml.exception.TopologyException;
@@ -43,18 +44,16 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static io.axual.ksml.type.UserType.DEFAULT_NOTATION;
-import static io.axual.ksml.user.UserFunction.INJECT_CONTEXT;
 import static io.axual.ksml.user.UserFunction.INJECT_STORES;
 
 @Slf4j
 public class PythonFunction extends UserFunction {
-    // The variables a call can inject: Python globals that start as None. A call sets only those it is given.
-    private static final List<String> INJECTABLE_VARIABLES = List.of(INJECT_STORES, INJECT_CONTEXT);
-    // Python classes that wrap an injected object before the function sees it
-    private static final Map<String, String> INJECTION_WRAPPERS = Map.of(INJECT_CONTEXT, PythonContext.PROCESSOR_CONTEXT_CLASS);
+    // Every function can get the stores; a call without stores gets an empty dict
+    private static final InjectedParameter STORES = new InjectedParameter(INJECT_STORES);
     private static final Map<String, Object> EMPTY_STORES = Map.of();
     private static final PythonNativeMapper NATIVE_MAPPER = new PythonNativeMapper();
     private static final String QUOTE = "\"";
@@ -62,6 +61,8 @@ public class PythonFunction extends UserFunction {
     private final Context context;
     private final PythonDataObjectMapper dataObjectMapper;
     private final Value function;
+    // The variables a call can inject: Python globals that start as None. A call sets only those it is given.
+    private final List<InjectedParameter> injectedParameters;
 
     public static PythonFunction forFunction(PythonContext context, String namespace, String name, FunctionDefinition definition) {
         return new PythonFunction(context, namespace, "function", name, definition);
@@ -80,6 +81,7 @@ public class PythonFunction extends UserFunction {
         converter = context.converter();
         this.context = context.context();
         dataObjectMapper = new PythonDataObjectMapper(true, this.context);
+        injectedParameters = injectedParametersOf(definition);
         final var pyCode = generatePythonCode(namespace, type, name, definition);
         function = context.registerFunction(pyCode, name + "_caller");
         if (function == null) {
@@ -120,7 +122,7 @@ public class PythonFunction extends UserFunction {
         // Only the variables that the caller injects are set in Python
         if (injections == null) injections = Map.of();
         for (final var variable : injections.keySet()) {
-            if (!INJECTABLE_VARIABLES.contains(variable))
+            if (injectedParameters.stream().noneMatch(parameter -> parameter.name().equals(variable)))
                 throw new ExecutionException("Python function %s.%s - can not inject unknown variable '%s'".formatted(namespace, name, variable));
         }
         // A function without stores sees an empty dict, not the stores of a call it is nested in
@@ -195,13 +197,20 @@ public class PythonFunction extends UserFunction {
                 .map(storeName -> "  " + storeName + " = stores[\"" + storeName + "\"]\n")
                 .collect(Collectors.joining());
         // Injected globals start as None; setdefault keeps a value set by globalCode
-        final var declareGlobals = INJECTABLE_VARIABLES.stream()
-                .map(variable -> "globals().setdefault(\"" + variable + "\", None)\n")
+        final var declareGlobals = injectedParameters.stream()
+                .map(parameter -> "globals().setdefault(\"" + parameter.name() + "\", None)\n")
                 .collect(Collectors.joining());
+        // The Python classes that wrap injected objects
+        final var proxyClasses = injectedParameters.stream()
+                .map(InjectedParameter::proxyClassCode)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.joining("\n"));
         // Wrap injected objects in their Python class
-        final var wrapInjections = INJECTION_WRAPPERS.entrySet().stream()
-                .map(wrapper -> "  if _ksml_injected.get(\"" + wrapper.getKey() + "\") is not None:\n" +
-                        "    _ksml_injected[\"" + wrapper.getKey() + "\"] = " + wrapper.getValue() + "(_ksml_injected[\"" + wrapper.getKey() + "\"])\n")
+        final var wrapInjections = injectedParameters.stream()
+                .filter(parameter -> parameter.proxyClassName() != null)
+                .map(parameter -> "  if _ksml_injected.get(\"" + parameter.name() + "\") is not None:\n" +
+                        "    _ksml_injected[\"" + parameter.name() + "\"] = " + parameter.proxyClassName() + "(_ksml_injected[\"" + parameter.name() + "\"])\n")
                 .collect(Collectors.joining());
         // Code to initialize optional parameters with default values
         final var initializeOptionalParams = Arrays.stream(definition.parameters())
@@ -265,7 +274,17 @@ public class PythonFunction extends UserFunction {
                         %3$s
                         """;
 
-        return pythonCodeTemplate.formatted(globalCode, functionAndExpression, pyCallerCode, declareGlobals);
+        return pythonCodeTemplate.formatted(globalCode, functionAndExpression, pyCallerCode, proxyClasses + "\n" + declareGlobals);
+    }
+
+    /** The stores, followed by the variables that the definition declares. */
+    private static List<InjectedParameter> injectedParametersOf(FunctionDefinition definition) {
+        final var result = new ArrayList<InjectedParameter>();
+        result.add(STORES);
+        definition.injectedParameters().stream()
+                .filter(parameter -> !parameter.name().equals(INJECT_STORES))
+                .forEach(result::add);
+        return List.copyOf(result);
     }
 
     private static String[] getFunctionCode(String[] code, String spaces) {

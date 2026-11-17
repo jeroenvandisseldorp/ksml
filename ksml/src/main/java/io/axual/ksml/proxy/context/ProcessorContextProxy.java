@@ -26,6 +26,7 @@ import io.axual.ksml.data.mapper.HeaderDataObjectMapper;
 import io.axual.ksml.data.object.DataNull;
 import io.axual.ksml.data.object.DataObject;
 import io.axual.ksml.definition.DefinitionConstants;
+import io.axual.ksml.definition.InjectedParameter;
 import io.axual.ksml.proxy.base.AbstractProxy;
 import io.axual.ksml.proxy.store.ProxyUtil;
 import io.axual.ksml.python.PythonDataObjectMapper;
@@ -51,6 +52,41 @@ public class ProcessorContextProxy implements AbstractProxy {
     private static final PythonDataObjectMapper DATA_OBJECT_MAPPER = new PythonDataObjectMapper(true);
     private static final DataObjectConverter CONVERTER = new DataObjectConverter();
     private static final HeaderDataObjectMapper HEADER_MAPPER = new HeaderDataObjectMapper();
+
+    // The Python class that wraps this proxy as {@code context}
+    private static final String PROXY_CLASS_NAME = "KSMLProcessorContext";
+    private static final String PROXY_CLASS_CODE = """
+            # GraalPy passes no keyword arguments to Java methods, so this class takes them and calls the
+            # ProcessorContextProxy by position. It only offers the methods below.
+            class %1$s:
+              __slots__ = ("_proxy",)
+
+              def __init__(self, proxy):
+                object.__setattr__(self, "_proxy", proxy)
+
+              def __setattr__(self, name, value):
+                raise AttributeError("The context is read-only")
+
+              def forward(self, key, value, timestamp=None, headers=None, to=None):
+                self._proxy.forward(key, value, timestamp, headers, to)
+
+              def commit(self):
+                self._proxy.commit()
+
+              def currentSystemTimeMs(self):
+                return self._proxy.currentSystemTimeMs()
+
+              def currentStreamTimeMs(self):
+                return self._proxy.currentStreamTimeMs()
+
+              def applicationId(self):
+                return self._proxy.applicationId()
+
+              def taskId(self):
+                return self._proxy.taskId()
+            """.formatted(PROXY_CLASS_NAME);
+    /** The {@code context} variable of a punctuator, wrapped in the Python class above. */
+    public static final InjectedParameter PYTHON_PROXY = new InjectedParameter("context", PROXY_CLASS_NAME, PROXY_CLASS_CODE);
 
     /**
      * An operation that {@code forward} can send records to.

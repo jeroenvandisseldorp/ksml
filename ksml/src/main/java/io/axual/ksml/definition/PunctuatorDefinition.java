@@ -22,6 +22,7 @@ package io.axual.ksml.definition;
 
 
 import io.axual.ksml.dsl.KSMLDSL;
+import io.axual.ksml.proxy.context.ProcessorContextProxy;
 
 import static io.axual.ksml.definition.DefinitionConstants.PUNCTUATOR_PARAMETERS;
 
@@ -30,6 +31,7 @@ public class PunctuatorDefinition extends FunctionDefinition {
         super(definition
                 .withType(KSMLDSL.Functions.TYPE_PUNCTUATOR)
                 .withParameters(mergeParameters(PUNCTUATOR_PARAMETERS, definition.parameters()))
-                .validateNoResultTypeDefined());
+                .validateNoResultTypeDefined()
+                .withInjectedParameter(ProcessorContextProxy.PYTHON_PROXY));
     }
 }

@@ -43,8 +43,6 @@ public class UserFunction {
     private static final Logger LOG = LoggerFactory.getLogger(UserFunction.class);
     /** Injects the state stores of the call; the function's code reads each store by its name. */
     public static final String INJECT_STORES = "stores";
-    /** Injects the Kafka Streams context of the call, such as the punctuation context. */
-    public static final String INJECT_CONTEXT = "context";
     private static final String[] TEMPLATE = new String[]{};
     public final String name;
     public final String namespace;
@@ -139,7 +137,8 @@ public class UserFunction {
      * Call the user-defined function and return the result.
      *
      * @param injections variables to make available to the function's code, by name, such as {@link #INJECT_STORES}
-     *                   and {@link #INJECT_CONTEXT}; a name that is not given keeps its global value, None by default.
+     *                   and the {@link io.axual.ksml.definition.InjectedParameter}s of the function's definition;
+     *                   a name that is not given keeps its global value, None by default.
      * @param parameters parameters for the function.
      * @return the result of the call.
      */

@@ -1116,6 +1116,11 @@ pipelines:
   flush_totals:
     from: orders
     via:
+      # The punctuator forwards the totals (doubles), so the stream must carry doubles too
+      - type: transformValue
+        mapper:
+          expression: float(value["amount"])
+          resultType: double
       - type: peek
         forEach: add_to_total    # writes to the totals store
       - type: filter             # only totals go to the output
